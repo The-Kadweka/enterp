@@ -4,7 +4,6 @@
 from odoo.addons.sale_ebay.tools.ebaysdk import Trading
 from ebaysdk.exception import ConnectionError
 from odoo import models, fields, api
-from odoo.tools.misc import str2bool
 
 
 class ResConfigSettings(models.TransientModel):
@@ -31,23 +30,25 @@ class ResConfigSettings(models.TransientModel):
                                    default=lambda self: self.env['res.country'].search([('ebay_available', '=', True)], limit=1).id,
                                    config_parameter='ebay_country')
     ebay_site = fields.Many2one("ebay.site", string="eBay Website",
-                                default=lambda self: self.env['ebay.site'].search([('ebay_id', '=', '0')], limit=1).id,
+                                default=lambda self: self.env['ebay.site'].search([], limit=1).id,
                                 config_parameter='ebay_site')
     ebay_zip_code = fields.Char(string="Zip", default='', config_parameter='ebay_zip_code')
     ebay_location = fields.Char(string="Location", default='', config_parameter='')
     ebay_out_of_stock = fields.Boolean("Out Of Stock", default=False)
-    ebay_sales_team = fields.Many2one("crm.team", string="ebay Sales Team",
+    ebay_sales_team = fields.Many2one("crm.team", string="ebay Sales Channel",
+                                      default=lambda self: self.env['crm.team'].search([('team_type', '=', 'ebay')], limit=1).id,
                                       config_parameter='ebay_sales_team')
     ebay_gallery_plus = fields.Boolean("Gallery Plus", default='', config_parameter='ebay_gallery_plus')
 
+    @api.multi
     def set_values(self):
         super(ResConfigSettings, self).set_values()
         set_param = self.env['ir.config_parameter'].sudo().set_param
         # by default all currencies active field is set to False except EUR and USD
         self.ebay_currency.active = True
 
-        out_of_stock = self.ebay_out_of_stock
-        if out_of_stock != str2bool(self.env['ir.config_parameter'].get_param('ebay_out_of_stock')):
+        out_of_stock = self.ebay_out_of_stock or ''
+        if out_of_stock != self.env['ir.config_parameter'].get_param('ebay_out_of_stock'):
             set_param('ebay_out_of_stock', out_of_stock)
             siteid = self.ebay_site.ebay_id if self.ebay_site else 0
 
@@ -89,9 +90,9 @@ class ResConfigSettings(models.TransientModel):
     @api.model
     def get_values(self):
         res = super(ResConfigSettings, self).get_values()
-        get_param = self.env['ir.config_parameter'].sudo().get_param('ebay_out_of_stock')
+        get_param = self.env['ir.config_parameter'].sudo().get_param
         res.update(
-            ebay_out_of_stock=str2bool(get_param) if get_param else False,
+            ebay_out_of_stock=get_param('ebay_out_of_stock', default=False),
         )
         return res
 

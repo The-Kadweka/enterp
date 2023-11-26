@@ -102,7 +102,7 @@ function createParent(params) {
  * @param {boolean} [params.debug=false]
  * @returns {Object}
  */
-async function createFieldsAndBoxLayer(params) {
+function createFieldsAndBoxLayer(params) {
     params = params || {};
     var $container = params.debug ? $('body') : $('#qunit-fixture');
 
@@ -120,8 +120,8 @@ async function createFieldsAndBoxLayer(params) {
     });
 
     var fields = wrapper.fields = new InvoiceExtractFields(parent);
-    await fields.renderButtons({ $container: $container });
-    var res = await invoiceExtractTestUtils.createBoxLayer({ parent: parent });
+    fields.renderButtons({ $container: $container });
+    var res = invoiceExtractTestUtils.createBoxLayer({ parent: parent });
     var boxLayer = wrapper.boxLayer = res.boxLayer;
     boxLayer.displayBoxes({ fieldName: fields.getActiveField().getName() });
 
@@ -133,16 +133,12 @@ async function createFieldsAndBoxLayer(params) {
 }
 
 QUnit.module('account_invoice_extract', {}, function () {
-QUnit.module('Fields & BoxLayer integration', {
-    afterEach: function () {
-        $('.page').remove();
-    },
-}, function () {
+QUnit.module('Fields & BoxLayer integration', {}, function () {
 
-    QUnit.test('basic', async function (assert) {
+    QUnit.test('basic', function (assert) {
         assert.expect(29);
 
-        var res = await createFieldsAndBoxLayer();
+        var res = createFieldsAndBoxLayer();
         var fields = res.fields;
         var parent = res.parent;
 
@@ -223,10 +219,10 @@ QUnit.module('Fields & BoxLayer integration', {
         parent.destroy();
     });
 
-    QUnit.test('click on field button', async function (assert) {
+    QUnit.test('click on field button', function (assert) {
         assert.expect(11);
 
-        var res = await createFieldsAndBoxLayer();
+        var res = createFieldsAndBoxLayer({ debug: true });
         var fields = res.fields;
         var parent = res.parent;
 
@@ -244,7 +240,7 @@ QUnit.module('Fields & BoxLayer integration', {
         assert.isNotVisible($('.o_invoice_extract_box[data-id=5]'),
             "should hide box with ID 5 by default");
 
-        await testUtils.dom.click($('.o_invoice_extract_button[data-field-name="invoice_id"]'));
+        testUtils.dom.click($('.o_invoice_extract_button[data-field-name="invoice_id"]'));
 
         assert.isNotVisible($('.o_invoice_extract_box[data-id=1]'),
             "box with ID 1 should become hidden");
@@ -260,10 +256,10 @@ QUnit.module('Fields & BoxLayer integration', {
         parent.destroy();
     });
 
-    QUnit.test('select another box', async function (assert) {
+    QUnit.test('select another box', function (assert) {
         assert.expect(16);
 
-        var res = await createFieldsAndBoxLayer();
+        var res = createFieldsAndBoxLayer();
         var fields = res.fields;
         var parent = res.parent;
 
@@ -281,7 +277,7 @@ QUnit.module('Fields & BoxLayer integration', {
         assert.hasClass($('.o_invoice_extract_box[data-id=5]'),'selected',
             "box with ID 5 should be selected");
 
-        await testUtils.dom.click($('.o_invoice_extract_box[data-id=1]'));
+        testUtils.dom.click($('.o_invoice_extract_box[data-id=1]'));
 
         assert.hasClass($('.o_invoice_extract_box[data-id=1]'),'selected',
             "box with ID 1 should become selected");
@@ -294,8 +290,8 @@ QUnit.module('Fields & BoxLayer integration', {
         assert.hasClass($('.o_invoice_extract_box[data-id=5]'),'selected',
             "box with ID 5 should stay selected");
 
-        await testUtils.dom.click($('.o_invoice_extract_button[data-field-name="invoice_id"]'));
-        await testUtils.dom.click($('.o_invoice_extract_box[data-id=4]'));
+        testUtils.dom.click($('.o_invoice_extract_button[data-field-name="invoice_id"]'));
+        testUtils.dom.click($('.o_invoice_extract_box[data-id=4]'));
 
         assert.hasClass($('.o_invoice_extract_box[data-id=1]'),'selected',
             "box with ID 1 should stay selected");
@@ -311,10 +307,10 @@ QUnit.module('Fields & BoxLayer integration', {
         parent.destroy();
     });
 
-    QUnit.test('click on box layer', async function (assert) {
+    QUnit.test('click on box layer', function (assert) {
         assert.expect(16);
 
-        var res = await createFieldsAndBoxLayer();
+        var res = createFieldsAndBoxLayer();
         var fields = res.fields;
         var parent = res.parent;
 
@@ -332,7 +328,7 @@ QUnit.module('Fields & BoxLayer integration', {
         assert.hasClass($('.o_invoice_extract_box[data-id=5]'),'selected',
             "box with ID 5 should be selected");
 
-        await testUtils.dom.click($('.boxLayer'));
+        testUtils.dom.click($('.boxLayer'));
 
         assert.doesNotHaveClass($('.o_invoice_extract_box[data-id=1]'), 'selected',
             "box with ID 1 should stay unselected");
@@ -345,7 +341,7 @@ QUnit.module('Fields & BoxLayer integration', {
         assert.hasClass($('.o_invoice_extract_box[data-id=5]'),'selected',
             "box with ID 5 should stay selected");
 
-        await testUtils.dom.click($('.boxLayer'));
+        testUtils.dom.click($('.boxLayer'));
 
         assert.doesNotHaveClass($('.o_invoice_extract_box[data-id=1]'), 'selected',
             "box with ID 1 should not stay unselected");

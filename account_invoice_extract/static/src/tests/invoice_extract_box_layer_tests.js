@@ -6,15 +6,11 @@ var invoiceExtractTestUtils = require('account_invoice_extract.testUtils');
 var testUtils = require('web.test_utils');
 
 QUnit.module('account_invoice_extract', {}, function () {
-QUnit.module('BoxLayer', {
-    afterEach: function () {
-        $('.page').remove();
-    },
-}, function () {
+QUnit.module('BoxLayer', {}, function () {
 
-    QUnit.test('basic rendering', async function (assert) {
+    QUnit.test('basic rendering', function (assert) {
         assert.expect(27);
-        var res = await invoiceExtractTestUtils.createBoxLayer();
+        var res = invoiceExtractTestUtils.createBoxLayer();
         var parent = res.parent;
 
         assert.strictEqual($('.boxLayer').length, 1,
@@ -85,9 +81,9 @@ QUnit.module('BoxLayer', {
         parent.destroy();
     });
 
-    QUnit.test('display boxes', async function (assert) {
+    QUnit.test('display boxes', function (assert) {
         assert.expect(20);
-        var res = await invoiceExtractTestUtils.createBoxLayer();
+        var res = invoiceExtractTestUtils.createBoxLayer();
         var boxLayer = res.boxLayer;
         var parent = res.parent;
 
@@ -142,9 +138,9 @@ QUnit.module('BoxLayer', {
         parent.destroy();
     });
 
-    QUnit.test('click on box', async function (assert) {
+    QUnit.test('click on box', function (assert) {
         assert.expect(3);
-        var res = await invoiceExtractTestUtils.createBoxLayer({
+        var res = invoiceExtractTestUtils.createBoxLayer({
             intercepts: {
                 /**
                  * Triggered by clicking on box
@@ -172,16 +168,16 @@ QUnit.module('BoxLayer', {
         });
         var parent = res.parent;
 
-        // we click on a hidden element here as the boxes are hidden by default
-        await testUtils.dom.click($('.o_invoice_extract_box[data-id=1]'), {allowInvisible: true});
+        // we don't use the click helper here as the boxes are hidden by default
+        $('.o_invoice_extract_box[data-id=1]').click();
         assert.verifySteps(['click_invoice_extract_box']);
 
         parent.destroy();
     });
 
-    QUnit.test('click on box layer (not box)', async function (assert) {
+    QUnit.test('click on box layer (not box)', function (assert) {
         assert.expect(2);
-        var res = await invoiceExtractTestUtils.createBoxLayer({
+        var res = invoiceExtractTestUtils.createBoxLayer({
             intercepts: {
                 /**
                  * Triggered by clicking on box
@@ -207,13 +203,13 @@ QUnit.module('BoxLayer', {
         });
         var parent = res.parent;
 
-        await testUtils.dom.click($('.boxLayer'));
+        testUtils.dom.click($('.boxLayer'));
         assert.verifySteps(['click_box_layer']);
 
         parent.destroy();
     });
 
-    QUnit.test('multi-page', async function (assert) {
+    QUnit.test('multi-page', function (assert) {
         assert.expect(3);
         var parent = testUtils.createParent({});
         var boxesData = invoiceExtractTestUtils.createBoxesData();
@@ -233,12 +229,12 @@ QUnit.module('BoxLayer', {
                 user_selected: false,
             })
         ]);
-        await invoiceExtractTestUtils.createBoxLayer({
+        invoiceExtractTestUtils.createBoxLayer({
             boxesData: boxesData,
             parent: parent,
             pageNum: 0,
         });
-        await invoiceExtractTestUtils.createBoxLayer({
+        invoiceExtractTestUtils.createBoxLayer({
             boxesData: boxesData,
             parent: parent,
             pageNum: 1,

@@ -43,8 +43,8 @@ class WebStudioReportController(main.WebStudioController):
         if layout == 'web.basic_layout':
             arch = etree.fromstring("""
                 <t t-name="studio_main_report">
-                    <t t-foreach="docs" t-as="doc">
-                        <t t-call="%(layout)s">
+                    <t t-call="%(layout)s">
+                        <t t-foreach="docs" t-as="doc">
                             <t t-call="%(document)s_document"/>
                             <p style="page-break-after: always;"/>
                         </t>
@@ -95,12 +95,6 @@ class WebStudioReportController(main.WebStudioController):
     def edit_report(self, report_id, values):
         report = request.env['ir.actions.report'].browse(report_id)
         if report:
-            if 'attachment_use' in values:
-                if values['attachment_use']:
-                    values['attachment'] = "'%s'" % report.name
-                else:
-                    # disable saving as attachment altogether
-                    values['attachment'] = False
             if 'groups_id' in values:
                 values['groups_id'] = [(6, 0, values['groups_id'])]
             if 'display_in_print' in values:

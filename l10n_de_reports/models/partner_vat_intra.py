@@ -10,7 +10,7 @@ class ReportL10nDePartnerVatIntra(models.AbstractModel):
     _description = "Deutschland Partner VAT Intra"
     _inherit = 'account.report'
 
-    filter_date = {'mode': 'range', 'filter': 'this_month'}
+    filter_date = {'date_from': '', 'date_to': '', 'filter': 'this_month'}
 
     @api.model
     def _get_lines(self, options, line_id=None):
@@ -24,14 +24,15 @@ class ReportL10nDePartnerVatIntra(models.AbstractModel):
             'l10n_de.tag_de_intracom_ABC']]
         query = """
             SELECT p.name As partner_name, l.partner_id AS partner_id, p.vat AS vat,
-                      at.account_account_tag_id AS intra_code, SUM(-l.balance) AS amount,
+                      tt.account_account_tag_id AS intra_code, SUM(-l.balance) AS amount,
                       c.code AS partner_country
                       FROM account_move_line l
                       LEFT JOIN account_move m ON m.id = l.move_id
                       LEFT JOIN res_partner p ON l.partner_id = p.id
-                      LEFT JOIN account_account_tag_account_move_line_rel at on l.id = at.account_move_line_id
+                      LEFT JOIN account_move_line_account_tax_rel amlt ON l.id = amlt.account_move_line_id
+                      LEFT JOIN account_tax_account_tag tt on amlt.account_tax_id = tt.account_tax_id
                       LEFT JOIN res_country c ON p.country_id = c.id
-                      WHERE at.account_account_tag_id IN %s
+                      WHERE tt.account_account_tag_id IN %s
                        AND l.date >= %s
                        AND l.date <= %s
                        AND l.company_id IN %s
@@ -56,7 +57,7 @@ class ReportL10nDePartnerVatIntra(models.AbstractModel):
                     code = 2
                 columns = [row['partner_country'], row['vat'].replace(' ', '').upper(), amt, code]
                 if not context.get('no_format', False):
-                    currency_id = self.env.company.currency_id
+                    currency_id = self.env.user.company_id.currency_id
                     columns[2] = formatLang(self.env, columns[2], currency_obj=currency_id)
 
                 lines.append({

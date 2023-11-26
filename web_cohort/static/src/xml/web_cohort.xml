@@ -50,7 +50,7 @@
         </ul>
     </t>
 
-    <div t-name="CohortView">
+    <div t-name="CohortView" class="o_cohort_view">
         <div t-if="comparisonReport &amp;&amp; (comparisonReport.rows.length || report.rows.length)" class="table-responsive">
             <table class="table text-center mb0">
                 <thead>
@@ -61,6 +61,7 @@
                     </tr>
                 </thead>
             </table>
+            <br/>
         </div>
         <div t-if="report.rows.length" class="table-responsive">
             <t t-set="col_length" t-value="report.rows[0].columns.length"/>
@@ -124,7 +125,7 @@
                 </tfoot>
             </table>
         </div>
-        <div t-if="!report.rows.length &amp;&amp; comparisonReport &amp;&amp; comparisonReport.rows.length" class="o_cohort_no_data text-center">
+        <div t-if="!report.rows.length &amp;&amp; comparisonReport &amp;&amp; comparisonReport.rows.length" class="o_cohort_no_data">
             No data available.
         </div>
         <br/>
@@ -138,8 +139,10 @@
                     </tr>
                 </thead>
             </table>
+            <br/>
         </div>
         <div t-if="comparisonReport &amp;&amp; comparisonReport.rows.length" class="table-responsive">
+            <br/>
             <table class="table text-center mb0">
                 <thead>
                     <tr>
@@ -194,8 +197,13 @@
                 </tfoot>
             </table>
         </div>
-        <div t-if="report.rows.length &amp;&amp; comparisonReport &amp;&amp; !comparisonReport.rows.length" class="o_cohort_no_data text-center">
+        <div t-if="report.rows.length &amp;&amp; comparisonReport &amp;&amp; !comparisonReport.rows.length" class="o_cohort_no_data">
+            <br/>
             No data available.
         </div>
+        <div t-if="!report.rows.length &amp;&amp; (!comparisonReport || !comparisonReport.rows.length)" class="o_cohort_no_data">
+            No data available for cohort.
+        </div>
     </div>
+
 </templates>

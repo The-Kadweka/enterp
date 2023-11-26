@@ -2,7 +2,7 @@
 
 {
     'name': 'Twitter Wall',
-    'category': 'Website/Website',
+    'category': 'Website',
     'summary': 'Pretty Way to Display Tweets for Event',
     'description': """
 Make Everybody a Part of Your Event

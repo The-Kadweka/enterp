@@ -1,38 +1,25 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* documents_project
+# * documents_project
 # 
 # Translators:
-# Martin Trigaux, 2019
 # Vasiliy Korobatov <korobatov@gmail.com>, 2019
-# Anton Ilchenko <anton.wmt@gmail.com>, 2019
-# Ivan Kropotkin <yelizariev@itpp.dev>, 2021
-# valmasone, 2022
-# Alena Vlasova, 2022
+# Martin Trigaux, 2019
+# Ivan Yelizariev <yelizariev@it-projects.info>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~12.5+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-13 11:38+0000\n"
-"PO-Revision-Date: 2019-08-26 09:35+0000\n"
-"Last-Translator: Alena Vlasova, 2022\n"
+"POT-Creation-Date: 2019-11-14 07:49+0000\n"
+"PO-Revision-Date: 2018-08-24 11:37+0000\n"
+"Last-Translator: Ivan Yelizariev <yelizariev@it-projects.info>, 2019\n"
 "Language-Team: Russian (https://www.transifex.com/odoo/teams/41243/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: ru\n"
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
-
-#. module: documents_project
-#: model_terms:ir.ui.view,arch_db:documents_project.res_config_settings_view_form
-msgid ""
-"<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
-"specific.\" aria-label=\"Values set here are company-specific.\" "
-"groups=\"base.group_multi_company\" role=\"img\"/>"
-msgstr ""
-"<span class=\"o_form_label\">Налоги по умолчанию</span>\n"
-"                                    <span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-specific.\" aria-label=\"Values set here are company-specific.\" groups=\"base.group_multi_company\" role=\"img\"/>"
 
 #. module: documents_project
 #: model:ir.model,name:documents_project.model_documents_workflow_rule
@@ -42,11 +29,6 @@ msgid ""
 msgstr ""
 "Набор действий и условий, которые будут доступны всем вложениям, "
 "соответствующие условиям"
-
-#. module: documents_project
-#: model_terms:ir.ui.view,arch_db:documents_project.res_config_settings_view_form
-msgid "Centralize files attached to projects and tasks"
-msgstr "Собирать файлы проектов и задач"
 
 #. module: documents_project
 #: model:ir.model,name:documents_project.model_res_company
@@ -64,19 +46,24 @@ msgid "Create"
 msgstr "Создать"
 
 #. module: documents_project
-#: model:documents.workflow.rule,name:documents_project.documents_project_rule
+#: model:documents.workflow.rule,name:documents_project.project_rule
 msgid "Create a Task"
 msgstr "создать задачу"
 
 #. module: documents_project
-#: model_terms:ir.ui.view,arch_db:documents_project.res_config_settings_view_form
-msgid "Default Tags"
-msgstr "Теги по умолчанию"
+#: selection:documents.workflow.rule,create_model:0
+msgid "Credit note"
+msgstr "сторно"
 
 #. module: documents_project
-#: model:ir.model.fields,field_description:documents_project.field_res_company__documents_project_settings
-msgid "Documents Project Settings"
-msgstr ""
+#: model:ir.model.fields,field_description:documents_project.field_res_company__dms_project_settings
+msgid "Dms Project Settings"
+msgstr "Настройка документооборота для проекта"
+
+#. module: documents_project
+#: model:ir.model,name:documents_project.model_ir_attachment
+msgid "Document"
+msgstr "Документ"
 
 #. module: documents_project
 #: model:ir.model.fields,field_description:documents_project.field_documents_workflow_rule__has_business_option
@@ -84,10 +71,15 @@ msgid "Has Business Option"
 msgstr "Имеет бизнес-функцию"
 
 #. module: documents_project
-#: model:ir.model,name:documents_project.model_project_project
-#: model:ir.model.fields,field_description:documents_project.field_res_config_settings__documents_project_settings
-msgid "Project"
-msgstr "Проект"
+#: selection:documents.workflow.rule,create_model:0
+msgid "Product template"
+msgstr "шаблон товара"
+
+#. module: documents_project
+#: model:ir.model.fields,field_description:documents_project.field_res_company__project_folder
+#: model:ir.model.fields,field_description:documents_project.field_res_config_settings__dms_project_settings
+msgid "Project Folder"
+msgstr "папка проекта"
 
 #. module: documents_project
 #: model:ir.model.fields,field_description:documents_project.field_res_company__project_tags
@@ -96,22 +88,36 @@ msgid "Project Tags"
 msgstr "Теги проекта"
 
 #. module: documents_project
-#: model:ir.model.fields,field_description:documents_project.field_res_company__project_folder
-msgid "Project Workspace"
-msgstr ""
+#: model_terms:ir.ui.view,arch_db:documents_project.res_config_settings_view_form
+msgid "Select the new folder to be used for project's documents"
+msgstr "Выберите новую папку для документов проекта"
 
 #. module: documents_project
-#: model:ir.model,name:documents_project.model_project_task
-#: model:ir.model.fields.selection,name:documents_project.selection__documents_workflow_rule__create_model__project_task
+#: model_terms:ir.ui.view,arch_db:documents_project.res_config_settings_view_form
+msgid "Select the tags to be applied to the project's new documents"
+msgstr "Выберите теги, которые будут применены к новым документам проекта"
+
+#. module: documents_project
+#: selection:documents.workflow.rule,create_model:0
+msgid "Signature template"
+msgstr "шаблон подписи"
+
+#. module: documents_project
+#: selection:documents.workflow.rule,create_model:0
 msgid "Task"
 msgstr "Задача"
 
 #. module: documents_project
-#: model_terms:ir.ui.view,arch_db:documents_project.res_config_settings_view_form
-msgid "Workspace"
-msgstr "Рабочее место"
+#: selection:documents.workflow.rule,create_model:0
+msgid "Vendor Credit Note"
+msgstr "Кредитное обязательство поставщика"
+
+#. module: documents_project
+#: selection:documents.workflow.rule,create_model:0
+msgid "Vendor bill"
+msgstr "счет поставщика"
 
 #. module: documents_project
 #: model:ir.model.fields,field_description:documents_project.field_res_config_settings__project_folder
-msgid "project default workspace"
-msgstr ""
+msgid "project default folder"
+msgstr "типичная папка для проекта"

@@ -21,10 +21,10 @@ QUnit.module('Account Reports', {
     },
 }, function () {
 
-    QUnit.test('can execute account report download actions', async function (assert) {
-        assert.expect(4);
+    QUnit.test('can execute account report download actions', function (assert) {
+        assert.expect(5);
 
-        var actionManager = await createActionManager({
+        var actionManager = createActionManager({
             actions: this.actions,
             mockRPC: function (route, args) {
                 assert.step(args.method || route);
@@ -40,25 +40,25 @@ QUnit.module('Account Reports', {
                         },
                         output_format: 'pdf',
                     }, "should give the correct data");
-                    params.success();
                     params.complete();
                 },
             },
         });
-        await actionManager.doAction(1);
+        actionManager.doAction(1);
 
         assert.verifySteps([
             '/web/action/load',
+            '/web/static/src/img/spin.png', // block UI image
             '/account_reports',
         ]);
 
         actionManager.destroy();
     });
 
-    QUnit.test('Account report m2m filters', async function (assert) {
+    QUnit.test('Account report m2m filters', function (assert) {
         assert.expect(4);
         var count = 0;
-        var actionManager = await createActionManager({
+        var actionManager = createActionManager({
             actions: [{
                 id: 9,
                 tag: 'account_report',
@@ -99,50 +99,39 @@ QUnit.module('Account Reports', {
                             '<li class="o_account_report_search js_account_partner_m2m"/>' +
                             '</ul>',
                     };
-                    var reportOptions;
                     if (count === 1) {
-                        reportOptions = args.args[1];
+                        var reportOptions = args.args[1];
                         assert.strictEqual(reportOptions.partner_ids[0], 1,
                             "pass correct partner_id to report");
                         vals.options.partner_ids = reportOptions.partner_ids;
                     } else if (count == 2) {
-                        reportOptions = args.args[1];
+                        var reportOptions = args.args[1];
                         assert.strictEqual(reportOptions.partner_categories[0], 1,
                             "pass correct partner_id to report");
                         vals.options.partner_categories = reportOptions.partner_categories;
                     }
                     count++;
-                    return Promise.resolve(vals);
+                    return $.when(vals);
                 }
                 if (route === '/web/dataset/call_kw/account.report/get_html_footnotes') {
-                    return Promise.resolve("");
+                    return $.when("");
                 }
                 return this._super.apply(this, arguments);
             },
         });
 
-        await actionManager.doAction(9);
-        assert.containsOnce(actionManager, '.o_control_panel .o_field_many2manytags[name="partner_ids"]',
+        actionManager.doAction(9);
+        assert.strictEqual(actionManager.controlPanel.$('.o_field_many2manytags[name="partner_ids"]').length, 1,
             "partner_ids m2m field added to filter");
-
-        // search on partners m2m
-        await testUtils.dom.click(actionManager.$('.o_control_panel .o_search_options a.dropdown-toggle'));
-        await testUtils.fields.many2one.clickOpenDropdown('partner_ids');
-        await testUtils.nextTick();
-        await testUtils.fields.many2one.clickItem('partner_ids', 'Genda Swami');
-        await testUtils.nextTick();
-
-        assert.containsOnce(actionManager, '.o_control_panel .o_field_many2manytags[name="partner_categories"]',
+        assert.strictEqual(actionManager.controlPanel.$('.o_field_many2manytags[name="partner_categories"]').length, 1,
             "partner_categories m2m field added to filter");
-
+        actionManager.controlPanel.$('.o_search_options a').click();
+        // search on partners m2m
+        actionManager.controlPanel.$('.o_field_many2one[name="partner_ids"] input').click();
+        $('.ui-autocomplete .ui-menu-item a:contains(Genda Swami)').click();
         // search on partner categories m2m
-        await testUtils.dom.click(actionManager.$('.o_control_panel .o_search_options a.dropdown-toggle'));
-        await testUtils.nextTick();
-        await testUtils.fields.many2one.clickOpenDropdown('partner_categories');
-        await testUtils.nextTick();
-        await testUtils.fields.many2one.clickItem('partner_categories', 'Brigadier suryadev singh');
-        await testUtils.nextTick();
-
+        actionManager.controlPanel.$('.o_field_many2one[name="partner_categories"] input').click();
+        $('.ui-autocomplete .ui-menu-item a:contains(Brigadier suryadev singh)').click();
         actionManager.destroy();
     });
 });

@@ -7,4 +7,3 @@ class AccountJournal(models.Model):
 
     l10n_co_edi_dian_authorization_number = fields.Char(string=u'Resolución de Facturación')
     l10n_co_edi_dian_authorization_date = fields.Date(string=u'Fecha de Resolución')
-    l10n_co_edi_country_code = fields.Char(related='company_id.country_id.code')

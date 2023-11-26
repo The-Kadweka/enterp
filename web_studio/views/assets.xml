@@ -10,30 +10,22 @@
     </template>
 
     <template id="web_studio.assets" name="Web Studio Assets">
-        <!-- can not be in the lazy load bundle because the button event is in an include of action manager -->
+
         <script type="text/javascript" src="/web_studio/static/src/js/action_manager.js"></script>
-
-        <!-- can not be in the lazy load bundle because the button event is in an include of web_client -->
+        <script type="text/javascript" src="/web_studio/static/src/js/app_creator.js"></script>
         <script type="text/javascript" src="/web_studio/static/src/js/bus.js"></script>
-        <script type="text/javascript" src="/web_studio/static/src/js/systray_item.js"></script>
-        <script type="text/javascript" src="/web_studio/static/src/js/web_client.js"></script>
-
-        <!-- can not be in the lazy load bundle because the menu is an include and the menu is already created -->
-        <script type="text/javascript" src="/web_studio/static/src/js/menu.js"></script>
         <script type="text/javascript" src="/web_studio/static/src/js/edit_menu.js"></script>
-        <script type="text/javascript" src="/web_studio/static/src/js/submenu.js"></script>
         <script type="text/javascript" src="/web_studio/static/src/js/home_menu.js"></script>
         <script type="text/javascript" src="/web_studio/static/src/js/icon_creator.js"></script>
-        <script type="text/javascript" src="/web_studio/static/src/js/utils.js"></script>
-        <script type="text/javascript" src="/web_studio/static/src/js/tours/web_studio.js"></script>
-    </template>
-
-    <template id="web_studio.studio_assets" name="Web Studio Lazy Assets">
-        <script type="text/javascript" src="/web_studio/static/src/js/app_creator.js"></script>
+        <script type="text/javascript" src="/web_studio/static/src/js/menu.js"></script>
         <script type="text/javascript" src="/web_studio/static/src/js/py.js"></script>
+        <script type="text/javascript" src="/web_studio/static/src/js/submenu.js"></script>
+        <script type="text/javascript" src="/web_studio/static/src/js/systray_item.js"></script>
+        <script type="text/javascript" src="/web_studio/static/src/js/tour.js"></script>
+        <script type="text/javascript" src="/web_studio/static/src/js/utils.js"></script>
+        <script type="text/javascript" src="/web_studio/static/src/js/web_client.js"></script>
 
         <script type="text/javascript" src="/web_studio/static/src/js/common/abstract_editor_manager.js"></script>
-        <script type="text/javascript" src="/web_studio/static/src/js/common/field_selector_dialog.js"></script>
         <script type="text/javascript" src="/web_studio/static/src/js/common/new_field_dialog.js"></script>
         <script type="text/javascript" src="/web_studio/static/src/js/common/xml_editor.js"></script>
 
@@ -100,19 +92,12 @@
         <link rel="stylesheet" type="text/scss" href="/web_studio/static/src/scss/xml_editor.scss"/>
     </template>
 
-    <template id="web_studio.compiled_assets_studio" name="Web Studio Bundle">
-        <t t-call-assets="web_studio.studio_assets"/>
-    </template>
-
     <template id="webclient_bootstrap" inherit_id="web.webclient_bootstrap">
-        <xpath expr="//t[@t-call-assets='web.assets_backend'][@t-css='false']" position="after">
-            <t t-call-assets="web_studio.assets" groups="base.group_system"/>
+        <xpath expr="//t[@t-call-assets='web.assets_backend'][@t-js='false']" position="after">
+            <t t-call-assets="web_studio.assets" t-js="false" groups="base.group_system"/>
         </xpath>
-    </template>
-
-    <template id="assets_tests" name="Web Studio Assets Tests" inherit_id="web.assets_tests">
-        <xpath expr="." position="inside">
-            <script type="text/javascript" src="/web_studio/static/tests/tours/web_studio.js"></script>
+        <xpath expr="//t[@t-call-assets='web.assets_backend'][@t-css='false']" position="after">
+            <t t-call-assets="web_studio.assets" t-css="false" groups="base.group_system"/>
         </xpath>
     </template>
 
@@ -137,19 +122,6 @@
 
     <template id="qunit_suite" name="studio_tests" inherit_id="web.qunit_suite">
         <xpath expr="//t[@t-set='head']" position="inside">
-            <script type="text/javascript">
-                odoo.define('web_studio.WebClient.test', function (require) {
-                    'use strict';
-                    require('web_studio.WebClient');
-                    var WebClient = require('web.WebClient');
-                    WebClient.include({
-                        _studioAssets: [],
-                    });
-                });
-            </script>
-            <t t-call="web_studio.compiled_assets_studio"/>
-
-            <script type="text/javascript" src="/web_studio/static/tests/action_editor_action_tests.js"></script>
             <script type="text/javascript" src="/web_studio/static/tests/app_creator_tests.js"></script>
             <script type="text/javascript" src="/web_studio/static/tests/edit_menu_tests.js"></script>
             <script type="text/javascript" src="/web_studio/static/tests/mock_server.js"></script>

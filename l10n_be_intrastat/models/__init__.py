@@ -2,4 +2,3 @@
 
 from . import res_config_settings
 from . import account_intrastat_report
-from . import account_move

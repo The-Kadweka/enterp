@@ -1,12 +1,6 @@
 odoo.define('web_enterprise.MobileFormRenderer', function (require) {
 "use strict";
 
-var config = require('web.config');
-
-if (!config.device.isMobile) {
-    return;
-}
-
 /**
  * This file defines the MobileFormRenderer, an extension of the FormRenderer
  * implementing some tweaks to improve the UX in mobile.
@@ -18,7 +12,7 @@ var FormRenderer = require('web.FormRenderer');
 
 var qweb = core.qweb;
 
-FormRenderer.include({
+var MobileFormRenderer = FormRenderer.extend({
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -48,44 +42,12 @@ FormRenderer.include({
             _.each(buttons, function ($button) {
                 $dropdownMenu.append($button.addClass('dropdown-item'));
             });
-            this._toggleStatusbarButtons($headerButtons);
         }
 
         return $headerButtons;
     },
-
-    /**
-     * Hide action dropdown button if no visible dropdown item button
-     *
-     * @private
-     */
-    _toggleStatusbarButtons: function ($headerButtons) {
-        var $visibleButtons = $headerButtons.find('.dropdown-menu button:not(.o_invisible_modifier)');
-
-        // We need to remove also the button that match these CSS selector:
-        // .o_form_view.o_form_editable .oe_read_only {
-        //     display: none !important;
-        // }
-        // At this time the widget is not appended and so the selector is not enable yet.
-        $visibleButtons = $visibleButtons.filter((index, element) => {
-            return !(this.mode === 'edit' && element.matches('.oe_read_only'));
-        });
-
-        $headerButtons.toggleClass('o_invisible_modifier', !$visibleButtons.length);
-    },
-
-    /**
-     * Update visibility of action dropdown button.
-     * Useful when invisible modifiers are on dropdown item buttons.
-     *
-     * @override
-     * @private
-     */
-    _updateAllModifiers: function () {
-        var def = this._super.apply(this, arguments);
-        this._toggleStatusbarButtons(this.$('.o_statusbar_buttons'));
-        return def;
-    },
 });
+
+return MobileFormRenderer;
 
 });

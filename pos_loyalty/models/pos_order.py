@@ -16,9 +16,9 @@ class PosOrder(models.Model):
         return fields
 
     @api.model
-    def create_from_ui(self, orders, draft=False):
-        order_ids = super(PosOrder, self).create_from_ui(orders, draft)
-        for order in self.sudo().browse([o['id'] for o in order_ids]):
+    def create_from_ui(self, orders):
+        order_ids = super(PosOrder, self).create_from_ui(orders)
+        for order in self.sudo().browse(order_ids):
             if order.loyalty_points != 0 and order.partner_id:
                 order.partner_id.loyalty_points += order.loyalty_points
         return order_ids

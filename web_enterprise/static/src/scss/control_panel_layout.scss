@@ -1,3 +1,12 @@
+@mixin o-when-not-full {
+    width: 0;
+    max-height: $o-cp-breadcrumb-height;
+}
+@mixin o-when-full {
+    width: 88%;
+    max-height: 1000px;
+}
+
 @include media-breakpoint-up(sm) {
     .o_control_panel {
         .o_cp_left {
@@ -17,10 +26,10 @@
 @include media-breakpoint-down(sm) {
     .o_control_panel {
         padding-right: 0;
-
         .breadcrumb  {
-            width: 100%;
+            @include o-when-not-full;
             overflow: hidden;
+            white-space: nowrap;
 
             > li {
                 &:before {
@@ -49,31 +58,13 @@
         }
 
         .o_cp_searchview {
-            min-height: 35px;
-
-            &.o_searchview_quick {
-                display: flex;
-                align-items: flex-start;
-                width: 100%;
-
-                > .o_searchview {
-                    display: flex;
-                    flex: 1 1 auto;
-                    align-items: center;
-                    border-bottom: 1px solid $o-brand-secondary;
-
-                    > .o_searchview_input_container {
-                        flex: 1 1 auto;
-                    }
-                    > .o_enable_searchview {
-                        margin: 0;
-                        padding-left: 0;
-                    }
-                }
-            }
+            overflow: hidden;
+            width: 12%;
+            text-align: right;
         }
 
         .o_cp_left, .o_cp_right {
+            width: auto; // override desktop rule width: 50%
             flex: 1 1 auto;
         }
 
@@ -85,6 +76,12 @@
             &.show > ul.dropdown-menu {
                 display: inline-flex;
                 min-width: 0px;
+            }
+        }
+
+        &.o_breadcrumb_full {
+            .breadcrumb {
+                @include o-when-full;
             }
         }
     }

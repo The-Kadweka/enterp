@@ -1,105 +1,67 @@
 # -*- encoding: utf-8 -*-
 
-from odoo.addons.account.tests.account_test_savepoint import AccountTestInvoicingCommon
-from odoo import fields
+from odoo.addons.account.tests.account_test_classes import AccountingTestCase
 from odoo.tests import tagged
 from odoo.tests.common import Form
 
 
 @tagged('post_install', '-at_install')
-class TestBillsPrediction(AccountTestInvoicingCommon):
+class TestBillsPrediction(AccountingTestCase):
 
-    @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def _create_one_line_bill(self, vendor, description, expected_account, account_to_set=None):
+        with Form(self.env['account.invoice'].with_context(type='in_invoice'), view='account.invoice_supplier_form') as invoice_form:
+            invoice_form.partner_id = vendor
 
-        cls.test_partners = cls.env['res.partner'].create([{'name': 'test partner %s' % i} for i in range(7)])
+            with invoice_form.invoice_line_ids.new() as invoice_line_form:
+                invoice_line_form.quantity = 1
+                invoice_line_form.price_unit = 42
+                invoice_line_form.name = description
 
-        expense_type = cls.env.ref('account.data_account_type_expenses')
-        cls.test_accounts = cls.env['account.account'].create({
-            'code': 'test%s' % i,
-            'name': name,
-            'user_type_id': expense_type.id,
-            'company_id': cls.company_data['company'].id,
-        } for i, name in enumerate((
-            "Test Maintenance and Repair",
-            "Test Purchase of services, studies and preparatory work",
-            "Test Various Contributions",
-            "Test Rental Charges",
-            "Test Purchase of commodity",
-        )))
+                self.assertEquals(invoice_line_form.account_id, expected_account, "Account %s should have been predicted instead of %s" % (expected_account.code, invoice_line_form.account_id.code))
 
-        cls.frozen_today = fields.Date.today()
+                if account_to_set:
+                    invoice_line_form.account_id = account_to_set
+                    # We check that the account doesn't get another value due to onchange calling itself
+                    self.assertEquals(invoice_line_form.account_id, account_to_set, "Account %s has been assigned manually, but has been changed to account %s" % (account_to_set.code, invoice_line_form.account_id.code))
 
-    def _create_bill(self, vendor, line_name, expected_account, account_to_set=None):
-        ''' Create a new vendor bill to test the prediction.
-        :param vendor:              The vendor to set on the invoice.
-        :param line_name:           The name of the invoice line that will be used to predict.
-        :param expected_account:    The expected predicted account.
-        :param account_to_set:      The optional account to set as a correction of the predicted account.
-        :return:                    The newly created vendor bill.
-        '''
-        invoice_form = Form(self.env['account.move'].with_context(default_type='in_invoice'))
-        invoice_form.partner_id = vendor
-        invoice_form.invoice_date = self.frozen_today
-        with invoice_form.invoice_line_ids.new() as invoice_line_form:
-            # Set the default account to avoid "account_id is a required field" in case of bad configuration.
-            invoice_line_form.account_id = self.company_data['default_journal_purchase'].default_credit_account_id
+            rslt = invoice_form.save()
+            rslt.action_invoice_open()
+            return rslt
 
-            invoice_line_form.quantity = 1.0
-            invoice_line_form.price_unit = 42.0
-            invoice_line_form.name = line_name
-        invoice = invoice_form.save()
-        invoice_line = invoice.invoice_line_ids
+    def _create_test_partners(self, nber):
+        rslt = self.env['res.partner']
+        for i in range(0, nber):
+            with Form(self.env['res.partner']) as partner_form:
+                partner_form.name = 'Test partner %d' % i
+                rslt += partner_form.save()
+        return rslt
 
-        self.assertEqual(
-            invoice_line.account_id,
-            expected_account,
-            "Account '%s' should have been predicted instead of '%s'" % (
-                expected_account.display_name,
-                invoice_line.account_id.display_name,
-            ),
-        )
-
-        if account_to_set:
-            invoice_line.account_id = account_to_set
-
-        invoice.post()
-        return invoice
+    def _create_test_accounts(self, code_name_list):
+        rslt = self.env['account.account']
+        for (code, name) in code_name_list:
+            with Form(self.env['account.account']) as account_form:
+                account_form.code = code
+                account_form.name = name
+                account_form.user_type_id = self.env.ref('account.data_account_type_expenses')
+                rslt += account_form.save()
+        return rslt
 
     def test_account_prediction_flow(self):
-        default_account = self.company_data['default_journal_purchase'].default_debit_account_id
-        self._create_bill(self.test_partners[0], "Maintenance and repair", self.test_accounts[0])
-        self._create_bill(self.test_partners[5], "Subsidies obtained", default_account, account_to_set=self.test_accounts[1])
-        self._create_bill(self.test_partners[6], "Prepare subsidies file", self.test_accounts[1])
-        self._create_bill(self.test_partners[1], "Contributions January", self.test_accounts[2])
-        self._create_bill(self.test_partners[2], "Coca-cola", default_account, account_to_set=self.test_accounts[4])
-        self._create_bill(self.test_partners[1], "Contribution February", self.test_accounts[2])
-        self._create_bill(self.test_partners[3], "Electricity Bruxelles", default_account, account_to_set=self.test_accounts[3])
-        self._create_bill(self.test_partners[3], "Electricity Grand-Rosière", self.test_accounts[3])
-        self._create_bill(self.test_partners[2], "Purchase of coca-cola", self.test_accounts[4])
-        self._create_bill(self.test_partners[4], "Crate of coca-cola", self.test_accounts[4])
-        self._create_bill(self.test_partners[1], "March", self.test_accounts[2])
-
-    def test_account_prediction_with_product(self):
-        product = self.env['product.product'].create({
-            'name': 'product_a',
-            'lst_price': 1000.0,
-            'standard_price': 800.0,
-            'property_account_income_id': self.company_data['default_account_revenue'].id,
-            'property_account_expense_id': self.company_data['default_account_expense'].id,
-        })
-
-        invoice_form = Form(self.env['account.move'].with_context(default_type='in_invoice'))
-        invoice_form.partner_id = self.test_partners[0]
-        invoice_form.invoice_date = self.frozen_today
-        with invoice_form.invoice_line_ids.new() as invoice_line_form:
-            invoice_line_form.product_id = product
-            invoice_line_form.name = "Maintenance and repair"
-        invoice = invoice_form.save()
-
-        self.assertRecordValues(invoice.invoice_line_ids, [{
-            'name': "Maintenance and repair",
-            'product_id': product.id,
-            'account_id': self.company_data['default_account_expense'].id,
-        }])
+        vendors = self._create_test_partners(7)
+        accounts = self._create_test_accounts([('test1', 'Entretien et réparation'),
+                                               ('test2', 'Achats de services, travaux et études'),
+                                               ('test3', 'Loyers divers'),
+                                               ('test4', 'Charges locatives'),
+                                               ('test5', 'Achats de marchandises')])
+        default_account = self.env['account.journal'].search([('type', '=', 'purchase')], limit=1).default_debit_account_id
+        self._create_one_line_bill(vendors[0], "Entretien et réparation", accounts[0])
+        self._create_one_line_bill(vendors[5], "Subsides obtenus", default_account, account_to_set=accounts[1])
+        self._create_one_line_bill(vendors[6], "Préparation dossier subsides", accounts[1])
+        self._create_one_line_bill(vendors[1], "Loyers Janvier", accounts[2])
+        self._create_one_line_bill(vendors[2], "Coca-cola", default_account, account_to_set=accounts[4])
+        self._create_one_line_bill(vendors[1], "Loyer Février", accounts[2])
+        self._create_one_line_bill(vendors[3], "Electricité Bruxelles", default_account, account_to_set=accounts[3])
+        self._create_one_line_bill(vendors[3], "Electricité Grand-Rosière", accounts[3])
+        self._create_one_line_bill(vendors[2], "Achat de coca-cola", accounts[4])
+        self._create_one_line_bill(vendors[4], "Casiers de Cocal-cola", accounts[4])
+        self._create_one_line_bill(vendors[1], "Mars: bureau", accounts[2])

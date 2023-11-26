@@ -8,7 +8,6 @@
 
         <t t-call="sign.items_input_info"/>
         <t t-call="sign.item_types_input_info"/>
-        <t t-call="sign.item_select_options_input_info"/>
     </template>
 
     <template id="sign.items_input_info" name="Items input info">
@@ -21,8 +20,6 @@
                     t-att-data-name="item.name"
                     t-att-data-responsible="item.responsible_id.id"
                     t-att-data-page="item.page"
-                    t-att-data-option_ids="item.option_ids.ids"
-                    t-att-data-template_id="item.template_id.ids"
                     t-att-data-pos-x="str(item.posX)"
                     t-att-data-pos-y="str(item.posY)"
                     t-att-data-width="item.width"
@@ -37,18 +34,10 @@
             <input type="hidden" class="o_sign_field_type_input_info" 
                 t-att-data-id="item_type['id']"
                 t-att-data-name="item_type['name']"
-                t-att-data-item_type="item_type['item_type']"
+                t-att-data-type="item_type['type']"
                 t-att-data-tip="item_type['tip']"
                 t-att-data-placeholder="item_type['placeholder']"
                 t-att-data-auto_field="item_type['auto_field']"/>
-        </t>
-    </template>
-
-    <template id="sign.item_select_options_input_info" name="Item select options input info">
-        <t t-foreach="sign_item_select_options" t-as="item_select_option">
-            <input type="hidden" class="o_sign_select_options_input_info"
-                t-att-data-id="item_select_option['id']"
-                t-att-data-value="item_select_option['value']"/>
         </t>
     </template>
 </odoo>

@@ -11,7 +11,7 @@
                 </button>
             </xpath>
             <xpath expr="//field[@name='location']" position="after">
-                <field name="workcenter_id" context="{'default_company_id':company_id}" groups="mrp.group_mrp_routings"/>
+                <field name="workcenter_id" groups="mrp.group_mrp_routings"/>
             </xpath>
             <xpath expr="//group[@name='maintenance']" position="after">
                 <group name="statistics">
@@ -67,7 +67,8 @@
         <field name="inherit_id" ref="maintenance.hr_equipment_request_view_search"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='maintenance_team_id']" position="after">
-                <field name="production_id" string="Operation" filter_domain="['|', ('production_id', 'ilike', self), ('workorder_id', 'ilike', self)]"/>
+                <field name="production_id"/>
+                <field name="workorder_id"/>
             </xpath>
         </field>
     </record>

@@ -4,11 +4,11 @@ odoo.define('account_batch_payment.reconciliation_tests.data', function (require
 var data = require('account.reconciliation_tests.data');
 
 data.params.data["account.reconciliation.widget"].get_batch_payments_data = function (args) {
-    return Promise.resolve();
+    return $.when();
 };
 
 data.params.data["account.reconciliation.widget"].get_move_lines_by_batch_payment = function (args) {
-    return Promise.resolve(data.params.mv_lines['[5,"b",0]']);
+    return $.when(data.params.mv_lines['[5,"b",0,5]']);
 };
 
 data.params.data_preprocess.batch_payments = [{
@@ -35,32 +35,30 @@ QUnit.module('account', {
 }, function () {
     QUnit.module('Reconciliation');
 
-    QUnit.test('Reconciliation basic rendering with account_batch_payment', async function (assert) {
+    QUnit.test('Reconciliation basic rendering with account_batch_payment', function (assert) {
         assert.expect(4);
 
         var clientAction = new ReconciliationClientAction.StatementAction(null, this.params.options);
-        testUtils.mock.addMockEnvironment(clientAction, {
+        testUtils.addMockEnvironment(clientAction, {
             data: this.params.data,
-            archs: {
-                'account.bank.statement.line,false,search': '<search string="Statement Line"><field name="display_name"/></search>',
-            },
         });
-        await clientAction.appendTo($('#qunit-fixture'));
+        clientAction.appendTo($('#qunit-fixture'));
 
-        assert.containsNone(clientAction.widgets[0], '.batch_payment',
+        assert.strictEqual(clientAction.widgets[0].$('.batch_payments_selector').length, 0,
             "should not have 'Select a Batch Payment' button");
 
         var widget = clientAction.widgets[1];
-        await testUtils.dom.click(widget.$('.accounting_view thead td:first'));
-        assert.containsOnce(widget, '.batch_payment',
+        widget.$('.accounting_view thead td:first').trigger('click');
+        assert.strictEqual(widget.$('.batch_payments_selector').length, 1,
             "should display 'Select a Batch Payment' button");
 
-        assert.containsNone(widget, '.accounting_view tbody tr',
+        assert.strictEqual(widget.$('.accounting_view tbody tr').length, 0,
             "should have not reconciliation propositions");
-        await testUtils.dom.click(widget.$('.nav-item.batch_payments_selector a:first'));
-        await testUtils.dom.click(widget.$('.batch_payment'));
 
-        assert.containsN(widget, '.accounting_view tbody tr', 2,
+        widget.$('.match .batch_payments_selector:first').trigger('click');
+        widget.$('.match a.batch_payment:first').trigger('click');
+
+        assert.strictEqual(widget.$('.accounting_view tbody tr').length, 2,
             "should have 2 reconciliation propositions");
 
         clientAction.destroy();

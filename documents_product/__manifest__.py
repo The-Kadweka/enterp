@@ -4,11 +4,11 @@
 {
     'name': 'Documents - Product',
     'version': '1.0',
-    'category': 'Operations/Documents',
+    'category': 'Uncategorized',
     'summary': 'Products from Documents',
     'description': """
-Adds the ability to create products from the document module and adds the
-option to send products' attachments to the documents app.
+Add the ability to create products from the document module.
+and to get the option to send products' attachments to the documents app.
 """,
     'website': ' ',
     'depends': ['documents', 'product'],

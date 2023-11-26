@@ -37,7 +37,7 @@
         try to use this method on an invoice for whose payment no mandate can be used.
     """,
 
-    'category': 'Accounting/Accounting',
+    'category': 'Accounting',
 
     'depends': ['base_iban','account_batch_payment'],
 
@@ -49,6 +49,7 @@
         'data/set_sdd_on_bank_journals.xml',
         'data/sdd_mandate_state_cron.xml',
         'views/account_payment_view.xml',
+        'views/account_invoice_view.xml',
         'views/account_journal_dashboard_view.xml',
         'views/report_invoice.xml',
         'views/res_config_settings_views.xml',

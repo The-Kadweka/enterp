@@ -53,12 +53,14 @@ class AccountJournal(models.Model):
                 'inbound_payment_method_ids': [(4, batch_deposit.id, None)],
         })
 
+    @api.multi
     def open_action_batch_payment(self):
         ctx = self._context.copy()
         ctx.update({'journal_id': self.id, 'default_journal_id': self.id})
         return {
             'name': _('Create Batch Payment'),
             'type': 'ir.actions.act_window',
+            'view_type': 'form',
             'view_mode': 'form',
             'res_model': 'account.batch.payment',
             'context': ctx,

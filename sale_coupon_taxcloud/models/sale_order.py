@@ -31,7 +31,14 @@ class SaleOrder(models.Model):
         taxcloud_orders.mapped('order_line').write({'tax_id': [(5,)]})
         return super(SaleOrder, self).recompute_coupon_lines()
 
-    def _create_invoices(self, grouped=False, final=False):
+    def recompute_discounts(self):
+        res = super(SaleOrder, self).recompute_discounts()
+        for order in self.filtered('fiscal_position_id.is_taxcloud'):
+            order.validate_taxes_on_sales_order()
+        return res
+
+    @api.multi
+    def action_invoice_create(self, grouped=False, final=False):
         """Ensure that any TaxCloud order that has discounts is invoiced in one go.
            Indeed, since the tax computation of discount lines with Taxcloud
            requires that any negative amount of a coupon line be deduced from the
@@ -53,13 +60,13 @@ class SaleOrder(models.Model):
         taxcloud_coupon_orders = taxcloud_orders.filtered('order_line.coupon_program_id')
         partial_taxcloud_coupon_orders = taxcloud_coupon_orders.filtered(not_totally_invoiceable)
         if partial_taxcloud_coupon_orders:
-            bad_orders = str(partial_taxcloud_coupon_orders.mapped('display_name'))[1:-1]
+            bad_orders = str(partial_taxcloud_coupon_orders.mapped('name'))[1:-1]
             bad_orders = bad_orders if len(bad_orders) < 80 else bad_orders[:80] + ', ...'
             raise UserError(_('Any order that has discounts and uses TaxCloud must be invoiced '
                               'all at once to prevent faulty tax computation with Taxcloud.\n'
                               'The following orders must be completely invoiced:\n%s') % bad_orders)
 
-        return super(SaleOrder, self)._create_invoices(grouped=grouped, final=final)
+        return super(SaleOrder, self).action_invoice_create(grouped=grouped, final=final)
 
 
 class SaleOrderLine(models.Model):
@@ -72,54 +79,12 @@ class SaleOrderLine(models.Model):
     price_taxcloud = fields.Float('Taxcloud Price', default=0,
                                   help='Technical fields to hold prices for TaxCloud.')
 
-    def _check_taxcloud_promo(self, vals):
-        """Ensure that users cannot modify sale order lines of a Taxcloud order
-           with promotions if there is already a valid invoice"""
-
-        blocked_fields = (
-            'product_id',
-            'price_unit',
-            'price_subtotal',
-            'price_tax',
-            'price_total',
-            'tax_id',
-            'discount',
-            'product_id',
-            'product_uom_qty',
-            'product_qty'
-        )
-        for line in self:
-            if (
-                line.order_id.is_taxcloud
-                and not line.display_type
-                and any(field in vals for field in blocked_fields)
-                and any(line.order_id.order_line.mapped(lambda sol: sol.invoice_status not in ('no','to invoice')))
-                and any(line.order_id.order_line.mapped('is_reward_line'))
-            ):
-                raise UserError(
-                    _(
-                    'Orders with coupons or promotions programs that use TaxCloud for '
-                    'automatic tax computation cannot be modified after having been invoiced.\n'
-                    'To modify this order, you must first cancel or refund all existing invoices.'
-                    )
-                )
-
-    def write(self, vals):
-        self._check_taxcloud_promo(vals)
-        return super(SaleOrderLine, self).write(vals)
-
-    @api.model
-    def create(self, vals):
-        line = super(SaleOrderLine, self).create(vals)
-        line._check_taxcloud_promo(vals)
-        return line
-
     def _get_taxcloud_price(self):
         self.ensure_one()
         return self.price_taxcloud
 
-    def _prepare_invoice_line(self):
-        res = super(SaleOrderLine, self)._prepare_invoice_line()
+    def _prepare_invoice_line(self, qty):
+        res = super(SaleOrderLine, self)._prepare_invoice_line(qty)
         res.update({'coupon_program_id': self.coupon_program_id.id})
         return res
 

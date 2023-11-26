@@ -2,35 +2,32 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import models, fields, api
-from odoo.addons.base.models import res_users as ru
+from openerp.addons.base.models import res_users as ru
 from odoo.exceptions import UserError
 from odoo.exceptions import ValidationError
 from odoo.tools.translate import _
-from dateutil import parser
-from itertools import groupby
-
 
 class AccountTax(models.Model):
     _inherit = 'account.tax'
 
     identification_letter = fields.Selection([('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')], compute='_compute_identification_letter')
 
+    @api.one
     @api.depends('amount_type', 'amount')
     def _compute_identification_letter(self):
-        for rec in self:
-            if rec.type_tax_use == "sale" and (rec.amount_type == "percent" or rec.amount_type == "group"):
-                if rec.amount == 21:
-                    rec.identification_letter = "A"
-                elif rec.amount == 12:
-                    rec.identification_letter = "B"
-                elif rec.amount == 6:
-                    rec.identification_letter = "C"
-                elif rec.amount == 0:
-                    rec.identification_letter = "D"
-                else:
-                    rec.identification_letter = False
+        if self.type_tax_use == "sale" and (self.amount_type == "percent" or self.amount_type == "group"):
+            if self.amount == 21:
+                self.identification_letter = "A"
+            elif self.amount == 12:
+                self.identification_letter = "B"
+            elif self.amount == 6:
+                self.identification_letter = "C"
+            elif self.amount == 0:
+                self.identification_letter = "D"
             else:
-                rec.identification_letter = False
+                self.identification_letter = False
+        else:
+            self.identification_letter = False
 
 class pos_config(models.Model):
     _inherit = 'pos.config'
@@ -39,61 +36,19 @@ class pos_config(models.Model):
     blackbox_pos_production_id = fields.Char("Registered IoT Box serial number",
         help='e.g. BODO001... The IoT Box must be certified by Odoo S.A. to be used with the blackbox.',
         copy=False)
-    iface_fiscal_data_module = fields.Many2one('iot.device',
-                                               domain="[('type', '=', 'fiscal_data_module'), '|', ('company_id', '=', False), ('company_id', '=', company_id)]")
-
-    @api.constrains("module_pos_reprint", "module_pos_discount", "module_pos_loyalty","blackbox_pos_production_id","iface_tax_included")
-    def _check_blackbox_config(self):
-        for config in self:
-            if config.blackbox_pos_production_id and (config.module_pos_reprint or config.module_pos_discount or config.module_pos_loyalty):
-                raise UserError(_("Loyalty programs, reprint and global discounts cannot be used on a PoS associated with a blackbox."))
-            if config.blackbox_pos_production_id and config.iface_tax_included == "subtotal":
-                raise UserError(_("You have to use the Tax-Included Price in order to use the blackbox."))
 
     @api.constrains('blackbox_pos_production_id')
-    def _check_blackbox_pos_production(self):
+    def _check_one_posbox_per_config(self):
+        pos_config = self.env['pos.config']
+
         for config in self:
             if config.blackbox_pos_production_id:
                 if len(config.blackbox_pos_production_id) != 14:
                     raise ValidationError(_("Serial number must consist of 14 characters."))
 
-    def open_session_cb(self):
-        if self.blackbox_pos_production_id:
-            self._check_insz_user()
-            self._check_company_address()
-            self._check_work_product_taxes()
-            self._check_cash_rounding()
-        return super(pos_config, self).open_session_cb()
-
-    def _check_work_product_taxes(self):
-        work_in = self.env.ref('pos_blackbox_be.product_product_work_in')
-        work_out = self.env.ref('pos_blackbox_be.product_product_work_out')
-        if not work_in.taxes_id or work_in.taxes_id.amount != 0 or not work_out.taxes_id or work_out.taxes_id.amount != 0:
-            raise ValidationError(_("The WORK IN/OUT products must have a taxes with 0%."))
-
-    def _check_insz_user(self):
-        if not self.env.user.insz_or_bis_number:
-            raise ValidationError(_("The user must have a INSZ or BIS number."))
-
-    def _check_company_address(self):
-        if not self.company_id.street:
-            raise ValidationError(_("The address of the company must be filled."))
-        if not self.company_id.vat:
-            raise ValidationError(_("The VAT number of the company must be filled."))
-
-    def _check_cash_rounding(self):
-        if not self.cash_rounding:
-            raise ValidationError(_("Cash rounding must be enabled"))
-        if self.rounding_method.rounding != 0.05 or self.rounding_method.rounding_method != "HALF-UP":
-            raise ValidationError(_("The rounding method must be set to 0.5 and HALF-UP"))
-
-    @api.constrains('blackbox_pos_production_id', 'iface_fiscal_data_module', 'is_posbox')
-    def _check_iot_and_blackbox_state(self):
-        for config in self:
-            if (config.blackbox_pos_production_id and not config.iface_fiscal_data_module) \
-                    or (not config.blackbox_pos_production_id and config.iface_fiscal_data_module) \
-                    or (config.blackbox_pos_production_id and config.iface_fiscal_data_module and not config.is_posbox):
-                raise ValidationError(_("The certified Iot Box Ref and the fiscal data module fields have to be set together or ignored."))
+                if pos_config.search([('id', '!=', config.id),
+                                      ('blackbox_pos_production_id', '=', config.blackbox_pos_production_id)]):
+                    raise ValidationError(_("Only one Point of Sale allowed per registered IoT Box."))
 
     @api.constrains('blackbox_pos_production_id', 'fiscal_position_ids')
     def _check_posbox_fp_tax_code(self):
@@ -106,24 +61,12 @@ class pos_config(models.Model):
                     if tax_line.tax_src_id.identification_letter and not tax_line.tax_dest_id.identification_letter:
                         raise ValidationError(_("Fiscal Position %s (tax %s) has an invalid tax amount. Only 21%%, 12%%, 6%% and 0%% are allowed.") % (fp.name, tax_line.tax_dest_id.name))
 
+
     def get_next_report_sequence_number(self):
         to_return = self.report_sequence_number
         self.report_sequence_number += 1
 
         return to_return
-
-    def _compute_iot_device_ids(self):
-        super(pos_config, self)._compute_iot_device_ids()
-        for config in self:
-            if config.is_posbox:
-                config.iot_device_ids += config.iface_fiscal_data_module
-
-    @api.model
-    def _get_allowed_change_fields(self):
-        allowed_keys = super(pos_config, self)._get_allowed_change_fields()
-        allowed_keys.append('report_sequence_number')
-        return allowed_keys
-
 
 class res_users(models.Model):
     _inherit = 'res.users'
@@ -131,41 +74,40 @@ class res_users(models.Model):
     # bis number is for foreigners in Belgium
     insz_or_bis_number = fields.Char("INSZ or BIS number",
                                      help="Social security identification number")
-    session_clocked_ids = fields.Many2many(
-        'pos.session',
-        'users_session_clocking_info',
-        string='Session Clocked In',
-        help='This is a technical field used for tracking the status of the session for each users.',
-    )
 
+    @api.one
     @api.constrains('insz_or_bis_number')
     def _check_insz_or_bis_number(self):
-        for rec in self:
-            if rec.insz_or_bis_number and (len(rec.insz_or_bis_number) != 11 or not rec.insz_or_bis_number.isdigit()):
-                raise ValidationError(_("The INSZ or BIS number has to consist of 11 numerical digits."))
+        if self.insz_or_bis_number and (len(self.insz_or_bis_number) != 11 or not self.insz_or_bis_number.isdigit()):
+            raise ValidationError(_("The INSZ or BIS number has to consist of 11 numerical digits."))
 
     @api.model
     def create(self, values):
+        log = self.env['pos_blackbox_be.log']
 
         filtered_values = {field: ('********' if field in ru.USER_PRIVATE_FIELDS else value)
                                for field, value in values.items()}
-        self.env['pos_blackbox_be.log'].sudo().create(filtered_values, "create", self._name, values.get('login'))
+        log.create(filtered_values, "create", self._name, values.get('login'))
 
         return super(res_users, self).create(values)
 
+    @api.multi
     def write(self, values):
+        log = self.env['pos_blackbox_be.log']
 
         filtered_values = {field: ('********' if field in ru.USER_PRIVATE_FIELDS else value)
                                for field, value in values.items()}
         for user in self:
-            self.env['pos_blackbox_be.log'].sudo().create(filtered_values, "modify", user._name, user.login)
+            log.create(filtered_values, "modify", user._name, user.login)
 
         return super(res_users, self).write(values)
 
+    @api.multi
     def unlink(self):
+        log = self.env['pos_blackbox_be.log']
 
         for user in self:
-            self.env['pos_blackbox_be.log'].sudo().create({}, "delete", user._name, user.login)
+            log.create({}, "delete", user._name, user.login)
 
         return super(res_users, self).unlink()
 
@@ -174,6 +116,8 @@ class pos_session(models.Model):
     _inherit = 'pos.session'
 
     pro_forma_order_ids = fields.One2many('pos.order_pro_forma', 'session_id')
+
+    forbidden_modules_installed = fields.Boolean(compute='_compute_forbidden_modules_installed')
 
     total_sold = fields.Monetary(compute='_compute_total_sold')
     total_pro_forma = fields.Monetary(compute='_compute_total_pro_forma')
@@ -191,103 +135,108 @@ class pos_session(models.Model):
     total_discount = fields.Monetary(compute='_compute_discounts')
     amount_of_corrections = fields.Integer(compute='_compute_corrections')
     total_corrections = fields.Monetary(compute='_compute_corrections')
-    total_rounding_applied = fields.Monetary(compute="_compute_rounding")
-    users_clocked_ids = fields.Many2many(
-        'res.users',
-        'users_session_clocking_info',
-        string='Users Clocked In',
-        help='This is a technical field used for tracking the status of the session for each users.',
-    )
+    work_status = fields.Selection([
+        ('work_in', 'WORK IN'),
+        ('valid', 'Valid'),
+        ('work_out', 'WORK OUT')
+    ], compute='_compute_work_status')
 
-    @api.depends('order_ids')
+    @api.one
+    @api.depends('statement_ids')
     def _compute_total_sold(self):
-        for rec in self:
-            rec.total_sold = 0
-            for order in rec.order_ids:
-                rec.total_sold += order.amount_paid
+        self.total_sold = 0
 
+        for st in self.statement_ids:
+            self.total_sold += st.total_entry_encoding
+
+    @api.one
     @api.depends('pro_forma_order_ids')
     def _compute_total_pro_forma(self):
-        for rec in self:
-            rec.total_pro_forma = 0
-            for pro_forma in rec.pro_forma_order_ids:
-                rec.total_pro_forma += pro_forma.amount_total
+        self.total_pro_forma = 0
 
+        for pro_forma in self.pro_forma_order_ids:
+            self.total_pro_forma += pro_forma.amount_total
+
+    @api.one
     @api.depends('order_ids')
     def _compute_total_tax(self):
-        for rec in self:
-            rec.total_base_of_measure_tax_a = 0
-            rec.total_base_of_measure_tax_b = 0
-            rec.total_base_of_measure_tax_c = 0
-            rec.total_base_of_measure_tax_d = 0
-            for order in rec.order_ids:
-                rec.total_base_of_measure_tax_a += order.blackbox_tax_category_a
-                rec.total_base_of_measure_tax_b += order.blackbox_tax_category_b
-                rec.total_base_of_measure_tax_c += order.blackbox_tax_category_c
-                rec.total_base_of_measure_tax_d += order.blackbox_tax_category_d
-            # compute the tax totals
-            currency = self.env['res.currency'].browse(rec.currency_id.id)
-            rec.total_tax_a = currency.round(rec.total_base_of_measure_tax_a * 0.21)
-            rec.total_tax_b = currency.round(rec.total_base_of_measure_tax_b * 0.12)
-            rec.total_tax_c = currency.round(rec.total_base_of_measure_tax_c * 0.06)
-            rec.total_tax_d = 0
+        self.total_base_of_measure_tax_a = 0
+        self.total_base_of_measure_tax_b = 0
+        self.total_base_of_measure_tax_c = 0
+        self.total_base_of_measure_tax_d = 0
 
+        for order in self.order_ids:
+            self.total_base_of_measure_tax_a += order.blackbox_tax_category_a
+            self.total_base_of_measure_tax_b += order.blackbox_tax_category_b
+            self.total_base_of_measure_tax_c += order.blackbox_tax_category_c
+            self.total_base_of_measure_tax_d += order.blackbox_tax_category_d
+
+        # compute the tax totals
+        currency = self.env['res.currency'].browse(self.currency_id.id)
+        self.total_tax_a = currency.round(self.total_base_of_measure_tax_a * 0.21)
+        self.total_tax_b = currency.round(self.total_base_of_measure_tax_b * 0.12)
+        self.total_tax_c = currency.round(self.total_base_of_measure_tax_c * 0.06)
+        self.total_tax_d = 0
+
+    @api.one
     @api.depends('order_ids')
     def _compute_amount_of_vat_tickets(self):
-        for rec in self:
-            rec.amount_of_vat_tickets = len(rec.order_ids)
+        self.amount_of_vat_tickets = len(self.order_ids)
 
+    @api.one
     @api.depends('order_ids', 'pro_forma_order_ids')
     def _compute_amounts_of_tickets(self):
-        for rec in self:
-            rec.amount_of_vat_tickets = len(rec.order_ids)
-            rec.amount_of_pro_forma_tickets = len(rec.pro_forma_order_ids)
+        self.amount_of_vat_tickets = len(self.order_ids)
+        self.amount_of_pro_forma_tickets = len(self.pro_forma_order_ids)
 
+    @api.one
     @api.depends('order_ids')
     def _compute_discounts(self):
-        for rec in self:
-            rec.amount_of_discounts = 0
-            rec.total_discount = 0
-            for order in rec.order_ids:
-                for line in order.lines:
-                    if line.discount > 0:
-                        rec.amount_of_discounts += 1
-                        if line.discount == 100:
-                            rec.total_discount += line.price_subtotal_incl
-                        else:
-                            price_without_discount = line.currency_id.round(line.price_subtotal_incl/(1-(line.discount/100)))
-                            rec.total_discount += price_without_discount - line.price_subtotal_incl
+        self.amount_of_discounts = 0
+        self.total_discount = 0
+        for order in self.order_ids:
+            for line in order.lines:
+                if line.discount > 0:
+                    self.amount_of_discounts += 1
 
+                    original_line_discount = line.discount
+                    line.discount = 0
+                    price_without_discount = line.price_subtotal_incl
+                    line.discount = original_line_discount
+
+                    self.total_discount += price_without_discount - line.price_subtotal_incl
+
+    @api.one
     @api.depends('order_ids')
     def _compute_corrections(self):
-        for rec in self:
-            rec.amount_of_corrections = 0
-            rec.total_corrections = 0
-            for order in rec.order_ids:
-                for line in order.lines:
-                    if line.price_subtotal_incl < 0:
-                        rec.amount_of_corrections += 1
-                        rec.total_corrections += line.price_subtotal_incl
+        self.amount_of_corrections = 0
+        self.total_corrections = 0
+
+        for order in self.order_ids:
+            for line in order.lines:
+                if line.price_subtotal_incl < 0:
+                    self.amount_of_corrections += 1
+                    self.total_corrections += line.price_subtotal_incl
 
     @api.depends('order_ids')
-    def _compute_rounding(self):
-        for rec in self:
-            rec.total_rounding_applied = 0
-            for order in rec.order_ids:
-                rec.total_rounding_applied += order.amount_paid - order.amount_total
+    def _compute_work_status(self):
+        work_in = self.env.ref('pos_blackbox_be.product_product_work_in', raise_if_not_found=False)
+        work_out = self.env.ref('pos_blackbox_be.product_product_work_out', raise_if_not_found=False)
+        for session in self:
+            if not session.order_ids:
+                # no orders yet, needs to fill work_in
+                session.work_status = 'work_in'
+            elif session.order_ids[0].lines and session.order_ids[0].lines[0].product_id == work_in:
+                # last order is a work in
+                session.work_status = 'valid'
+            elif session.order_ids[0].lines and session.order_ids[0].lines[0].product_id == work_out:
+                # last order is a work in, needs to create a new session or work in again
+                session.work_status = 'work_out'
+            else:
+                # last order is a normal one, assuming has already made a work in
+                session.work_status = 'valid'
 
-    def get_user_session_work_status(self, user_id):
-        if user_id in self.users_clocked_ids.ids:
-            return True
-        return False
-
-    def set_user_session_work_status(self, user_id, status):
-        if status:
-            self.write({'users_clocked_ids': [(4, user_id)]})
-        else:
-            self.write({'users_clocked_ids': [(3, user_id)]})
-        return self.users_clocked_ids.ids
-
+    @api.multi
     def action_pos_session_closing_control(self):
         # The government does not want PS orders that have not been
         # finalized into an NS before we close a session
@@ -332,53 +281,57 @@ class pos_session(models.Model):
         else:
             return list(total_sold_per_user_per_category[0].items())
 
-    def _get_order_data_for_user_report(self, order):
-        return {
-                    'login': order.user_id.name,
-                    'insz_or_bis_number': order.user_id.insz_or_bis_number,
-                    'revenue': order.amount_total,
-                    'revenue_per_category': {},
-                    'first_ticket_time': order.blackbox_pos_receipt_time,
-                    'last_ticket_time': False,
-                }
-
-    def _build_order_data_list_for_user_report(self):
-        sorted_orders = sorted(self.order_ids, key=lambda o: o.user_id.id)
-        return groupby(sorted_orders, key=lambda o: o.user_id.id)
-
     def get_user_report_data(self):
         data = {}
-        i = 0
 
-        if self.config_id.blackbox_pos_production_id:
-            for user, orders in self._build_order_data_list_for_user_report():
-                for order in sorted(orders, key=lambda o: o.blackbox_pos_receipt_time):
-                    isWorkIn = False
-                    isWorkOut = False
-                    for line in order.lines:
-                        if line.product_id.id == self.env['ir.model.data'].xmlid_to_object('pos_blackbox_be.product_product_work_in').id:
-                            isWorkIn = True
-                        if line.product_id.id == self.env['ir.model.data'].xmlid_to_object('pos_blackbox_be.product_product_work_out').id:
-                            isWorkOut = True
+        for order in self.order_ids:
+            if not data.get(order.user_id.id):
+                data[order.user_id.id] = {
+                    'login': order.user_id.login,
+                    'insz_or_bis_number': order.user_id.insz_or_bis_number,
+                    'revenue': order.amount_total,
+                    'first_ticket_time': order.blackbox_pos_receipt_time,
+                    'last_ticket_time': order.blackbox_pos_receipt_time
+                }
+            else:
+                current = data[order.user_id.id]
+                current['revenue'] += order.amount_total
 
-                    if isWorkIn:
-                        total_sold_per_category = {}
-                        data[i] = self._get_order_data_for_user_report(order)
+                if order.blackbox_pos_receipt_time < current['first_ticket_time']:
+                    current['first_ticket_time'] = order.blackbox_pos_receipt_time
 
-                        current = data[i]
-                    elif isWorkOut:
-                        current['last_ticket_time'] = order.blackbox_pos_receipt_time
-                        i += 1
-                    else:
-                        current['revenue'] += order.amount_total
-                        for line in order.lines:
-                            key = line.product_id.pos_categ_id.name or "None"
-                            if key in total_sold_per_category:
-                                total_sold_per_category[key] += line.price_subtotal_incl
-                            else:
-                                total_sold_per_category[key] = line.price_subtotal_incl
-                        current['revenue_per_category'] = list(total_sold_per_category.items())
+                if order.blackbox_pos_receipt_time > current['last_ticket_time']:
+                    current['last_ticket_time'] = order.blackbox_pos_receipt_time
+
+        total_sold_per_category_per_user = self.get_total_sold_per_category(group_by_user_id=True)
+
+        for user in total_sold_per_category_per_user:
+            data[user[0]]['revenue_per_category'] = list(user[1].items())
+
         return data
+
+    @api.one
+    def _compute_forbidden_modules_installed(self):
+        ir_module = self.env['ir.module.module'].sudo()
+
+        # We don't want pos_discount because it creates a single PLU
+        # line with a user-set product that acts as a
+        # discount. Because of this we have to treat the discount line
+        # as a regular PLU line, which is fine, but we also have to
+        # split it per tax. So we would need four PLU products, each
+        # with a different tax, and then we'd have to calculate how
+        # much discount/tax we would need to apply. If necessary, I
+        # think it would be easier to just do the discount per line
+        # (like it happens in the regular pos module). That way the
+        # discounts are 'notices' which are not regulated by law.
+        blacklisted_modules = ["pos_reprint", "pos_discount"]
+        blacklisted_installed_modules = ir_module.search([('name', 'in', blacklisted_modules),
+                                                          ('state', '!=', 'uninstalled')])
+
+        if blacklisted_installed_modules:
+            self.forbidden_modules_installed = True
+        else:
+            self.forbidden_modules_installed = False
 
     def action_report_journal_file(self):
         self.ensure_one()
@@ -413,39 +366,6 @@ class pos_order(models.Model):
     terminal_id = fields.Char(help="Unique ID of the terminal that created this order")
     hash_chain = fields.Char()
 
-    def _set_log_description(self, order):
-        lines = "Lignes de commande: "
-        if order.lines:
-            lines += "\n* " + "\n* ".join([
-                "%s x %s: %s" % (l.qty, l.product_id.name, l.price_subtotal_incl)
-                for l in order.lines
-            ])
-        description = """
-        NORMAL SALES
-        Date: {create_date}
-        Réf: {pos_reference}
-        Vendeur: {user_id}
-        {lines}
-        Total: {total}
-        Compteur Ticket: {ticket_counters}
-        Hash: {hash}
-        POS Version: {pos_version}
-        FDM ID: {fdm_id}
-        POS ID: {pos_id}
-        """.format(
-            create_date=order.create_date,
-            user_id=order.user_id.name,
-            lines=lines,
-            total=order.amount_total,
-            pos_reference=order.pos_reference,
-            hash=order.hash_chain,
-            pos_version=order.pos_version,
-            ticket_counters=order.blackbox_ticket_counters,
-            fdm_id=order.blackbox_unique_fdm_production_number,
-            pos_id=order.pos_production_id,
-        )
-        return description
-
     @api.model
     def create(self, values):
         pos_session = self.env["pos.session"].browse(values.get("session_id"))
@@ -455,11 +375,41 @@ class pos_order(models.Model):
 
         order = super(pos_order, self).create(values)
         if order.blackbox_signature:
-            description = self._set_log_description(order)
-            self.env["pos_blackbox_be.log"].sudo().create(description, "create", self._name, order.pos_reference)
+            lines = "Lignes de commande: "
+            if order.lines:
+                lines += "\n* " + "\n* ".join([
+                        "%s x %s: %s" % (l.qty, l.product_id.name, l.price_subtotal_incl)
+                        for l in order.lines
+                    ])
+            description = """
+NORMAL SALES
+Date: {create_date}
+Réf: {pos_reference}
+Vendeur: {user_id}
+{lines}
+Total: {total}
+Compteur Ticket: {ticket_counters}
+Hash: {hash}
+POS Version: {pos_version}
+FDM ID: {fdm_id}
+POS ID: {pos_id}
+""".format(
+                create_date=order.create_date,
+                user_id=order.user_id.name,
+                lines=lines,
+                total=order.amount_total,
+                pos_reference=order.pos_reference,
+                hash=order.hash_chain,
+                pos_version=order.pos_version,
+                ticket_counters=order.blackbox_ticket_counters,
+                fdm_id=order.blackbox_unique_fdm_production_number,
+                pos_id=order.pos_production_id,
+            )
+            self.env["pos_blackbox_be.log"].create(description, "create", self._name, order.pos_reference)
 
         return order
 
+    @api.multi
     def unlink(self):
         for order in self:
             if order.config_id.blackbox_pos_production_id:
@@ -467,9 +417,10 @@ class pos_order(models.Model):
 
         return super(pos_order, self).unlink()
 
+    @api.multi
     def write(self, values):
         for order in self:
-            if order.config_id.blackbox_pos_production_id and order.state != 'draft':
+            if order.config_id.blackbox_pos_production_id:
                 white_listed_fields = ['state', 'account_move', 'picking_id',
                                        'invoice_id']
 
@@ -479,6 +430,7 @@ class pos_order(models.Model):
 
         return super(pos_order, self).write(values)
 
+    @api.multi
     def refund(self):
         for order in self:
             if order.config_id.blackbox_pos_production_id:
@@ -512,7 +464,7 @@ class pos_order(models.Model):
         return fields
 
     @api.model
-    def create_from_ui(self, orders, draft=False):
+    def create_from_ui(self, orders):
         # this will call pos_order_pro_forma.create_from_ui when required
         pro_forma_orders = [order['data'] for order in orders if order['data'].get('blackbox_pro_forma')]
 
@@ -523,11 +475,12 @@ class pos_order(models.Model):
         self.env['pos.order_pro_forma'].create_from_ui(pro_forma_orders)
 
         # only return regular order ids, shouldn't care about pro forma in the POS anyway
-        return super(pos_order, self).create_from_ui(regular_orders, draft)
+        return super(pos_order, self).create_from_ui(regular_orders)
 
 class pos_make_payment(models.TransientModel):
     _inherit = 'pos.make.payment'
 
+    @api.multi
     def check(self):
         order = self.env['pos.order'].browse(self.env.context.get('active_id'))
 
@@ -541,6 +494,7 @@ class pos_order_line(models.Model):
 
     vat_letter = fields.Selection([('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')])
 
+    @api.multi
     def write(self, values):
         if values.get('vat_letter'):
             raise UserError(_("Can't modify fields related to the Fiscal Data Module."))
@@ -550,7 +504,6 @@ class pos_order_line(models.Model):
 class pos_order_line_pro_forma(models.Model):
     _name = 'pos.order_line_pro_forma'  # needs to be a new class
     _inherit = 'pos.order.line'
-    _description = 'Order line of a pro forma order'
 
     order_id = fields.Many2one('pos.order_pro_forma')
 
@@ -566,7 +519,6 @@ class pos_order_line_pro_forma(models.Model):
 
 class pos_order_pro_forma(models.Model):
     _name = 'pos.order_pro_forma'
-    _description = 'Model for pro forma order'
 
     def _default_session(self):
         so = self.env['pos.session']
@@ -594,7 +546,6 @@ class pos_order_pro_forma(models.Model):
     pricelist_id = fields.Many2one('product.pricelist', 'Pricelist', default=_default_pricelist, readonly=True)
     fiscal_position_id = fields.Many2one('account.fiscal.position', 'Fiscal Position', readonly=True)
     table_id = fields.Many2one('restaurant.table', 'Table', readonly=True)
-    currency_id = fields.Many2one(related='session_id.currency_id')
 
     blackbox_date = fields.Char("Fiscal Data Module date", help="Date returned by the Fiscal Data Module.", readonly=True)
     blackbox_time = fields.Char("Fiscal Data Module time", help="Time returned by the Fiscal Data Module.", readonly=True)
@@ -614,86 +565,77 @@ class pos_order_pro_forma(models.Model):
     terminal_id = fields.Char(help="Unique ID of the POS that created this order", readonly=True)
     hash_chain = fields.Char()
 
-    def _set_log_description(self, order):
-        lines = "Lignes de commande: "
-        if order.lines:
-            lines += "\n* " + "\n* ".join([
-                "%s x %s: %s" % (l.qty, l.product_id.name, l.price_subtotal_incl)
-                for l in order.lines
-            ])
-        description = """
-        PRO FORMA SALES
-        Date: {create_date}
-        Réf: {pos_reference}
-        Vendeur: {user_id}
-        {lines}
-        Total: {total}
-        Compteur Ticket: {ticket_counters}
-        Hash: {hash}
-        POS Version: {pos_version}
-        FDM ID: {fdm_id}
-        POS ID: {pos_id}
-        """.format(
-            create_date=order.create_date,
-            user_id=order.user_id.name,
-            lines=lines,
-            total=order.amount_total,
-            pos_reference=order.pos_reference,
-            hash=order.hash_chain,
-            pos_version=order.pos_version,
-            ticket_counters=order.blackbox_ticket_counters,
-            fdm_id=order.blackbox_unique_fdm_production_number,
-            pos_id=order.pos_production_id,
-        )
-        return description
-
-    def set_values(self, ui_order):
-        return {
-            'user_id': ui_order['user_id'] or False,
-            'session_id': ui_order['pos_session_id'],
-            'pos_reference': ui_order['name'],
-            'lines': [self.env['pos.order_line_pro_forma']._order_line_fields(l) for l in ui_order['lines']] if
-            ui_order['lines'] else False,
-            'partner_id': ui_order['partner_id'] or False,
-            'date_order': parser.parse(ui_order['creation_date']).strftime("%Y-%m-%d %H:%M:%S"),
-            'fiscal_position_id': ui_order['fiscal_position_id'],
-            'blackbox_date': ui_order.get('blackbox_date'),
-            'blackbox_time': ui_order.get('blackbox_time'),
-            'blackbox_pos_receipt_time': parser.parse(ui_order.get('blackbox_pos_receipt_time')).strftime(
-                "%Y-%m-%d %H:%M:%S"),
-            'amount_total': ui_order.get('blackbox_amount_total'),
-            'blackbox_ticket_counters': ui_order.get('blackbox_ticket_counters'),
-            'blackbox_unique_fdm_production_number': ui_order.get('blackbox_unique_fdm_production_number'),
-            'blackbox_vsc_identification_number': ui_order.get('blackbox_vsc_identification_number'),
-            'blackbox_signature': ui_order.get('blackbox_signature'),
-            'blackbox_tax_category_a': ui_order.get('blackbox_tax_category_a'),
-            'blackbox_tax_category_b': ui_order.get('blackbox_tax_category_b'),
-            'blackbox_tax_category_c': ui_order.get('blackbox_tax_category_c'),
-            'blackbox_tax_category_d': ui_order.get('blackbox_tax_category_d'),
-            'plu_hash': ui_order.get('blackbox_plu_hash'),
-            'pos_version': ui_order.get('blackbox_pos_version'),
-            'pos_production_id': ui_order.get('blackbox_pos_production_id'),
-            'terminal_id': ui_order.get('blackbox_terminal_id'),
-            'table_id': ui_order.get('table_id'),
-            'hash_chain': ui_order.get('blackbox_hash_chain')
-        }
-
     @api.model
     def create_from_ui(self, orders):
         for ui_order in orders:
-            values = self.set_values(ui_order)
+            values = {
+                'user_id': ui_order['user_id'] or False,
+                'session_id': ui_order['pos_session_id'],
+                'pos_reference': ui_order['name'],
+                'lines': [self.env['pos.order_line_pro_forma']._order_line_fields(l) for l in ui_order['lines']] if ui_order['lines'] else False,
+                'partner_id': ui_order['partner_id'] or False,
+                'date_order': ui_order['creation_date'],
+                'fiscal_position_id': ui_order['fiscal_position_id'],
+                'blackbox_date': ui_order.get('blackbox_date'),
+                'blackbox_time': ui_order.get('blackbox_time'),
+                'blackbox_pos_receipt_time': ui_order.get('blackbox_pos_receipt_time'),
+                'amount_total': ui_order.get('blackbox_amount_total'),
+                'blackbox_ticket_counters': ui_order.get('blackbox_ticket_counters'),
+                'blackbox_unique_fdm_production_number': ui_order.get('blackbox_unique_fdm_production_number'),
+                'blackbox_vsc_identification_number': ui_order.get('blackbox_vsc_identification_number'),
+                'blackbox_signature': ui_order.get('blackbox_signature'),
+                'blackbox_tax_category_a': ui_order.get('blackbox_tax_category_a'),
+                'blackbox_tax_category_b': ui_order.get('blackbox_tax_category_b'),
+                'blackbox_tax_category_c': ui_order.get('blackbox_tax_category_c'),
+                'blackbox_tax_category_d': ui_order.get('blackbox_tax_category_d'),
+                'plu_hash': ui_order.get('blackbox_plu_hash'),
+                'pos_version': ui_order.get('blackbox_pos_version'),
+                'pos_production_id': ui_order.get('blackbox_pos_production_id'),
+                'terminal_id': ui_order.get('blackbox_terminal_id'),
+                'table_id': ui_order.get('table_id'),
+                'hash_chain': ui_order.get('blackbox_hash_chain'),
+            }
+
             # set name based on the sequence specified on the config
             session = self.env['pos.session'].browse(values['session_id'])
             values['name'] = session.config_id.sequence_id._next()
 
             order = self.create(values)
-            description = self._set_log_description(order)
-            self.env["pos_blackbox_be.log"].sudo().create(description, "create", self._name, order.pos_reference)
+            lines = "Lignes de commande: "
+            if order.lines:
+                lines += "\n* " + "\n* ".join([
+                        "%s x %s: %s" % (l.qty, l.product_id.name, l.price_subtotal_incl)
+                        for l in order.lines
+                    ])
+            description = """
+PRO FORMA SALES
+Date: {create_date}
+Réf: {pos_reference}
+Vendeur: {user_id}
+{lines}
+Total: {total}
+Compteur Ticket: {ticket_counters}
+Hash: {hash}
+POS Version: {pos_version}
+FDM ID: {fdm_id}
+POS ID: {pos_id}
+""".format(
+                create_date=order.create_date,
+                user_id=order.user_id.name,
+                lines=lines,
+                total=order.amount_total,
+                pos_reference=order.pos_reference,
+                hash=order.hash_chain,
+                pos_version=order.pos_version,
+                ticket_counters=order.blackbox_ticket_counters,
+                fdm_id=order.blackbox_unique_fdm_production_number,
+                pos_id=order.pos_production_id,
+            )
+            self.env["pos_blackbox_be.log"].create(description, "create", self._name, order.pos_reference)
 
 
 class pos_blackbox_be_log(models.Model):
     _name = 'pos_blackbox_be.log'
-    _description = 'Track every changes made while using the Blackbox'
     _order = 'id desc'
 
     user = fields.Many2one('res.users', readonly=True)
@@ -728,11 +670,14 @@ class product_template(models.Model):
 
     @api.model
     def create(self, values):
-        self.env['pos_blackbox_be.log'].sudo().create(values, "create", self._name, values.get('name'))
+        log = self.env['pos_blackbox_be.log']
+        log.create(values, "create", self._name, values.get('name'))
 
         return super(product_template, self).create(values)
 
+    @api.multi
     def write(self, values):
+        log = self.env['pos_blackbox_be.log']
         ir_model_data = self.env['ir.model.data']
         work_in = ir_model_data.xmlid_to_object('pos_blackbox_be.product_product_work_in').product_tmpl_id.id
         work_out = ir_model_data.xmlid_to_object('pos_blackbox_be.product_product_work_out').product_tmpl_id.id
@@ -743,11 +688,13 @@ class product_template(models.Model):
                     raise UserError(_('Modifying this product is not allowed.'))
 
         for product in self:
-            self.env['pos_blackbox_be.log'].sudo().create(values, "modify", product._name, product.name)
+            log.create(values, "modify", product._name, product.name)
 
         return super(product_template, self).write(values)
 
+    @api.multi
     def unlink(self):
+        log = self.env['pos_blackbox_be.log']
         ir_model_data = self.env['ir.model.data']
         work_in = ir_model_data.xmlid_to_object('pos_blackbox_be.product_product_work_in').product_tmpl_id.id
         work_out = ir_model_data.xmlid_to_object('pos_blackbox_be.product_product_work_out').product_tmpl_id.id
@@ -757,61 +704,35 @@ class product_template(models.Model):
                 raise UserError(_('Deleting this product is not allowed.'))
 
         for product in self:
-            self.env['pos_blackbox_be.log'].sudo().create({}, "delete", product._name, product.name)
+            log.create({}, "delete", product._name, product.name)
 
         return super(product_template, self).unlink()
 
-    def set_sequence_top(self, to_remove=[]):
-        to_remove.append(self.env['ir.model.data'].xmlid_to_object('pos_blackbox_be.product_product_work_in').product_tmpl_id.id)
-        to_remove.append(self.env['ir.model.data'].xmlid_to_object('pos_blackbox_be.product_product_work_out').product_tmpl_id.id)
-
-        return super(product_template, self).set_sequence_top(to_remove)
-
-    def set_sequence_bottom(self, to_remove=[]):
-        to_remove.append(self.env['ir.model.data'].xmlid_to_object('pos_blackbox_be.product_product_work_in').product_tmpl_id.id)
-        to_remove.append(self.env['ir.model.data'].xmlid_to_object('pos_blackbox_be.product_product_work_out').product_tmpl_id.id)
-
-        return super(product_template, self).set_sequence_bottom(to_remove)
+    @api.model
+    def _remove_availibility_all_but_blackbox(self):
+        """ Remove all products from the point of sale that were not create by this module 
+        
+        Useful in demo only.
+        Only a subset of demo products should be displayed for the certification process
+        """
+        blackbox_products = self.env['ir.model.data'].search([
+            ('module', '=', 'pos_blackbox_be'), ('model', '=', 'product.template')
+        ])
+        tip_products = self.env['pos.config'].search([]).mapped('tip_product_id').ids
+        to_keep = blackbox_products.mapped('res_id') + tip_products
+        other_products = self.search([
+            ('id', 'not in', to_keep), ('available_in_pos', '=', True)
+        ])
+        return other_products.write({'available_in_pos': False})
 
 
 class module(models.Model):
     _inherit = 'ir.module.module'
 
+    @api.multi
     def module_uninstall(self):
         for module_to_remove in self:
             if module_to_remove.name == "pos_blackbox_be":
                 raise UserError(_("This module is not allowed to be removed."))
 
         return super(module, self).module_uninstall()
-
-
-class ProductProduct(models.Model):
-    _inherit = 'product.product'
-
-    @api.model
-    def set_tax_on_work_in_out(self):
-        existing_companies = self.env['res.company'].sudo().search([])
-        for company in existing_companies:
-            if company.chart_template_id == self.env.ref('l10n_be.l10nbe_chart_template'):
-                work_in = self.env.ref('pos_blackbox_be.product_product_work_in')
-                work_out = self.env.ref('pos_blackbox_be.product_product_work_out')
-                taxes = self.env['account.tax'].sudo().with_context(active_test=False).search([('amount', '=', 0.0), ('type_tax_use', '=', 'sale'), ('name', '=', '0%'), ('company_id', '=', company.id)])
-                if not taxes.active:
-                    taxes.active = True
-                work_in.with_context(force_company=company.id).write({'taxes_id': [(4, taxes.id)]})
-                work_out.with_context(force_company=company.id).write({'taxes_id': [(4, taxes.id)]})
-
-
-class AccountChartTemplate(models.Model):
-    _inherit = "account.chart.template"
-
-    def _load(self, sale_tax_rate, purchase_tax_rate, company):
-        super(AccountChartTemplate, self)._load(sale_tax_rate, purchase_tax_rate, company)
-        if self == self.env.ref('l10n_be.l10nbe_chart_template'):
-            work_in = self.env.ref('pos_blackbox_be.product_product_work_in')
-            work_out = self.env.ref('pos_blackbox_be.product_product_work_out')
-            taxes = self.env['account.tax'].sudo().with_context(active_test=False).search([('amount', '=', 0.0), ('type_tax_use', '=', 'sale'), ('name', '=', '0%'), ('company_id', '=', company.id)])
-            if not taxes.active:
-                taxes.active = True
-            work_in.with_context(install_mode=True, force_company=company.id).write({'taxes_id': [(4, taxes.id)]})
-            work_out.with_context(install_mode=True, force_company=company.id).write({'taxes_id': [(4, taxes.id)]})

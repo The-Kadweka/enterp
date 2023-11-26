@@ -9,7 +9,7 @@
         Use Plaid.com to retrieve bank statements.
     """,
 
-    'category': 'Accounting/Accounting',
+    'category': 'Accounting',
     'version': '3.0',
 
     'depends': ['account_online_sync'],

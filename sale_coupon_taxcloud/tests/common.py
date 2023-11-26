@@ -25,6 +25,7 @@ class TestSaleCouponTaxCloudCommon(common.TransactionCase):
 
         self.customer = self.env['res.partner'].create({
             'name': 'Theodore John K.',
+            'customer': True,
         })
         self.fiscal_position = self.env['account.fiscal.position'].create({
             'name': 'BurgerLand',
@@ -90,7 +91,7 @@ class TestSaleCouponTaxCloudCommon(common.TransactionCase):
         })
         self.program_specific_product_A = self.env['sale.coupon.program'].create({
             'name': '20% on product A',
-            'discount_apply_on': 'specific_products',
+            'discount_apply_on': 'specific_product',
             'reward_type': 'discount',
             'discount_percentage': 20.0,
             'discount_line_product_id': self.product_A.id,

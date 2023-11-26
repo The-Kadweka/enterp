@@ -3,35 +3,32 @@
 # * helpdesk_timesheet
 # 
 # Translators:
-# Martin Trigaux <mat@odoo.com>, 2017
-# Saba Khmaladze <skhmaladze@uglt.org>, 2018
-# Giorgi Melitauri <gmelitauri@live.com>, 2018
+# Saba Khmaladze <skhmaladze@uglt.org>, 2019
+# Martin Trigaux, 2019
+# Giorgi Melitauri <gmelitauri@live.com>, 2019
+# Temur, 2019
+# 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 10.saas~18+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-09-20 11:33+0000\n"
-"PO-Revision-Date: 2017-09-20 11:33+0000\n"
-"Last-Translator: Giorgi Melitauri <gmelitauri@live.com>, 2018\n"
+"POT-Creation-Date: 2019-11-14 07:50+0000\n"
+"PO-Revision-Date: 2018-08-24 11:38+0000\n"
+"Last-Translator: Temur, 2019\n"
 "Language-Team: Georgian (https://www.transifex.com/odoo/teams/41243/ka/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: ka\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
 #. module: helpdesk_timesheet
-#: model:ir.model.fields,field_description:helpdesk_timesheet.field_project_project_ticket_count
+#: model:ir.model.fields,field_description:helpdesk_timesheet.field_project_project__ticket_count
 msgid "# Tickets"
 msgstr ""
 
 #. module: helpdesk_timesheet
-#: model:ir.model.fields,field_description:helpdesk_timesheet.field_helpdesk_ticket_is_task_active
-msgid "Active"
-msgstr "აქტიური"
-
-#. module: helpdesk_timesheet
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:73
+#: code:addons/helpdesk_timesheet/models/helpdesk.py:71
 #, python-format
 msgid ""
 "All timesheet hours will be assigned to the selected task on save. Discard "
@@ -48,27 +45,27 @@ msgstr ""
 #: code:addons/helpdesk_timesheet/models/helpdesk.py:34
 #, python-format
 msgid "Closed"
-msgstr ""
+msgstr "დახურვა"
 
 #. module: helpdesk_timesheet
-#: model:ir.ui.view,arch_db:helpdesk_timesheet.helpdesk_ticket_view_form_inherit_helpdesk_timesheet
+#: model_terms:ir.ui.view,arch_db:helpdesk_timesheet.helpdesk_ticket_view_form_inherit_helpdesk_timesheet
 msgid "Customer's task is closed."
 msgstr ""
 
 #. module: helpdesk_timesheet
-#: model:ir.ui.view,arch_db:helpdesk_timesheet.helpdesk_ticket_view_form_inherit_helpdesk_timesheet
+#: model_terms:ir.ui.view,arch_db:helpdesk_timesheet.helpdesk_ticket_view_form_inherit_helpdesk_timesheet
 msgid "Description"
-msgstr "აღწერილობა"
+msgstr "აღწერა"
 
 #. module: helpdesk_timesheet
-#: model:ir.ui.view,arch_db:helpdesk_timesheet.helpdesk_ticket_view_form_inherit_helpdesk_timesheet
+#: model_terms:ir.ui.view,arch_db:helpdesk_timesheet.helpdesk_ticket_view_form_inherit_helpdesk_timesheet
 msgid "Description of the ticket..."
 msgstr "ბილეთის აღწერა..."
 
 #. module: helpdesk_timesheet
-#: model:ir.ui.view,arch_db:helpdesk_timesheet.helpdesk_ticket_view_form_inherit_helpdesk_timesheet
+#: model_terms:ir.ui.view,arch_db:helpdesk_timesheet.helpdesk_ticket_view_form_inherit_helpdesk_timesheet
 msgid "Duration"
-msgstr ""
+msgstr "ხანგრძლივობა"
 
 #. module: helpdesk_timesheet
 #: model:ir.model,name:helpdesk_timesheet.model_helpdesk_team
@@ -76,7 +73,8 @@ msgid "Helpdesk Team"
 msgstr "მხარდაჭერის გუნდი"
 
 #. module: helpdesk_timesheet
-#: model:ir.model.fields,field_description:helpdesk_timesheet.field_account_analytic_line_helpdesk_ticket_id
+#: model:ir.model,name:helpdesk_timesheet.model_helpdesk_ticket
+#: model:ir.model.fields,field_description:helpdesk_timesheet.field_account_analytic_line__helpdesk_ticket_id
 msgid "Helpdesk Ticket"
 msgstr "მხარდაჭერის ბილეთი"
 
@@ -88,19 +86,24 @@ msgid "In Progress"
 msgstr "მიმდინარე"
 
 #. module: helpdesk_timesheet
-#: model:ir.model.fields,field_description:helpdesk_timesheet.field_helpdesk_ticket_is_closed
+#: model:ir.model.fields,field_description:helpdesk_timesheet.field_helpdesk_ticket__is_closed
 msgid "Is Closed"
 msgstr ""
 
 #. module: helpdesk_timesheet
-#: model:ir.model.fields,field_description:helpdesk_timesheet.field_project_task_type_is_closed
+#: model:ir.model.fields,field_description:helpdesk_timesheet.field_helpdesk_ticket__is_task_active
+msgid "Is Task Active"
+msgstr ""
+
+#. module: helpdesk_timesheet
+#: model:ir.model.fields,field_description:helpdesk_timesheet.field_project_task_type__is_closed
 msgid "Is a close stage"
 msgstr ""
 
 #. module: helpdesk_timesheet
 #: model:ir.model,name:helpdesk_timesheet.model_project_project
-#: model:ir.model.fields,field_description:helpdesk_timesheet.field_helpdesk_team_project_id
-#: model:ir.model.fields,field_description:helpdesk_timesheet.field_helpdesk_ticket_project_id
+#: model:ir.model.fields,field_description:helpdesk_timesheet.field_helpdesk_team__project_id
+#: model:ir.model.fields,field_description:helpdesk_timesheet.field_helpdesk_ticket__project_id
 msgid "Project"
 msgstr "პროექტი"
 
@@ -110,7 +113,7 @@ msgid "Project Tickets"
 msgstr ""
 
 #. module: helpdesk_timesheet
-#: model:ir.model.fields,field_description:helpdesk_timesheet.field_helpdesk_ticket_task_id
+#: model:ir.model.fields,field_description:helpdesk_timesheet.field_helpdesk_ticket__task_id
 msgid "Task"
 msgstr "დავალება"
 
@@ -120,44 +123,40 @@ msgid "Task Stage"
 msgstr ""
 
 #. module: helpdesk_timesheet
-#: model:ir.model.fields,help:helpdesk_timesheet.field_helpdesk_ticket_is_closed
-#: model:ir.model.fields,help:helpdesk_timesheet.field_project_task_type_is_closed
+#: model:ir.model.fields,help:helpdesk_timesheet.field_helpdesk_ticket__is_closed
+#: model:ir.model.fields,help:helpdesk_timesheet.field_project_task_type__is_closed
 msgid "Tasks in this stage are considered as closed."
 msgstr ""
 
 #. module: helpdesk_timesheet
-#: model:ir.model.fields,help:helpdesk_timesheet.field_helpdesk_ticket_task_id
+#: model:ir.model.fields,help:helpdesk_timesheet.field_helpdesk_ticket__task_id
 msgid "The task must have the same customer as this ticket."
 msgstr ""
 
 #. module: helpdesk_timesheet
-#: model:ir.model.fields,help:helpdesk_timesheet.field_helpdesk_ticket_use_helpdesk_timesheet
+#: model:ir.model.fields,help:helpdesk_timesheet.field_helpdesk_ticket__use_helpdesk_timesheet
 msgid "This required to have project module installed."
 msgstr ""
 
 #. module: helpdesk_timesheet
-#: model:ir.model,name:helpdesk_timesheet.model_helpdesk_ticket
-msgid "Ticket"
-msgstr "ბილეთი"
-
-#. module: helpdesk_timesheet
-#: model:ir.model.fields,field_description:helpdesk_timesheet.field_project_project_ticket_ids
-#: model:ir.ui.view,arch_db:helpdesk_timesheet.project_project_view_form_inherit_helpdesk_timesheet
+#: model:ir.model.fields,field_description:helpdesk_timesheet.field_project_project__ticket_ids
+#: model_terms:ir.ui.view,arch_db:helpdesk_timesheet.project_project_view_form_inherit_helpdesk_timesheet
+#: model_terms:ir.ui.view,arch_db:helpdesk_timesheet.project_project_view_project_tickets_kanban_inherited
 msgid "Tickets"
 msgstr "ბილეთები"
 
 #. module: helpdesk_timesheet
-#: model:ir.ui.view,arch_db:helpdesk_timesheet.helpdesk_ticket_view_form_inherit_helpdesk_timesheet
+#: model_terms:ir.ui.view,arch_db:helpdesk_timesheet.helpdesk_ticket_view_form_inherit_helpdesk_timesheet
 msgid "Timesheet Activities"
 msgstr ""
 
 #. module: helpdesk_timesheet
-#: model:ir.model.fields,field_description:helpdesk_timesheet.field_helpdesk_ticket_use_helpdesk_timesheet
+#: model:ir.model.fields,field_description:helpdesk_timesheet.field_helpdesk_ticket__use_helpdesk_timesheet
 msgid "Timesheet activated on Team"
 msgstr ""
 
 #. module: helpdesk_timesheet
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:75
+#: code:addons/helpdesk_timesheet/models/helpdesk.py:73
 #, python-format
 msgid ""
 "Timesheet hours will not be assigned to a customer task. Set a task to "
@@ -165,23 +164,23 @@ msgid ""
 msgstr ""
 
 #. module: helpdesk_timesheet
-#: model:ir.model.fields,field_description:helpdesk_timesheet.field_helpdesk_ticket_timesheet_ids
-#: model:ir.ui.view,arch_db:helpdesk_timesheet.helpdesk_ticket_view_form_inherit_helpdesk_timesheet
+#: model:ir.model.fields,field_description:helpdesk_timesheet.field_helpdesk_ticket__timesheet_ids
+#: model_terms:ir.ui.view,arch_db:helpdesk_timesheet.helpdesk_ticket_view_form_inherit_helpdesk_timesheet
 msgid "Timesheets"
-msgstr ""
+msgstr "დროის აღრიცხვა"
 
 #. module: helpdesk_timesheet
-#: model:ir.ui.view,arch_db:helpdesk_timesheet.helpdesk_ticket_view_form_inherit_helpdesk_timesheet
+#: model_terms:ir.ui.view,arch_db:helpdesk_timesheet.helpdesk_ticket_view_form_inherit_helpdesk_timesheet
 msgid "Total hours"
 msgstr ""
 
 #. module: helpdesk_timesheet
-#: model:ir.ui.view,arch_db:helpdesk_timesheet.helpdesk_ticket_view_form_inherit_helpdesk_timesheet
+#: model_terms:ir.ui.view,arch_db:helpdesk_timesheet.helpdesk_ticket_view_form_inherit_helpdesk_timesheet
 msgid "View task."
 msgstr ""
 
 #. module: helpdesk_timesheet
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:78
+#: code:addons/helpdesk_timesheet/models/helpdesk.py:76
 #, python-format
 msgid "Warning"
-msgstr ""
+msgstr "გაფრთხილება"

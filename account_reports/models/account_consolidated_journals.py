@@ -9,22 +9,38 @@ class report_account_consolidated_journal(models.AbstractModel):
     _description = "Consolidated Journals Report"
     _inherit = 'account.report'
 
-    filter_multi_company = None
-    filter_date = {'mode': 'range', 'filter': 'this_year'}
+    filter_date = {'date_from': '', 'date_to': '', 'filter': 'this_year'}
     filter_all_entries = False
     filter_journals = True
     filter_unfold_all = False
 
     # Override: disable multicompany
     def _get_filter_journals(self):
-        return self.env['account.journal'].search([('company_id', 'in', [self.env.company.id, False])], order="company_id, name")
+        return self.env['account.journal'].search([('company_id', 'in', [self.env.user.company_id.id, False])], order="company_id, name")
 
     @api.model
     def _get_options(self, previous_options=None):
         options = super(report_account_consolidated_journal, self)._get_options(previous_options=previous_options)
         # We do not want multi company for this report
+        if options.get('multi_company'):
+            options.pop('multi_company')
         options.setdefault('date', {})
         options['date'].setdefault('date_to', fields.Date.context_today(self))
+
+        # Overwrite journals, otherwise changing companies won't work
+        options['journals'] = self._get_journals()
+
+        # Keep the selection, though
+        selected_journals = {}
+        if previous_options:
+            selected_journals = {
+                j.get('id'): j.get('selected', False)
+                for j in previous_options.get('journals', [])
+            }
+
+        for j in options['journals']:
+            j['selected'] = selected_journals.get(j.get('id'), False)
+
         return options
 
     def _get_report_name(self):
@@ -55,7 +71,7 @@ class report_account_consolidated_journal(models.AbstractModel):
                 'id': 'account_%s_%s' % (current_account,current_journal),
                 'name': '%s %s' % (record['account_code'], record['account_name']),
                 'level': 3,
-                'columns': [{'name': n} for n in self._get_sum(results, lambda x: x['account_id'] == current_account and x['journal_id'] == current_journal)],
+                'columns': [{'name': n} for n in self._get_sum(results, lambda x: x['account_id'] == current_account)],
                 'unfoldable': True,
                 'unfolded': self._need_to_unfold('account_%s_%s' % (current_account, current_journal), options),
                 'parent_id': 'journal_%s' % (current_journal),
@@ -163,7 +179,7 @@ class report_account_consolidated_journal(models.AbstractModel):
             if self._need_to_unfold('account_%s_%s' % (values['account_id'], values['journal_id']), options):
                 vals = {
                     'id': 'month_%s__%s_%s_%s' % (values['journal_id'], values['account_id'], values['month'], values['yyyy']),
-                    'name': convert_date('%s-%s-01' % (values['yyyy'], values['month']), {'format': 'MMM yyyy'}),
+                    'name': convert_date('%s-%s-01' % (values['yyyy'], values['month']), {'format': 'MMM YYYY'}),
                     'caret_options': True,
                     'level': 4,
                     'parent_id': "account_%s_%s" % (values['account_id'], values['journal_id']),

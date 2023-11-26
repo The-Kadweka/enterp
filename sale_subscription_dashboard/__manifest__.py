@@ -4,7 +4,7 @@
 {
     'name': 'Sale Subscription Dashboard',
     'version': '1.0',
-    'depends': ['sale_subscription'],
+    'depends': ['sale_subscription', 'sale_subscription_asset'],
     'description': """
 Sale Subscription Dashboard
 ===========================
@@ -13,7 +13,7 @@ It adds dashboards to :
 2) Analyse the subscriptions modifications by salesman and compute their value.
     """,
     'website': 'https://www.odoo.com/page/accounting',
-    'category': 'Sales/Subscription',
+    'category': 'Accounting',
     'data': [
         'views/sale_subscription_dashboard_views.xml',
         'views/assets.xml',

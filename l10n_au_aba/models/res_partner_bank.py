@@ -26,6 +26,7 @@ class ResPartnerBank(models.Model):
                 if len(test_bsb) != 6 or not test_bsb.isdigit():
                     raise ValidationError(_('BSB is not valid (expected format is "NNN-NNN"). Please rectify.'))
 
+    @api.one
     @api.depends('acc_number')
     def _compute_acc_type(self):
         """ Criteria to be an ABA account:
@@ -33,9 +34,9 @@ class ResPartnerBank(models.Model):
             - Total length must be 9 or less.
             - Cannot be only spaces, zeros or hyphens (must have at least one digit in range 1-9)
         """
-        for rec in self:
-            acct = rec.acc_number
-            if acct and re.match("^( |-|\d).*$", acct) and len(acct) <= 9 and re.search("[1-9]", acct):
-                rec.acc_type = 'aba'
-            else:
-                super(ResPartnerBank, self)._compute_acc_type()
+
+        acct = self.acc_number
+        if acct and re.match("^( |-|\d).*$", acct) and len(acct) <= 9 and re.search("[1-9]", acct):
+            self.acc_type = 'aba'
+        else:
+            super(ResPartnerBank, self)._compute_acc_type()

@@ -128,14 +128,6 @@ return AbstractRenderer.extend({
     },
     /**
      * @private
-     * @returns {boolean}
-     */
-    _hasContent: function () {
-        var state = _.isArray(this.state) ? this.state[0] : this.state;
-        return state.rows[0] !== undefined;
-    },
-    /**
-     * @private
      * @param {Object} cell
      * @param {boolean} cell.readonly
      * @returns {boolean}
@@ -167,11 +159,8 @@ return AbstractRenderer.extend({
         if (!value_to_display){
             return _t('Unknown');
         }
-        if (["many2one", "many2many", "one2many", "selection"].indexOf(field_type) > -1) {
+        if (["many2one", "many2many", "one2many"].indexOf(field_type) > -1) {
             return value_to_display[1];
-        }
-        else if (["date"].indexOf(field_type) > -1) {
-            return Array.isArray(value_to_display) ? value_to_display.slice(1).join(' ') : value_to_display;
         }
         else {
             return value_to_display;
@@ -179,15 +168,13 @@ return AbstractRenderer.extend({
     },
     /**
      * @private
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _render: function () {
         var self = this;
         var vnode;
 
-        if (!this._hasContent() && !!this.noContentHelp) {
-            vnode = this._renderNoContentHelper();
-        } else if (_.isArray(this.state)) {
+        if (_.isArray(this.state)) {
             // array of grid groups
             // get columns (check they're the same in all groups)
             if (!(_.isEmpty(this.state) || _.reduce(this.state, function (m, it) {
@@ -213,7 +200,7 @@ return AbstractRenderer.extend({
             }
         }, 0);
 
-        return Promise.resolve();
+        return $.when();
     },
     /**
      * @private
@@ -308,34 +295,6 @@ return AbstractRenderer.extend({
                ]);
     },
     /**
-     * Return a node for the column total if needed
-     * If the range is day this column is not rendered
-     * @private
-     * @param {String} node node cell
-     * @param {String} value the value to put in the cell
-     * @return {snabbdom[]}
-     */
-    _renderGridColumnTotalCell: function (node, value) {
-        if (this.state.range === 'day') {
-            return [];
-        }
-        return [h(node, value)];
-    },
-    /**
-     * Renders the nocontent helper.
-     *
-     * This method is a helper for renderers that want to display a help
-     * message when no content is available.
-     *
-     * @private
-     * @returns {snabbdom}
-     */
-    _renderNoContentHelper: function () {
-        return h('div.o_view_nocontent', [
-            h('div.o_nocontent_help', {props: {innerHTML: this.noContentHelp}})
-        ]);
-    },
-    /**
      * @private
      * @param {Array<Array>} grid actual grid content
      * @param {Array<String>} groupFields
@@ -354,13 +313,7 @@ return AbstractRenderer.extend({
                 var value = rows[rowIndex].values[row_field];
                 var fieldName = row_field.split(':')[0]; // remove groupby function (:day, :month...)
                 var field_type = self.fields[fieldName].type;
-                if (field_type === 'selection') {
-                    value = self.fields[fieldName].selection.find(function (choice) {
-                        return choice[0] === value;
-                    });
-                }
-                let key = ['selection', 'many2one'].includes(field_type) ? value[0] : value;
-                rowKeys.push(key);
+                rowKeys.push(value[0]);
                 rowValues.push(self._field2label(value, field_type));
             }
             var rowKey = rowKeys.join('|');
@@ -374,7 +327,7 @@ return AbstractRenderer.extend({
                 ])
             ].concat(_.map(row, function (cell, cell_index) {
                 return self._renderCell(cell, path.concat([rowIndex, cell_index]).join('.'));
-            }), self._renderGridColumnTotalCell('td.o_grid_total', self._format(totals[rowIndex]))));
+            }), [h('td.o_grid_total', self._format(totals[rowIndex]))]));
         });
     },
     /**
@@ -411,7 +364,9 @@ return AbstractRenderer.extend({
                                 o_grid_current: column.is_current,
                             }}, self._format(totals.columns[column_index]));
                         }),
-                        self._renderGridColumnTotalCell('td.o_grid_total', self._format(totals.super))
+                        [h('td.o_grid_total', [
+                            self._format(totals.super)
+                        ])]
                     ))
                 ].concat(rows)
             ));
@@ -452,7 +407,7 @@ return AbstractRenderer.extend({
                                 column.values[col_field][1]
                             );
                         }),
-                        self._renderGridColumnTotalCell('th.o_grid_total', total_label)
+                        [h('th.o_grid_total', total_label)]
                     ))
                 ]),
                 h('tfoot', [
@@ -462,11 +417,11 @@ return AbstractRenderer.extend({
                         _.map(columns, function (column, column_index) {
                             var cell_content = !totals ? []
                                 : self._format(totals[column_index]);
-                            return h(totals && totals[column_index] ? 'td' : 'td.text-muted', {class: {
+                            return h('td', {class: {
                                 o_grid_current: column.is_current,
                             }}, cell_content);
                         }),
-                        self._renderGridColumnTotalCell('td', !super_total ? [] : self._format(super_total))
+                        [h('td', !super_total ? [] : self._format(super_total))]
                     ))
                 ]),
             ])
@@ -477,7 +432,6 @@ return AbstractRenderer.extend({
      * @returns {snabbdom}
      */
     _renderUngroupedGrid: function () {
-        var self = this;
         var vnode;
         var columns = this.state.cols;
         var rows = this.state.rows;
@@ -500,7 +454,7 @@ return AbstractRenderer.extend({
                         _.map(columns, function (column) {
                             return h('td', {class: {o_grid_current: column.is_current}}, []);
                         }),
-                        self._renderGridColumnTotalCell('td.o_grid_total', [])
+                        [h('td.o_grid_total', [])]
                     ));
                 }))
             )
@@ -530,8 +484,6 @@ return AbstractRenderer.extend({
 
         // path should be [path, to, grid, 'grid', row_index, col_index]
         var cell_path = $target.parent().attr('data-path').split('.');
-        const glass_icon = $target.siblings('i.o_grid_cell_information');
-        glass_icon.css('pointer-events', 'none');
         var grid_path = cell_path.slice(0, -3);
         var row_path = grid_path.concat(['rows'], cell_path.slice(-2, -1));
         var col_path = grid_path.concat(['cols'], cell_path.slice(-1));
@@ -541,9 +493,6 @@ return AbstractRenderer.extend({
             row_path: row_path,
             col_path: col_path,
             value: value,
-            doneCallback: function () {
-                glass_icon.css('pointer-events', 'auto');
-            },
         });
     },
     /**

@@ -3,7 +3,7 @@
 import logging
 import re
 from odoo.exceptions import UserError
-from odoo.tests.common import TransactionCase, tagged, Form
+from odoo.tests.common import TransactionCase, tagged
 
 
 _logger = logging.getLogger(__name__)
@@ -66,25 +66,14 @@ class TestDeliveryUSPS(TransactionCase):
                     'price_unit': self.iPadMini.lst_price}
 
         so_vals = {'partner_id': self.think_big_system.id,
+                   'carrier_id': self.env.ref('delivery_usps.delivery_carrier_usps_domestic').id,
                    'order_line': [(0, None, sol_vals)]}
 
         sale_order = SaleOrder.create(so_vals)
-        # I add delivery cost in Sales order
-        delivery_wizard = Form(self.env['choose.delivery.carrier'].with_context({
-            'default_order_id': sale_order.id,
-            'default_carrier_id': self.env.ref('delivery_usps.delivery_carrier_usps_domestic').id,
-        }))
-        choose_delivery_carrier = delivery_wizard.save()
-        try:
-            choose_delivery_carrier.update_price()
-        except UserError as exc:
-            m = country_unavailable_re.search(exc.name)
-            if m:
-                _logger.warning(country_unavailable_msg, m.group(1))
-                return
-            raise
-        self.assertGreater(choose_delivery_carrier.delivery_price, 0.0, "USPS delivery cost for this SO has not been correctly estimated.")
-        choose_delivery_carrier.button_confirm()
+        sale_order.get_delivery_price()
+        self.assertTrue(sale_order.delivery_rating_success, "USPS has not been able to rate this order (%s)" % sale_order.delivery_message)
+        self.assertGreater(sale_order.delivery_price, 0.0, "USPS delivery cost for this SO has not been correctly estimated.")
+        sale_order.set_delivery_line()
 
         sale_order.action_confirm()
         self.assertEquals(len(sale_order.picking_ids), 1, "The Sales Order did not generate a picking.")
@@ -114,25 +103,14 @@ class TestDeliveryUSPS(TransactionCase):
                     'price_unit': self.iPadMini.lst_price}
 
         so_vals = {'partner_id': self.agrolait.id,
+                   'carrier_id': self.env.ref('delivery_usps.delivery_carrier_usps_international').id,
                    'order_line': [(0, None, sol_vals)]}
 
         sale_order = SaleOrder.create(so_vals)
-        # I add delivery cost in Sales order
-        delivery_wizard = Form(self.env['choose.delivery.carrier'].with_context({
-            'default_order_id': sale_order.id,
-            'default_carrier_id': self.env.ref('delivery_usps.delivery_carrier_usps_international').id,
-        }))
-        choose_delivery_carrier = delivery_wizard.save()
-        try:
-            choose_delivery_carrier.update_price()
-        except UserError as exc:
-            m = country_unavailable_re.search(exc.name)
-            if m:
-                _logger.warning(country_unavailable_msg, m.group(1))
-                return
-            raise
-        self.assertGreater(choose_delivery_carrier.delivery_price, 0.0, "USPS delivery cost for this SO has not been correctly estimated.")
-        choose_delivery_carrier.button_confirm()
+        sale_order.get_delivery_price()
+        self.assertTrue(sale_order.delivery_rating_success, "USPS has not been able to rate this order (%s)" % sale_order.delivery_message)
+        self.assertGreater(sale_order.delivery_price, 0.0, "USPS delivery cost for this SO has not been correctly estimated.")
+        sale_order.set_delivery_line()
 
         sale_order.action_confirm()
         self.assertEquals(len(sale_order.picking_ids), 1, "The Sales Order did not generate a picking.")
@@ -161,25 +139,14 @@ class TestDeliveryUSPS(TransactionCase):
                     'price_unit': self.iPadMini.lst_price}
 
         so_vals = {'partner_id': self.montreal.id,
+                   'carrier_id': self.env.ref('delivery_usps.delivery_carrier_usps_international').id,
                    'order_line': [(0, None, sol_vals)]}
 
         sale_order = SaleOrder.create(so_vals)
-        # I add delivery cost in Sales order
-        delivery_wizard = Form(self.env['choose.delivery.carrier'].with_context({
-            'default_order_id': sale_order.id,
-            'default_carrier_id': self.env.ref('delivery_usps.delivery_carrier_usps_international').id,
-        }))
-        choose_delivery_carrier = delivery_wizard.save()
-        try:
-            choose_delivery_carrier.update_price()
-        except UserError as exc:
-            m = country_unavailable_re.search(exc.name)
-            if m:
-                _logger.warning(country_unavailable_msg, m.group(1))
-                return
-            raise
-        self.assertGreater(choose_delivery_carrier.delivery_price, 0.0, "USPS delivery cost for this SO has not been correctly estimated.")
-        choose_delivery_carrier.button_confirm()
+        sale_order.get_delivery_price()
+        self.assertTrue(sale_order.delivery_rating_success, "USPS has not been able to rate this order (%s)" % sale_order.delivery_message)
+        self.assertGreater(sale_order.delivery_price, 0.0, "USPS delivery cost for this SO has not been correctly estimated.")
+        sale_order.set_delivery_line()
 
         sale_order.action_confirm()
         self.assertEquals(len(sale_order.picking_ids), 1, "The Sale Order did not generate a picking.")
@@ -202,8 +169,9 @@ class TestDeliveryUSPS(TransactionCase):
 
         inventory = self.env['stock.inventory'].create({
             'name': '[A1232] iPad Mini',
-            'location_ids': [(4, self.stock_location.id)],
-            'product_ids': [(4, self.iPadMini.id)],
+            'filter': 'product',
+            'location_id': self.stock_location.id,
+            'product_id': self.iPadMini.id,
         })
 
         StockPicking = self.env['stock.picking']

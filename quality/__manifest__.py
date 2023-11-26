@@ -5,10 +5,10 @@
 {
     'name': 'Quality Base',
     'version': '1.0',
-    'category': 'Manufacturing/Quality',
+    'category': 'Manufacturing',
     'sequence': 50,
     'summary': 'Basic Feature for Quality',
-    'depends': ['stock'],
+    'depends': ['stock', 'decimal_precision'],
     'description': """
 Quality Base
 ===============
@@ -23,9 +23,6 @@ Quality Base
         'security/ir.model.access.csv',
         'data/quality_data.xml',
         'views/quality_views.xml',
-    ],
-    'qweb': [
-        'static/src/xml/widget_template.xml',
     ],
     'demo': [],
     'application': False,

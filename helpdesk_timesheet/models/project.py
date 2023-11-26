@@ -4,6 +4,12 @@
 from odoo import api, fields, models
 
 
+class ProjectTaskType(models.Model):
+    _inherit = 'project.task.type'
+
+    is_closed = fields.Boolean('Is a close stage', help="Tasks in this stage are considered as closed.")
+
+
 class Project(models.Model):
     _inherit = 'project.project'
 
@@ -13,7 +19,6 @@ class Project(models.Model):
     @api.depends('ticket_ids.project_id')
     def _compute_ticket_count(self):
         if not self.user_has_groups('helpdesk.group_helpdesk_user'):
-            self.ticket_count = 0
             return
         result = self.env['helpdesk.ticket'].read_group([
             ('project_id', 'in', self.ids)

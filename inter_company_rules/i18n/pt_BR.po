@@ -1,23 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* inter_company_rules
+# * inter_company_rules
 # 
 # Translators:
-# Rodrigo de Almeida Sottomaior Macedo <rmsolucoeseminformatica@protonmail.com>, 2019
-# Martin Trigaux, 2019
-# grazziano <gra.negocia@gmail.com>, 2019
-# Silmar <pinheirosilmar@gmail.com>, 2019
-# mariana rodrigues <mariana12v@gmail.com>, 2019
-# Rafael H L Moretti <rafael.moretti@gmail.com>, 2020
-# Kevin Harrings <kha@odoo.com>, 2020
+# Rodrigo de Almeida Sottomaior Macedo <rmsolucoeseminformatica@protonmail.com>, 2018
+# Martin Trigaux, 2018
+# Mateus Lopes <mateus1@gmail.com>, 2018
+# grazziano <gra.negocia@gmail.com>, 2018
+# Thiago Matos <thiago.crea@gmail.com>, 2018
+# Silmar <pinheirosilmar@gmail.com>, 2018
+# nle_odoo, 2018
+# Fernando Colus <fcolus1@gmail.com>, 2020
 # Éder Brito <britoederr@gmail.com>, 2021
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~12.5+e\n"
+"Project-Id-Version: Odoo Server saas~11.5+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-26 08:05+0000\n"
-"PO-Revision-Date: 2019-08-26 09:36+0000\n"
+"POT-Creation-Date: 2018-09-21 14:06+0000\n"
+"PO-Revision-Date: 2018-08-24 11:38+0000\n"
 "Last-Translator: Éder Brito <britoederr@gmail.com>, 2021\n"
 "Language-Team: Portuguese (Brazil) (https://www.transifex.com/odoo/teams/41243/pt_BR/)\n"
 "MIME-Version: 1.0\n"
@@ -27,25 +28,45 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #. module: inter_company_rules
-#: code:addons/inter_company_rules/models/account_move.py:0
+#: code:addons/inter_company_rules/models/account_invoice.py:89
 #, python-format
-msgid "%s Invoice: %s"
-msgstr "%s Fatura: %s"
+msgid " Invoice: "
+msgstr "Fatura:"
+
+#. module: inter_company_rules
+#: model_terms:ir.ui.view,arch_db:inter_company_rules.res_config_settings_view_form
+msgid ", generate a"
+msgstr ""
+
+#. module: inter_company_rules
+#: model_terms:ir.ui.view,arch_db:inter_company_rules.view_company_inter_change_inherit_form
+msgid ""
+"<strong>\n"
+"                                    <span attrs=\"{'invisible': [('applicable_on','!=', 'purchase')]}\" class=\"ml4\">Sale Order</span>\n"
+"                                    <span attrs=\"{'invisible': [('applicable_on','!=', 'sale')]}\" class=\"ml4\">Purchase Order</span>\n"
+"                                    <span attrs=\"{'invisible':[('applicable_on','!=', 'sale_purchase')]}\" class=\"ml4\"> Sale and Purchase Order</span>\n"
+"                                </strong> using"
+msgstr ""
+
+#. module: inter_company_rules
+#: model_terms:ir.ui.view,arch_db:inter_company_rules.res_config_settings_view_form
+msgid ""
+"<strong>\n"
+"                                <span attrs=\"{'invisible': [('applicable_on','!=', 'purchase')]}\" class=\"ml8\">Sale Order </span>\n"
+"                                <span attrs=\"{'invisible': [('applicable_on','!=', 'sale')]}\" class=\"ml8\">Purchase Order </span>\n"
+"                                <span attrs=\"{'invisible': [('applicable_on','!=', 'sale_purchase')]}\" class=\"ml8\"> Sale and Purchase Order </span>\n"
+"                            </strong>\n"
+"                            using"
+msgstr ""
 
 #. module: inter_company_rules
 #: model:ir.model.fields,field_description:inter_company_rules.field_res_company__applicable_on
 #: model:ir.model.fields,field_description:inter_company_rules.field_res_config_settings__applicable_on
-msgid "Apply on"
-msgstr "Aplicar em"
+msgid "Applicable On"
+msgstr "Aplicável Em"
 
 #. module: inter_company_rules
-#: model:ir.model.fields,field_description:inter_company_rules.field_res_company__intercompany_user_id
-#: model:ir.model.fields,field_description:inter_company_rules.field_res_config_settings__intercompany_user_id
-msgid "Assign to"
-msgstr "Atribuir à"
-
-#. module: inter_company_rules
-#: model:ir.model.fields,field_description:inter_company_rules.field_account_move__auto_generated
+#: model:ir.model.fields,field_description:inter_company_rules.field_account_invoice__auto_generated
 msgid "Auto Generated Document"
 msgstr "Documento Gerado Automaticamente"
 
@@ -62,8 +83,8 @@ msgstr "Autogerar Pedido de Vendas"
 #. module: inter_company_rules
 #: model:ir.model.fields,field_description:inter_company_rules.field_res_company__auto_validation
 #: model:ir.model.fields,field_description:inter_company_rules.field_res_config_settings__auto_validation
-msgid "Automatic Validation"
-msgstr "Validação automática"
+msgid "Auto Validation"
+msgstr ""
 
 #. module: inter_company_rules
 #: model:ir.model,name:inter_company_rules.model_res_company
@@ -76,8 +97,8 @@ msgid "Config Settings"
 msgstr "Ajuste de configurações"
 
 #. module: inter_company_rules
-#: code:addons/inter_company_rules/models/purchase_order.py:0
-#: code:addons/inter_company_rules/models/sale_order.py:0
+#: code:addons/inter_company_rules/models/purchase_order.py:82
+#: code:addons/inter_company_rules/models/sale_order.py:77
 #, python-format
 msgid ""
 "Configure correct warehouse for company(%s) from Menu: "
@@ -87,8 +108,14 @@ msgstr ""
 "Configurações/Usuários/Empresas"
 
 #. module: inter_company_rules
-#: model:ir.model.fields,help:inter_company_rules.field_res_company__warehouse_id
 #: model:ir.model.fields,help:inter_company_rules.field_res_config_settings__warehouse_id
+msgid ""
+"Default value to set on Purchase Orders that will be created based on Sales "
+"Orders made to this company."
+msgstr ""
+
+#. module: inter_company_rules
+#: model:ir.model.fields,help:inter_company_rules.field_res_company__warehouse_id
 msgid ""
 "Default value to set on Purchase(Sales) Orders that will be created based on"
 " Sale(Purchase) Orders made to this company"
@@ -97,43 +124,13 @@ msgstr ""
 "com base em ordens de venda (compra) feitas a esta empresa"
 
 #. module: inter_company_rules
-#: model:ir.model.fields.selection,name:inter_company_rules.selection__res_company__rule_type__not_synchronize
-msgid "Do not synchronize"
-msgstr "Não sincronizar"
+#: model:ir.model.fields,field_description:inter_company_rules.field_res_company__intercompany_user_id
+msgid "Inter Company User"
+msgstr "Usuário Multi-empresa"
 
 #. module: inter_company_rules
-#: code:addons/inter_company_rules/models/res_company.py:0
-#, python-format
-msgid ""
-"Generate a %(validation)s %(generated_object)s                using "
-"warehouse %(warehouse)s when a company confirms a %(event_type)s for "
-"%(company)s."
-msgstr ""
-"Gerar uma %(validation)s %(generated_object)s                usando o "
-"armazém %(warehouse)s quando a empresa confirmar um %(event_type)s para "
-"%(company)s."
-
-#. module: inter_company_rules
-#: code:addons/inter_company_rules/models/res_company.py:0
-#, python-format
-msgid ""
-"Generate a %(validation)s %(generated_object)s                when a company"
-" confirms a %(event_type)s for %(company)s."
-msgstr ""
-"Gerar uma %(validation)s %(generated_object)s                quando uma "
-"empresa confirmar um %(event_type)s para %(company)s."
-
-#. module: inter_company_rules
-#: code:addons/inter_company_rules/models/res_company.py:0
-#, python-format
-msgid ""
-"Generate a bill/invoice when a company confirms an invoice/bill for %s."
-msgstr ""
-"Gerar uma conta/fatura quando uma empresa confirma uma fatura/conta para %s."
-
-#. module: inter_company_rules
-#: code:addons/inter_company_rules/models/purchase_order.py:0
-#: code:addons/inter_company_rules/models/sale_order.py:0
+#: code:addons/inter_company_rules/models/purchase_order.py:42
+#: code:addons/inter_company_rules/models/sale_order.py:46
 #, python-format
 msgid "Inter company user of company %s doesn't have enough access rights"
 msgstr ""
@@ -141,58 +138,54 @@ msgstr ""
 
 #. module: inter_company_rules
 #: model_terms:ir.ui.view,arch_db:inter_company_rules.view_company_inter_change_inherit_form
-msgid "Inter-Company Transactions"
-msgstr "Transações interempresas"
+msgid "Inter-Company Rules"
+msgstr "Regras entre Empresas"
 
 #. module: inter_company_rules
-#: model:ir.model.fields,field_description:inter_company_rules.field_res_company__intercompany_transaction_message
-#: model:ir.model.fields,field_description:inter_company_rules.field_res_config_settings__intercompany_transaction_message
-msgid "Intercompany Transaction Message"
-msgstr "Mensagem de transação interempresarial"
+#: model:ir.model,name:inter_company_rules.model_account_invoice
+msgid "Invoice"
+msgstr "Fatura"
 
 #. module: inter_company_rules
-#: model:ir.model,name:inter_company_rules.model_account_move
-msgid "Journal Entries"
-msgstr "Lançamentos de Diário"
-
-#. module: inter_company_rules
-#: model:ir.model,name:inter_company_rules.model_account_move_line
-msgid "Journal Item"
-msgstr "Item de Diário"
-
-#. module: inter_company_rules
-#: code:addons/inter_company_rules/models/purchase_order.py:0
+#: code:addons/inter_company_rules/models/purchase_order.py:54
 #, python-format
 msgid "Partner:"
 msgstr "Parceiro:"
 
 #. module: inter_company_rules
-#: code:addons/inter_company_rules/models/purchase_order.py:0
+#: code:addons/inter_company_rules/models/account_invoice.py:81
+#, python-format
+msgid "Please define %s journal for this company: \"%s\" (id:%d)."
+msgstr "Por favor defina o diário de %s para esta empresa: \"%s\" (id:%d)."
+
+#. module: inter_company_rules
+#: code:addons/inter_company_rules/models/purchase_order.py:53
 #, python-format
 msgid "Pricelist:"
 msgstr "Lista de Preços:"
 
 #. module: inter_company_rules
-#: code:addons/inter_company_rules/models/purchase_order.py:0
+#: code:addons/inter_company_rules/models/purchase_order.py:39
 #, python-format
 msgid "Provide at least one user for inter company relation for % "
 msgstr "Fornecer pelo menos um usuário para a relação inter-empresa para %"
 
 #. module: inter_company_rules
-#: code:addons/inter_company_rules/models/sale_order.py:0
+#: code:addons/inter_company_rules/models/account_invoice.py:44
+#: code:addons/inter_company_rules/models/sale_order.py:43
 #, python-format
 msgid "Provide one user for intercompany relation for % "
 msgstr "Fornecer um usuário para relação interempresarial para %"
 
 #. module: inter_company_rules
 #: model:ir.model,name:inter_company_rules.model_purchase_order
-#: model:ir.model.fields.selection,name:inter_company_rules.selection__res_company__applicable_on__purchase
+#: selection:res.company,applicable_on:0
+#: selection:res.config.settings,applicable_on:0
 msgid "Purchase Order"
 msgstr "Pedido de Compra"
 
 #. module: inter_company_rules
 #: model:ir.model.fields,help:inter_company_rules.field_res_company__intercompany_user_id
-#: model:ir.model.fields,help:inter_company_rules.field_res_config_settings__intercompany_user_id
 msgid ""
 "Responsible user for creation of documents triggered by intercompany rules."
 msgstr ""
@@ -202,30 +195,37 @@ msgstr ""
 #. module: inter_company_rules
 #: model:ir.model.fields,field_description:inter_company_rules.field_res_company__rule_type
 #: model:ir.model.fields,field_description:inter_company_rules.field_res_config_settings__rule_type
-msgid "Rule"
-msgstr "Regra"
+msgid "Rule Type"
+msgstr "Tipo de Regra"
 
 #. module: inter_company_rules
-#: code:addons/inter_company_rules/models/purchase_order.py:0
+#: code:addons/inter_company_rules/models/purchase_order.py:52
 #, python-format
 msgid "SO currency:"
 msgstr "Moeda do PV:"
 
 #. module: inter_company_rules
 #: model:ir.model,name:inter_company_rules.model_sale_order
-#: model:ir.model.fields.selection,name:inter_company_rules.selection__res_company__applicable_on__sale
-msgid "Sales Order"
-msgstr "Ordem de Venda"
+#: selection:res.company,applicable_on:0
+#: selection:res.config.settings,applicable_on:0
+msgid "Sale Order"
+msgstr "Pedido de Venda"
 
 #. module: inter_company_rules
-#: model:ir.model.fields.selection,name:inter_company_rules.selection__res_company__applicable_on__sale_purchase
-msgid "Sales and Purchase Order"
+#: selection:res.company,applicable_on:0
+#: selection:res.config.settings,applicable_on:0
+msgid "Sale and Purchase Order"
 msgstr ""
 
 #. module: inter_company_rules
 #: model:ir.model.fields,field_description:inter_company_rules.field_res_config_settings__rules_company_id
 msgid "Select Company"
 msgstr "Escolha a Empresa"
+
+#. module: inter_company_rules
+#: model:ir.model.fields,help:inter_company_rules.field_res_config_settings__rules_company_id
+msgid "Select company to setup Inter company rules."
+msgstr "Selecione a empresa para configurar as regras da empresa."
 
 #. module: inter_company_rules
 #: model:ir.model.fields,help:inter_company_rules.field_res_company__rule_type
@@ -236,7 +236,7 @@ msgstr ""
 "selecionada."
 
 #. module: inter_company_rules
-#: model:ir.model.fields,field_description:inter_company_rules.field_account_move__auto_invoice_id
+#: model:ir.model.fields,field_description:inter_company_rules.field_account_invoice__auto_invoice_id
 msgid "Source Invoice"
 msgstr "Fonte da Fatura"
 
@@ -251,28 +251,23 @@ msgid "Source Sales Order"
 msgstr "Pedido de Vendas Fonte"
 
 #. module: inter_company_rules
-#: model:ir.model.fields.selection,name:inter_company_rules.selection__res_company__rule_type__invoice_and_refund
-msgid "Synchronize invoices/bills"
-msgstr "Sincronizar faturas/contas"
-
-#. module: inter_company_rules
-#: model:ir.model.fields.selection,name:inter_company_rules.selection__res_company__rule_type__so_and_po
-msgid "Synchronize sales/purchase orders"
+#: selection:res.company,rule_type:0 selection:res.config.settings,rule_type:0
+msgid "Synchronize Invoices & Bills"
 msgstr ""
 
 #. module: inter_company_rules
-#: code:addons/inter_company_rules/models/purchase_order.py:0
+#: selection:res.company,rule_type:0 selection:res.config.settings,rule_type:0
+msgid "Synchronize Sales & Purchase Orders"
+msgstr ""
+
+#. module: inter_company_rules
+#: code:addons/inter_company_rules/models/purchase_order.py:50
 #, python-format
 msgid ""
 "The currency of the SO is obtained from the pricelist of the company "
 "partner."
 msgstr ""
 "A moeda do PV é obtida a partir da lista de preços da empresa parceira."
-
-#. module: inter_company_rules
-#: model_terms:ir.ui.view,arch_db:inter_company_rules.res_config_settings_view_form
-msgid "Use Warehouse"
-msgstr "Usar Armazém"
 
 #. module: inter_company_rules
 #: model:ir.model.fields,field_description:inter_company_rules.field_res_company__warehouse_id
@@ -285,7 +280,13 @@ msgid "Warehouse For Purchase Orders"
 msgstr "Armazém para pedidos de compra"
 
 #. module: inter_company_rules
-#: code:addons/inter_company_rules/models/purchase_order.py:0
+#: model_terms:ir.ui.view,arch_db:inter_company_rules.res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:inter_company_rules.view_company_inter_change_inherit_form
+msgid "When a company validates a"
+msgstr ""
+
+#. module: inter_company_rules
+#: code:addons/inter_company_rules/models/purchase_order.py:47
 #, python-format
 msgid ""
 "You cannot create SO from PO because sale price list currency is different "
@@ -295,48 +296,37 @@ msgstr ""
 "diferente da moeda da lista de preços de compra."
 
 #. module: inter_company_rules
-#: code:addons/inter_company_rules/models/res_company.py:0
+#: code:addons/inter_company_rules/models/res_company.py:37
 #, python-format
 msgid ""
 "You cannot select to create invoices based on other invoices\n"
-"                        simultaneously with another option ('Create Sales Orders when buying to this\n"
-"                        company' or 'Create Purchase Orders when selling to this company')!"
+"                    simultaneously with another option ('Create Sales Orders when buying to this\n"
+"                    company' or 'Create Purchase Orders when selling to this company')!"
 msgstr ""
 
 #. module: inter_company_rules
-#: code:addons/inter_company_rules/models/res_company.py:0
-#, python-format
+#: selection:res.company,auto_validation:0
+#: selection:res.config.settings,auto_validation:0
 msgid "draft"
 msgstr "rascunho"
 
 #. module: inter_company_rules
-#: code:addons/inter_company_rules/models/res_company.py:0
-#: code:addons/inter_company_rules/models/res_company.py:0
-#, python-format
-msgid "purchase order"
-msgstr "ordem de compra"
+#: model_terms:ir.ui.view,arch_db:inter_company_rules.view_company_inter_change_inherit_form
+msgid "generate a"
+msgstr ""
 
 #. module: inter_company_rules
-#: code:addons/inter_company_rules/models/res_company.py:0
-#, python-format
-msgid "purchase/sales order"
-msgstr "ordem de compra/venda"
+#: model_terms:ir.ui.view,arch_db:inter_company_rules.res_config_settings_view_form
+msgid "to"
+msgstr "até"
 
 #. module: inter_company_rules
-#: code:addons/inter_company_rules/models/res_company.py:0
-#: code:addons/inter_company_rules/models/res_company.py:0
-#, python-format
-msgid "sales order"
-msgstr "pedido de vendas"
+#: model_terms:ir.ui.view,arch_db:inter_company_rules.view_company_inter_change_inherit_form
+msgid "to this company,"
+msgstr ""
 
 #. module: inter_company_rules
-#: code:addons/inter_company_rules/models/res_company.py:0
-#, python-format
-msgid "sales/purchase order"
-msgstr "pedido de vendas/compra"
-
-#. module: inter_company_rules
-#: code:addons/inter_company_rules/models/res_company.py:0
-#, python-format
+#: selection:res.company,auto_validation:0
+#: selection:res.config.settings,auto_validation:0
 msgid "validated"
 msgstr "validado"

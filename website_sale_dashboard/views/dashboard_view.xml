@@ -61,8 +61,8 @@
                 </xpath>
 
                 <xpath expr="//filter[@name='confirmed']" position="after">
-                    <filter string="Unpaid Orders" name="unpaid" domain="[('state', '=', 'sent')]"/>
-                    <filter string="Abandoned Carts" name="abandoned" domain="[('is_abandoned_cart', '=', True)]" invisible="1"/>
+                    <filter string="Unpaid Orders" name="unpaid" domain="['&amp;', ('state', '=', 'sent'), ('invoice_status', '=', 'to invoice')]"/>
+                    <filter string="Abandoned Carts" name="abandoned" domain="[('is_abandoned_cart', '=', True)]"/>
                 </xpath>
             </field>
         </record>
@@ -72,7 +72,7 @@
             <field name="res_model">sale.report</field>
             <field name="view_mode">dashboard</field>
             <field name="view_id" ref="sale_dashboard_view"/>
-            <field name="domain">[('team_id.website_ids', '!=', False)]</field>
+            <field name="domain">[('team_id.team_type', '=', 'website')]</field>
             <field name="search_view_id" ref="website_sale.sale_report_view_search_website"/>
             <field name="context">{'search_default_confirmed': 1, 'time_ranges': {'field':'date', 'range':'last_7_days'}}</field>
         </record>

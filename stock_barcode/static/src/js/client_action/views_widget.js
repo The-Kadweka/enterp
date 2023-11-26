@@ -11,6 +11,9 @@ var ViewsWidget = Widget.extend({
         'click .o_save': '_onClickSave',
         'click .o_discard': '_onClickDiscard',
     },
+    custom_events: {
+        'env_updated': '_onEnvUpdated',
+    },
 
     init: function (clientAction, model, view, defaultValue, params, mode, view_type) {
         this._super.apply(this, arguments);
@@ -35,7 +38,7 @@ var ViewsWidget = Widget.extend({
     start: function () {
         var self = this;
         var def = this.controller.appendTo(this.$el.filter('.o_barcode_generic_view'));
-        return Promise.all([def, this._super()]).then(function () {
+        return $.when(def, this._super()).then(function () {
             self.$el.find('.o_form_view').addClass('o_xxs_form_view');
             self.trigger_up('listen_to_barcode_scanned', {'listen': false});
         });
@@ -74,7 +77,6 @@ var ViewsWidget = Widget.extend({
                 modelName: self.model,
                 userContext: self.getSession().user_context,
                 mode: self.mode,
-                withControlPanel: false,
             });
             var View;
             if (self.view_type === 'form') {
@@ -115,6 +117,17 @@ var ViewsWidget = Widget.extend({
      _onClickDiscard: function (ev) {
         ev.stopPropagation();
         this.trigger_up('reload');
+    },
+
+    /**
+     * Stops the propagation of 'update_env' events triggered by the controllers
+     * instantiated by the FormWidget.
+     *
+     * @override
+     * @private
+     */
+    _onEnvUpdated: function (event) {
+        event.stopPropagation();
     },
 });
 

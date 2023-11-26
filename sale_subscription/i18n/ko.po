@@ -1,22 +1,25 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* sale_subscription
+# * sale_subscription
 # 
 # Translators:
-# Mark Lee <odoos@soti.33mail.com>, 2019
-# heejun lee <tkm01b@gmail.com>, 2019
-# Seongseok Shin <shinss61@hotmail.com>, 2019
-# Martin Trigaux, 2019
-# Link Up링크업 <linkup.way@gmail.com>, 2019
+# Goh Gangtai <gangtai.goh@gmail.com>, 2018
+# 종현 엄 <whd5367@naver.com>, 2018
+# heejun lee <tkm01b@gmail.com>, 2018
+# Mark Lee <odoos@soti.33mail.com>, 2018
+# Martin Trigaux, 2018
+# Spike Lee <rurouni24@gmail.com>, 2018
+# Link Up링크업 <linkup.way@gmail.com>, 2018
+# Seongseok Shin <shinss61@hotmail.com>, 2018
 # Linkup <link-up@naver.com>, 2020
 # JH CHOI <hwangtog@gmail.com>, 2021
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-05 12:37+0000\n"
-"PO-Revision-Date: 2019-08-26 09:38+0000\n"
+"POT-Creation-Date: 2019-11-14 07:50+0000\n"
+"PO-Revision-Date: 2018-08-24 11:48+0000\n"
 "Last-Translator: JH CHOI <hwangtog@gmail.com>, 2021\n"
 "Language-Team: Korean (https://www.transifex.com/odoo/teams/41243/ko/)\n"
 "MIME-Version: 1.0\n"
@@ -26,25 +29,37 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: sale_subscription
-#: code:addons/sale_subscription/models/sale_subscription.py:0
+#: model:sale.subscription.template,description:sale_subscription.cleaning_monthly
+#: model:sale.subscription.template,description:sale_subscription.cleaning_yearly
+msgid ""
+"\n"
+"Payment\n"
+"All payments are due upon receipt. If a payment is not received or payment method is declined, the buyer forfeits the ownership of any items purchased. If no payment is received, no items will be shipped.\n"
+"\n"
+"Shipping Policies\n"
+"Shipping will be paid for by the buyer in the amount agreed upon by the seller at the time of purchase. If an item is lost during shipping, the total cost of item, including shipping, will be refunded to the buyer by the seller. Shipping costs may double if shipping internationally. If an item is damaged during shipping, seller will not be held responsible.\n"
+"\n"
+"Refund/Return Policy\n"
+"Items are entitled to be refunded or returned based on complaint. If an item is damaged during shipping, a replacement item will be sent free of charge. If an item is unsatisfactory, a written explanation is needed before the item may be considered for a refund. Buyer must take into account the description of the item before requesting a refund. If the item matches the description by the seller and the buyer is unsatisfied, seller is not responsible for refund. Exchanges are granted on a case-by-case basis.\n"
+"\n"
+"Cancellation\n"
+"An item may be cancelled up until payment has been processed. Once payment has been processed, the buyer is responsible for payment.\n"
+"\n"
+"Complaints\n"
+"Any complaints about items or sellers may be sent to our support team: support@wesellyourstuff.com or (888) 555-0198. There is no guarantee of a resolution. Each case will be looked at individually, and the seller will be in contact as well.\n"
+"            "
+msgstr ""
+
+#. module: sale_subscription
+#: code:addons/sale_subscription/models/sale_subscription.py:778
 #, python-format
 msgid " E-mail sent to customer."
 msgstr "고객에게 이메일을 보냈습니다."
 
 #. module: sale_subscription
 #: model:mail.template,subject:sale_subscription.mail_template_subscription_invoice
-msgid "${object.company_id.name} Invoice (Ref ${object.name or 'n/a'})"
-msgstr "${object.company_id.name} 송장 (Ref ${object.name or 'n/a'})"
-
-#. module: sale_subscription
-#: model:sms.template,body:sale_subscription.sms_template_data_payment_failure
-msgid ""
-"${object.company_id.name}: Our final attempt to process a payment for your "
-"subscription failed. As your payment should have been made on "
-"${object.recurring_next_date}, your subscription has been terminated."
-msgstr ""
-"${object.company_id.name} : 귀하의 구독료 결제를 처리하려는 우리의 마지막 시도가 실패했습니다. "
-"${object.recurring_next_date}에 대한 결제가 이루어졌어야 하므로 가입이 종료되었습니다."
+msgid "${object.company_id.name} Invoice (Ref ${object.number or 'n/a'})"
+msgstr "${object.company_id.name} 청구서 (Ref ${object.number or 'n/a'})"
 
 #. module: sale_subscription
 #: model:mail.template,subject:sale_subscription.mail_template_subscription_alert
@@ -58,40 +73,14 @@ msgid "${object.company_id.name}: Service Rating Request"
 msgstr "${object.company_id.name} : 서비스 등급 요청"
 
 #. module: sale_subscription
-#: model:sms.template,body:sale_subscription.sms_template_data_payment_reminder
-msgid ""
-"${object.company_id.name}: We were unable to process a payment for your "
-"subscription. Your subscription ${object.name} is still valid but will be "
-"suspended on ${object.recurring_next_date} unless the payment succeeds in "
-"the meantime."
-msgstr ""
-"${object.company_id.name} : 귀하의 구독에 대한 결제를 처리할 수 없습니다. 귀하의 ${object.name} "
-"구독은 아직 유효하지만, 그 사이에 결제가 되지 않으면  ${object.recurring_next_date}에 중단될 것입니다."
-
-#. module: sale_subscription
-#: model:sms.template,body:sale_subscription.sms_template_data_default_alert
-msgid ""
-"${object.company_id.name}: Your subscription ${object.name} needs your "
-"attention. If you have some concerns about it, please contact "
-"${object.user_id.name}, your contact person."
-msgstr ""
-"${object.company_id.name} : ${object.name} 구독에 귀하의 관심이 필요합니다. 이에 대해 염려되는 사항이"
-" 있으시면 ${object.user_id.name} 연락처로 문의해 주십시오."
-
-#. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__percentage_satisfaction
 msgid "% Happy"
-msgstr "% 좋음"
+msgstr "% Happy"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_template_view_kanban
 msgid "&amp;nbsp;"
 msgstr "&amp;nbsp;"
-
-#. module: sale_subscription
-#: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
-msgid "&amp;times;"
-msgstr "&amp;times;"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
@@ -104,12 +93,12 @@ msgid "(Wrong address?)"
 msgstr "(잘못된 주소?)"
 
 #. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_alert__mrr_change_period__1month
+#: selection:sale.subscription.alert,mrr_change_period:0
 msgid "1 Month"
 msgstr "1달"
 
 #. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_alert__mrr_change_period__3months
+#: selection:sale.subscription.alert,mrr_change_period:0
 msgid "3 Months"
 msgstr "3달"
 
@@ -130,7 +119,7 @@ msgid ""
 "                <table style=\"width:600px;margin:0px auto;background:white;border:1px solid #e1e1e1;\">\n"
 "                    <tbody>\n"
 "                        <tr><td style=\"padding:15px 20px 10px 20px;\">\n"
-"                            <p>Dear ${object.partner_id.name},</p>\n"
+"                            <p>Dear %{object.partner_id.name}.</p>\n"
 "                            <p>Your subscription <strong>${object.name}</strong> needs your attention.</p>\n"
 "                            <p>If you have some concerns about it, please contact your contact person ${object.user_id.name} or reply to this email.</p>\n"
 "                            <p>Kind regards.</p>\n"
@@ -141,30 +130,6 @@ msgid ""
 "            </div>\n"
 "        "
 msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<div style=\"background:#F0F0F0;color:#515166;padding:10px 0px;font-family:Arial,Helvetica,sans-serif;font-size:14px;\">\n"
-"                <table style=\"width:600px;margin:5px auto;\">\n"
-"                    <tbody>\n"
-"                        <tr><td>\n"
-"                            <a href=\"/\"><img src=\"/web/binary/company_logo\" style=\"vertical-align:baseline;max-width:100px;\"/></a>\n"
-"                        </td><td style=\"text-align:right;vertical-align:middle;\">\n"
-"                                구독 의견\n"
-"                        </td></tr>\n"
-"                    </tbody>\n"
-"                </table>\n"
-"                <table style=\"width:600px;margin:0px auto;background:white;border:1px solid #e1e1e1;\">\n"
-"                    <tbody>\n"
-"                        <tr><td style=\"padding:15px 20px 10px 20px;\">\n"
-"                            <p>${object.partner_id.name}님 안녕하세요.</p>\n"
-"                            <p><strong>${object.name}</strong> 구독의 귀하의 주의가 필요합니다.</p>\n"
-"                            <p>궁금한 점이 있으시면 연락 담당자 ${object.user_id.name} 또는 이메일로 문의주십시오.</p>\n"
-"                            <p>감사합니다.</p>\n"
-"                        </td></tr>\n"
-"                        <tr><td style=\"padding:15px 20px 10px 20px;\">${(object.user_id.signature or '')| safe}</td></tr>\n"
-"                    </tbody>\n"
-"                </table>\n"
-"            </div>\n"
-"        "
 
 #. module: sale_subscription
 #: model:mail.template,body_html:sale_subscription.mail_template_subscription_invoice
@@ -190,74 +155,30 @@ msgid ""
 "                            </p>\n"
 "                            <p>\n"
 "                                Here is, in attachment, your\n"
-"                                % if object.name:\n"
-"                                    invoice <strong>${object.name}</strong>\n"
+"                                % if object.number:\n"
+"                                    invoice <strong>${object.number}</strong>\n"
 "                                % else:\n"
 "                                    invoice\n"
 "                                %endif\n"
-"                                % if object.invoice_origin:\n"
-"                                    (with reference: ${object.invoice_origin} )\n"
+"                                % if object.origin:\n"
+"                                    (with reference: ${object.origin} )\n"
 "                                % endif\n"
 "                                amounting in <strong>${format_amount(object.amount_total, object.currency_id)}</strong>\n"
 "                                from ${object.company_id.name}.\n"
-"                                % if object.invoice_payment_state == 'paid':\n"
+"                                % if object.state=='paid':\n"
 "                                    This invoice is already paid.\n"
 "                                % else:\n"
 "                                    Please remit payment at your earliest convenience.\n"
 "                                % endif\n"
 "                            </p>\n"
-"                            <p>Do not hesitate to contact us if you have any questions.</p>\n"
+"                            <p>Do not hesitate to contact us if you have any question.</p>\n"
 "                        </td></tr>\n"
-"                        <tr><td style=\"padding:15px 20px 10px 20px;\">${(object.invoice_user_id.signature or '')| safe}</td></tr>\n"
+"                        <tr><td style=\"padding:15px 20px 10px 20px;\">${(object.user_id.signature or '')| safe}</td></tr>\n"
 "                    </tbody>\n"
 "                </table>\n"
 "            </div>\n"
 "        "
 msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<div style=\"background:#F0F0F0;color:#515166;padding:10px 0px;font-family:Arial,Helvetica,sans-serif;font-size:14px;\">\n"
-"                <table style=\"width:600px;margin:5px auto;\">\n"
-"                    <tbody>\n"
-"                        <tr><td>\n"
-"                            <a href=\"/\"><img src=\"/web/binary/company_logo\" style=\"vertical-align:baseline;max-width:100px;\"/></a>\n"
-"                        </td><td style=\"text-align:right;vertical-align:middle;\">\n"
-"                                구독 송장\n"
-"                        </td></tr>\n"
-"                    </tbody>\n"
-"                </table>\n"
-"                <table style=\"width:600px;margin:0px auto;background:white;border:1px solid #e1e1e1;\">\n"
-"                    <tbody>\n"
-"                        <tr><td style=\"padding:15px 20px 10px 20px;\">\n"
-"                            <p>${object.partner_id.name}님 안녕하세요.\n"
-"                                % if object.partner_id.parent_id:\n"
-"                                    (${object.partner_id.parent_id.name})\n"
-"                                % endif\n"
-"                            </p>\n"
-"                            <p>\n"
-"                                Here is, in attachment, your\n"
-"                                % if object.name:\n"
-"                                    송장 <strong>${object.name}</strong>\n"
-"                                % else:\n"
-"                                    송장\n"
-"                                %endif\n"
-"                                % if object.invoice_origin:\n"
-"                                    (with reference: ${object.invoice_origin} )\n"
-"                                % endif\n"
-"                                     ${object.company_id.name}에서\n"
-"                                <strong>${format_amount(object.amount_total, object.currency_id)}</strong>의 금액\n"
-"                                % if object.invoice_payment_state == 'paid':\n"
-"                                    이 송장은 이미 지불되었습니다.\n"
-"                                % else:\n"
-"                                    빠른 시일 내에 결제를 해주시기 바랍니다.\n"
-"                                % endif\n"
-"                            </p>\n"
-"                            <p>궁금한 점이 있으면 언제든지 문의하십시오.</p>\n"
-"                        </td></tr>\n"
-"                        <tr><td style=\"padding:15px 20px 10px 20px;\">${(object.invoice_user_id.signature or '')| safe}</td></tr>\n"
-"                    </tbody>\n"
-"                </table>\n"
-"            </div>\n"
-"        "
 
 #. module: sale_subscription
 #: model:mail.template,body_html:sale_subscription.mail_template_subscription_rating
@@ -323,6 +244,7 @@ msgid ""
 "                <table style=\"width:600px;margin:auto;text-align:center;font-size:12px;\">\n"
 "                    <tbody>\n"
 "                        <tr><td style=\"padding-top:10px;color:#afafaf;\">\n"
+"                            <p>This customer survey has been sent because your subscription has been moved to the stage <b>${object.stage_id.name}</b></p>\n"
 "                            <p>Email automatically sent by <a target=\"_blank\" href=\"https://www.odoo.com/page/subscriptions\" style=\"color:#875A7B;text-decoration:none;\">Odoo Subscription</a> for <a href=\"${object.company_id.website}\" style=\"color:#875A7B;text-decoration:none;\">${object.company_id.name}</a></p>\n"
 "                        </td></tr>\n"
 "                    </tbody>\n"
@@ -330,73 +252,6 @@ msgid ""
 "            </div>\n"
 "        "
 msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<div style=\"background:#F0F0F0;color:#515166;padding:10px 0px;font-family:Arial,Helvetica,sans-serif;font-size:14px;\">\n"
-"            % set access_token = object.rating_get_access_token()\n"
-"                <table style=\"width:600px;margin:5px auto;\">\n"
-"                    <tbody>\n"
-"                        <tr><td>\n"
-"                            <a href=\"/\"><img src=\"/web/binary/company_logo\" style=\"vertical-align:baseline;max-width:100px;\"/></a>\n"
-"                        </td><td style=\"text-align:right;vertical-align:middle;\">\n"
-"                                만족도 조사\n"
-"                        </td></tr>\n"
-"                    </tbody>\n"
-"                </table>\n"
-"                <table style=\"width:600px;margin:0px auto;background:white;border:1px solid #e1e1e1;\">\n"
-"                    <tbody>\n"
-"                        <tr><td style=\"padding:15px 20px 10px 20px;\">\n"
-"                            <p>안녕하세요.</p>\n"
-"                            <p>잠시 시간을 내려서\"<strong>${object.name}</strong>\"에 할당된 \n"
-"                               <strong>${object.rating_get_rated_partner_id().name}</strong> 구독과 관련된 서비스의 등급을 매겨 주십시오.</p>\n"
-"                            <p>의견을 보내 주셔서 감사합니다. 귀하의 의견은 저희의 서비스를 지속적으로 개선하는 데 도움이 됩니다.</p>\n"
-"                        </td></tr>\n"
-"                        <tr><td style=\"padding:10px 20px\">\n"
-"                            <table summary=\"o_mail_notification\" style=\"width:100%;border-top:1px solid #e1e1e1;\">\n"
-"                                <tr>\n"
-"                                    <td style=\"text-align:center;\">\n"
-"                                        <h2 style=\"font-weight:300;font-size:18px;\">\n"
-"                                            우리의 서비스에 대해 어떻게 생각하는지 알려주세요 :\n"
-"                                        </h2>\n"
-"                                        <div style=\"text-color: #888888\">(이 스마일 중 하나를 클릭하십시오)</div>\n"
-"                                    </td>\n"
-"                                </tr>\n"
-"                                <tr>\n"
-"                                    <td style=\"padding:10px 10px;\">\n"
-"                                        <table style=\"width:100%;text-align:center;\">\n"
-"                                            <tr>\n"
-"                                                <td>\n"
-"                                                    <a href=\"/rating/${access_token}/10\">\n"
-"                                                        <img alt=\"Satisfied\" src=\"/rating/static/src/img/rating_10.png\" title=\"Satisfied\"/>\n"
-"                                                    </a>\n"
-"                                                </td>\n"
-"                                                <td>\n"
-"                                                    <a href=\"/rating/${access_token}/5\">\n"
-"                                                        <img alt=\"Not satisfied\" src=\"/rating/static/src/img/rating_5.png\" title=\"Not satisfied\"/>\n"
-"                                                    </a>\n"
-"                                                </td>\n"
-"                                                <td>\n"
-"                                                    <a href=\"/rating/${access_token}/1\">\n"
-"                                                        <img alt=\"Highly Dissatisfied\" src=\"/rating/static/src/img/rating_1.png\" title=\"Highly Dissatisfied\"/>\n"
-"                                                    </a>\n"
-"                                                </td>\n"
-"                                            </tr>\n"
-"                                        </table>\n"
-"                                    </td>\n"
-"                                </tr>\n"
-"                            </table>\n"
-"                        </td></tr>\n"
-"                        <tr><td style=\"padding:15px 20px 10px 20px;\">${(object.user_id.signature or '')| safe}</td></tr>\n"
-"                    </tbody>\n"
-"                </table>\n"
-"                <table style=\"width:600px;margin:auto;text-align:center;font-size:12px;\">\n"
-"                    <tbody>\n"
-"                        <tr><td style=\"padding-top:10px;color:#afafaf;\">\n"
-"                            <p><a target=\"_blank\" href=\"https://www.odoo.com/page/subscriptions\" style=\"color:#875A7B;text-decoration:none;\">Odoo 구독</a>에서 <a href=\"${object.company_id.website}\" style=\"color:#875A7B;text-decoration:none;\">${object.company_id.name}</a>으로 자동으로 이메일을 보냈습니다.</p>\n"
-"                        </td></tr>\n"
-"                    </tbody>\n"
-"                </table>\n"
-"            </div>\n"
-"        "
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
@@ -413,14 +268,14 @@ msgid "<i class=\"fa fa-check\"/> Closable by customer"
 msgstr "<i class=\"fa fa-check\"/> 고객에 의해 종료 가능"
 
 #. module: sale_subscription
-#: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
-msgid "<i class=\"fa fa-comment\"/> Send message"
-msgstr "<i class=\"fa fa-comment\"/> 메시지 보내기"
-
-#. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_template_view_kanban
 msgid "<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" title=\"Manage\"/>"
 msgstr "<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" title=\"Manage\"/>"
+
+#. module: sale_subscription
+#: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
+msgid "<i class=\"fa fa-envelope\"/> Send email"
+msgstr ""
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
@@ -490,15 +345,6 @@ msgid "<span class=\"mr-1\">period(s)</span>"
 msgstr "<span class=\"mr-1\">기간</span>"
 
 #. module: sale_subscription
-#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_form
-msgid ""
-"<span class=\"o_stat_text\">Customer</span>\n"
-"                                <span class=\"o_stat_text\">Preview</span>"
-msgstr ""
-"<span class=\"o_stat_text\">고객</span>\n"
-"                                <span class=\"o_stat_text\">미리보기</span>"
-
-#. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_template_view_kanban
 msgid "<span>Subscriptions</span>"
 msgstr "<span>구독</span>"
@@ -534,7 +380,7 @@ msgid ""
 "        <td align=\"center\" style=\"min-width: 590px;\">\n"
 "            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
 "                <tr><td valign=\"middle\">\n"
-"                    % set company = object.company_id or object.invoice_user_id.company_id or user.company_id\n"
+"                    % set company = object.company_id or object.user_id.company_id or user.company_id\n"
 "                    <span style=\"font-size: 10px;\">Your Subscription</span><br/>\n"
 "                    <span style=\"font-size: 20px; font-weight: bold;\">${ctx.get('code') or 'Document'}</span>\n"
 "                </td></tr>\n"
@@ -560,10 +406,10 @@ msgid ""
 "                    <br/><br/>\n"
 "                    You will find your invoice attached.\n"
 "                    %if ctx.get('next_date'):\n"
-"                        Your next invoice will be on ${format_date(ctx.get('next_date'))}.\n"
+"                        Your next invoice will be on ${ctx.get('next_date')}.\n"
 "                    %endif\n"
 "                    <br/><br/>\n"
-"                    If you have any questions, do not hesitate to contact us.\n"
+"                    If you have any question, do not hesitate to contact us.\n"
 "                    <br/><br/>\n"
 "                    Thank you for choosing ${company.name}!\n"
 "                    % if user.signature\n"
@@ -613,92 +459,6 @@ msgid ""
 "</table>\n"
 "        "
 msgstr ""
-"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: 16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;\"><tr><td align=\"center\">\n"
-"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"padding: 16px; background-color: white; color: #454748; border-collapse:separate;\">\n"
-"<tbody>\n"
-"    <!-- HEADER -->\n"
-"    <tr>\n"
-"        <td align=\"center\" style=\"min-width: 590px;\">\n"
-"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
-"                <tr><td valign=\"middle\">\n"
-"                    % set company = object.company_id or object.invoice_user_id.company_id or user.company_id\n"
-"                    <span style=\"font-size: 10px;\">구독</span><br/>\n"
-"                    <span style=\"font-size: 20px; font-weight: bold;\">${ctx.get('code') or 'Document'}</span>\n"
-"                </td></tr>\n"
-"                <tr><td valign=\"middle\" align=\"right\">\n"
-"                    <img src=\"/logo.png?company=${company.id}\" style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" alt=\"${company.name}\"/>\n"
-"                </td></tr>\n"
-"                <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
-"                    <hr width=\"100%\" style=\"background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;\"/>\n"
-"                </td></tr>\n"
-"            </table>\n"
-"        </td>\n"
-"    </tr>\n"
-"    <!-- CONTENT -->\n"
-"    <tr>\n"
-"        <td align=\"center\" style=\"min-width: 590px;\">\n"
-"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
-"                <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
-"                    ${object.partner_id.name}님 안녕하세요.<br/><br/>\n"
-"                    귀하의 (${ctx.get('code')}) 구독이 아래와 같이 갱신되었습니다\n"
-"                    %if ctx.get('total_amount') and ctx.get('payment_token'):\n"
-"                        via a payment of ${ctx['total_amount']} ${ctx['currency']} charged on ${ctx['payment_token']}.\n"
-"                    %endif\n"
-"                    <br/><br/>\n"
-"                    청구서가 첨부되어 있습니다.\n"
-"                    %if ctx.get('next_date'):\n"
-"                        다음 청구일자는 ${format_date(ctx.get('next_date'))}입니다.\n"
-"                    %endif\n"
-"                    <br/><br/>\n"
-"                    궁금한 점이 있으면 언제든지 문의하십시오.\n"
-"                    <br/><br/>\n"
-"                    ${company.name}을 선택해 주셔서 감사합니다!\n"
-"                    % if user.signature\n"
-"                        <br/><br/>\n"
-"                        ${user.signature | safe}\n"
-"                    % endif\n"
-"                </td></tr>\n"
-"                <tr><td style=\"text-align:center;\">\n"
-"                    <hr width=\"100%\" style=\"background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
-"                </td></tr>\n"
-"            </table>\n"
-"        </td>\n"
-"    </tr>\n"
-"    <!-- FOOTER -->\n"
-"    <tr>\n"
-"        <td align=\"center\" style=\"min-width: 590px;\">\n"
-"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; font-size: 11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
-"                <tr><td valign=\"middle\" align=\"left\">\n"
-"                    ${company.name}\n"
-"                </td></tr>\n"
-"                <tr><td valign=\"middle\" align=\"left\" style=\"opacity: 0.7;\">\n"
-"                    % if company.phone\n"
-"                        ${company.phone} |\n"
-"                    %endif\n"
-"                    % if company.email\n"
-"                        <a href=\"'mailto:%s' % ${company.email}\" style=\"text-decoration:none; color: #454748;\">${company.email}</a> |\n"
-"                    % endif\n"
-"                    % if company.website\n"
-"                        <a href=\"'%s' % ${company.website}\" style=\"text-decoration:none; color: #454748;\">${company.website}\n"
-"                        </a>\n"
-"                    % endif\n"
-"                </td></tr>\n"
-"            </table>\n"
-"        </td>\n"
-"    </tr>\n"
-"</tbody>\n"
-"</table>\n"
-"</td></tr>\n"
-"<!-- POWERED BY -->\n"
-"<tr><td align=\"center\" style=\"min-width: 590px;\">\n"
-"    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;\">\n"
-"      <tr><td style=\"text-align: center; font-size: 13px;\">\n"
-"        Powered by <a target=\"_blank\" href=\"https://www.odoo.com?utm_source=db&amp;utm_medium=mail\" style=\"color: #875A7B;\">Odoo</a>\n"
-"      </td></tr>\n"
-"    </table>\n"
-"</td></tr>\n"
-"</table>\n"
-"        "
 
 #. module: sale_subscription
 #: model:mail.template,body_html:sale_subscription.email_payment_close
@@ -921,9 +681,9 @@ msgid ""
 "                    % endif\n"
 "                    <br/><br/>\n"
 "                    Your subscription ${ctx.get('code')} is still valid but will be <strong>suspended</strong>\n"
-"                    on ${format_date(ctx.get('date_close'))} unless the payment succeeds in the mean time (we will retry once every day).\n"
+"                    on ${ctx.get('date_close')} unless the payment succeeds in the mean time (we will retry once every day).\n"
 "                    Please double-check that you have sufficient funds.<br/><br/>\n"
-"                    If you have any questions, do not hesitate to contact us.<br/><br/>\n"
+"                    If you have any question, do not hesitate to contact us.<br/><br/>\n"
 "                    Thank you for choosing ${company.name}!\n"
 "                    % if user.signature:\n"
 "                        <br/><br/>\n"
@@ -972,94 +732,6 @@ msgid ""
 "</table>\n"
 "        "
 msgstr ""
-"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: 16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;\"><tr><td align=\"center\">\n"
-"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"padding: 16px; background-color: white; color: #454748; border-collapse:separate;\">\n"
-"<tbody>\n"
-"    <!-- HEADER -->\n"
-"    <tr>\n"
-"        <td align=\"center\" style=\"min-width: 590px;\">\n"
-"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
-"                <tr><td valign=\"middle\">\n"
-"                    % set company = object.company_id or object.user_id.company_id or user.company_id\n"
-"                    <span style=\"font-size: 10px;\">귀하의 구독</span><br/>\n"
-"                    <span style=\"font-size: 20px; font-weight: bold;\">${object.name}</span>\n"
-"                </td></tr>\n"
-"                <tr><td valign=\"middle\" align=\"right\">\n"
-"                    <img src=\"/logo.png?company=${company.id}\" style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" alt=\"${company.name}\"/>\n"
-"                </td></tr>\n"
-"                <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
-"                    <hr width=\"100%\" style=\"background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;\"/>\n"
-"                </td></tr>\n"
-"            </table>\n"
-"        </td>\n"
-"    </tr>\n"
-"    <!-- CONTENT -->\n"
-"    <tr>\n"
-"        <td align=\"center\" style=\"min-width: 590px;\">\n"
-"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
-"                <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
-"                    ${object.partner_id.name}님 안녕하세요.<br/><br/>\n"
-"                    % if ctx.get('payment_token') 및  ctx.get('total_amount') :\n"
-"                        ${ctx['payment_token']} 지불 수단을 이용하여\n"
-"                        ${ctx['total_amount']} ${ctx.get('currency')}에 대한 구독료를 처리할 수 없습니다.\n"
-"                        % if ctx.get('error') :\n"
-"                            은행이나 신용 기관에서이 문제에 대해 다음 세부 정보를 제공했습니다 : <pre>${ctx['error']}</pre>.\n"
-"                        %endif\n"
-"                    % else:\n"
-"                        귀하를 위해 기록된 지불 방법이 없기 때문에 귀하 구독에 대한 지불을 처리할 수 없습니다.\n"
-"                    % endif\n"
-"                    <br/><br/>\n"
-"                    귀하의 구독 ${ctx.get('code')}는 여전히 <strong>유효하지만</strong>\n"
-"                    평균 시간 내에 지불이 성공하지 않는 한 ${format_date(ctx.get('date_close'))}는 일시 중단됩니다(우리는 매일 한 번 재시도할 것입니다).\n"
-"                    충분한 자금이 있는지 다시 확인하십시오.<br/><br/>\n"
-"                    궁금한 점이 있으면 언제든지 문의하십시오.<br/><br/>\n"
-"                    ${company.name}을 선택해 주셔서 감사합니다!\n"
-"                    % if user.signature:\n"
-"                        <br/><br/>\n"
-"                        ${user.signature | safe}\n"
-"                    % endif\n"
-"                </td></tr>\n"
-"                <tr><td style=\"text-align:center;\">\n"
-"                    <hr width=\"100%\" style=\"background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
-"                </td></tr>\n"
-"            </table>\n"
-"        </td>\n"
-"    </tr>\n"
-"    <!-- FOOTER -->\n"
-"    <tr>\n"
-"        <td align=\"center\" style=\"min-width: 590px;\">\n"
-"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; font-size: 11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
-"                <tr><td valign=\"middle\" align=\"left\">\n"
-"                    ${company.name}\n"
-"                </td></tr>\n"
-"                <tr><td valign=\"middle\" align=\"left\" style=\"opacity: 0.7;\">\n"
-"                    % if company.phone\n"
-"                        ${company.phone} |\n"
-"                    %endif\n"
-"                    % if company.email\n"
-"                        <a href=\"'mailto:%s' % ${company.email}\" style=\"text-decoration:none; color: #454748;\">${company.email}</a> |\n"
-"                    % endif\n"
-"                    % if company.website\n"
-"                        <a href=\"'%s' % ${company.website}\" style=\"text-decoration:none; color: #454748;\">${company.website}\n"
-"                        </a>\n"
-"                    % endif\n"
-"                </td></tr>\n"
-"            </table>\n"
-"        </td>\n"
-"    </tr>\n"
-"</tbody>\n"
-"</table>\n"
-"</td></tr>\n"
-"<!-- POWERED BY -->\n"
-"<tr><td align=\"center\" style=\"min-width: 590px;\">\n"
-"    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;\">\n"
-"      <tr><td style=\"text-align: center; font-size: 13px;\">\n"
-"        Powered by <a target=\"_blank\" href=\"https://www.odoo.com?utm_source=db&amp;utm_medium=mail\" style=\"color: #875A7B;\">Odoo</a>\n"
-"      </td></tr>\n"
-"    </table>\n"
-"</td></tr>\n"
-"</table>\n"
-"        "
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription_alert__website_published
@@ -1069,9 +741,9 @@ msgid ""
 "field as True to allow users to run this action. If it is set to False the "
 "action cannot be run through the website."
 msgstr ""
-"전용 제어기를 사용하여 코드 서버 작업을 웹 사이트에서 실행할 수 있습니다. 주소는 "
-"<base>/website/action/<website_path>입니다. 이 필드를 True로 설정하면 사용자가 이 작업을 실행할 수 "
-"있습니다. False로 설정하면 웹 사이트를 통해 작업을 실행할 수 없습니다."
+"전용 제어기를 사용하여 코드 서버 작업을 웹 사이트에서 실행할 수 있습니다. 주소는 <base> / website / action / "
+"<website_path>입니다. 이 필드를 True로 설정하면 사용자가 이 작업을 실행할 수 있습니다. False로 설정하면 웹 "
+"사이트를 통해 작업을 실행할 수 없습니다."
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__uuid
@@ -1092,12 +764,12 @@ msgstr "추가 작업"
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__help
 msgid "Action Description"
-msgstr "작업 설명"
+msgstr "동작 설명"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__name
 msgid "Action Name"
-msgstr "작업명"
+msgstr "동작명"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__message_needaction
@@ -1108,12 +780,12 @@ msgstr "작업이 필요함"
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__state
 msgid "Action To Do"
-msgstr "수행할 작업"
+msgstr "필요한 작업"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__type
 msgid "Action Type"
-msgstr "작업 유형"
+msgstr "동작 유형"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__active
@@ -1133,11 +805,6 @@ msgid "Activity"
 msgstr "활동"
 
 #. module: sale_subscription
-#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__activity_exception_decoration
-msgid "Activity Exception Decoration"
-msgstr "활동 예외 장식"
-
-#. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__activity_state
 msgid "Activity State"
 msgstr "활동 상태"
@@ -1146,27 +813,37 @@ msgstr "활동 상태"
 #: model:ir.actions.act_window,name:sale_subscription.mail_activity_type_action_config_subscription
 #: model:ir.ui.menu,name:sale_subscription.subscription_menu_config_activity_type
 msgid "Activity Types"
-msgstr "활동 유형"
+msgstr "활동 종류"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__activity_user_type
 msgid "Activity User Type"
-msgstr "활동 사용자 유형"
+msgstr "활성 사용자 유형"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__channel_ids
 msgid "Add Channels"
-msgstr "채널 추가하기"
+msgstr "채널 추가"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__partner_ids
 msgid "Add Followers"
-msgstr "팔로워 추가하기"
+msgstr "팔로워 추가"
 
 #. module: sale_subscription
-#: model:res.groups,name:sale_subscription.group_sale_subscription_manager
-msgid "Administrator"
-msgstr "관리자"
+#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_stage_view_form
+msgid "Add a description..."
+msgstr "설명 추가..."
+
+#. module: sale_subscription
+#: model_terms:ir.ui.view,arch_db:sale_subscription.wizard_form_view
+msgid "Add in Subscription"
+msgstr "구독 추가"
+
+#. module: sale_subscription
+#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_form
+msgid "Add options to the subscription directly or through a quotation"
+msgstr ""
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_alert_view_form
@@ -1178,13 +855,21 @@ msgstr "알림 이름"
 #: model:ir.ui.menu,name:sale_subscription.menu_sale_subscription_alert
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_alert_view_tree
 msgid "Alerts"
-msgstr "알림"
+msgstr "경고"
 
 #. module: sale_subscription
-#: code:addons/sale_subscription/controllers/portal.py:0
+#: model_terms:ir.actions.act_window,help:sale_subscription.sale_subscription_alert_action
+msgid ""
+"Alerts are used to inform the salesman which subscriptions\n"
+"              need their attention. It can be positive (upsell) or\n"
+"              negative (churn, invoice not paid...)."
+msgstr ""
+
+#. module: sale_subscription
+#: code:addons/sale_subscription/controllers/portal.py:44
 #, python-format
 msgid "All"
-msgstr "전체"
+msgstr "모두"
 
 #. module: sale_subscription
 #: model:ir.model,name:sale_subscription.model_account_analytic_account
@@ -1194,22 +879,15 @@ msgid "Analytic Account"
 msgstr "분석 계정"
 
 #. module: sale_subscription
-#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_alert_view_form
-msgid "Apply On"
-msgstr "적용"
-
-#. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__filter_domain
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_alert_view_form
 msgid "Apply on"
-msgstr "적용"
+msgstr "적용 대상"
 
 #. module: sale_subscription
-#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_alert_view_form
-#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_template_view_form
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_template_view_search
 msgid "Archived"
-msgstr "보존"
+msgstr "아카이브됨"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__activity_user
@@ -1225,15 +903,15 @@ msgstr "첨부 파일 수"
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__automation_id
 msgid "Automated Action"
-msgstr "자동 작업"
+msgstr "자동화된 동작"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_template__auto_close_limit
-msgid "Automatic Closing"
-msgstr "자동 마감"
+msgid "Automatic closing limit"
+msgstr ""
 
 #. module: sale_subscription
-#: code:addons/sale_subscription/models/sale_subscription.py:0
+#: code:addons/sale_subscription/models/sale_subscription.py:734
 #, python-format
 msgid ""
 "Automatic payment failed after multiple attempts. Subscription closed "
@@ -1241,22 +919,19 @@ msgid ""
 msgstr "여러 번 시도한 후 자동 결제가 실패했습니다. 구독이 자동으로 마감됩니다."
 
 #. module: sale_subscription
-#: code:addons/sale_subscription/models/sale_subscription.py:0
+#: code:addons/sale_subscription/models/sale_subscription.py:739
 #, python-format
 msgid "Automatic payment failed. Subscription set to \"To Renew\"."
 msgstr "자동 결제에 실패했습니다. 구독이 \"갱신하기\"으로 설정되었습니다."
 
 #. module: sale_subscription
-#: code:addons/sale_subscription/models/sale_subscription.py:0
+#: code:addons/sale_subscription/models/sale_subscription.py:699
 #, python-format
 msgid ""
 "Automatic payment succeeded. Payment reference: <a href=# data-oe-"
 "model=payment.transaction data-oe-id=%d>%s</a>; Amount: %s. Invoice <a "
-"href=# data-oe-model=account.move data-oe-id=%d>View Invoice</a>."
+"href=# data-oe-model=account.invoice data-oe-id=%d>View Invoice</a>."
 msgstr ""
-"자동 결제가 완료되었습니다. 결제 참조 : <a href=# data-oe-model=payment.transaction data-oe-"
-"id=%d>%s</a>; 금액 : %s. 송장 <a href=# data-oe-model=account.move data-oe-"
-"id=%d>송장 보기</a>."
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__website_published
@@ -1264,8 +939,13 @@ msgid "Available on the Website"
 msgstr "웹 사이트에서 사용 가능"
 
 #. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription__health__bad
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_report__health__bad
+#: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
+msgid "Back"
+msgstr "뒤로"
+
+#. module: sale_subscription
+#: selection:sale.subscription,health:0
+#: selection:sale.subscription.report,health:0
 msgid "Bad"
 msgstr "나쁨"
 
@@ -1280,7 +960,12 @@ msgstr "상태 나쁨"
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__filter_pre_domain
 msgid "Before Update Domain"
-msgstr "도메인 업데이트 전"
+msgstr "도메인을 업데이트 하기 이전에"
+
+#. module: sale_subscription
+#: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
+msgid "Billing:"
+msgstr ""
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__binding_model_id
@@ -1293,11 +978,6 @@ msgid "Binding Type"
 msgstr "바인딩 유형"
 
 #. module: sale_subscription
-#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__binding_view_types
-msgid "Binding View Types"
-msgstr "보기 유형을 묶기"
-
-#. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription__percentage_satisfaction
 msgid ""
 "Calculate the ratio between the number of the best ('great') ratings and the"
@@ -1305,22 +985,20 @@ msgid ""
 msgstr "최고 등급('제일 좋음')의 수와 등급  총 수 사이의 비율을 계산합니다."
 
 #. module: sale_subscription
-#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_close_reason_view_form
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.wizard_form_view
 msgid "Cancel"
 msgstr "취소"
 
 #. module: sale_subscription
-#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_line__product_uom_category_id
-#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_wizard_option__product_uom_category_id
-msgid "Category"
-msgstr "범주"
+#: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
+msgid "Change Payment Method"
+msgstr "지불방식 변경"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
-msgid "Change Payment Method"
-msgstr "결제 방법 변경"
+msgid "Change payment method"
+msgstr "지불방식 변경"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
@@ -1337,23 +1015,18 @@ msgstr "하위 작업"
 msgid ""
 "Child server actions that will be executed. Note that the last return "
 "returned action value will be used as global return value."
-msgstr "종속 서버 작업이 실행됩니다. 주의 : 전역 반환 값으로 사용할 반환된 작업 값을 마지막에 반환합니다."
-
-#. module: sale_subscription
-#: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
-msgid "Choose Payment Method"
-msgstr "결제 방법 선택"
+msgstr "보조 서버 작업이 실행됩니다. 주의 : 전역 반환 값으로 사용할 반환된 작업 값을 마지막에 반환합니다."
 
 #. module: sale_subscription
 #. openerp-web
-#: code:addons/sale_subscription/static/src/js/tours/sale_subscription.js:0
+#: code:addons/sale_subscription/static/src/js/tour.js:68
 #, python-format
 msgid "Choose a product name.<br/><i>(e.g. eLearning Access)</i>"
-msgstr "제품명을 선택하세요.<br/><i>(예. 온라인학습 접근권)</i>"
+msgstr "제품명을 선택하세요.<br/><i>(예. 이러닝 접근)</i>"
 
 #. module: sale_subscription
 #. openerp-web
-#: code:addons/sale_subscription/static/src/js/tours/sale_subscription.js:0
+#: code:addons/sale_subscription/static/src/js/tour.js:41
 #, python-format
 msgid ""
 "Choose the recurrence for this template.<br/><i>(e.g. 1 time per Year)</i>"
@@ -1361,21 +1034,20 @@ msgstr "이 서식의 반복 주기를 선택하십시오. <br/><i>(예. 연간 
 
 #. module: sale_subscription
 #. openerp-web
-#: code:addons/sale_subscription/static/src/js/tours/sale_subscription.js:0
+#: code:addons/sale_subscription/static/src/js/tour.js:22
 #, python-format
 msgid "Click here to create <b>your first subscription template</b>"
 msgstr "<b>귀하의 첫 번째 구독 서식</b>을 만들려면 여기를 클릭하십시오."
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_template__user_closable
-msgid "Closable by Customer"
-msgstr "고객이 마감 가능"
+msgid "Closable by customer"
+msgstr ""
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_form
-#: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
 msgid "Close"
-msgstr "닫기"
+msgstr "마감"
 
 #. module: sale_subscription
 #: model:ir.actions.act_window,name:sale_subscription.sale_subscription_close_reason_wizard_action
@@ -1394,17 +1066,22 @@ msgid "Close Reasons"
 msgstr "마감 사유"
 
 #. module: sale_subscription
-#: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
-msgid "Close Subscription"
-msgstr "구독 마감"
+#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_form
+msgid "Close the subscription"
+msgstr ""
 
 #. module: sale_subscription
-#: code:addons/sale_subscription/controllers/portal.py:0
+#: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
+msgid "Close your subscription"
+msgstr ""
+
+#. module: sale_subscription
+#: code:addons/sale_subscription/controllers/portal.py:47
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_search
 #: model:sale.subscription.stage,name:sale_subscription.sale_subscription_stage_closed
 #, python-format
 msgid "Closed"
-msgstr "종료됨"
+msgstr "마감됨"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_report_search
@@ -1413,7 +1090,7 @@ msgid "Closed subscriptions"
 msgstr "구독 종료됨"
 
 #. module: sale_subscription
-#: code:addons/sale_subscription/controllers/portal.py:0
+#: code:addons/sale_subscription/controllers/portal.py:223
 #, python-format
 msgid "Closing text : "
 msgstr "마감 문구 :"
@@ -1436,20 +1113,18 @@ msgstr "변경 사항을 트리거하는 쉼표로 구분된 필드 이름의 �
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__company_id
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__company_id
-#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_line__company_id
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__company_id
-#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_template__company_id
 msgid "Company"
 msgstr "회사"
 
 #. module: sale_subscription
 #: model:ir.ui.menu,name:sale_subscription.menu_sale_subscription_config
 msgid "Configuration"
-msgstr "환경 설정"
+msgstr "구성"
 
 #. module: sale_subscription
 #. openerp-web
-#: code:addons/sale_subscription/static/src/js/tours/sale_subscription.js:0
+#: code:addons/sale_subscription/static/src/js/tour.js:18
 #, python-format
 msgid "Configure your subscription templates here"
 msgstr "구독 서식을 여기에서 구성하십시오"
@@ -1466,14 +1141,6 @@ msgid "Contact"
 msgstr "연락처"
 
 #. module: sale_subscription
-#: model:ir.model.fields,help:sale_subscription.field_sale_subscription_line__product_uom_category_id
-#: model:ir.model.fields,help:sale_subscription.field_sale_subscription_wizard_option__product_uom_category_id
-msgid ""
-"Conversion between Units of Measure can only occur if they belong to the "
-"same category. The conversion will be made based on the ratios."
-msgstr "단위 사이의 변환은 동일 분류 항목에서만 가능합니다. 변환은 비율에 따라 이루어집니다."
-
-#. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__country_id
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__country_id
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_report_search
@@ -1487,15 +1154,19 @@ msgid "Create & View Quotation"
 msgstr "견적서 생성 및 보기"
 
 #. module: sale_subscription
-#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_template_view_form
+#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_form
+msgid "Create A Renewal Quotation"
+msgstr ""
+
+#. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_form
 msgid "Create Invoice"
-msgstr "청구서 작성하기"
+msgstr "청구서 작성"
 
 #. module: sale_subscription
 #: model_terms:ir.actions.act_window,help:sale_subscription.product_action_subscription
 msgid "Create a new product"
-msgstr "새 상품 만들기"
+msgstr "새로운 상품 작성"
 
 #. module: sale_subscription
 #: model_terms:ir.actions.act_window,help:sale_subscription.sale_subscription_action
@@ -1506,7 +1177,7 @@ msgstr "새 구독 만들기"
 #. module: sale_subscription
 #: model_terms:ir.actions.act_window,help:sale_subscription.sale_subscription_alert_action
 msgid "Create a new subscription alert"
-msgstr "새 구독 알림 만들기"
+msgstr "새 구독 알람 만들기"
 
 #. module: sale_subscription
 #: model_terms:ir.actions.act_window,help:sale_subscription.sale_subscription_stage_action
@@ -1519,18 +1190,14 @@ msgid "Create a new template of subscription"
 msgstr "새 구독 서식 만들기"
 
 #. module: sale_subscription
-#: model_terms:ir.ui.view,arch_db:sale_subscription.wizard_form_view
+#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_form
 msgid ""
-"Create a quotation with new products and send it to the customer for approval.\n"
-"                    When the quotation is confirmed, the products will be added to the subscription.\n"
-"                    Quotation prices will be prorated to the remaining time of the current invoicing period."
+"Create a sale order that will overwrite this subscription when confirmed "
+"(renewal quotation)"
 msgstr ""
-"새 제품으로 견적을 작성하여 고객에게 보내 승인을 받습니다.\n"
-"                     견적이 확정되면 제품이 구독을 추가하게 됩니다.\n"
-"                     견적 가격은 현재 송장 발행 기간의 남은 시간까지 비례하여 책정됩니다."
 
 #. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_alert__action__next_activity
+#: selection:sale.subscription.alert,action:0
 msgid "Create next activity"
 msgstr "다음 활동 만들기"
 
@@ -1547,7 +1214,7 @@ msgstr ""
 
 #. module: sale_subscription
 #. openerp-web
-#: code:addons/sale_subscription/static/src/js/tours/sale_subscription.js:0
+#: code:addons/sale_subscription/static/src/js/tour.js:57
 #, python-format
 msgid "Create your first subscription product here"
 msgstr "여기에서 첫 번째 구독 상품을 만드십시오"
@@ -1569,7 +1236,7 @@ msgstr "대상 모델 생성/작성"
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_wizard__create_uid
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_wizard_option__create_uid
 msgid "Created by"
-msgstr "작성인"
+msgstr "작성자"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__create_date
@@ -1586,7 +1253,7 @@ msgid "Created on"
 msgstr "작성일"
 
 #. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_order__subscription_management__create
+#: selection:sale.order,subscription_management:0
 msgid "Creation"
 msgstr "생성"
 
@@ -1598,19 +1265,19 @@ msgid ""
 "Renewal: The Sales Order replaced the subscription's content with its own"
 msgstr ""
 "생성 : 판매 주문에서 구독을 생성\n"
-"연쇄판매 : 판매 주문이 구독에 내역을 추가\n"
+"상향 판매 : 판매 주문이 구독에 내역을 추가\n"
 "갱신 : 판매 주문이 구독 내용을 자체 내용으로 교체"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__currency_id
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__currency_id
 msgid "Currency"
-msgstr "통화"
+msgstr "환율"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
-msgid "Current Plan:"
-msgstr "현재 계획 :"
+msgid "Current plan:"
+msgstr ""
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__partner_id
@@ -1624,6 +1291,11 @@ msgstr "고객"
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__commercial_partner_id
 msgid "Customer Company"
 msgstr "고객 회사"
+
+#. module: sale_subscription
+#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_template_view_form
+msgid "Customer Portal"
+msgstr "고객 포털"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__customer_ids
@@ -1642,19 +1314,14 @@ msgid "Date of Next Invoice"
 msgstr "다음 청구일"
 
 #. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_template__recurring_rule_type__daily
-msgid "Days"
+#: selection:sale.subscription.template,recurring_rule_type:0
+msgid "Day(s)"
 msgstr "일"
 
 #. module: sale_subscription
 #: model_terms:ir.actions.act_window,help:sale_subscription.sale_subscription_action_pending
 msgid "Define a new subscription"
 msgstr "새 구독 정의"
-
-#. module: sale_subscription
-#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_alert_view_form
-msgid "Delay After Trigger"
-msgstr "트리거 후 지연"
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription_alert__trg_date_range
@@ -1670,7 +1337,7 @@ msgstr ""
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__trg_date_range
 msgid "Delay after trigger date"
-msgstr "트리거 날짜 이후 지연"
+msgstr "작동일 이후 지연"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__trg_date_range_type
@@ -1680,22 +1347,23 @@ msgstr "지연 유형"
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__description
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_line__name
+#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_stage__description
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_wizard_option__name
 msgid "Description"
-msgstr "설명"
-
-#. module: sale_subscription
-#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_form
-msgid "Disc.%"
-msgstr "할인율 %"
+msgstr "내용"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_line__discount
 msgid "Discount (%)"
-msgstr "할인율 (%)"
+msgstr "할인율(%)"
 
 #. module: sale_subscription
-#: code:addons/sale_subscription/models/sale_subscription.py:0
+#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_wizard__date_from
+msgid "Discount Date"
+msgstr ""
+
+#. module: sale_subscription
+#: code:addons/sale_subscription/models/sale_subscription.py:190
 #, python-format
 msgid ""
 "Discount computation failed because the upsell date is not between the next "
@@ -1717,7 +1385,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_wizard__display_name
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_wizard_option__display_name
 msgid "Display Name"
-msgstr "표시 이름"
+msgstr "제목"
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription_template__bad_health_domain
@@ -1730,10 +1398,14 @@ msgid "Domain used to change subscription's Kanban state with a 'Good' rating"
 msgstr "구독의 칸반 상태를 '좋음' 등급으로 변경하는 데 사용되는 도메인"
 
 #. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_template__payment_mode__draft_invoice
 #: model:sale.subscription.stage,name:sale_subscription.sale_subscription_stage_draft
 msgid "Draft"
-msgstr "초안"
+msgstr "임시"
+
+#. module: sale_subscription
+#: selection:sale.subscription.template,payment_mode:0
+msgid "Draft invoice"
+msgstr ""
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__activity_date_deadline_range
@@ -1754,7 +1426,7 @@ msgstr "기간"
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__template_id
 msgid "Email Template"
-msgstr "이메일 서식"
+msgstr "이메일 템플릿(서식)"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_template__recurring_rule_count
@@ -1771,22 +1443,20 @@ msgstr "종료일"
 
 #. module: sale_subscription
 #. openerp-web
-#: code:addons/sale_subscription/static/src/js/tours/sale_subscription.js:0
+#: code:addons/sale_subscription/static/src/js/tour.js:34
 #, python-format
 msgid "Enter a name for this template.<br/><i>(e.g. eLearning Yearly)</i>"
 msgstr "이 서식의 이름을 입력하십시오. <br/><i>(예. 연단위 온라인학습)</i>"
 
 #. module: sale_subscription
-#: model:ir.model.fields,help:sale_subscription.field_sale_subscription_stage__description
-msgid ""
-"Enter here the internal requirements for this stage. It will appear as a "
-"tooltip over the stage's name."
-msgstr "이 단계의 내부 요구 사항을 여기에 입력하십시오. 단계 이름 위에 툴팁으로 나타납니다."
+#: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
+msgid "Every:"
+msgstr ""
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_report_search
 msgid "Expired"
-msgstr "만료됨"
+msgstr "만료 됨"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__xml_id
@@ -1794,7 +1464,7 @@ msgid "External ID"
 msgstr "외부 ID"
 
 #. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_template__recurring_rule_boundary__limited
+#: selection:sale.subscription.template,recurring_rule_boundary:0
 msgid "Fixed"
 msgstr "고정"
 
@@ -1819,10 +1489,10 @@ msgstr "팔로워 (채널)"
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__message_partner_ids
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_template__message_partner_ids
 msgid "Followers (Partners)"
-msgstr "팔로워 (협력사)"
+msgstr "팔로워 (파트너)"
 
 #. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_template__recurring_rule_boundary__unlimited
+#: selection:sale.subscription.template,recurring_rule_boundary:0
 msgid "Forever"
 msgstr "영원히"
 
@@ -1832,25 +1502,15 @@ msgid "Future Activities"
 msgstr "향후 활동"
 
 #. module: sale_subscription
-#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_form
-msgid "Generate Invoice"
-msgstr "송장 생성"
-
-#. module: sale_subscription
-#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_stage_view_form
-msgid "Give your team the requirements to move a subscription to this stage."
-msgstr "이 단계로 구독을 이동하기 위한 요구 사항을 팀에 제공하십시오."
-
-#. module: sale_subscription
 #. openerp-web
-#: code:addons/sale_subscription/static/src/js/tours/sale_subscription.js:0
+#: code:addons/sale_subscription/static/src/js/tour.js:62
 #, python-format
 msgid "Go ahead and create a new product"
 msgstr "계속해서 새로운 상품을 만드십시오"
 
 #. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription__health__done
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_report__health__done
+#: selection:sale.subscription,health:0
+#: selection:sale.subscription.report,health:0
 msgid "Good"
 msgstr "좋음"
 
@@ -1874,11 +1534,6 @@ msgid "Group of Subscription"
 msgstr "구독 그룹"
 
 #. module: sale_subscription
-#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__groups_id
-msgid "Groups"
-msgstr "그룹"
-
-#. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_kanban
 msgid "Happy face"
 msgstr "행복한 표정"
@@ -1897,7 +1552,7 @@ msgstr "상태 확인"
 #. module: sale_subscription
 #: model:ir.module.category,description:sale_subscription.module_category_subscription_management
 msgid "Helps you handle subscriptions and recurring invoicing."
-msgstr "구독 및 재발생하는 청구서 발행 관리."
+msgstr "구독 및 재발생하는 청구서발행 관리."
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
@@ -1930,30 +1585,22 @@ msgid "ID of the action if defined in a XML file"
 msgstr "XML 파일에 정의된 작업의 ID입니다."
 
 #. module: sale_subscription
-#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__activity_exception_icon
-msgid "Icon"
-msgstr "아이콘"
-
-#. module: sale_subscription
-#: model:ir.model.fields,help:sale_subscription.field_sale_subscription__activity_exception_icon
-msgid "Icon to indicate an exception activity."
-msgstr "예외활동을 표시하기 위한 아이콘"
+#: model:ir.model.fields,help:sale_subscription.field_sale_subscription__message_unread
+#: model:ir.model.fields,help:sale_subscription.field_sale_subscription_template__message_unread
+msgid "If checked new messages require your attention."
+msgstr "만약 선택하였으면, 새 메시지에 주의를 기울여야 합니다."
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription__message_needaction
-#: model:ir.model.fields,help:sale_subscription.field_sale_subscription__message_unread
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription_template__message_needaction
-#: model:ir.model.fields,help:sale_subscription.field_sale_subscription_template__message_unread
 msgid "If checked, new messages require your attention."
-msgstr "선택하면 새로운 메시지를 주목할 필요가 있습니다."
+msgstr "만약 선택하였으면, 새 메시지에 주의를 기울여야 합니다."
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription__message_has_error
-#: model:ir.model.fields,help:sale_subscription.field_sale_subscription__message_has_sms_error
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription_template__message_has_error
-#: model:ir.model.fields,help:sale_subscription.field_sale_subscription_template__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr "이 옵션을 선택하면 일부 정보가 전달 오류를 생성합니다."
+msgstr "이 옵션을 선택하면 일부 메시지에 배달 오류가 발생합니다."
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription_template__user_closable
@@ -1963,29 +1610,29 @@ msgstr "선택하면 사용자는 프론트 엔드에서 자신의 계정을 폐
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription__payment_token_id
-msgid "If not set, the automatic payment will fail."
-msgstr ""
+msgid "If not set, the default payment token of the partner will be used."
+msgstr "설정하지 않으면 협력사의 기본 결제 토큰이 사용됩니다."
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription_alert__filter_domain
 msgid ""
 "If present, this condition must be satisfied before executing the action "
 "rule."
-msgstr "작업 규칙을 실행하기 전에 이 조건을 만족해야 합니다."
+msgstr "존재하려면 동작 규칙을 실행하기 전에 이 조건을 만족해야 합니다."
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription_alert__filter_pre_domain
 msgid ""
 "If present, this condition must be satisfied before the update of the "
 "record."
-msgstr "레코드 갱신 전에 이 조건을 만족해야 합니다."
+msgstr "존재하려면 기록 갱신 전에 이 조건을 만족해야 합니다."
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription__date
 msgid ""
-"If set in advance, the subscription will be set to renew 1 month before the "
-"date and will be closed on the date set in this field."
-msgstr "미리 설정된 경우 구독은 날짜 1 개월 전에 갱신되도록 설정되며 이 필드에 설정된 날짜에 마감됩니다."
+"If set in advance, the subscription will be set to pending 1 month before "
+"the date and will be closed on the date set in this field."
+msgstr ""
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_product_product__recurring_invoice
@@ -2003,18 +1650,11 @@ msgstr ""
 "설정된 경우 이 서식을 사용하여 구독하면 이 분개장에 송장이 발행됩니다. 그렇지 않으면 순서가 가장 낮은 영업 분개장이 사용됩니다."
 
 #. module: sale_subscription
-#: model:ir.model.fields,help:sale_subscription.field_sale_subscription_template__auto_close_limit
-msgid ""
-"If the chosen payment method has failed to renew the subscription after this"
-" time, the subscription is automatically closed."
-msgstr "이 시간 이후에 선택한 결제 방법으로 구독을 갱신하지 못하면 구독이 자동으로 종료됩니다."
-
-#. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
 msgid ""
-"If you confirm, your subscription will be closed right away. Your current "
+"If you confirm, you subscription will be closed right away. Your current "
 "invoicing period is valid until"
-msgstr "확인하면 구독이 즉시 종료됩니다. 현재 송장 유효 발행 기간"
+msgstr ""
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
@@ -2026,7 +1666,7 @@ msgstr "다시 열려면, "
 msgid ""
 "If you wish to reopen it, you can pay your invoice for the current invoicing"
 " period."
-msgstr "다시 열려면 현재 송장 발행 기간 안에 송장을 결제하면 됩니다."
+msgstr "다시 열려면 현재 송장 발행 기간 동안 송장을 결제하면 됩니다."
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_template_view_kanban
@@ -2034,13 +1674,13 @@ msgid "In #{kanban_getcolorname(record.color.raw_value)}"
 msgstr "In #{kanban_getcolorname(record.color.raw_value)}"
 
 #. module: sale_subscription
-#: code:addons/sale_subscription/controllers/portal.py:0
+#: code:addons/sale_subscription/controllers/portal.py:45
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__in_progress
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_stage__in_progress
 #: model:sale.subscription.stage,name:sale_subscription.sale_subscription_stage_in_progress
 #, python-format
 msgid "In Progress"
-msgstr "진행 중"
+msgstr "진행중"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__industry_id
@@ -2051,19 +1691,40 @@ msgid "Industry"
 msgstr "산업"
 
 #. module: sale_subscription
+#: model_terms:ir.ui.view,arch_db:sale_subscription.wizard_form_view
+msgid ""
+"Insert the options directly, they will be invoiced on the next invoice date."
+msgstr ""
+
+#. module: sale_subscription
+#: selection:sale.subscription.template,payment_mode:0
+msgid "Invoice"
+msgstr "청구서"
+
+#. module: sale_subscription
+#: selection:sale.subscription.template,payment_mode:0
+msgid "Invoice & try to charge"
+msgstr ""
+
+#. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__invoice_count
 msgid "Invoice Count"
 msgstr "송장 수"
 
 #. module: sale_subscription
-#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_template_view_form
-msgid "Invoice Email"
-msgstr "송장 이메일"
-
-#. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_template__invoice_mail_template_id
 msgid "Invoice Email Template"
 msgstr "송장 이메일 서식"
+
+#. module: sale_subscription
+#: model:ir.model,name:sale_subscription.model_account_invoice_line
+msgid "Invoice Line"
+msgstr "청구서 라인"
+
+#. module: sale_subscription
+#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__recurring_invoice_line_ids
+msgid "Invoice Lines"
+msgstr "청구서 라인"
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription__recurring_rule_type
@@ -2078,18 +1739,28 @@ msgid "Invoice for subscription ${ctx.get('code')}"
 msgstr "${ctx.get('code')} 구독에 대한 청구서"
 
 #. module: sale_subscription
+#: selection:sale.subscription.template,payment_mode:0
+msgid "Invoice only on successful payment"
+msgstr ""
+
+#. module: sale_subscription
+#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_template_view_form
+msgid "Invoice period"
+msgstr ""
+
+#. module: sale_subscription
 #: model:mail.template,report_name:sale_subscription.mail_template_subscription_invoice
 msgid ""
-"Invoice_${(object.name or '').replace('/','_')}${object.state == 'draft' and"
-" '_draft' or ''}"
+"Invoice_${(object.number or '').replace('/','_')}${object.state == 'draft' "
+"and '_draft' or ''}"
 msgstr ""
-"Invoice_${(object.name or '').replace('/','_')}${object.state == 'draft' and"
-" '_draft' or ''}"
+"Invoice_${(object.number or '').replace('/','_')}${object.state == 'draft' "
+"and '_draft' or ''}"
 
 #. module: sale_subscription
 #: model:mail.template,report_name:sale_subscription.email_payment_success
-msgid "Invoice_${ctx.get('code')}_${format_date(ctx.get('previous_date'))}"
-msgstr "Invoice_${ctx.get('code')}_${format_date(ctx.get('previous_date'))}"
+msgid "Invoice_${ctx.get('code')}_${ctx.get('previous_date')}"
+msgstr ""
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_form
@@ -2097,39 +1768,21 @@ msgid "Invoices"
 msgstr "청구서"
 
 #. module: sale_subscription
-#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_template_view_form
-msgid "Invoicing"
-msgstr "청구"
-
-#. module: sale_subscription
-#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_template__recurring_interval
-msgid "Invoicing Period"
-msgstr "청구 기간"
-
-#. module: sale_subscription
-#: code:addons/sale_subscription/models/sale_order.py:0
-#: code:addons/sale_subscription/models/sale_order.py:0
-#: code:addons/sale_subscription/models/sale_order.py:0
-#: code:addons/sale_subscription/models/sale_subscription.py:0
+#: code:addons/sale_subscription/models/sale_order.py:162
 #, python-format
-msgid "Invoicing period"
-msgstr ""
+msgid "Invoicing period: %s - %s"
+msgstr "청구 기간 : %s - %s"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__message_is_follower
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_template__message_is_follower
 msgid "Is Follower"
-msgstr "팔로워 여부"
+msgstr "팔로워입니다"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_template_view_form
 msgid "Journal"
 msgstr "분개장"
-
-#. module: sale_subscription
-#: model:ir.model,name:sale_subscription.model_account_move_line
-msgid "Journal Item"
-msgstr "분개 항목"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__kpi_1month_mrr_delta
@@ -2164,7 +1817,7 @@ msgstr "KPI 3개월 MRR 델타"
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_wizard____last_update
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_wizard_option____last_update
 msgid "Last Modified on"
-msgstr "최근 수정일"
+msgstr "최근 수정"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__last_run
@@ -2197,13 +1850,13 @@ msgstr "최근 갱신한 사람"
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_wizard__write_date
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_wizard_option__write_date
 msgid "Last Updated on"
-msgstr "최근 갱신일"
+msgstr "최근 갱신 날짜"
 
 #. module: sale_subscription
-#: code:addons/sale_subscription/models/sale_subscription.py:0
+#: code:addons/sale_subscription/models/sale_subscription.py:197
 #, python-format
 msgid "Last invoice date: "
-msgstr "최근 청구서 발행일 :"
+msgstr "최근 송장 발행일 :"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_search
@@ -2218,48 +1871,43 @@ msgstr "최근 평가 : 매우 불만족"
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_kanban
 msgid "Latest Rating: Not Satisfied"
-msgstr "최근 평가 : 만족하지 않음"
+msgstr "최근 평가:만족하지 않음"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_kanban
 msgid "Latest Rating: Satisfied"
-msgstr "최근 평가 : 만족"
+msgstr "최근 평가: 만족"
 
 #. module: sale_subscription
 #. openerp-web
-#: code:addons/sale_subscription/static/src/js/tours/sale_subscription.js:0
+#: code:addons/sale_subscription/static/src/js/tour.js:27
 #, python-format
 msgid "Let's create your first subscription template."
 msgstr "첫 번째 구독 서식을 만들어 봅시다."
 
 #. module: sale_subscription
 #. openerp-web
-#: code:addons/sale_subscription/static/src/js/tours/sale_subscription.js:0
+#: code:addons/sale_subscription/static/src/js/tour.js:52
 #, python-format
 msgid "Let's go to the catalog to create our first subscription product"
-msgstr "상품안내서로 가서 첫 번째 구독 상품을 만들어 봅시다"
+msgstr "범주로 가서 첫 번째 구독 상품을 만들어 봅시다"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__link_field_id
 msgid "Link using field"
-msgstr "필드를 사용하여 연결"
+msgstr "필드를 사용하여 링크"
 
 #. module: sale_subscription
 #. openerp-web
-#: code:addons/sale_subscription/static/src/js/tours/sale_subscription.js:0
+#: code:addons/sale_subscription/static/src/js/tour.js:75
 #, python-format
 msgid "Link your product to a subscription template in this tab"
 msgstr "이 탭에서 제품을 구독 서식에 연결"
 
 #. module: sale_subscription
-#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__sms_mass_keep_log
-msgid "Log a note"
-msgstr "노트 기록"
-
-#. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_alert_view_form
 msgid "Log a note..."
-msgstr "노트 기록..."
+msgstr "메모 기록 ..."
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_alert_view_form
@@ -2303,25 +1951,35 @@ msgid "Main Attachment"
 msgstr "주요 첨부 파일"
 
 #. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_template__payment_mode__manual
-msgid "Manually"
+#: model:res.groups,name:sale_subscription.group_sale_subscription_manager
+msgid "Manage Subscriptions"
+msgstr "구독관리"
+
+#. module: sale_subscription
+#: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
+msgid "Manage your payment methods"
+msgstr "지불 방법 관리"
+
+#. module: sale_subscription
+#: selection:sale.subscription.template,payment_mode:0
+msgid "Manual"
 msgstr "수동"
 
 #. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_alert__action__set_to_renew
+#: selection:sale.subscription.alert,action:0
 msgid "Mark as To Renew"
 msgstr "갱신하기로 표시"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__starred_user_ids
 msgid "Members"
-msgstr "회원"
+msgstr "참여자"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__message_has_error
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_template__message_has_error
 msgid "Message Delivery error"
-msgstr "메시지 전송 오류"
+msgstr "메시지 배달 오류"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__message_ids
@@ -2349,28 +2007,27 @@ msgstr "생성 / 업데이트 된 모델을 기록하십시오. 이 필드를 �
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription_alert__model_id
 msgid "Model on which the server action runs."
-msgstr "서버 동작이 실행되는 모델"
+msgstr "서버 작업이 실행되는 모델"
 
 #. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_alert__trigger_condition__on_create_or_write
+#: selection:sale.subscription.alert,trigger_condition:0
 msgid "Modification"
 msgstr "수정"
 
 #. module: sale_subscription
-#: model:ir.model.fields,field_description:sale_subscription.field_account_move_line__subscription_mrr
+#: model:product.product,uom_name:sale_subscription.product_office_cleaning
+#: model:product.template,uom_name:sale_subscription.product_office_cleaning_product_template
+#: selection:sale.subscription.template,recurring_rule_type:0
+#: model:uom.uom,name:sale_subscription.subscription_uom_month
+msgid "Month(s)"
+msgstr "월"
+
+#. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__recurring_monthly
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__recurring_monthly
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_snapshot__recurring_monthly
 msgid "Monthly Recurring Revenue"
-msgstr "월별 반복 수익(MRR)"
-
-#. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_template__recurring_rule_type__monthly
-#: model:product.product,uom_name:sale_subscription.product_office_cleaning
-#: model:product.template,uom_name:sale_subscription.product_office_cleaning_product_template
-#: model:uom.uom,name:sale_subscription.subscription_uom_month
-msgid "Months"
-msgstr "월"
+msgstr "월별 반복 수입"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_report_search
@@ -2379,8 +2036,9 @@ msgid "My Subscriptions"
 msgstr "나의 구독"
 
 #. module: sale_subscription
-#: code:addons/sale_subscription/controllers/portal.py:0
+#: code:addons/sale_subscription/controllers/portal.py:41
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__name
+#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_close_reason__name
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__name
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_template__name
 #, python-format
@@ -2388,8 +2046,8 @@ msgid "Name"
 msgstr "이름"
 
 #. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription__health__normal
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_report__health__normal
+#: selection:sale.subscription,health:0
+#: selection:sale.subscription.report,health:0
 msgid "Neutral"
 msgstr "중립"
 
@@ -2399,7 +2057,7 @@ msgid "Neutral face"
 msgstr "중립적인 얼굴"
 
 #. module: sale_subscription
-#: code:addons/sale_subscription/controllers/portal.py:0
+#: code:addons/sale_subscription/controllers/portal.py:40
 #, python-format
 msgid "Newest"
 msgstr "최신"
@@ -2420,15 +2078,15 @@ msgid "Next Activity Type"
 msgstr "다음 활동 유형"
 
 #. module: sale_subscription
-#: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
-msgid "Next Invoice:"
-msgstr "다음 청구서 :"
-
-#. module: sale_subscription
-#: code:addons/sale_subscription/models/sale_subscription.py:0
+#: code:addons/sale_subscription/models/sale_subscription.py:196
 #, python-format
 msgid "Next invoice date: "
-msgstr "다음 청구서 발행일 "
+msgstr "다음 송장 발행일 "
+
+#. module: sale_subscription
+#: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
+msgid "Next invoice:"
+msgstr ""
 
 #. module: sale_subscription
 #: model_terms:ir.actions.act_window,help:sale_subscription.product_template_action_subscription
@@ -2438,18 +2096,25 @@ msgstr "상품을 찾을 수 없습니다"
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__activity_note
 msgid "Note"
-msgstr "노트"
+msgstr "메모"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__message_needaction_counter
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_template__message_needaction_counter
 msgid "Number of Actions"
-msgstr "작업 수"
+msgstr "작업 횟수"
+
+#. module: sale_subscription
+#: model:ir.model.fields,help:sale_subscription.field_sale_subscription_template__auto_close_limit
+msgid ""
+"Number of days before a subscription gets closed when the chosen payment "
+"mode trigger automatically the payment."
+msgstr ""
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__message_has_error_counter
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_template__message_has_error_counter
-msgid "Number of errors"
+msgid "Number of error"
 msgstr "오류 횟수"
 
 #. module: sale_subscription
@@ -2462,7 +2127,7 @@ msgstr "작업이 필요한 메시지 수"
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription__message_has_error_counter
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription_template__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr "전송 오류 메시지 수"
+msgstr "배달 오류 메시지 수"
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription__message_unread_counter
@@ -2474,12 +2139,9 @@ msgstr "읽지 않은 메시지 수"
 #: model_terms:ir.actions.act_window,help:sale_subscription.sale_subscription_action_pending
 msgid ""
 "Odoo automatically sets subscriptions to be renewed in a pending\n"
-"            state. After the negotiation, the salesman should close or renew\n"
+"            state. After the negociation, the salesman should close or renew\n"
 "            pending subscriptions."
 msgstr ""
-"Odoo는 보류 중인 상태에서 갱신할 구독을 자동으로 설정합니다. \n"
-"          협상이 끝난 후 영업 사원은 보류 중인 구독을 \n"
-"          마감하거나 갱신해야 합니다."
 
 #. module: sale_subscription
 #: model:product.product,name:sale_subscription.product_office_cleaning
@@ -2499,17 +2161,22 @@ msgid "On Change Fields Trigger"
 msgstr "필드 변경을 위한 트리거"
 
 #. module: sale_subscription
+#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_form
+msgid "Online Preview"
+msgstr ""
+
+#. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription_alert__help
 msgid ""
 "Optional help text for the users with a description of the target view, such"
 " as its usage and purpose."
-msgstr "대상 보기에 대한 설명, 예를 들면 사용 및 용도가 있는 사용자를 위한 선택적 도움말."
+msgstr "대상 보기에 대한 설명(예 : 사용 및 용도)이 있는 사용자를 위한 선택적 도움말."
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_wizard__option_lines
 #: model_terms:ir.ui.view,arch_db:sale_subscription.wizard_form_view
 msgid "Options"
-msgstr "선택 사항"
+msgstr "옵션"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_order_view_tree_subscription
@@ -2522,36 +2189,31 @@ msgid "Other"
 msgstr "기타"
 
 #. module: sale_subscription
-#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_form
-msgid "Other Info"
-msgstr "기타 정보"
-
-#. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_alert_view_form
 msgid "Over"
 msgstr "초과"
 
 #. module: sale_subscription
+#: selection:sale.subscription,activity_state:0
+msgid "Overdue"
+msgstr "기한이 지난"
+
+#. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
-msgid "Pay With"
+msgid "Pay with"
 msgstr "결제 방법"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__payment_mode
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_template__payment_mode
 msgid "Payment Mode"
-msgstr "결제 방법"
+msgstr "지불 방법"
 
 #. module: sale_subscription
 #: model:ir.model,name:sale_subscription.model_payment_token
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__payment_token_id
 msgid "Payment Token"
 msgstr "결제 토큰"
-
-#. module: sale_subscription
-#: model:ir.model,name:sale_subscription.model_payment_transaction
-msgid "Payment Transaction"
-msgstr "결제 거래"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
@@ -2571,17 +2233,22 @@ msgstr "보류중인 구독"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
-msgid "Plan Details"
-msgstr "계획 세부 사항"
+msgid "Plan details"
+msgstr ""
 
 #. module: sale_subscription
-#: code:addons/sale_subscription/models/sale_subscription.py:0
+#: selection:sale.subscription,activity_state:0
+msgid "Planned"
+msgstr "계획됨"
+
+#. module: sale_subscription
+#: code:addons/sale_subscription/models/sale_subscription.py:444
 #, python-format
 msgid "Please define Date of Next Invoice of \"%s\"."
 msgstr "\"%s\"의 다음 청구 날짜를 정의하십시오."
 
 #. module: sale_subscription
-#: code:addons/sale_subscription/models/sale_subscription.py:0
+#: code:addons/sale_subscription/models/sale_subscription.py:440
 #, python-format
 msgid "Please define a sale journal for the company \"%s\"."
 msgstr "\"%s\" 회사에 대한 판매 분개 항목을 정의하십시오."
@@ -2597,14 +2264,13 @@ msgstr "가격표"
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__product_id
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_template__product_ids
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_wizard_option__product_id
-#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_search
 msgid "Product"
 msgstr "상품"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__categ_id
 msgid "Product Category"
-msgstr "상품 종류"
+msgstr "상품 범주"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_template__product_count
@@ -2615,7 +2281,7 @@ msgstr "상품 수"
 #: model:ir.model,name:sale_subscription.model_product_template
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__product_tmpl_id
 msgid "Product Template"
-msgstr "상품 서식"
+msgstr "상품 양식"
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_product_product__subscription_template_id
@@ -2625,10 +2291,9 @@ msgstr "선택한 서식에 상품이 포함됩니다"
 
 #. module: sale_subscription
 #: model:ir.actions.act_window,name:sale_subscription.product_template_action_subscription
-#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_alert_view_form
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_template_view_form
 msgid "Products"
-msgstr "제품"
+msgstr "상품"
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription_alert__link_field_id
@@ -2658,12 +2323,7 @@ msgstr "청구된 수량."
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__rating_ids
 msgid "Rating"
-msgstr "등급"
-
-#. module: sale_subscription
-#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__rating_avg
-msgid "Rating Average"
-msgstr "평균 등급"
+msgstr "평가"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_stage__rating_template_id
@@ -2673,22 +2333,22 @@ msgstr "평가용 이메일 서식"
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__rating_last_feedback
 msgid "Rating Last Feedback"
-msgstr "최근 의견 등급"
+msgstr "최근 피드백을 평가"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__rating_last_image
 msgid "Rating Last Image"
-msgstr "최근 이미지 등급"
+msgstr "최근 이미지 평가"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__rating_last_value
 msgid "Rating Last Value"
-msgstr "최근 값 등급"
+msgstr "최근 값 평가"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__rating_operator
 msgid "Rating Operator"
-msgstr "등급 담당자"
+msgstr "등급 연산자"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__rating_percentage
@@ -2703,10 +2363,9 @@ msgstr "만족도 등급"
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__rating_count
 msgid "Rating count"
-msgstr "등급 수 "
+msgstr "평가 수 "
 
 #. module: sale_subscription
-#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_close_reason__name
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_close_reason_view_form
 msgid "Reason"
 msgstr "사유"
@@ -2714,7 +2373,7 @@ msgstr "사유"
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription__rating_last_feedback
 msgid "Reason of the rating"
-msgstr "등급 사유"
+msgstr "평가를 하는 이유"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__recurring_rule_type
@@ -2733,11 +2392,6 @@ msgid "Recurrence:"
 msgstr "반복 :"
 
 #. module: sale_subscription
-#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__recurring_invoice_day
-msgid "Recurring Invoice Day"
-msgstr "반복 청구 날짜"
-
-#. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__recurring_total
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__recurring_total
 msgid "Recurring Price"
@@ -2754,22 +2408,18 @@ msgid "Reference:"
 msgstr "참조 :"
 
 #. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_order__subscription_management__renew
+#: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
+msgid "Register a payment method with"
+msgstr ""
+
+#. module: sale_subscription
+#: selection:sale.order,subscription_management:0
 msgid "Renewal"
 msgstr "갱신"
 
 #. module: sale_subscription
-#: model:ir.model.fields,field_description:sale_subscription.field_payment_transaction__renewal_allowed
-msgid "Renewal Allowed"
-msgstr "갱신 허용됨"
-
-#. module: sale_subscription
-#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_form
-msgid "Renewal Quotation"
-msgstr "갱신 견적서"
-
-#. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__recurring_interval
+#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_template__recurring_interval
 msgid "Repeat Every"
 msgstr "다음 주기마다 반복"
 
@@ -2785,12 +2435,6 @@ msgid "Reporting"
 msgstr "보고"
 
 #. module: sale_subscription
-#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_stage__description
-#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_stage_view_form
-msgid "Requirements"
-msgstr "요구 사항"
-
-#. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__activity_user_id
 msgid "Responsible"
 msgstr "담당자"
@@ -2801,7 +2445,7 @@ msgid "Responsible User"
 msgstr "담당 사용자"
 
 #. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_alert__activity_user__contract
+#: selection:sale.subscription.alert,activity_user:0
 msgid "Responsible of Contract"
 msgstr "계약의 책임"
 
@@ -2816,11 +2460,16 @@ msgid "Retention Analysis"
 msgstr "보유 분석"
 
 #. module: sale_subscription
+#: model:ir.ui.menu,name:sale_subscription.menu_account_asset_asset_list_normal_sale
+msgid "Revenue Types"
+msgstr ""
+
+#. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__in_progress
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_report_search
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_search
 msgid "Running"
-msgstr "실행 중"
+msgstr "동작중"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_report_search
@@ -2829,20 +2478,14 @@ msgid "Running Subscriptions"
 msgstr "구독 실행 중"
 
 #. module: sale_subscription
-#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__message_has_sms_error
-#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_template__message_has_sms_error
-msgid "SMS Delivery error"
-msgstr "SMS 전송 에러"
-
-#. module: sale_subscription
-#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__sms_template_id
-msgid "SMS Template"
-msgstr "SMS 서식"
-
-#. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_kanban
 msgid "Sad face"
 msgstr "슬픈 표정"
+
+#. module: sale_subscription
+#: model:ir.model,name:sale_subscription.model_sale_order
+msgid "Sale Order"
+msgstr "판매 주문"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__sale_order_count
@@ -2878,20 +2521,20 @@ msgstr "판매 구독"
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_form
 msgid "Sales"
-msgstr "판매"
+msgstr "매출"
 
 #. module: sale_subscription
-#: model:ir.model,name:sale_subscription.model_sale_order
-msgid "Sales Order"
-msgstr "판매 주문"
+#: selection:sale.subscription.alert,activity_user:0
+msgid "Sales Channel Leader"
+msgstr ""
 
 #. module: sale_subscription
 #: model:ir.model,name:sale_subscription.model_sale_order_line
 msgid "Sales Order Line"
-msgstr "판매 주문 명세"
+msgstr "판매 주문 라인"
 
 #. module: sale_subscription
-#: code:addons/sale_subscription/models/sale_subscription.py:0
+#: code:addons/sale_subscription/models/sale_subscription.py:149
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_order_view_tree_subscription
 #, python-format
 msgid "Sales Orders"
@@ -2899,15 +2542,9 @@ msgstr "판매 주문"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__team_id
-#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__team_id
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_search
 msgid "Sales Team"
 msgstr "영업팀"
-
-#. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_alert__activity_user__channel_leader
-msgid "Sales Team Leader"
-msgstr "영업팀장"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__user_id
@@ -2919,7 +2556,7 @@ msgstr "영업사원"
 
 #. module: sale_subscription
 #. openerp-web
-#: code:addons/sale_subscription/static/src/js/tours/sale_subscription.js:0
+#: code:addons/sale_subscription/static/src/js/tour.js:86
 #, python-format
 msgid ""
 "Save and you're all set!<br/>Simply sell this product to create a "
@@ -2929,7 +2566,7 @@ msgstr ""
 
 #. module: sale_subscription
 #. openerp-web
-#: code:addons/sale_subscription/static/src/js/tours/sale_subscription.js:0
+#: code:addons/sale_subscription/static/src/js/tour.js:47
 #, python-format
 msgid "Save this template and the modifications you've made to it."
 msgstr "이 서식과 수정한 내용을 저장하십시오."
@@ -2937,11 +2574,11 @@ msgstr "이 서식과 수정한 내용을 저장하십시오."
 #. module: sale_subscription
 #: model:res.groups,name:sale_subscription.group_sale_subscription_view
 msgid "See Subscriptions"
-msgstr "구독 정보 보기"
+msgstr "구독 정보보기"
 
 #. module: sale_subscription
 #. openerp-web
-#: code:addons/sale_subscription/static/src/js/tours/sale_subscription.js:0
+#: code:addons/sale_subscription/static/src/js/tour.js:81
 #, python-format
 msgid ""
 "Select your newly created template. Every sale of this product will generate"
@@ -2949,62 +2586,21 @@ msgid ""
 msgstr "새로 만든 서식을 선택하십시오. 이 상품을 판매할 때마다 새로운 구독이 생성됩니다!"
 
 #. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_template__payment_mode__validate_send
-msgid "Send"
-msgstr "전송"
-
-#. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_template__payment_mode__validate_send_payment
-msgid "Send & try to charge"
-msgstr "전송 및 충전 시도"
-
-#. module: sale_subscription
-#: model_terms:ir.actions.act_window,help:sale_subscription.sale_subscription_action_pending
-msgid ""
-"Send a renewal quotation to the customer.\n"
-"            When it is confirmed, the subscription is running again."
-msgstr ""
-"고객에게 갱신용 견적을 보내십시오. \n"
-"             확인하면 구독이 다시 실행됩니다."
-
-#. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_template__payment_mode__success_payment
-msgid "Send after successful payment"
-msgstr "결제 완료 후 발송"
-
-#. module: sale_subscription
-#: model:ir.actions.act_window,name:sale_subscription.sale_subscription_act_window_sms_composer_multi
-#: model:ir.actions.act_window,name:sale_subscription.sale_subscription_act_window_sms_composer_single
-msgid "Send an SMS Text Message"
-msgstr "SMS 문자 메시지 보내기"
-
-#. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_alert__action__sms
-msgid "Send an SMS Text Message to the customer"
-msgstr "고객에게 SMS 문자 메시지 보내기"
-
-#. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_alert__action__email
+#: selection:sale.subscription.alert,action:0
 msgid "Send an email to the customer"
 msgstr "고객에게 이메일 보내기"
-
-#. module: sale_subscription
-#: model:ir.model.fields,help:sale_subscription.field_sale_subscription_stage__rating_template_id
-msgid ""
-"Send an email to the customer when the subscription is moved to this stage."
-msgstr "구독이 이 단계로 이동되면 고객에게 이메일을 보냅니다."
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__sequence
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_close_reason__sequence
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_stage__sequence
 msgid "Sequence"
-msgstr "순서"
+msgstr "순차적"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__action_server_id
 msgid "Server Actions"
-msgstr "서버 작업"
+msgstr "서버 동작"
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription__health
@@ -3012,12 +2608,12 @@ msgid "Set a health status"
 msgstr "건강 상태 설정"
 
 #. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_alert__action__set_stage
+#: selection:sale.subscription.alert,action:0
 msgid "Set a stage on the subscription"
 msgstr "구독 단계를 설정하십시오"
 
 #. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_alert__action__set_tag
+#: selection:sale.subscription.alert,action:0
 msgid "Set a tag on the subscription"
 msgstr "구독에서 태그 설정"
 
@@ -3030,6 +2626,7 @@ msgstr "값을 설정하면 주어진 모델의 메뉴에서 이 작업을 사�
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_template_view_kanban
+#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_form
 msgid "Settings"
 msgstr "설정"
 
@@ -3041,7 +2638,7 @@ msgstr "대시 보드에 구독 표시"
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_search
 msgid "Show all records which has next action date is before today"
-msgstr "다음 활동 일자가 오늘 이전인 모든 자료 조회"
+msgstr "다음 행동 날짜가 오늘 이전 인 모든 기록보기"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__product_ids
@@ -3050,7 +2647,7 @@ msgstr "특정 제품"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__activity_user_ids
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_alert__activity_user__users
+#: selection:sale.subscription.alert,activity_user:0
 msgid "Specific Users"
 msgstr "특정 사용자"
 
@@ -3077,7 +2674,7 @@ msgstr "시작 단계"
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_stage__name
 msgid "Stage Name"
-msgstr "단계명"
+msgstr "단계 이름"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__stage_to_id
@@ -3092,7 +2689,6 @@ msgstr "단계"
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__date_start
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__date_start
-#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_wizard__date_from
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_report_search
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_search
 msgid "Start Date"
@@ -3100,13 +2696,13 @@ msgstr "시작일"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
-msgid "Start Date:"
-msgstr "시작일 :"
+msgid "Start date:"
+msgstr ""
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.portal_my_subscriptions
 msgid "Status"
-msgstr "단계"
+msgstr "상태"
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription__activity_state
@@ -3116,10 +2712,15 @@ msgid ""
 "Today: Activity date is today\n"
 "Planned: Future activities."
 msgstr ""
-"활동별 현황\n"
-"기한 초과 : 이미 기한이 지났습니다\n"
-"오늘 : 활동 날짜가 오늘입니다\n"
-"계획 : 향후 활동입니다."
+"활동에 기조한 상태입니다\n"
+"기한초과: 이미 기한이 지났습니다\n"
+"오늘: 활동 날짜가 오늘입니다\n"
+"계획: 향후 활동입니다."
+
+#. module: sale_subscription
+#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_line__price_subtotal
+msgid "Sub Total"
+msgstr "소계"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_close_reason_view_form
@@ -3128,13 +2729,12 @@ msgstr "승인"
 
 #. module: sale_subscription
 #: model:ir.model,name:sale_subscription.model_sale_subscription
-#: model:ir.model.fields,field_description:sale_subscription.field_account_move_line__subscription_id
+#: model:ir.model.fields,field_description:sale_subscription.field_account_invoice_line__subscription_id
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order_line__subscription_id
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_line__analytic_account_id
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_snapshot__subscription_id
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_wizard__subscription_id
 #: model_terms:ir.ui.view,arch_db:sale_subscription.portal_my_subscriptions
-#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_report_search
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_report_view_cohort
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_template_view_form
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_cohort
@@ -3156,7 +2756,7 @@ msgstr "구독 분석"
 #. module: sale_subscription
 #: model:ir.model,name:sale_subscription.model_sale_subscription_close_reason
 msgid "Subscription Close Reason"
-msgstr "구독 종료 이유"
+msgstr "구독 종료이유"
 
 #. module: sale_subscription
 #: model:ir.model,name:sale_subscription.model_sale_subscription_close_reason_wizard
@@ -3177,10 +2777,9 @@ msgid "Subscription Line"
 msgstr "구독 내역"
 
 #. module: sale_subscription
-#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__recurring_invoice_line_ids
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_form
 msgid "Subscription Lines"
-msgstr "구독 내역"
+msgstr "명세 구독"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order__subscription_management
@@ -3198,17 +2797,7 @@ msgstr "구독 상품"
 #: model:ir.ui.menu,name:sale_subscription.menu_sale_subscription_product
 #: model_terms:ir.ui.view,arch_db:sale_subscription.product_template_search_view_inherit_sale_subscription
 msgid "Subscription Products"
-msgstr "구독 제품"
-
-#. module: sale_subscription
-#: model:ir.model.fields,field_description:sale_subscription.field_account_move_line__subscription_end_date
-msgid "Subscription Revenue End Date"
-msgstr "구독 수익 종료일"
-
-#. module: sale_subscription
-#: model:ir.model.fields,field_description:sale_subscription.field_account_move_line__subscription_start_date
-msgid "Subscription Revenue Start Date"
-msgstr "구독 수익 시작일"
+msgstr "구독 상품"
 
 #. module: sale_subscription
 #: model:ir.model,name:sale_subscription.model_sale_subscription_snapshot
@@ -3223,7 +2812,6 @@ msgstr "구독 단계"
 
 #. module: sale_subscription
 #: model:ir.ui.menu,name:sale_subscription.menu_sale_subscription_stage
-#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_stage_view_list
 msgid "Subscription Stages"
 msgstr "구독 단계"
 
@@ -3234,7 +2822,7 @@ msgstr "구독 단계"
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__template_id
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__template_id
 msgid "Subscription Template"
-msgstr "구독 서식"
+msgstr "구독 양식"
 
 #. module: sale_subscription
 #: model:ir.actions.act_window,name:sale_subscription.sale_subscription_template_action
@@ -3243,7 +2831,7 @@ msgstr "구독 서식"
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_template_view_list
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_template_view_search
 msgid "Subscription Templates"
-msgstr "구독 서식"
+msgstr "구독 양식"
 
 #. module: sale_subscription
 #: model:ir.model,name:sale_subscription.model_sale_subscription_wizard_option
@@ -3263,12 +2851,12 @@ msgstr "구독내용이 나의 요구사항과 다름"
 #. module: sale_subscription
 #: model:sale.subscription.close.reason,name:sale_subscription.close_reason_1
 msgid "Subscription is too expensive"
-msgstr "구독 가격이 높음"
+msgstr "구독가격이 높음"
 
 #. module: sale_subscription
 #: model:sale.subscription.close.reason,name:sale_subscription.close_reason_3
 msgid "Subscription reached its end date"
-msgstr "구독의 종료날짜가 다가옴"
+msgstr "구독이 만료일자에 다가옴"
 
 #. module: sale_subscription
 #: model:mail.message.subtype,description:sale_subscription.subtype_stage_change
@@ -3276,22 +2864,6 @@ msgid "Subscription stage has changed"
 msgstr "구독 단계가 변경되었습니다"
 
 #. module: sale_subscription
-#: model:sms.template,name:sale_subscription.sms_template_data_default_alert
-msgid "Subscription: Default SMS Alert"
-msgstr "구독 : 기본 SMS 경고"
-
-#. module: sale_subscription
-#: model:sms.template,name:sale_subscription.sms_template_data_payment_failure
-msgid "Subscription: Payment failure"
-msgstr "구독 : 결제 실패"
-
-#. module: sale_subscription
-#: model:sms.template,name:sale_subscription.sms_template_data_payment_reminder
-msgid "Subscription: Payment reminder"
-msgstr "구독 : 결제 알림"
-
-#. module: sale_subscription
-#: code:addons/sale_subscription/models/sale_subscription.py:0
 #: model:ir.actions.act_window,name:sale_subscription.sale_subscription_action
 #: model:ir.actions.act_window,name:sale_subscription.sale_subscription_action_filtered
 #: model:ir.actions.act_window,name:sale_subscription.sale_subscription_action_res_partner
@@ -3312,12 +2884,10 @@ msgstr "구독 : 결제 알림"
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_alert_view_form
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_template_view_form
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_template_view_kanban
-#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_activity
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_graph
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_pivot
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_search
 #: model_terms:ir.ui.view,arch_db:sale_subscription.view_sale_subscription_order_line
-#, python-format
 msgid "Subscriptions"
 msgstr "구독"
 
@@ -3347,7 +2917,6 @@ msgid "Subscriptions to Renew"
 msgstr "갱신할 구독"
 
 #. module: sale_subscription
-#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_line__price_subtotal
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
 msgid "Subtotal"
 msgstr "소계"
@@ -3397,14 +2966,7 @@ msgstr "세금 :<br/>"
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__team_user_id
 msgid "Team Leader"
-msgstr "팀장"
-
-#. module: sale_subscription
-#: model:ir.model.fields,help:sale_subscription.field_payment_transaction__renewal_allowed
-msgid ""
-"Technical field used to control the renewal flow based on the transaction's "
-"state."
-msgstr "거래 상태에 따라 갱신 흐름을 제어하는 ​​데 사용되는 기술 필드."
+msgstr "팀 리더"
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription_alert__activity_user_field_name
@@ -3416,7 +2978,7 @@ msgstr "레코드에 있는 사용자의 기술적 이름"
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_template_view_search
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_search
 msgid "Template"
-msgstr "서식"
+msgstr "템플릿"
 
 #. module: sale_subscription
 #: model_terms:ir.actions.act_window,help:sale_subscription.sale_subscription_template_action
@@ -3425,7 +2987,7 @@ msgid ""
 "                can be selected by the salespeople to quickly configure the\n"
 "                terms and conditions of the subscription."
 msgstr ""
-"서식은 미리 구독의 형태를 설정하여 \n"
+"양식은 미리 구독의 형태를 설정하여 \n"
 "                 판매자가 빠르게 구독의 기간과 조건을 작성할 수 있도록 \n"
 "                 구독을 미리 설정하는데 사용됩니다."
 
@@ -3438,27 +3000,13 @@ msgstr "${object.code} 구독 종료"
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_template__description
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_template_view_form
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_form
-#: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
 msgid "Terms and Conditions"
 msgstr "이용 약관"
 
 #. module: sale_subscription
-#: model:ir.model.fields,help:sale_subscription.field_account_move_line__subscription_mrr
-msgid ""
-"The MRR is computed by dividing the signed amount (in company currency) by the amount of time between the start and end dates converted in months.\n"
-"This allows comparison of invoice lines created by subscriptions with different temporalities.\n"
-"The computation assumes that 1 month is comprised of exactly 30 days, regardless  of the actual length of the month."
-msgstr ""
-"MRR은 서명된 금액(회사 통화)을 시작 날짜와 종료 날짜 사이의 시간으로 나누어 계산합니다.\n"
-"이렇게 하면 구독에 의해 생성된 청구 내역을 다른 시간대와 비교할 수 있습니다.\n"
-"계산은 실제 월의 길이에 관계없이 1개월이 정확히 30일로 구성된다고 가정합니다."
-
-#. module: sale_subscription
-#: model:ir.model.fields,help:sale_subscription.field_sale_subscription_alert__trigger_field_ids
-msgid ""
-"The action will be triggered if and only if one of these fields is "
-"updated.If empty, all fields are watched."
-msgstr "이러한 필드 중 하나가 업데이트된 경우에만 작업이 트리거됩니다. 비어있는 경우 모든 필드가 감시됩니다."
+#: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
+msgid "Terms and conditions"
+msgstr "내용 및 조건"
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription_wizard__date_from
@@ -3471,7 +3019,7 @@ msgstr "판매 주문을 작성할 때 적용되는 할인은 구독의 전체 �
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription__website_url
 msgid "The full URL to access the document through the website."
-msgstr "웹사이트를 통해 문서에 접근하는 전체 URL입니다."
+msgstr "웹사이트를 통해 문서에 접근 하는 전체 URL입니다."
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription_alert__website_url
@@ -3486,7 +3034,7 @@ msgid ""
 msgstr "다음 청구서가 이 날짜에 생성되고 기간이 연장됩니다."
 
 #. module: sale_subscription
-#: code:addons/sale_subscription/models/sale_subscription.py:0
+#: code:addons/sale_subscription/models/sale_subscription.py:978
 #, python-format
 msgid "The recurring interval must be positive"
 msgstr "반복 간격은 양수여야 합니다."
@@ -3494,7 +3042,9 @@ msgstr "반복 간격은 양수여야 합니다."
 #. module: sale_subscription
 #: model:res.groups,comment:sale_subscription.group_sale_subscription_view
 msgid "The user will have read access to subscriptions."
-msgstr "사용자는 구독에 대한 읽기 권한이 있습니다."
+msgstr ""
+"사용자는 구독에 대한 읽기 권한이 있습니다.\n"
+" "
 
 #. module: sale_subscription
 #: model:res.groups,comment:sale_subscription.group_sale_subscription_manager
@@ -3508,16 +3058,10 @@ msgid ""
 msgstr "이 막대를 사용하면 예약된 활동을 기준으로 영업 기회를 필터링할 수 있습니다."
 
 #. module: sale_subscription
-#: code:addons/sale_subscription/models/sale_subscription.py:0
+#: code:addons/sale_subscription/models/sale_subscription.py:462
 #, python-format
 msgid "This invoice covers the following period: %s - %s"
 msgstr "이 청구서에는 다음 기간이 포함됩니다 : %s - %s"
-
-#. module: sale_subscription
-#: code:addons/sale_subscription/models/sale_subscription.py:0
-#, python-format
-msgid "This renewal order has been created from the subscription "
-msgstr "이 갱신 주문은 구독에서 생성되었습니다"
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription_stage__fold
@@ -3527,23 +3071,17 @@ msgid ""
 msgstr "이 단계는 표시할 단계에 레코드가 없는 경우 Kanban 보기에서 접힙니다."
 
 #. module: sale_subscription
-#: code:addons/sale_subscription/wizard/sale_subscription_wizard.py:0
-#, python-format
-msgid "This upsell order has been created from the subscription "
-msgstr "이것은 구독에서 생성된 연쇄판매 주문입니다"
-
-#. module: sale_subscription
 #: model:uom.category,name:sale_subscription.uom_categ_time
 msgid "Time"
 msgstr "시간"
 
 #. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_alert__trigger_condition__on_time
+#: selection:sale.subscription.alert,trigger_condition:0
 msgid "Timed Condition"
 msgstr "시간 조건"
 
 #. module: sale_subscription
-#: code:addons/sale_subscription/controllers/portal.py:0
+#: code:addons/sale_subscription/controllers/portal.py:46
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__to_renew
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__to_renew
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_report_search
@@ -3552,12 +3090,27 @@ msgstr "시간 조건"
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_search
 #, python-format
 msgid "To Renew"
-msgstr "갱신하기"
+msgstr "갱신"
 
 #. module: sale_subscription
 #: model:sale.subscription.stage,name:sale_subscription.sale_subscription_stage_upsell
 msgid "To Upsell"
-msgstr "연쇄판매하기"
+msgstr "판매유도로"
+
+#. module: sale_subscription
+#: model_terms:ir.ui.view,arch_db:sale_subscription.wizard_form_view
+msgid ""
+"To add new products to this running subscription, you can either create a "
+"new quotation to ask a customer approval (discounted for the current "
+"invoicing period) or directly insert them in the subscription to invoice it "
+"on the next invoice date. If you use a quotation, the products will be added"
+" at the order confirmation."
+msgstr ""
+
+#. module: sale_subscription
+#: selection:sale.subscription,activity_state:0
+msgid "Today"
+msgstr "오늘"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_search
@@ -3583,19 +3136,12 @@ msgstr "트리거 조건"
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__trg_date_id
 msgid "Trigger Date"
-msgstr "작동된 날짜"
+msgstr "작동일"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__trigger_condition
 msgid "Trigger On"
 msgstr "작동일"
-
-#. module: sale_subscription
-#: model_terms:ir.actions.act_window,help:sale_subscription.sale_subscription_alert_action
-msgid ""
-"Trigger alerts for salespersons or customers: churn, invoice not paid, "
-"upsell, etc."
-msgstr "영업 사원 또는 고객에 대한 알림 트리거 : 전환, 미납, 연쇄판매 등."
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription_alert__state
@@ -3614,17 +3160,12 @@ msgstr ""
 "- '작성 ': 새 값으로 새 레코드를 만듭니다.\n"
 "- '기록 업데이트' : 레코드의 값을 업데이트합니다.\n"
 "- '여러 작업 실행' : 여러 다른 서버 작업을 트리거하는 작업을 정의합니다.\n"
-"- '이메일 보내기' : 자동으로 이메일을 보냅니다(메일 및 채팅).\n"
-"- '팔로워 추가' : 레코드에 팔로워를 추가합니다(메일 및 채팅).\n"
-"- '다음 활동 만들기' : 활동을 만듭니다(메일 및 채팅)."
+"- '이메일 보내기' : 자동으로 이메일을 보냅니다(토론).\n"
+"- '팔로워 추가' : 레코드에 팔로워를 추가합니다(토론).\n"
+"- '다음 활동 만들기' : 활동을 만듭니다(토론)."
 
 #. module: sale_subscription
-#: model:ir.model.fields,help:sale_subscription.field_sale_subscription__activity_exception_decoration
-msgid "Type of the exception activity on record."
-msgstr "레코드에서 예외 활동의 유형입니다."
-
-#. module: sale_subscription
-#: model:ir.model.constraint,message:sale_subscription.constraint_sale_subscription_uuid_uniq
+#: sql_constraint:sale.subscription:0
 msgid ""
 "UUIDs (Universally Unique IDentifier) for Sale Subscriptions should be "
 "unique!"
@@ -3633,7 +3174,7 @@ msgstr "판매 구독의 UUID(Universally Unique IDentifier)는 고유해야 합
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_search
 msgid "Unassigned"
-msgstr "미할당"
+msgstr "미배정(할당)"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_line__price_unit
@@ -3652,18 +3193,13 @@ msgstr "단위"
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__message_unread
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_template__message_unread
 msgid "Unread Messages"
-msgstr "읽지 않은 메시지"
+msgstr "읽지 않은 메세지"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription__message_unread_counter
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_template__message_unread_counter
 msgid "Unread Messages Counter"
-msgstr "읽지 않은 메시지 수"
-
-#. module: sale_subscription
-#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_form
-msgid "UoM"
-msgstr "단위"
+msgstr "읽지 않은 메세지 수"
 
 #. module: sale_subscription
 #: model:ir.actions.act_window,name:sale_subscription.wizard_action
@@ -3673,15 +3209,15 @@ msgid "Upsell"
 msgstr " 연쇄판매"
 
 #. module: sale_subscription
-#: code:addons/sale_subscription/models/sale_subscription.py:0
+#: code:addons/sale_subscription/models/sale_subscription.py:195
 #, python-format
 msgid "Upsell date: "
 msgstr "연쇄판매 날짜 :"
 
 #. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_order__subscription_management__upsell
+#: selection:sale.order,subscription_management:0
 msgid "Upselling"
-msgstr "연쇄판매"
+msgstr "상향판매"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__usage
@@ -3695,13 +3231,13 @@ msgid ""
 " 'Generic User From Record' to specify the field name of the user to choose "
 "on the record."
 msgstr ""
-"다음 작업에서 항상 동일한 사용자를 할당하려면 '특정 사용자'를 사용합니다. '레코드에서 일반 사용자'를 사용하여 레코드에서 선택할 "
+"'특정 사용자'를 사용하여 항상 다음 활동에서 동일한 사용자를 지정하십시오 '레코드에서 일반 사용자'를 사용하여 레코드에서 선택할 "
 "사용자의 필드 이름을 지정하십시오."
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__trg_date_calendar_id
 msgid "Use Calendar"
-msgstr "일정표 사용"
+msgstr "달력 사용"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__trg_date_resource_field_id
@@ -3731,8 +3267,8 @@ msgstr "사용자 필드 이름"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
-msgid "Valid Until:"
-msgstr "유효기간 :"
+msgid "Valid until:"
+msgstr ""
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__fields_lines
@@ -3741,17 +3277,12 @@ msgstr "매핑된 값"
 
 #. module: sale_subscription
 #. openerp-web
-#: code:addons/sale_subscription/static/src/js/tours/sale_subscription.js:0
+#: code:addons/sale_subscription/static/src/js/tour.js:13
 #, python-format
 msgid ""
 "Want recurring billing via subscription management ? Get started by clicking"
 " here"
 msgstr "구독 관리를 통한 반복 청구를 원하십니까? 여기를 클릭하여 시작하십시오"
-
-#. module: sale_subscription
-#: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_alert__trigger_field_ids
-msgid "Watched fields"
-msgstr "관찰된 필드"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
@@ -3785,11 +3316,11 @@ msgstr "웹사이트 URL"
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription__website_message_ids
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription_template__website_message_ids
 msgid "Website communication history"
-msgstr "웹사이트 의사소통 이력"
+msgstr "웹사이트 대화 이력"
 
 #. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_template__recurring_rule_type__weekly
-msgid "Weeks"
+#: selection:sale.subscription.template,recurring_rule_type:0
+msgid "Week(s)"
 msgstr "주"
 
 #. module: sale_subscription
@@ -3839,17 +3370,17 @@ msgstr ""
 "작업을 실행할 파이썬 코드를 작성하십시오. 일부 변수는 사용할 수 있지만 파이썬 표현식에 대한 도움말은 도움말 옵션 탭에 있습니다."
 
 #. module: sale_subscription
+#: model:product.product,uom_name:sale_subscription.product_office_cleaning_yearly
+#: model:product.template,uom_name:sale_subscription.product_office_cleaning_yearly_product_template
+#: selection:sale.subscription.template,recurring_rule_type:0
+#: model:uom.uom,name:sale_subscription.subscription_uom_year
+msgid "Year(s)"
+msgstr "년"
+
+#. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__recurring_yearly
 msgid "Yearly Recurring Revenue"
 msgstr "매년 반복되는 수익"
-
-#. module: sale_subscription
-#: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_template__recurring_rule_type__yearly
-#: model:product.product,uom_name:sale_subscription.product_office_cleaning_yearly
-#: model:product.template,uom_name:sale_subscription.product_office_cleaning_yearly_product_template
-#: model:uom.uom,name:sale_subscription.subscription_uom_year
-msgid "Years"
-msgstr "년"
 
 #. module: sale_subscription
 #: code:addons/sale_subscription/models/sale_order.py:49
@@ -3867,14 +3398,12 @@ msgstr "아직 구독이 없습니다."
 #. module: sale_subscription
 #: model_terms:ir.actions.act_window,help:sale_subscription.product_action_subscription
 msgid ""
-"You must define a product for everything you sell or purchase,\n"
-"            whether it's a storable product, a consumable or a service."
+"You must define a product for everything you purchase,\n"
+"            whether it's a physical product, a consumable or services."
 msgstr ""
-"판매 또는 구매하는 모든 제품을 정의해야 합니다. \n"
-"              저장 가능한 제품이든 소모품이든 서비스든 상관 없습니다."
 
 #. module: sale_subscription
-#: code:addons/sale_subscription/models/sale_subscription.py:0
+#: code:addons/sale_subscription/models/sale_subscription.py:429
 #, python-format
 msgid "You must first select a Customer for Subscription %s!"
 msgstr "먼저 %s 구독할 고객을 선택해야 합니다!"
@@ -3888,19 +3417,20 @@ msgstr "이 구독 서식과 관련된 모든 제품을 여기에서 찾을 수 
 #. module: sale_subscription
 #: model_terms:ir.actions.act_window,help:sale_subscription.sale_subscription_action_pending
 msgid ""
-"You will find here the subscriptions to be renewed (end date is close or "
-"passed)"
-msgstr "여기서 구독을 갱신해야 합니다(종료일이 마감되었거나 지났습니다)."
+"You will find here the subscriptions to be renewed because the\n"
+"            end date is passed or the working effort is higher than the\n"
+"            maximum authorized one."
+msgstr ""
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
-msgid "Your Details"
-msgstr "세부 정보"
+msgid "Your informations"
+msgstr ""
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
-msgid "Your Plan"
-msgstr "당신의 계획"
+msgid "Your plan"
+msgstr ""
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
@@ -3908,19 +3438,32 @@ msgid "Your subscription is closed."
 msgstr "구독이 종료되었습니다."
 
 #. module: sale_subscription
-#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_alert_view_form
-msgid "e.g. Closed Subscription"
-msgstr "예. 종료된 구독"
+#: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
+msgid "day(s)"
+msgstr "일"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_alert_view_form
 msgid "e.g. Discuss proposal"
-msgstr "예 : 업무 협의 제안"
+msgstr "예: 의논/토의 제안"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_template_view_form
 msgid "e.g. Monthly Subscription"
 msgstr "예. 월간 구독"
+
+#. module: sale_subscription
+#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_alert_view_form
+msgid "e.g. Update order quantity"
+msgstr "예: 주문 수량 업데이트"
+
+#. module: sale_subscription
+#: model:product.product,weight_uom_name:sale_subscription.product_office_cleaning
+#: model:product.product,weight_uom_name:sale_subscription.product_office_cleaning_yearly
+#: model:product.template,weight_uom_name:sale_subscription.product_office_cleaning_product_template
+#: model:product.template,weight_uom_name:sale_subscription.product_office_cleaning_yearly_product_template
+msgid "kg"
+msgstr "kg"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
@@ -3929,5 +3472,25 @@ msgstr "결제 실패 ("
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
+msgid "month(s)"
+msgstr ""
+
+#. module: sale_subscription
+#: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
 msgid "to this day) will be automatically processed."
 msgstr "오늘까지)이 자동으로 처리됩니다."
+
+#. module: sale_subscription
+#: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
+msgid "week(s)"
+msgstr ""
+
+#. module: sale_subscription
+#: model_terms:ir.ui.view,arch_db:sale_subscription.subscription
+msgid "year(s)"
+msgstr ""
+
+#. module: sale_subscription
+#: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_form
+msgid "⇒ Generate Invoice"
+msgstr ""

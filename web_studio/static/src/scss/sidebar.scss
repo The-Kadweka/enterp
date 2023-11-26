@@ -48,7 +48,6 @@
 
         > h3 {
             color: white;
-            margin: 10px 0 15px 0;
         }
 
         > hr {
@@ -99,7 +98,6 @@
             .o_web_studio_attrs {
                 font-size: 11px;
                 float: right;
-                @include o-web-studio-sidebar-btn-link;
             }
 
             > button {
@@ -130,11 +128,6 @@
                 @include o-web-studio-select;
             }
 
-            &.o_web_studio_sidebar_optional_select {
-                @include o-web-studio-select;
-                margin-top: 0px;
-            }
-
             &.o_web_studio_sidebar_tags {
                 .o_field_widget {
                     display: flex;
@@ -144,7 +137,6 @@
                 .o_field_many2one {
                     flex: 0 0 100%;
                     > .o_input_dropdown {
-                        width: auto;
                         > .o_dropdown_button {
                             right: 18px;
                             top: -2px;
@@ -161,7 +153,6 @@
                         }
                     }
                     > .o_external_button {
-                        border: 0;
                         padding-right: 0;
                         background-color: transparent;
                         &:hover, &:focus, &:active {
@@ -245,35 +236,15 @@
         .o_web_studio_sidebar_toolbox {
             flex: 1 0 100%;
 
-            button.btn {
-                @include o-web-studio-btn;
+            > button.btn {
                 flex: 1 1 auto;
             }
-
-            > div {
-                display: flex;
-                align-content: space-between;
-            }
-
-            .o_web_studio_restore {
-                margin-top: inherit;
-                width: 100%;
-            }
-
-            .o_web_studio_remove_warning_groups {
-                color: orange;
-                display: block;
-            }
+        }
+        .o_web_studio_remove_warning_groups {
+            color: orange;
         }
         .o_field_selector_chain_part {
             background: none;
         }
-        .o_web_studio_edit_selection_values {
-            @include o-web-studio-sidebar-btn-link;
-        }
     }
-}
-
-.o_web_studio_restore_default_view_dialog {
-    white-space: pre;
 }

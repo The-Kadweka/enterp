@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name' : 'Intrastat Reports',
-    'category': 'Accounting/Accounting',
+    'category': 'Accounting',
     'description': """
 Intrastat Reports
 ==================
@@ -20,6 +20,7 @@ Intrastat Reports
         'views/account_invoice_view.xml',
         'data/account_financial_report_data.xml',
         'views/search_template_view.xml',
+        'views/res_config_settings.xml',
     ],
     'installable': True,
     'license': 'OEEL-1',

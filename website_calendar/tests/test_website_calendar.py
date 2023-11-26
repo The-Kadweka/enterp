@@ -52,7 +52,7 @@ class WebsiteCalendarTest(common.HttpCase):
             'min_cancellation_hours': 1,
             'appointment_tz': 'Europe/Brussels',
             'employee_ids': [(4, self.employee.id, False)],
-            'slot_ids': [(0, False, {'weekday': '1', 'hour': 9})]  # Yes, monday has either 0 or 1 as weekday number depending on the object it's in
+            'slot_ids': [(0, False, {'weekday': 1, 'hour': 9})]  # Yes, monday has either 0 or 1 as weekday number depending on the object it's in
         })
 
     def test_extreme_timezone_delta(self):

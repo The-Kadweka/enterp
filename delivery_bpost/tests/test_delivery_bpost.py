@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import logging
 from odoo.exceptions import UserError
-from odoo.tests import TransactionCase, tagged, Form
+from odoo.tests import TransactionCase, tagged
 
 _logger = logging.getLogger(__name__)
 
@@ -14,7 +14,6 @@ class TestDeliveryBpost(TransactionCase):
 
         self.your_company = self.env.ref('base.main_partner')
         self.your_company.write({'name': 'Odoo SA',
-                                 'country_id': self.env.ref('base.be').id,
                                  'street': 'Chaussée de Namur 40',
                                  'street2': False,
                                  'state_id': False,
@@ -70,18 +69,14 @@ class TestDeliveryBpost(TransactionCase):
                     'price_unit': self.iPadMini.lst_price}
 
         so_vals = {'partner_id': self.agrolait.id,
+                   'carrier_id': self.env.ref('delivery_bpost.delivery_carrier_bpost_domestic').id,
                    'order_line': [(0, None, sol_vals)]}
 
         sale_order = SaleOrder.create(so_vals)
-        # I add delivery cost in Sales order
-        delivery_wizard = Form(self.env['choose.delivery.carrier'].with_context({
-            'default_order_id': sale_order.id,
-            'default_carrier_id': self.env.ref('delivery_bpost.delivery_carrier_bpost_domestic').id
-        }))
-        choose_delivery_carrier = delivery_wizard.save()
-        choose_delivery_carrier.update_price()
-        self.assertGreater(choose_delivery_carrier.delivery_price, 0.0, "bpost delivery cost for this SO has not been correctly estimated.")
-        choose_delivery_carrier.button_confirm()
+        sale_order.get_delivery_price()
+        self.assertTrue(sale_order.delivery_rating_success, "bpost has not been able to rate this order (%s)" % sale_order.delivery_message)
+        self.assertGreater(sale_order.delivery_price, 0.0, "bpost delivery cost for this SO has not been correctly estimated.")
+        sale_order.set_delivery_line()
 
         sale_order.action_confirm()
         self.assertEquals(len(sale_order.picking_ids), 1, "The Sales Order did not generate a picking.")
@@ -112,18 +107,14 @@ class TestDeliveryBpost(TransactionCase):
                     'price_unit': self.iPadMini.lst_price}
 
         so_vals = {'partner_id': self.think_big_system.id,
+                   'carrier_id': self.env.ref('delivery_bpost.delivery_carrier_bpost_inter').id,
                    'order_line': [(0, None, sol_vals)]}
 
         sale_order = SaleOrder.create(so_vals)
-        # I add delivery cost in Sales order
-        delivery_wizard = Form(self.env['choose.delivery.carrier'].with_context({
-            'default_order_id': sale_order.id,
-            'default_carrier_id': self.env.ref('delivery_bpost.delivery_carrier_bpost_inter').id
-        }))
-        choose_delivery_carrier = delivery_wizard.save()
-        choose_delivery_carrier.update_price()
-        self.assertGreater(choose_delivery_carrier.delivery_price, 0.0, "bpost delivery cost for this SO has not been correctly estimated.")
-        choose_delivery_carrier.button_confirm()
+        sale_order.get_delivery_price()
+        self.assertTrue(sale_order.delivery_rating_success, "bpost has not been able to rate this order (%s)" % sale_order.delivery_message)
+        self.assertGreater(sale_order.delivery_price, 0.0, "bpost delivery cost for this SO has not been correctly estimated.")
+        sale_order.set_delivery_line()
 
         sale_order.action_confirm()
         self.assertEquals(len(sale_order.picking_ids), 1, "The Sales Order did not generate a picking.")
@@ -143,62 +134,14 @@ class TestDeliveryBpost(TransactionCase):
             raise
         self.assertIsNot(picking.carrier_tracking_ref, False, "bpost did not return any tracking number")
         self.assertGreater(picking.carrier_price, 0.0, "bpost carrying price is probably incorrect")
-
-    def test_02b_bpost_real_invoice_policy(self):
-        SaleOrder = self.env['sale.order']
-        # set invoice policy to 'real'
-        self.env.ref('delivery_bpost.delivery_carrier_bpost_inter').invoice_policy = 'real'
-        sol_vals = {'product_id': self.iPadMini.id,
-                    'name': "[A1232] Large Cabinet",
-                    'product_uom': self.env.ref('uom.product_uom_unit').id,
-                    'product_uom_qty': 1.0,
-                    'price_unit': self.iPadMini.lst_price}
-
-        so_vals = {'partner_id': self.think_big_system.id,
-                   'order_line': [(0, None, sol_vals)]}
-
-        sale_order = SaleOrder.create(so_vals)
-        # I add delivery cost in Sales order
-        delivery_wizard = Form(self.env['choose.delivery.carrier'].with_context({
-            'default_order_id': sale_order.id,
-            'default_carrier_id': self.env.ref('delivery_bpost.delivery_carrier_bpost_inter').id
-        }))
-        choose_delivery_carrier = delivery_wizard.save()
-        choose_delivery_carrier.update_price()
-        self.assertGreater(choose_delivery_carrier.delivery_price, 0.0, "bpost delivery cost for this SO has not been correctly estimated.")
-        choose_delivery_carrier.button_confirm()
-
-        delivery_line = sale_order.order_line.filtered(lambda line: line.is_delivery)
-        self.assertEquals(len(delivery_line), 1, "The delivery line is not present on the SO.")
-        self.assertEquals(delivery_line.price_unit, 0, "The delivery cost should be 0.")
-
-        sale_order.action_confirm()
-        self.assertEquals(len(sale_order.picking_ids), 1, "The Sales Order did not generate a picking.")
-
-        picking = sale_order.picking_ids[0]
-        self.assertEquals(picking.carrier_id.id, sale_order.carrier_id.id, "Carrier is not the same on Picking and on SO.")
-
-        picking.move_lines[0].quantity_done = 1.0
-        self.assertGreater(picking.shipping_weight, 0.0, "Picking weight should be positive.")
-
-        try:
-            picking.action_done()
-        except UserError as exc:
-            if exc.name == "The BPost shipping service is unresponsive, please retry later.":
-                _logger.warning("BPost test aborted, service is unresponsive.")
-                return
-            raise
-        self.assertIsNot(picking.carrier_tracking_ref, False, "bpost did not return any tracking number")
-        self.assertGreater(picking.carrier_price, 0.0, "bpost carrying price is probably incorrect")
-        # Check that the delivery cost (previously set to 0) has been correctly updated
-        self.assertEquals(picking.carrier_price, delivery_line.price_unit, "The delivery cost is not updated")
 
     def test_03_bpost_flow_from_delivery_order(self):
 
         inventory = self.env['stock.inventory'].create({
             'name': '[A1232] iPad Mini',
-            'location_ids': [(4, self.stock_location.id)],
-            'product_ids': [(4, self.iPadMini.id)],
+            'filter': 'product',
+            'location_id': self.stock_location.id,
+            'product_id': self.iPadMini.id,
         })
 
         StockPicking = self.env['stock.picking']

@@ -16,7 +16,7 @@ class ReportCheckRegister(models.AbstractModel):
     def _get_filter_journals(self):
         #filter only the bank/cash/miscellaneous journals
         return self.env['account.journal'].search([
-            ('company_id', 'in', self.env.companies.ids or [self.env.company.id]),
+            ('company_id', 'in', self.env.user.company_ids.ids or [self.env.user.company_id.id]),
             ('type', 'in', ['bank', 'cash', 'general'])], order="company_id, name")
 
     @api.model
@@ -27,14 +27,6 @@ class ReportCheckRegister(models.AbstractModel):
         '''
         liquidity_type_id = self.env.ref('account.data_account_type_liquidity')
         return self.env['account.account'].search([('user_type_id', '=', liquidity_type_id.id)])
-
-    @api.model
-    def _get_options_journals_domain(self, options):
-        # OVERRIDE
-        domain = super(ReportCheckRegister, self)._get_options_journals_domain(options)
-        if not domain:
-            domain = [('journal_id.type', 'in', ('bank', 'cash', 'general'))]
-        return domain
 
     @api.model
     def _get_lines(self, options, line_id=None):

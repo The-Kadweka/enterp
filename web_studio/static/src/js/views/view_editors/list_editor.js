@@ -18,30 +18,17 @@ return ListRenderer.extend(EditorMixin, {
      */
     init: function (parent, state, params) {
         this._super.apply(this, arguments);
-        this.show_invisible = params.show_invisible;
+        if (params.show_invisible) {
+            var validChildren = _.filter(this.arch.children, function(child) {
+                // Editing controls is not supported in studio
+                return child.tag !== 'control';
+            });
+            this.invisible_columns = _.difference(validChildren, this.columns);
+            this.columns = validChildren;
+        } else {
+            this.invisible_columns = [];
+        }
         this.node_id = 1;
-    },
-    /**
-     * Columns visibility is computed in the willStart of the list renderer.
-     * Here, we override the result of this computation to force the visibility
-     * of otherwise invisible columns so that they can be properly edited.
-     *
-     * @override
-     */
-    willStart: function () {
-        var self = this;
-        return this._super.apply(this, arguments).then(function () {
-            if (self.show_invisible) {
-                var validChildren = _.filter(self.arch.children, function (child) {
-                    // Editing controls is not supported in studio
-                    return child.tag !== 'control';
-                });
-                self.invisible_columns = _.difference(validChildren, self.columns);
-                self.columns = validChildren;
-            } else {
-                self.invisible_columns = [];
-            }
-        });
     },
 
     //--------------------------------------------------------------------------
@@ -66,14 +53,11 @@ return ListRenderer.extend(EditorMixin, {
 
         var $nearest_list_hook = this.$('.o_web_studio_hook')
             .touching({
-                    x: position.pageX - this.nearest_hook_tolerance,
-                    y: position.pageY - this.nearest_hook_tolerance,
-                    w: this.nearest_hook_tolerance*2,
-                    h: this.nearest_hook_tolerance*2
-                },{
-                    container: document.body
-                }
-            ).nearest({x: position.pageX, y: position.pageY}, {container: document.body}).eq(0);
+                x: position.pageX - this.nearest_hook_tolerance,
+                y: position.pageY - this.nearest_hook_tolerance,
+                w: this.nearest_hook_tolerance*2,
+                h: this.nearest_hook_tolerance*2})
+            .nearest({x: position.pageX, y: position.pageY}).eq(0);
         if ($nearest_list_hook.length) {
             var $elements = this._getColumnElements($nearest_list_hook);
             $elements.addClass('o_web_studio_nearest_hook');
@@ -119,14 +103,6 @@ return ListRenderer.extend(EditorMixin, {
         .mouseout(function () {
             self.$('.o_web_studio_hovered').removeClass('o_web_studio_hovered');
         });
-    },
-    /**
-     * Selects the field on view
-     *
-     * @param {string} fieldName
-     */
-    selectField: function (fieldName) {
-        this.$('th[data-name=' + fieldName + ']').click();
     },
 
     //--------------------------------------------------------------------------
@@ -174,32 +150,20 @@ return ListRenderer.extend(EditorMixin, {
             .children(':nth-child(' + ($target.index() + 1) + ')');
     },
     /**
-     * Add totalWidth of columns + hook cells going to add
-     *
-     * @override
-     * @private
-     * @return {integer}
-     */
-    _getColumnsTotalWidth() {
-        const thElementsLength = this.el.querySelectorAll('thead th').length + 1;
-        return this._super(...arguments) + thElementsLength;
-    },
-    /**
      * @override
      * @private
      */
     _render: function () {
-        var self = this;
-        var prom = this._super.apply(this, arguments);
-        prom.then(function () {
-            self.$el.droppable({
-                accept: ".o_web_studio_component",
-                drop: self._handleDrop.bind(self),
-            });
+        var def = this._super.apply(this, arguments);
 
-            self.setSelectable(self.$('th, td').not('.o_web_studio_hook'));
+        this.$el.droppable({
+            accept: ".o_web_studio_component",
+            drop: this._handleDrop.bind(this),
         });
-        return prom;
+
+        this.setSelectable(this.$('th, td').not('.o_web_studio_hook'));
+
+        return def;
     },
     /**
      * @override
@@ -209,22 +173,6 @@ return ListRenderer.extend(EditorMixin, {
         // we don't want to be able to resequence in the editor
         this.hasHandle = false;
         return this._super();
-    },
-    /**
-     * @override
-     * @private
-     * @param {Object} record
-     * @param {Object} node
-     * @param {...any} args
-     * @return {jQueryElement}
-     */
-    _renderBodyCell(record, node, ...args) {
-        const $td = this._super(record, node, ...args);
-        const invisibleTechnicalNames = this.invisible_columns.map(column => column.attrs.name);
-        if (invisibleTechnicalNames.includes(node.attrs.name)) {
-            $td.addClass('o_web_studio_show_invisible');
-        }
-        return $td;
     },
     /**
      * @override

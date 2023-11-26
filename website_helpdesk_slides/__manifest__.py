@@ -3,7 +3,7 @@
 
 {
     'name': 'Website Slides Helpdesk',
-    'category': 'Operations/Helpdesk',
+    'category': 'Helpdesk',
     'sequence': 58,
     'summary': 'Ticketing, Support, Slides',
     'depends': [
@@ -20,6 +20,7 @@ Website Slides integration for the helpdesk module
     'data': [
         'views/helpdesk_views.xml',
         'views/helpdesk_templates.xml',
+        'wizard/slide_upload_views.xml'
     ],
     'auto_install': True,
     'license': 'OEEL-1',

@@ -1,32 +1,30 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* mrp_plm
+# * mrp_plm
 # 
 # Translators:
-# SHIMIZU Taku <shimizu.taku@gmail.com>, 2019
-# Manami Hashi <manami@roomsfor.hk>, 2019
-# Shigekazu N. <shigekazu.noka@gmail.com>, 2019
-# 高木正勝 <masakatsu.takagi@pro-spire.co.jp>, 2019
-# Kohji Katayama <kohji.katayama@dreamyard.co.jp>, 2019
-# 城谷 龍弥 <tatsuya.shirotani@pro-spire.co.jp>, 2019
-# Martin Trigaux, 2019
-# kent_ocean <ke.tanabe@gmail.com>, 2019
-# Masayuki Takesue <m_takesue@nifty.com>, 2019
-# Norimichi Sugimoto <norimichi.sugimoto@tls-ltd.co.jp>, 2019
-# NANIWA Masahiro <naniwa.masahiro@gmail.com>, 2019
-# Tim Siu Lai <tl@roomsfor.hk>, 2019
+# kent_ocean <ke.tanabe@gmail.com>, 2018
+# Tim Siu Lai <tl@roomsfor.hk>, 2018
+# 城谷 龍弥 <tatsuya.shirotani@pro-spire.co.jp>, 2018
+# SHIMIZU Taku <shimizu.taku@gmail.com>, 2018
+# Martin Trigaux, 2018
+# Manami Hashi <manami@roomsfor.hk>, 2018
+# Shigekazu N. <shigekazu.noka@gmail.com>, 2018
+# 高木正勝 <masakatsu.takagi@pro-spire.co.jp>, 2018
+# Kohji Katayama <kohji.katayama@dreamyard.co.jp>, 2018
+# Masayuki Takesue <m_takesue@nifty.com>, 2018
+# Norimichi Sugimoto <norimichi.sugimoto@tls-ltd.co.jp>, 2018
 # Hau Dao <hau@quartile.co>, 2020
 # Noma Yuki, 2020
 # Yoshi Tashiro (Quartile) <tashiro@roomsfor.hk>, 2021
-# Ryoko Tsuda <ryoko@quartile.co>, 2022
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-05 12:35+0000\n"
-"PO-Revision-Date: 2019-08-26 09:37+0000\n"
-"Last-Translator: Ryoko Tsuda <ryoko@quartile.co>, 2022\n"
+"POT-Creation-Date: 2019-01-15 15:18+0000\n"
+"PO-Revision-Date: 2018-08-24 11:38+0000\n"
+"Last-Translator: Yoshi Tashiro (Quartile) <tashiro@roomsfor.hk>, 2021\n"
 "Language-Team: Japanese (https://www.transifex.com/odoo/teams/41243/ja/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -35,7 +33,14 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: mrp_plm
+#: model:ir.model.fields,field_description:mrp_plm.field_product_product__product_attachment_count
+msgid "# Attachment"
+msgstr ""
+
+#. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__mrp_document_count
+#: model:ir.model.fields,field_description:mrp_plm.field_product_product__template_attachment_count
+#: model:ir.model.fields,field_description:mrp_plm.field_product_template__template_attachment_count
 msgid "# Attachments"
 msgstr ""
 
@@ -59,7 +64,7 @@ msgstr "&amp;nbsp;"
 
 #. module: mrp_plm
 #. openerp-web
-#: code:addons/mrp_plm/static/src/xml/mrp_plm_templates.xml:0
+#: code:addons/mrp_plm/static/src/xml/mrp_plm_templates.xml:9
 #, python-format
 msgid "&times;"
 msgstr "&times;"
@@ -92,7 +97,7 @@ msgid "<i class=\"fa fa-undo\" role=\"img\" aria-label=\"Undo\" title=\"Undo\"/>
 msgstr ""
 
 #. module: mrp_plm
-#: code:addons/mrp_plm/models/mrp_eco.py:0
+#: code:addons/mrp_plm/models/mrp_eco.py:651
 #, python-format
 msgid ""
 "<p class=\"o_view_nocontent_smiling_face\">\n"
@@ -101,16 +106,23 @@ msgid ""
 "                        Use this feature to store any files, like drawings or specifications.\n"
 "                    </p>"
 msgstr ""
+
+#. module: mrp_plm
+#: code:addons/mrp_plm/models/product.py:40
+#: code:addons/mrp_plm/models/product.py:86
+#, python-format
+msgid ""
 "<p class=\"o_view_nocontent_smiling_face\">\n"
-"                        プロダクトに後日適用されるファイルをECOにアップロードしましょう。\n"
+"                        Upload files to your product\n"
 "                    </p><p>\n"
-"                        この機能を使って、図面や設計書などいろいろなファイルを保存しましょう。\n"
+"                        Use this feature to store any files, like drawings or specifications.\n"
 "                    </p>"
+msgstr ""
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_view_form
-msgid "<span>BOM</span><br/>"
-msgstr ""
+msgid "<span>Bill of Materials</span><br/>"
+msgstr "<span>部品表</span><br/>"
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_type_dashboard_view_kanban
@@ -151,18 +163,13 @@ msgid "Activities"
 msgstr "活動"
 
 #. module: mrp_plm
-#: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__activity_exception_decoration
-msgid "Activity Exception Decoration"
-msgstr "例外の活動を示す文字装飾"
-
-#. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__activity_state
 msgid "Activity State"
 msgstr "活動状態"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_bom_change__change_type__add
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_routing_change__change_type__add
+#: selection:mrp.eco.bom.change,change_type:0
+#: selection:mrp.eco.routing.change,change_type:0
 msgid "Add"
 msgstr "追加"
 
@@ -170,11 +177,6 @@ msgstr "追加"
 #: model_terms:ir.actions.act_window,help:mrp_plm.mrp_eco_tag_action
 msgid "Add a new tag"
 msgstr "新しいタグを追加"
-
-#. module: mrp_plm
-#: model:res.groups,name:mrp_plm.group_plm_manager
-msgid "Administrator"
-msgstr "管理者"
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_type__alias_id
@@ -215,7 +217,7 @@ msgstr ""
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_type_dashboard_view_kanban
 msgid "All Validations"
-msgstr "全ての承認"
+msgstr ""
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__allow_change_stage
@@ -225,17 +227,17 @@ msgstr ""
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_stage__allow_apply_change
 msgid "Allow to apply changes"
-msgstr "変更適用を許可"
+msgstr ""
 
 #. module: mrp_plm
 #: model:ir.model.fields,help:mrp_plm.field_mrp_eco_stage__allow_apply_change
 msgid "Allow to apply changes from this stage."
-msgstr "このステージから変更適用を許可"
+msgstr ""
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_view_form
 msgid "Apply Changes"
-msgstr "変更を適用"
+msgstr ""
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_view_form
@@ -248,14 +250,9 @@ msgid "Apply on"
 msgstr "適用対象"
 
 #. module: mrp_plm
-#: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_approval__approval_date
-msgid "Approval Date"
-msgstr "承認日"
-
-#. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_stage__approval_roles
 msgid "Approval Roles"
-msgstr "承認役割"
+msgstr ""
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_approval__template_stage_id
@@ -266,11 +263,6 @@ msgstr "承認ステージ"
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_approval_template__approval_type
 msgid "Approval Type"
 msgstr "承認タイプ"
-
-#. module: mrp_plm
-#: model_terms:ir.ui.view,arch_db:mrp_plm.message_approval
-msgid "Approval:"
-msgstr ""
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__approval_ids
@@ -291,8 +283,7 @@ msgid "Approve"
 msgstr "承認"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco__kanban_state__done
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_approval__status__approved
+#: selection:mrp.eco,kanban_state:0 selection:mrp.eco.approval,status:0
 msgid "Approved"
 msgstr "承認済"
 
@@ -302,30 +293,29 @@ msgid "Approved by"
 msgstr "承認者"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_approval_template__approval_type__optional
+#: selection:mrp.eco.approval.template,approval_type:0
 msgid "Approves, but the approval is optional"
-msgstr "承認。ただし、承認は任意。"
+msgstr ""
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
-#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_view_form
 #: model_terms:ir.ui.view,arch_db:mrp_plm.view_document_search_mrp_plm
 msgid "Archived"
 msgstr "アーカイブ済"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco__effectivity__asap
+#: selection:mrp.eco,effectivity:0
 msgid "As soon as possible"
 msgstr "なるべく早く"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco__effectivity__date
+#: selection:mrp.eco,effectivity:0
 msgid "At Date"
 msgstr "日付"
 
 #. module: mrp_plm
 #. openerp-web
-#: code:addons/mrp_plm/static/src/xml/mrp_plm_templates.xml:0
+#: code:addons/mrp_plm/static/src/xml/mrp_plm_templates.xml:16
 #, python-format
 msgid "Attachment"
 msgstr "添付"
@@ -337,21 +327,16 @@ msgid "Attachment Count"
 msgstr "添付数"
 
 #. module: mrp_plm
-#: code:addons/mrp_plm/models/mrp_eco.py:0
+#: code:addons/mrp_plm/models/mrp_eco.py:642
+#: code:addons/mrp_plm/models/product.py:32
+#: code:addons/mrp_plm/models/product.py:78
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__mrp_document_ids
+#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_view_form
+#: model_terms:ir.ui.view,arch_db:mrp_plm.product_product_view_form_inherit_plm
+#: model_terms:ir.ui.view,arch_db:mrp_plm.product_template_view_form_inherit_plm
 #, python-format
 msgid "Attachments"
 msgstr "添付"
-
-#. module: mrp_plm
-#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
-msgid "Awaiting My Validation"
-msgstr "自分の承認待ち"
-
-#. module: mrp_plm
-#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
-msgid "Awaiting Validation"
-msgstr "承認待ち"
 
 #. module: mrp_plm
 #: model:ir.model,name:mrp_plm.model_report_mrp_report_bom_structure
@@ -369,11 +354,10 @@ msgid "Bill of Material Line"
 msgstr ""
 
 #. module: mrp_plm
-#: code:addons/mrp_plm/models/mrp_eco.py:0
+#: code:addons/mrp_plm/models/mrp_eco.py:152
 #: model:ir.actions.act_window,name:mrp_plm.mrp_bom_action_kanban
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__bom_id
 #: model:ir.ui.menu,name:mrp_plm.menu_mrp_plm_boms
-#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
 #, python-format
 msgid "Bill of Materials"
 msgstr "部品表"
@@ -381,13 +365,13 @@ msgstr "部品表"
 #. module: mrp_plm
 #: model_terms:ir.actions.act_window,help:mrp_plm.mrp_bom_action_kanban
 msgid ""
-"Bills of materials allow you to define the list of required components\n"
-"              used to make a finished product; through a manufacturing\n"
+"Bills of materials allow you to define the list of required raw\n"
+"              materials used to make a finished product; through a manufacturing\n"
 "              order or a pack of products."
 msgstr ""
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco__kanban_state__blocked
+#: selection:mrp.eco,kanban_state:0
 msgid "Blocked"
 msgstr "ブロック済"
 
@@ -395,6 +379,11 @@ msgstr "ブロック済"
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_stage__is_blocking
 msgid "Blocking Stage"
 msgstr ""
+
+#. module: mrp_plm
+#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
+msgid "BoM"
+msgstr "部品表"
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_view_form
@@ -413,12 +402,7 @@ msgid "BoM Revision"
 msgstr "部品表改訂"
 
 #. module: mrp_plm
-#: model_terms:ir.ui.view,arch_db:mrp_plm.report_mrp_bom_inherit_mrp_plm
-msgid "BoM Version"
-msgstr ""
-
-#. module: mrp_plm
-#: code:addons/mrp_plm/models/mrp_eco.py:0
+#: code:addons/mrp_plm/models/mrp_eco.py:154
 #, python-format
 msgid "BoM and Routing"
 msgstr "部品表と工順"
@@ -465,7 +449,7 @@ msgstr ""
 
 #. module: mrp_plm
 #. openerp-web
-#: code:addons/mrp_plm/static/src/xml/mrp_plm_templates.xml:0
+#: code:addons/mrp_plm/static/src/xml/mrp_plm_templates.xml:25
 #, python-format
 msgid "Close"
 msgstr "閉じる"
@@ -482,14 +466,14 @@ msgid "Color Index"
 msgstr "カラーインデクス"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_approval__status__comment
+#: selection:mrp.eco.approval,status:0
 msgid "Commented"
 msgstr ""
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_approval_template__approval_type__comment
+#: selection:mrp.eco.approval.template,approval_type:0
 msgid "Comments only"
-msgstr "コメントのみ"
+msgstr ""
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__company_id
@@ -504,10 +488,10 @@ msgstr "設定"
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_bom_change__conflict
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco__state__conflict
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
+#: selection:mrp.eco,state:0
 msgid "Conflict"
-msgstr "不整合"
+msgstr ""
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_view_form
@@ -527,7 +511,7 @@ msgstr "部品表を作成しましょう"
 #. module: mrp_plm
 #: model_terms:ir.actions.act_window,help:mrp_plm.mrp_eco_stage_action
 msgid "Create a new ECO stage"
-msgstr "新しいECOステージを作成"
+msgstr ""
 
 #. module: mrp_plm
 #: model_terms:ir.actions.act_window,help:mrp_plm.mrp_eco_type_action_dashboard
@@ -575,7 +559,7 @@ msgstr "作成日"
 #. module: mrp_plm
 #: model:ir.model.fields,help:mrp_plm.field_mrp_eco__effectivity
 msgid "Date on which the changes should be applied. For reference only."
-msgstr "変更が適用される日付。参照目的のみ。"
+msgstr ""
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_type__alias_defaults
@@ -620,13 +604,8 @@ msgid "Displayed Image"
 msgstr "表示イメージ"
 
 #. module: mrp_plm
-#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_view_form
-msgid "Documents"
-msgstr "ドキュメント"
-
-#. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco__state__done
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
+#: selection:mrp.eco,state:0
 msgid "Done"
 msgstr "完了"
 
@@ -655,12 +634,12 @@ msgstr "設計変更オーダ分析"
 #. module: mrp_plm
 #: model:ir.model,name:mrp_plm.model_mrp_eco_approval
 msgid "ECO Approval"
-msgstr "ECO 承認"
+msgstr ""
 
 #. module: mrp_plm
 #: model:ir.model,name:mrp_plm.model_mrp_eco_approval_template
 msgid "ECO Approval Template"
-msgstr "ECO 承認テンプレート"
+msgstr ""
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__bom_change_ids
@@ -686,7 +665,7 @@ msgstr ""
 #: model:ir.model,name:mrp_plm.model_mrp_eco_stage
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_approval__eco_stage_id
 msgid "ECO Stage"
-msgstr "ECOステージ"
+msgstr ""
 
 #. module: mrp_plm
 #: model:ir.actions.act_window,name:mrp_plm.mrp_eco_stage_action
@@ -739,8 +718,6 @@ msgid "ECO(s)"
 msgstr ""
 
 #. module: mrp_plm
-#. openerp-web
-#: code:addons/mrp_plm/static/src/js/mrp_bom_report.js:0
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_type__nb_ecos
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_routing__eco_ids
 #: model:ir.model.fields,field_description:mrp_plm.field_product_product__eco_ids
@@ -750,8 +727,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_view_calendar
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_routing_view_form_inherit_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.product_template_view_form_inherit_plm
-#: model_terms:ir.ui.view,arch_db:mrp_plm.report_mrp_bom_inherit_mrp_plm
-#, python-format
 msgid "ECOs"
 msgstr "設計変更オーダ"
 
@@ -761,13 +736,13 @@ msgid "Eco"
 msgstr ""
 
 #. module: mrp_plm
-#: code:addons/mrp_plm/models/mrp_eco.py:0
+#: code:addons/mrp_plm/models/mrp_eco.py:663
 #, python-format
 msgid "Eco BoM"
 msgstr ""
 
 #. module: mrp_plm
-#: code:addons/mrp_plm/models/mrp_eco.py:0
+#: code:addons/mrp_plm/models/mrp_eco.py:675
 #, python-format
 msgid "Eco Routing"
 msgstr ""
@@ -803,21 +778,15 @@ msgid "Email Alias"
 msgstr "Eメールエイリアス"
 
 #. module: mrp_plm
-#: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__email_cc
-#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_view_form
-msgid "Email cc"
-msgstr "メールCC"
-
-#. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_bom_change__eco_id
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_routing_change__eco_id
 msgid "Engineering Change"
-msgstr "設計変更"
+msgstr ""
 
 #. module: mrp_plm
 #: model:ir.model,name:mrp_plm.model_mrp_eco
 msgid "Engineering Change Order (ECO)"
-msgstr "設計変更オーダ (ECO)"
+msgstr ""
 
 #. module: mrp_plm
 #: model:ir.actions.act_window,name:mrp_plm.mrp_eco_action
@@ -835,12 +804,7 @@ msgstr "設計変更オーダ"
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_type_dashboard_view_kanban
 msgid "Engineering Changes"
-msgstr "設計変更"
-
-#. module: mrp_plm
-#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_view_form
-msgid "Extra Info"
-msgstr "追加情報"
+msgstr ""
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
@@ -850,7 +814,7 @@ msgstr "フィルタ"
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_stage__final_stage
 msgid "Final Stage"
-msgstr "最終ステージ"
+msgstr ""
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_stage__folded
@@ -891,12 +855,12 @@ msgid "Group by..."
 msgstr "グル―プ化…"
 
 #. module: mrp_plm
-#: model:ir.module.category,description:mrp_plm.module_category_manufacturing_plm
+#: model:ir.module.category,description:mrp_plm.module_category_plm
 msgid "Helps you manage your product's lifecycles."
 msgstr ""
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco__priority__1
+#: selection:mrp.eco,priority:0
 msgid "High"
 msgstr "高"
 
@@ -920,28 +884,20 @@ msgid ""
 msgstr "エイリアスを保持する親レコードのID(例：プロジェクトは、タスク作成エイリアスを保持)"
 
 #. module: mrp_plm
-#: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__activity_exception_icon
-msgid "Icon"
-msgstr "アイコン"
-
-#. module: mrp_plm
-#: model:ir.model.fields,help:mrp_plm.field_mrp_eco__activity_exception_icon
-msgid "Icon to indicate an exception activity."
-msgstr "例外的なアクティビティを示唆するアイコン"
+#: model:ir.model.fields,help:mrp_plm.field_mrp_eco__message_unread
+#: model:ir.model.fields,help:mrp_plm.field_mrp_eco_type__message_unread
+msgid "If checked new messages require your attention."
+msgstr "チェックされている場合は、新しいメッセージに注意が必要です。"
 
 #. module: mrp_plm
 #: model:ir.model.fields,help:mrp_plm.field_mrp_eco__message_needaction
-#: model:ir.model.fields,help:mrp_plm.field_mrp_eco__message_unread
 #: model:ir.model.fields,help:mrp_plm.field_mrp_eco_type__message_needaction
-#: model:ir.model.fields,help:mrp_plm.field_mrp_eco_type__message_unread
 msgid "If checked, new messages require your attention."
 msgstr "チェックされている場合は、新しいメッセージに注意が必要です。"
 
 #. module: mrp_plm
 #: model:ir.model.fields,help:mrp_plm.field_mrp_eco__message_has_error
-#: model:ir.model.fields,help:mrp_plm.field_mrp_eco__message_has_sms_error
 #: model:ir.model.fields,help:mrp_plm.field_mrp_eco_type__message_has_error
-#: model:ir.model.fields,help:mrp_plm.field_mrp_eco_type__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr "チェックした場合、一部のメッセージが配信エラーが発生しています。"
 
@@ -960,11 +916,6 @@ msgid ""
 msgstr ""
 
 #. module: mrp_plm
-#: model:ir.model.fields,field_description:mrp_plm.field_mrp_bom__image_128
-msgid "Image 128"
-msgstr "イメージ 128"
-
-#. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_kanban
 msgid "Important Messages"
 msgstr "重要なメッセージ"
@@ -976,9 +927,8 @@ msgid "In #{kanban_getcolorname(record.color.raw_value)}"
 msgstr "番号{kanban_getcolorname(record.color.raw_value)}の中にあります"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco__kanban_state__normal
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco__state__progress
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
+#: selection:mrp.eco,kanban_state:0 selection:mrp.eco,state:0
 #: model:mrp.eco.stage,name:mrp_plm.ecostage_progress
 msgid "In Progress"
 msgstr "進行中"
@@ -987,11 +937,6 @@ msgstr "進行中"
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_approval__is_approved
 msgid "Is Approved"
 msgstr ""
-
-#. module: mrp_plm
-#: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_approval__is_closed
-msgid "Is Closed"
-msgstr "終了済"
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__message_is_follower
@@ -1005,9 +950,9 @@ msgid "Is Rejected"
 msgstr ""
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_approval_template__approval_type__mandatory
+#: selection:mrp.eco.approval.template,approval_type:0
 msgid "Is required to approve"
-msgstr "承認が必要"
+msgstr ""
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__kanban_state
@@ -1061,15 +1006,15 @@ msgid "Late Activities"
 msgstr "遅れた活動"
 
 #. module: mrp_plm
-#: model:ir.model.fields,help:mrp_plm.field_mrp_eco__email_cc
-msgid "List of cc from incoming emails."
-msgstr "受信メールからのccのリスト。"
-
-#. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__message_main_attachment_id
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_type__message_main_attachment_id
 msgid "Main Attachment"
 msgstr "主な添付"
+
+#. module: mrp_plm
+#: model:res.groups,name:mrp_plm.group_plm_manager
+msgid "Manager"
+msgstr "マネジャー"
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_routing_change__upd_time_cycle_manual
@@ -1100,16 +1045,22 @@ msgstr ""
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
+msgid "My Activities"
+msgstr "自分の活動"
+
+#. module: mrp_plm
+#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
 msgid "My Change Orders"
 msgstr "自分の変更オーダ"
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_type_dashboard_view_kanban
 msgid "My Validations"
-msgstr "自分の承認"
+msgstr ""
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_stage__name
+#: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_tag__name
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_type__name
 msgid "Name"
 msgstr "名称"
@@ -1175,14 +1126,14 @@ msgid "Next Activity Type"
 msgstr "次の活動タイプ"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco__priority__0
+#: selection:mrp.eco,priority:0
 msgid "Normal"
 msgstr "通常"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_approval__status__none
+#: selection:mrp.eco.approval,status:0
 msgid "Not Yet"
-msgstr "未承認"
+msgstr ""
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__note
@@ -1199,7 +1150,7 @@ msgstr "アクションの数"
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__message_has_error_counter
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_type__message_has_error_counter
-msgid "Number of errors"
+msgid "Number of error"
 msgstr "エラー数"
 
 #. module: mrp_plm
@@ -1228,7 +1179,7 @@ msgstr ""
 #. module: mrp_plm
 #: model:ir.model.fields,help:mrp_plm.field_mrp_eco_stage__final_stage
 msgid "Once the changes are applied, the ECOs will be moved to this stage."
-msgstr "変更が適用されると、ECOはこのステージに移行されます。"
+msgstr ""
 
 #. module: mrp_plm
 #: model:ir.model.fields,help:mrp_plm.field_mrp_eco_type__alias_force_thread_id
@@ -1237,6 +1188,11 @@ msgid ""
 "attached, even if they did not reply to it. If set, this will disable the "
 "creation of new records completely."
 msgstr "すべての受信メッセージに添付されるスレッド(レコード)のオプションIDです。設定した場合は新しいレコードの作成を無効にします。"
+
+#. module: mrp_plm
+#: selection:mrp.eco,activity_state:0
+msgid "Overdue"
+msgstr "滞納"
 
 #. module: mrp_plm
 #: model:ir.ui.menu,name:mrp_plm.menu_mrp_plm_dashboard
@@ -1249,7 +1205,7 @@ msgid "Owner"
 msgstr "オーナー"
 
 #. module: mrp_plm
-#: model:ir.module.category,name:mrp_plm.module_category_manufacturing_plm
+#: model:ir.module.category,name:mrp_plm.module_category_plm
 #: model:ir.ui.menu,name:mrp_plm.menu_mrp_plm_root
 msgid "PLM"
 msgstr "PLM"
@@ -1257,7 +1213,7 @@ msgstr "PLM"
 #. module: mrp_plm
 #: model:ir.actions.act_window,name:mrp_plm.mrp_eco_type_action_dashboard
 msgid "PLM Overview"
-msgstr "PLM概要"
+msgstr ""
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_type__alias_parent_model_id
@@ -1277,6 +1233,11 @@ msgid ""
 "(parent_model) and task (model))"
 msgstr ""
 "エイリアスを保持する親モデル。エイリアスの参照を保持しているモデルは、必ずしもalias_model_idによって与えられたモデルではありません(例：プロジェクト(parent_model)とタスク(model))"
+
+#. module: mrp_plm
+#: selection:mrp.eco,activity_state:0
+msgid "Planned"
+msgstr "予定済"
 
 #. module: mrp_plm
 #: model:ir.model.fields,help:mrp_plm.field_mrp_eco_type__alias_contact
@@ -1332,6 +1293,7 @@ msgid "Priority"
 msgstr "優先度"
 
 #. module: mrp_plm
+#: model:ir.model,name:mrp_plm.model_product_product
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__product_tmpl_id
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_bom_change__product_id
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_bom_view_kanban
@@ -1341,10 +1303,10 @@ msgid "Product"
 msgstr "プロダクト"
 
 #. module: mrp_plm
-#: code:addons/mrp_plm/models/mrp_eco.py:0
+#: code:addons/mrp_plm/models/mrp_eco.py:151
 #, python-format
 msgid "Product Only"
-msgstr "プロダクトのみ"
+msgstr ""
 
 #. module: mrp_plm
 #: model:ir.model,name:mrp_plm.model_product_template
@@ -1368,8 +1330,8 @@ msgstr "数量"
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_bom_change__rebase_id
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco__state__rebase
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
+#: selection:mrp.eco,state:0
 msgid "Rebase"
 msgstr ""
 
@@ -1394,7 +1356,7 @@ msgid "Reject"
 msgstr "拒否"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_approval__status__rejected
+#: selection:mrp.eco.approval,status:0
 msgid "Rejected"
 msgstr "拒否済"
 
@@ -1404,8 +1366,8 @@ msgid "Related attachment"
 msgstr ""
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_bom_change__change_type__remove
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_routing_change__change_type__remove
+#: selection:mrp.eco.bom.change,change_type:0
+#: selection:mrp.eco.routing.change,change_type:0
 msgid "Remove"
 msgstr "削除"
 
@@ -1430,14 +1392,14 @@ msgid "Responsible User"
 msgstr "担当者"
 
 #. module: mrp_plm
+#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_view_form
+msgid "Rev :"
+msgstr ""
+
+#. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_bom__revision_ids
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_routing__revision_ids
 msgid "Revision"
-msgstr "更新"
-
-#. module: mrp_plm
-#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_view_form
-msgid "Revision :"
 msgstr ""
 
 #. module: mrp_plm
@@ -1447,7 +1409,7 @@ msgid "Role"
 msgstr "役割"
 
 #. module: mrp_plm
-#: code:addons/mrp_plm/models/mrp_eco.py:0
+#: code:addons/mrp_plm/models/mrp_eco.py:154
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__routing_id
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
 #, python-format
@@ -1476,12 +1438,6 @@ msgid "Routings"
 msgstr "工順"
 
 #. module: mrp_plm
-#: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__message_has_sms_error
-#: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_type__message_has_sms_error
-msgid "SMS Delivery error"
-msgstr "SMS配信エラー"
-
-#. module: mrp_plm
 #: model:ir.ui.menu,name:mrp_plm.menu_mrp_plm_search
 msgid "Search"
 msgstr "検索"
@@ -1500,7 +1456,7 @@ msgstr "カバーイメージを設定"
 
 #. module: mrp_plm
 #. openerp-web
-#: code:addons/mrp_plm/static/src/xml/mrp_plm_templates.xml:0
+#: code:addons/mrp_plm/static/src/xml/mrp_plm_templates.xml:8
 #, python-format
 msgid "Set a Cover Image"
 msgstr "カバーイメージを設定"
@@ -1524,6 +1480,20 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
 msgid "Show all records which has next action date is before today"
 msgstr "次のアクションの日付が今日より前のすべてのレコードを表示する"
+
+#. module: mrp_plm
+#: model:ir.model.fields,field_description:mrp_plm.field_mrp_bom__image_small
+msgid "Small-sized image"
+msgstr "画像 (小)"
+
+#. module: mrp_plm
+#: model:ir.model.fields,help:mrp_plm.field_mrp_bom__image_small
+msgid ""
+"Small-sized image of the product. It is automatically resized as a 64x64px "
+"image, with aspect ratio preserved. Use this field anywhere a small image is"
+" required."
+msgstr ""
+"製品用の縮小されたイメージ。それは自動的に保存され、アスペクト比で、64x64px画像とサイズを変更します。小さな画像を必要とするどこでも、このフィールドを使用しています。"
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_kanban
@@ -1572,7 +1542,7 @@ msgstr ""
 "予定：将来の活動。"
 
 #. module: mrp_plm
-#: code:addons/mrp_plm/models/mrp_eco.py:0
+#: code:addons/mrp_plm/models/mrp_eco.py:347
 #, python-format
 msgid "Successfully Rebased !"
 msgstr ""
@@ -1585,12 +1555,7 @@ msgid ""
 msgstr ""
 
 #. module: mrp_plm
-#: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_tag__name
-msgid "Tag Name"
-msgstr "タグ名"
-
-#. module: mrp_plm
-#: model:ir.model.constraint,message:mrp_plm.constraint_mrp_eco_tag_name_uniq
+#: sql_constraint:mrp.eco.tag:0
 msgid "Tag name already exists !"
 msgstr "そのタグ名は既に使われています！"
 
@@ -1629,7 +1594,7 @@ msgstr ""
 #: model:ir.model.fields,help:mrp_plm.field_product_product__version
 #: model:ir.model.fields,help:mrp_plm.field_product_template__version
 msgid "The current version of the product."
-msgstr "プロダクトの現在のバージョン"
+msgstr ""
 
 #. module: mrp_plm
 #: model:ir.model.fields,help:mrp_plm.field_mrp_eco_type__alias_model_id
@@ -1659,7 +1624,7 @@ msgstr ""
 
 #. module: mrp_plm
 #. openerp-web
-#: code:addons/mrp_plm/static/src/xml/mrp_plm_templates.xml:0
+#: code:addons/mrp_plm/static/src/xml/mrp_plm_templates.xml:20
 #, python-format
 msgid ""
 "There is no available image to be set as cover. Add an image as an "
@@ -1671,13 +1636,18 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_type_dashboard_view_kanban
 msgid "To Apply"
-msgstr "適用待ち"
+msgstr ""
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco__state__confirmed
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
+#: selection:mrp.eco,state:0
 msgid "To Do"
-msgstr "To Do"
+msgstr "未処理"
+
+#. module: mrp_plm
+#: selection:mrp.eco,activity_state:0
+msgid "Today"
+msgstr "本日"
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
@@ -1691,11 +1661,6 @@ msgstr "本日の活動"
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_stage__type_id
 msgid "Type"
 msgstr "タイプ"
-
-#. module: mrp_plm
-#: model:ir.model.fields,help:mrp_plm.field_mrp_eco__activity_exception_decoration
-msgid "Type of the exception activity on record."
-msgstr "記録上の例外アクティビティのタイプ。"
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_bom_change__uom_change
@@ -1715,8 +1680,8 @@ msgid "Unread Messages Counter"
 msgstr "未読メッセージカウンター"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_bom_change__change_type__update
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_routing_change__change_type__update
+#: selection:mrp.eco.bom.change,change_type:0
+#: selection:mrp.eco.routing.change,change_type:0
 msgid "Update"
 msgstr "更新"
 
@@ -1760,9 +1725,19 @@ msgid "Version"
 msgstr "バージョン"
 
 #. module: mrp_plm
+#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
+msgid "Waiting Any Validation"
+msgstr "検証待ち"
+
+#. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_type__nb_approvals
 msgid "Waiting Approvals"
 msgstr ""
+
+#. module: mrp_plm
+#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
+msgid "Waiting My Validation"
+msgstr "自分の検証待ち"
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_kanban
@@ -1797,33 +1772,23 @@ msgid "Work Centers"
 msgstr "作業区"
 
 #. module: mrp_plm
-#: code:addons/mrp_plm/models/mrp_eco.py:0
+#: code:addons/mrp_plm/models/mrp_eco.py:489
 #, python-format
 msgid "You cannot change the stage, as approvals are required in the process."
 msgstr ""
 
 #. module: mrp_plm
-#: code:addons/mrp_plm/models/mrp_eco.py:0
+#: code:addons/mrp_plm/models/mrp_eco.py:479
 #, python-format
 msgid "You cannot change the stage, as approvals are still required."
 msgstr ""
 
 #. module: mrp_plm
-#: model_terms:ir.ui.view,arch_db:mrp_plm.message_approval
-msgid "by"
-msgstr "により"
-
-#. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_stage_view_form
 msgid "e.g. Engineering Department"
-msgstr "例: 設計部門"
+msgstr ""
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_kanban
 msgid "oe_kanban_text_red"
 msgstr "oe_kanban_text_red"
-
-#. module: mrp_plm
-#: model_terms:ir.ui.view,arch_db:mrp_plm.message_approval
-msgid "was"
-msgstr ""

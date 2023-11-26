@@ -4,7 +4,7 @@ odoo.define('web_enterprise.DebugManager', function (require) {
 var config = require('web.config');
 var WebClient = require('web.WebClient');
 
-if (config.isDebug()) {
+if (config.debug) {
     WebClient.include({
         start: function() {
             var self = this;
@@ -17,7 +17,7 @@ if (config.isDebug()) {
                         action = self.action_manager.getCurrentAction();
                         controller = self.action_manager.getCurrentController();
                     }
-                    self.update_debug_manager(action, controller);
+                    self.current_action_updated(action, controller);
                     toggle_home_menu.apply(self, arguments);
                 };
             });

@@ -1,32 +1,31 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_batch_payment
+# * account_batch_payment
 # 
 # Translators:
-# e2f <projects@e2f.com>, 2019
+# e2f <projects@e2f.com>, 2018
+# Martin Trigaux, 2018
+# Massiel Acuna <mac@odoo.com>, 2018
+# gabriumaa <gabriel.umana@delfixcr.com>, 2019
 # Rick Hunter <rick_hunter_ec@yahoo.com>, 2019
-# Massiel Acuna <mac@odoo.com>, 2019
-# Jesse Garza <jga@odoo.com>, 2019
-# Martin Trigaux, 2019
 # gpi odoo <gpi@odoo.com>, 2020
 # Jon Perez <jop@odoo.com>, 2020
 # José Cabrera Lozano <jose.cabrera@edukative.es>, 2021
 # Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2021
-# Leonardo J. Caballero G. <leonardocaballero@gmail.com>, 2022
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~12.5+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-23 11:38+0000\n"
-"PO-Revision-Date: 2019-08-26 09:34+0000\n"
-"Last-Translator: Leonardo J. Caballero G. <leonardocaballero@gmail.com>, 2022\n"
+"POT-Creation-Date: 2019-11-14 07:49+0000\n"
+"PO-Revision-Date: 2018-08-24 11:36+0000\n"
+"Last-Translator: Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2021\n"
 "Language-Team: Spanish (https://www.transifex.com/odoo/teams/41243/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: es\n"
-"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: account_batch_payment
 #: model:ir.model,name:account_batch_payment.model_account_batch_download_wizard
@@ -39,14 +38,14 @@ msgid "Account Reconciliation widget"
 msgstr "Widget de reconciliación de cuenta"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:75
 #, python-format
 msgid "All payments in the batch must belong to the same company."
 msgstr ""
 "Todos los pagos dentro de la remesa deben provenir de la misma empresa."
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:86
 #, python-format
 msgid "All payments in the batch must share the same payment method."
 msgstr ""
@@ -99,15 +98,12 @@ msgid "Batch Payment"
 msgstr "Pagos por lotes"
 
 #. module: account_batch_payment
-#. openerp-web
-#: code:addons/account_batch_payment/static/src/xml/account_reconciliation.xml:0
 #: model:ir.actions.act_window,name:account_batch_payment.action_batch_payment_in
 #: model:ir.actions.act_window,name:account_batch_payment.action_batch_payment_out
 #: model:ir.ui.menu,name:account_batch_payment.menu_batch_payment_purchases
 #: model:ir.ui.menu,name:account_batch_payment.menu_batch_payment_sales
-#, python-format
 msgid "Batch Payments"
-msgstr "Pagos por lotes"
+msgstr "Lote de pagos"
 
 #. module: account_batch_payment
 #: model:ir.model.fields,field_description:account_batch_payment.field_account_batch_payment__batch_type
@@ -147,7 +143,8 @@ msgid "Code"
 msgstr "Código"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_journal.py:0
+#: code:addons/account_batch_payment/models/account_journal.py:57
+#: model:ir.actions.server,name:account_batch_payment.action_account_create_batch_payment
 #, python-format
 msgid "Create Batch Payment"
 msgstr "Crea un pago por lotes"
@@ -161,11 +158,6 @@ msgstr "Crea un nuevo pago por lotes para un cliente"
 #: model_terms:ir.actions.act_window,help:account_batch_payment.action_batch_payment_out
 msgid "Create a new vendor batch payment"
 msgstr "Crea un nuevo pago por lotes para un vendedor"
-
-#. module: account_batch_payment
-#: model:ir.actions.server,name:account_batch_payment.action_account_create_batch_payment
-msgid "Create batch payment"
-msgstr "Crea un pago por lotes"
 
 #. module: account_batch_payment
 #: model:ir.model.fields,field_description:account_batch_payment.field_account_batch_download_wizard__create_uid
@@ -205,7 +197,7 @@ msgstr "Fecha"
 #: model:ir.model.fields,field_description:account_batch_payment.field_account_batch_payment__display_name
 #: model:ir.model.fields,field_description:account_batch_payment.field_report_account_batch_payment_print_batch_payment__display_name
 msgid "Display Name"
-msgstr "Nombre mostrado"
+msgstr "Nombre a mostrar"
 
 #. module: account_batch_payment
 #: model_terms:ir.ui.view,arch_db:account_batch_payment.download_xml_form
@@ -215,7 +207,7 @@ msgstr "Descargar el archivo importado"
 #. module: account_batch_payment
 #: model:ir.model.fields,help:account_batch_payment.field_account_batch_payment__export_file
 msgid "Export file related to this batch"
-msgstr "Exporta un archivo relacionado con este pago por lotes"
+msgstr "Exporta un archivo relacionado con este pago por lotes."
 
 #. module: account_batch_payment
 #: model_terms:ir.ui.view,arch_db:account_batch_payment.view_batch_payment_form
@@ -244,13 +236,6 @@ msgid "File name"
 msgstr "Nombre de fichero"
 
 #. module: account_batch_payment
-#. openerp-web
-#: code:addons/account_batch_payment/static/src/xml/account_reconciliation.xml:0
-#, python-format
-msgid "Filter..."
-msgstr "Filtro..."
-
-#. module: account_batch_payment
 #: model:ir.model.fields,help:account_batch_payment.field_account_batch_download_wizard__export_file
 msgid "Generated XML file"
 msgstr "Archivo XML generado"
@@ -258,7 +243,7 @@ msgstr "Archivo XML generado"
 #. module: account_batch_payment
 #: model:ir.model.fields,field_description:account_batch_payment.field_account_batch_payment__export_file_create_date
 msgid "Generation Date"
-msgstr "Fecha de generación"
+msgstr "v"
 
 #. module: account_batch_payment
 #: model_terms:ir.ui.view,arch_db:account_batch_payment.view_batch_payment_search
@@ -273,25 +258,25 @@ msgid "ID"
 msgstr "ID"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:89
 #, python-format
 msgid "Id: %s"
 msgstr "Id: %s"
 
 #. module: account_batch_payment
-#: model:ir.model.fields.selection,name:account_batch_payment.selection__account_batch_payment__batch_type__inbound
+#: selection:account.batch.payment,batch_type:0
 msgid "Inbound"
 msgstr "Entrante"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_journal.py:0
+#: code:addons/account_batch_payment/models/account_journal.py:37
 #, python-format
 msgid "Inbound Batch Payments Sequence"
 msgstr "Secuencias de pago por lotes salientes"
 
 #. module: account_batch_payment
 #. openerp-web
-#: code:addons/account_batch_payment/static/src/js/account_batch_payment_reconciliation.js:0
+#: code:addons/account_batch_payment/static/src/js/account_batch_payment_reconciliation.js:135
 #, python-format
 msgid "Incorrect Operation"
 msgstr "Operación incorrecta"
@@ -328,7 +313,7 @@ msgstr "Circular"
 #. module: account_batch_payment
 #: model:ir.model.fields,help:account_batch_payment.field_account_batch_payment__export_filename
 msgid "Name of the export file generated for this batch"
-msgstr "Nombre del archivo exportado que se generó para este pago por lotes"
+msgstr "Nombre del archivo exportado que se generó para este pago por lotes."
 
 #. module: account_batch_payment
 #: model:ir.model.fields,help:account_batch_payment.field_account_batch_download_wizard__export_filename
@@ -336,20 +321,20 @@ msgid "Name of the generated XML file"
 msgstr "Nombre del archivo XML generado"
 
 #. module: account_batch_payment
-#: model:ir.model.fields.selection,name:account_batch_payment.selection__account_batch_payment__state__draft
+#: selection:account.batch.payment,state:0
 msgid "New"
 msgstr "Nuevo"
 
 #. module: account_batch_payment
-#: model:ir.model.fields.selection,name:account_batch_payment.selection__account_batch_payment__batch_type__outbound
+#: selection:account.batch.payment,batch_type:0
 msgid "Outbound"
 msgstr "Saliente"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_journal.py:0
+#: code:addons/account_batch_payment/models/account_journal.py:17
 #, python-format
 msgid "Outbound Batch Payments Sequence"
-msgstr "Secuencias de pago por lotes salientes"
+msgstr "Secuencias de pago por lotes salientes."
 
 #. module: account_batch_payment
 #: model:ir.model.fields,field_description:account_batch_payment.field_account_batch_payment__payment_method_id
@@ -374,7 +359,12 @@ msgid "Print Batch Payment"
 msgstr "Imprimir pago por lotes"
 
 #. module: account_batch_payment
-#: model:ir.model.fields.selection,name:account_batch_payment.selection__account_batch_payment__state__reconciled
+#: model:ir.actions.server,name:account_batch_payment.action_account_print_batch_payment
+msgid "Print Batch Payments"
+msgstr ""
+
+#. module: account_batch_payment
+#: selection:account.batch.payment,state:0
 msgid "Reconciled"
 msgstr "Conciliado"
 
@@ -389,20 +379,27 @@ msgid "Register Payment"
 msgstr "Registrar pago"
 
 #. module: account_batch_payment
-#: model:ir.model.fields.selection,name:account_batch_payment.selection__account_batch_payment__state__sent
+#. openerp-web
+#: code:addons/account_batch_payment/static/src/xml/account_reconciliation.xml:8
+#, python-format
+msgid "Select a Batch Payment"
+msgstr ""
+
+#. module: account_batch_payment
+#: selection:account.batch.payment,state:0
 msgid "Sent"
 msgstr "Enviado"
 
 #. module: account_batch_payment
 #. openerp-web
-#: code:addons/account_batch_payment/static/src/js/account_batch_payment_reconciliation.js:0
+#: code:addons/account_batch_payment/static/src/js/account_batch_payment_reconciliation.js:133
 #, python-format
 msgid ""
 "Some journal items from the selected batch payment are already selected in "
 "another reconciliation : "
 msgstr ""
 "Algunos de los elementos pertenecientes al pago por lotes seleccionados ya "
-"están seleccionados en otra reconciliación : "
+"están seleccionados en otra reconciliación: "
 
 #. module: account_batch_payment
 #: model:ir.model.fields,field_description:account_batch_payment.field_account_batch_payment__state
@@ -411,7 +408,7 @@ msgid "State"
 msgstr "Estado"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:88
 #, python-format
 msgid ""
 "The batch must have the same payment method as the payments it contains."
@@ -420,14 +417,14 @@ msgstr ""
 "pagos que contiene."
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:83
 #, python-format
 msgid "The batch must have the same type as the payments it contains."
 msgstr ""
 "El pago por lotes debe de ser del mismo tipo que los pagos que contiene."
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:78
 #, python-format
 msgid ""
 "The journal of the batch payment and of the payments it contains must be the"
@@ -465,8 +462,6 @@ msgstr "Alerta"
 #: model:ir.model.fields,help:account_batch_payment.field_account_batch_download_wizard__warning_message
 msgid "Warning message to display about the content of the downloadable file."
 msgstr ""
-"Mensaje de advertencia para mostrar sobre el contenido del archivo "
-"descargable."
 
 #. module: account_batch_payment
 #: model:ir.model.fields,help:account_batch_payment.field_account_batch_payment__file_generation_enabled
@@ -474,11 +469,11 @@ msgid ""
 "Whether or not this batch payment should display the 'Generate File' button "
 "instead of 'Print' in form view."
 msgstr ""
-"Si este pago por lotes debería mostrar el botón de 'Generar archivo' en "
-"lugar de 'Imprimir' al verlo como formulario."
+"Si este pago por lotes debería mostrar el botón de \"Generar archivo\" en "
+"lugar de \"Imprimir\" al verlo como formulario."
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:90
 #, python-format
 msgid ""
 "You cannot add payments with zero amount in a Batch Payment.\n"
@@ -490,24 +485,12 @@ msgstr ""
 "%s"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_payment.py:0
+#: code:addons/account_batch_payment/models/account_payment.py:38
 #, python-format
 msgid ""
 "You cannot make a batch payment with internal transfers. Internal transfers "
 "ids: %s"
 msgstr ""
-"No se puede realizar un pago por lotes con transferencias internas. ID de "
-"transferencias internas: %s"
-
-#. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:131
-#, python-format
-msgid ""
-"You cannot validate a batch containing payments that are not in 'posted' "
-"state."
-msgstr ""
-"No puede validar un lote que contenga pagos que no estén en estado "
-"'registrado'."
 
 #. module: account_batch_payment
 #: model_terms:ir.ui.view,arch_db:account_batch_payment.view_batch_payment_form
@@ -517,4 +500,4 @@ msgstr "auto ..."
 #. module: account_batch_payment
 #: model_terms:ir.ui.view,arch_db:account_batch_payment.view_batch_payment_form
 msgid "re-Generate Export File"
-msgstr "Volver a generar archivo de exportación"
+msgstr ""

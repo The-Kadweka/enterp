@@ -16,7 +16,7 @@ var FieldMany2One = relational_fields.FieldMany2One;
 var _t = core._t;
 
 var AppCreator = AbstractAction.extend(StandaloneFieldManagerMixin, {
-    contentTemplate: 'web_studio.AppCreator',
+    template: 'web_studio.AppCreator',
     events: {
         'click .o_web_studio_app_creator_next': '_onNext',
         'click .o_web_studio_app_creator_back': '_onBack',
@@ -34,16 +34,18 @@ var AppCreator = AbstractAction.extend(StandaloneFieldManagerMixin, {
         this._super.apply(this, arguments);
         StandaloneFieldManagerMixin.init.call(this);
         this.currentStep = 1;
-        this.debug = config.isDebug();
+        this.debug = config.debug;
     },
     /**
      * @override
      */
     start: function () {
+        this._update();
+
         // namespace the event to remove it easily (because of bind)
         $('body').on('keypress.app_creator', this._onKeyPress.bind(this));
 
-        return this._super.apply(this, arguments).then(this._update.bind(this));
+        return this._super.apply(this, arguments);
     },
     /**
      * @override
@@ -59,15 +61,10 @@ var AppCreator = AbstractAction.extend(StandaloneFieldManagerMixin, {
 
     /**
      * Re-render the widget and update its content according to @currentStep.
-     * @returns {Promise}
      */
     update: function () {
-        var self = this;
         this.renderElement();
-        return this._update().then(function () {
-            // focus on input
-            self.$('input').first().focus();
-        });
+        this._update();
     },
 
     //--------------------------------------------------------------------------
@@ -128,7 +125,7 @@ var AppCreator = AbstractAction.extend(StandaloneFieldManagerMixin, {
      *  - the ir.attachment id of the uploaded image
      *  - if the icon has been created with the IconCreator, an array containing:
      *      [icon_class, color, background_color]
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _createNewApp: function (app_name, menu_name, model_id, icon) {
         var self = this;
@@ -144,24 +141,20 @@ var AppCreator = AbstractAction.extend(StandaloneFieldManagerMixin, {
                 context: session.user_context,
             },
         }).then(function (result) {
-            core.bus.trigger('clear_cache');
             self.trigger_up('new_app_created', result);
-            framework.unblockUI();
-        }).guardedCatch(framework.unblockUI.bind(framework));
+            core.bus.trigger('clear_cache');
+        }).always(framework.unblockUI.bind(framework));
     },
-    /**
+    /*
      * Update the widget according to the @currentStep
      * The steps are:
-     *  - welcome
-     *  - form with the app name
-     *  - form with the menu name and an optional model
+     *   1) welcome
+     *   2) form with the app name
+     *   3) form with the menu name and an optional model
      *
      * @private
-     * @returns {Promise}
      */
     _update: function () {
-        var self = this;
-
         this.$left = this.$('.o_web_studio_app_creator_left_content');
         this.$right = this.$('.o_web_studio_app_creator_right_content');
         this.$back = this.$('.o_web_studio_app_creator_back');
@@ -185,7 +178,6 @@ var AppCreator = AbstractAction.extend(StandaloneFieldManagerMixin, {
             this.$back.addClass('o_hidden');
             this.$next.find('span').text(_t('Next'));
             this.$next.addClass('is_ready');
-            return Promise.resolve();
         } else if (this.currentStep === 2) {
             // add 'Create your App' content
             var $appForm = $(QWeb.render('web_studio.AppCreator.App', {
@@ -198,12 +190,13 @@ var AppCreator = AbstractAction.extend(StandaloneFieldManagerMixin, {
             } else {
                 this.iconCreator.enableEdit();
             }
-            return this.iconCreator.appendTo(this.$right).then(function () {
-                self._checkFields();
-            });
+            this.iconCreator.appendTo(this.$right);
+
+            this._checkFields();
         } else {
             // create a Many2one field widget for the custom model
-            return this.model.makeRecord('ir.actions.act_window', [{
+            var self = this;
+            this.model.makeRecord('ir.actions.act_window', [{
                 name: 'model',
                 relation: 'ir.model',
                 type: 'many2one',
@@ -215,21 +208,22 @@ var AppCreator = AbstractAction.extend(StandaloneFieldManagerMixin, {
                 };
                 self.many2one = new FieldMany2One(self, 'model', record, options);
                 self._registerWidget(recordID, 'model', self.many2one);
-
-                // add 'Create your first Menu' content
-                var $menuForm = $(QWeb.render('web_studio.AppCreator.Menu', {
-                    widget: self,
-                }));
-                self.$left.append($menuForm);
-                self.iconCreator.disableEdit();
-                return Promise.all([
-                    self.many2one.appendTo($menuForm.find('.js_model')),
-                    self.iconCreator.appendTo(self.$right)
-                ]).then(function () {
-                    self._checkFields();
-                });
             });
+
+            // add 'Create your first Menu' content
+            var $menuForm = $(QWeb.render('web_studio.AppCreator.Menu', {
+                widget: this,
+            }));
+            this.many2one.appendTo($menuForm.find('.js_model'));
+            this.$left.append($menuForm);
+            this.iconCreator.disableEdit();
+            this.iconCreator.appendTo(this.$right);
+
+            this._checkFields();
         }
+
+        // focus on input
+        this.$('input').first().focus();
     },
 
     //--------------------------------------------------------------------------

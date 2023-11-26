@@ -3,25 +3,52 @@ odoo.define('web_enterprise.mobile_menu_tests', function (require) {
 
 var Menu = require('web_enterprise.Menu');
 var testUtils = require('web.test_utils');
-var testUtilsEnterprise = require('web_enterprise.test_utils');
+var SystrayMenu = require('web.SystrayMenu');
 var UserMenu = require('web.UserMenu');
 
+/**
+ * create a menu from given parameters.
+ *
+ * @param {Object} params This object will be given to addMockEnvironment, so
+ *   any parameters from that method applies
+ * @param {Object} params.menuData This object will define the menu's data
+ *   structure to render
+ * @param {Widget[]} [params.systrayMenuItems=[]] This array will define the systray
+ *  items to use. Will at least contain and default to UserMenu
+ * @returns {Menu}
+ */
+function createMenu(params) {
+    var parent = testUtils.createParent({});
+
+    var systrayMenuItems = params.systrayMenuItems || [];
+    if (params.systrayMenuItems) {
+        delete params.systrayMenuItems;
+    }
+
+    var initialSystrayMenuItems = _.clone(SystrayMenu.Items);
+    SystrayMenu.Items = _.union([UserMenu], systrayMenuItems);
+
+    var menuData = params.menuData || {};
+    if (params.menuData) {
+        delete params.menuData;
+    }
+
+    var menu = new Menu(parent, menuData);
+    testUtils.addMockEnvironment(menu, params);
+    menu.appendTo($('#qunit-fixture'));
+
+    var menuDestroy = menu.destroy;
+    menu.destroy = function () {
+        SystrayMenu.Items = initialSystrayMenuItems;
+        menuDestroy.call(this);
+        parent.destroy();
+    };
+
+    return menu;
+}
+
 QUnit.module('web_enterprise mobile_menu_tests', {
-    afterEach() {
-        testUtils.mock.unpatch(Menu);
-    },
     beforeEach: function () {
-        testUtils.mock.patch(Menu, {
-            animationDuration: 0
-        });
-        // LUL TODO adapt the company switcher widget to handle empty session
-        this.session = {
-            user_companies: {
-                allowed_companies: [[1, "Company 1"]],
-                current_company: [1, "Company 1"],
-            },
-            user_context: { allowed_company_ids: "1" },
-        };
         this.data = {
             all_menu_ids: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
             name: "root",
@@ -72,84 +99,40 @@ QUnit.module('web_enterprise mobile_menu_tests', {
 
     QUnit.module('Burger Menu');
 
-    QUnit.test('Burger Menu on home menu', async function (assert) {
-        assert.expect(3);
+    QUnit.test('Burger Menu on home menu', function (assert) {
+        assert.expect(1);
 
-        const mobileMenu = await testUtilsEnterprise.createMenu({
-            menuData: this.data,
-            session: this.session,
-        });
+        var mobileMenu = createMenu({ menuData: this.data });
 
-        if (mobileMenu.$burgerMenu.length) {
-            var menuInMobileMenu = mobileMenu.$burgerMenu[0].querySelector('.o_burger_menu_user');
-            assert.ok(menuInMobileMenu !== null, 'node with class o_burger_menu_user must be in Burger menu');
-            if (menuInMobileMenu) {
-                var subMenuInMobileMenu = menuInMobileMenu.querySelector('.o_user_menu_mobile');
-                assert.ok(subMenuInMobileMenu !== null, 'sub menu (.o_user_menu_mobile) must be in Burger menu');
-            }
-        }
-
-        await testUtils.dom.click(mobileMenu.$('.o_mobile_menu_toggle'));
-        assert.isVisible($(".o_burger_menu"),
+        mobileMenu.$('.o_mobile_menu_toggle').click();
+        assert.ok(!$(".o_burger_menu").hasClass('o_hidden'),
             "Burger menu should be opened on button click");
-        await testUtils.dom.click($('.o_burger_menu_close'));
+        mobileMenu.$('.o_burger_menu_close').click();
 
         mobileMenu.destroy();
     });
 
-    QUnit.test('Burger Menu on an App', async function (assert) {
+    QUnit.test('Burger Menu on an App', function (assert) {
         assert.expect(4);
 
-        const mobileMenu = await testUtilsEnterprise.createMenu({
-            menuData: this.data,
-            session: this.session,
-        });
+        var mobileMenu = createMenu({ menuData: this.data });
 
         mobileMenu.change_menu_section(3);
         mobileMenu.toggle_mode(false);
 
-        await testUtils.dom.click(mobileMenu.$('.o_mobile_menu_toggle'));
-        assert.isVisible($(".o_burger_menu"),
+        mobileMenu.$('.o_mobile_menu_toggle').click();
+        assert.ok(!$(".o_burger_menu").hasClass('o_hidden'),
             "Burger menu should be opened on button click");
         assert.strictEqual($('.o_burger_menu .o_burger_menu_app .o_menu_sections > *').length, 2,
             "Burger menu should contains top levels menu entries");
-        await testUtils.dom.click($('.o_burger_menu_topbar'));
-        assert.doesNotHaveClass($(".o_burger_menu_content"), 'o_burger_menu_dark',
+        $('.o_burger_menu_topbar').click();
+        assert.ok(!$(".o_burger_menu_content").hasClass('o_burger_menu_dark'),
             "Toggle to usermenu on header click");
-        await testUtils.dom.click($('.o_burger_menu_topbar'));
-        assert.hasClass($(".o_burger_menu_content"),'o_burger_menu_dark',
+        $('.o_burger_menu_topbar').click();
+        assert.ok($(".o_burger_menu_content").hasClass('o_burger_menu_dark'),
             "Toggle back to main sales menu on header click");
 
         mobileMenu.destroy();
-    });
-
-    QUnit.test('Burger menu is closed when it do_action', async function (assert) {
-        assert.expect(2);
-        testUtils.mock.patch(UserMenu, {
-            _onMenuSettings() {
-                this.do_action()
-            },
-        });
-
-        const mobileMenu = await testUtilsEnterprise.createMenu({
-            menuData: this.data,
-            session: this.session,
-            intercepts: {
-                do_action: function (ev) {
-                    ev.data.on_success();
-                    return Promise.resolve();
-                },
-            },
-        });
-
-        await testUtils.dom.click($('.o_mobile_menu_toggle'));
-        assert.isVisible($(".o_burger_menu"), "Burger menu should be opened on button click");
-
-        await testUtils.dom.click($('.o_user_menu_mobile a[data-menu="settings"]'));
-        assert.isNotVisible($(".o_burger_menu"), "Burger menu should be closed after do_action");
-
-        mobileMenu.destroy();
-        testUtils.mock.unpatch(UserMenu);
     });
 });
 });

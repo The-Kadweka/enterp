@@ -47,8 +47,77 @@ var BackArrow = FieldInteger.extend({
             model: 'mrp.workorder',
             args: [self.recordData.id],
         }).then(function () {
-            self.trigger_up('history_back');
+            self.do_action('mrp_workorder.mrp_workorder_action_tablet', {
+                additional_context: {active_id: self.record.data.workcenter_id.res_id},
+                clear_breadcrumbs: true,
+            });
         });
+    },
+});
+
+var TabletImage = FieldBinaryImage.extend({
+    template: 'FieldBinaryTabletImage',
+    events: _.extend({}, FieldBinaryImage.prototype.events, {
+        'click .o_form_image_controls': '_onOpenPreview',
+        'click .o_input_file': function (ev) {
+            ev.stopImmediatePropagation();
+        },
+    }),
+
+    /**
+     * After render, hide the controls if no image is set
+     *
+     * @return {Deferred}
+     * @override
+     * @private
+     */
+    _render: function (){
+        var def = this._super.apply(this, arguments);
+        this.$('.o_form_image_controls').toggleClass('o_invisible_modifier', !this.value);
+        return def;
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * Just prevent propagation of click event on the overlay
+     * that opens the preview when the Trash button is clicked
+     *
+     * @override
+     */
+    _onClearClick: function (ev){
+        ev.stopImmediatePropagation();
+        this._super.apply(this, arguments);
+    },
+
+    /**
+     * Open the image preview
+     *
+     * @private
+     */
+    _onOpenPreview: function (ev) {
+        ev.stopPropagation();
+        this.src = this.$el.find('>img').attr('src');
+
+        this.$modal = $(QWeb.render('FieldBinaryTabletImage.Preview', {
+            url: this.src
+        }));
+        this.$modal.click(this._onClosePreview.bind(this));
+        this.$modal.appendTo('body');
+        this.$modal.modal('show');
+    },
+
+    /**
+     * Close the image preview
+     *
+     * @private
+     */
+    _onClosePreview: function (ev) {
+        ev.preventDefault();
+        this.$modal.remove();
+        $('.modal-backdrop').remove();
     },
 });
 
@@ -87,11 +156,13 @@ var TabletListView = ListView.extend({
 });
 
 field_registry.add('back_arrow', BackArrow);
+field_registry.add('tablet_image', TabletImage);
 view_registry.add('tablet_kanban_view', TabletKanbanView);
 view_registry.add('tablet_list_view', TabletListView);
 
 return {
     BackArrow: BackArrow,
+    TabletImage: TabletImage,
     TabletKanbanView: TabletKanbanView,
     TabletListView: TabletListView,
 };

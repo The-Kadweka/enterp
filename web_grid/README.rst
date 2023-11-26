@@ -175,7 +175,7 @@ operations from within without having to override the entire method:
 ``_grid_format_cell(group, cell_field)``
     converts the output of a read_group (group-by-group) into cells in the
     format described above (as part of "the grid data")
-``_grid_make_empty_cell(row_domain, column_domain, view_domain)``
+``_grid_make_empty_cell(cell_domain)``
     generates an empty version of a cell (if there is no corresponding group)
 ``_grid_column_info(name, range)``
     generates a ColumnMetadata object based on the column type, storing values

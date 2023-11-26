@@ -1,30 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* mrp_plm
+# * mrp_plm
 # 
 # Translators:
-# DE T2 <e2f48d4s5vd1s2@outlook.com>, 2019
-# Felix Schubert <felix.schubert@go-erp.com>, 2019
+# Martin Trigaux, 2018
+# DE T2 <e2f48d4s5vd1s2@outlook.com>, 2018
+# Johannes Croe <jcr@odoo.com>, 2018
+# Michael Schütt <michael.schuett.lwl@gmail.com>, 2018
 # Wolfgang Taferner, 2019
-# Andreas Stauder <andreas.stauder@brain-tec.ch>, 2019
-# Jan Meyer, 2019
-# Michael Schütt <michael.schuett.lwl@gmail.com>, 2019
-# Martin Trigaux, 2019
-# Johannes Croe <jcr@odoo.com>, 2019
-# Bettina Pfeifer <betzilla@web.de>, 2019
 # Leon Grill <leg@odoo.com>, 2019
-# Florian Pose <fp@igh.de>, 2020
-# TomTietze <tietze.development@web.de>, 2021
 # Chris Egal <sodaswed@web.de>, 2021
-# Friederike Fasterling-Nesselbosch, 2022
+# Friederike Fasterling-Nesselbosch, 2021
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-05 12:35+0000\n"
-"PO-Revision-Date: 2019-08-26 09:37+0000\n"
-"Last-Translator: Friederike Fasterling-Nesselbosch, 2022\n"
+"POT-Creation-Date: 2019-01-15 15:18+0000\n"
+"PO-Revision-Date: 2018-08-24 11:38+0000\n"
+"Last-Translator: Friederike Fasterling-Nesselbosch, 2021\n"
 "Language-Team: German (https://www.transifex.com/odoo/teams/41243/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -33,7 +27,14 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: mrp_plm
+#: model:ir.model.fields,field_description:mrp_plm.field_product_product__product_attachment_count
+msgid "# Attachment"
+msgstr "# Anhänge"
+
+#. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__mrp_document_count
+#: model:ir.model.fields,field_description:mrp_plm.field_product_product__template_attachment_count
+#: model:ir.model.fields,field_description:mrp_plm.field_product_template__template_attachment_count
 msgid "# Attachments"
 msgstr "# Anhänge"
 
@@ -57,7 +58,7 @@ msgstr "&amp;nbsp;"
 
 #. module: mrp_plm
 #. openerp-web
-#: code:addons/mrp_plm/static/src/xml/mrp_plm_templates.xml:0
+#: code:addons/mrp_plm/static/src/xml/mrp_plm_templates.xml:9
 #, python-format
 msgid "&times;"
 msgstr "&times;"
@@ -92,7 +93,7 @@ msgid "<i class=\"fa fa-undo\" role=\"img\" aria-label=\"Undo\" title=\"Undo\"/>
 msgstr ""
 
 #. module: mrp_plm
-#: code:addons/mrp_plm/models/mrp_eco.py:0
+#: code:addons/mrp_plm/models/mrp_eco.py:651
 #, python-format
 msgid ""
 "<p class=\"o_view_nocontent_smiling_face\">\n"
@@ -101,16 +102,28 @@ msgid ""
 "                        Use this feature to store any files, like drawings or specifications.\n"
 "                    </p>"
 msgstr ""
+
+#. module: mrp_plm
+#: code:addons/mrp_plm/models/product.py:40
+#: code:addons/mrp_plm/models/product.py:86
+#, python-format
+msgid ""
 "<p class=\"o_view_nocontent_smiling_face\">\n"
-"                        Laden Sie Dateien in Ihren Änderungsauftrag hoch, um sie später auf das Produkt anzuwenden\n"
+"                        Upload files to your product\n"
 "                    </p><p>\n"
-"                        Verwenden Sie diese Funktion, um beliebige Dateien, wie Zeichnungen oder Spezifikationen, zu speichern.\n"
+"                        Use this feature to store any files, like drawings or specifications.\n"
+"                    </p>"
+msgstr ""
+"<p class=\"o_view_nocontent_smiling_face\">\n"
+"                        Laden Sie Dateien für Ihr Produkt hoch\n"
+"                    </p><p>\n"
+"                        Verwenden Sie diese Funktion, um Dateien wie Zeichnungen oder Spezifikationen zu speichern.\n"
 "                    </p>"
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_view_form
-msgid "<span>BOM</span><br/>"
-msgstr ""
+msgid "<span>Bill of Materials</span><br/>"
+msgstr "<span/><br/>"
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_type_dashboard_view_kanban
@@ -153,18 +166,13 @@ msgid "Activities"
 msgstr "Aktivitäten"
 
 #. module: mrp_plm
-#: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__activity_exception_decoration
-msgid "Activity Exception Decoration"
-msgstr "Aktivität Ausnahme Dekoration"
-
-#. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__activity_state
 msgid "Activity State"
 msgstr "Status der Aktivität"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_bom_change__change_type__add
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_routing_change__change_type__add
+#: selection:mrp.eco.bom.change,change_type:0
+#: selection:mrp.eco.routing.change,change_type:0
 msgid "Add"
 msgstr "Hinzufügen"
 
@@ -172,11 +180,6 @@ msgstr "Hinzufügen"
 #: model_terms:ir.actions.act_window,help:mrp_plm.mrp_eco_tag_action
 msgid "Add a new tag"
 msgstr "Klicken Sie, um einen neuen Tag hinzuzufügen."
-
-#. module: mrp_plm
-#: model:res.groups,name:mrp_plm.group_plm_manager
-msgid "Administrator"
-msgstr "Administrator"
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_type__alias_id
@@ -250,11 +253,6 @@ msgid "Apply on"
 msgstr "Anzuwenden auf"
 
 #. module: mrp_plm
-#: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_approval__approval_date
-msgid "Approval Date"
-msgstr "Genehmigungsdatum"
-
-#. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_stage__approval_roles
 msgid "Approval Roles"
 msgstr "Genehmigungsfunktionen"
@@ -268,11 +266,6 @@ msgstr "Genehmigungsstufe"
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_approval_template__approval_type
 msgid "Approval Type"
 msgstr "Genehmigungstyp"
-
-#. module: mrp_plm
-#: model_terms:ir.ui.view,arch_db:mrp_plm.message_approval
-msgid "Approval:"
-msgstr ""
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__approval_ids
@@ -293,8 +286,7 @@ msgid "Approve"
 msgstr "Genehmigen"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco__kanban_state__done
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_approval__status__approved
+#: selection:mrp.eco,kanban_state:0 selection:mrp.eco.approval,status:0
 msgid "Approved"
 msgstr "Genehmigt"
 
@@ -304,30 +296,29 @@ msgid "Approved by"
 msgstr "Genehmigt von"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_approval_template__approval_type__optional
+#: selection:mrp.eco.approval.template,approval_type:0
 msgid "Approves, but the approval is optional"
 msgstr "Zwar genehmigt, aber die Genehmigung ist optional."
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
-#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_view_form
 #: model_terms:ir.ui.view,arch_db:mrp_plm.view_document_search_mrp_plm
 msgid "Archived"
 msgstr "Archiviert"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco__effectivity__asap
+#: selection:mrp.eco,effectivity:0
 msgid "As soon as possible"
 msgstr "Sobald wie möglich"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco__effectivity__date
+#: selection:mrp.eco,effectivity:0
 msgid "At Date"
 msgstr "Tageskurs"
 
 #. module: mrp_plm
 #. openerp-web
-#: code:addons/mrp_plm/static/src/xml/mrp_plm_templates.xml:0
+#: code:addons/mrp_plm/static/src/xml/mrp_plm_templates.xml:16
 #, python-format
 msgid "Attachment"
 msgstr "Dateianhang"
@@ -339,21 +330,16 @@ msgid "Attachment Count"
 msgstr "# Anhänge"
 
 #. module: mrp_plm
-#: code:addons/mrp_plm/models/mrp_eco.py:0
+#: code:addons/mrp_plm/models/mrp_eco.py:642
+#: code:addons/mrp_plm/models/product.py:32
+#: code:addons/mrp_plm/models/product.py:78
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__mrp_document_ids
+#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_view_form
+#: model_terms:ir.ui.view,arch_db:mrp_plm.product_product_view_form_inherit_plm
+#: model_terms:ir.ui.view,arch_db:mrp_plm.product_template_view_form_inherit_plm
 #, python-format
 msgid "Attachments"
 msgstr "Dateianhänge"
-
-#. module: mrp_plm
-#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
-msgid "Awaiting My Validation"
-msgstr "Validierung ausstehend"
-
-#. module: mrp_plm
-#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
-msgid "Awaiting Validation"
-msgstr "Validierung ausstehend"
 
 #. module: mrp_plm
 #: model:ir.model,name:mrp_plm.model_report_mrp_report_bom_structure
@@ -371,11 +357,10 @@ msgid "Bill of Material Line"
 msgstr "Stücklistenposition"
 
 #. module: mrp_plm
-#: code:addons/mrp_plm/models/mrp_eco.py:0
+#: code:addons/mrp_plm/models/mrp_eco.py:152
 #: model:ir.actions.act_window,name:mrp_plm.mrp_bom_action_kanban
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__bom_id
 #: model:ir.ui.menu,name:mrp_plm.menu_mrp_plm_boms
-#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
 #, python-format
 msgid "Bill of Materials"
 msgstr "Stückliste"
@@ -383,16 +368,16 @@ msgstr "Stückliste"
 #. module: mrp_plm
 #: model_terms:ir.actions.act_window,help:mrp_plm.mrp_bom_action_kanban
 msgid ""
-"Bills of materials allow you to define the list of required components\n"
-"              used to make a finished product; through a manufacturing\n"
+"Bills of materials allow you to define the list of required raw\n"
+"              materials used to make a finished product; through a manufacturing\n"
 "              order or a pack of products."
 msgstr ""
-"Mit Hilfe von Stücklisten können Sie die Liste der erforderlichen Komponenten definieren\n"
-"die zur Herstellung eines Endprodukts benötigt werden; durch einen\n"
-"Fertigungsauftrag oder ein Produktpaket."
+"Mit Hilfe von Stücklisten können Sie die Liste der benötigten Rohstoffe definieren\n"
+"Rohstoffe für die Herstellung eines Endprodukts zu definieren; durch einen\n"
+"Auftrag oder ein Produktpaket."
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco__kanban_state__blocked
+#: selection:mrp.eco,kanban_state:0
 msgid "Blocked"
 msgstr "Blockiert"
 
@@ -400,6 +385,11 @@ msgstr "Blockiert"
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_stage__is_blocking
 msgid "Blocking Stage"
 msgstr "Sperrstufe"
+
+#. module: mrp_plm
+#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
+msgid "BoM"
+msgstr "Liste"
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_view_form
@@ -418,15 +408,10 @@ msgid "BoM Revision"
 msgstr "BoM-Revision"
 
 #. module: mrp_plm
-#: model_terms:ir.ui.view,arch_db:mrp_plm.report_mrp_bom_inherit_mrp_plm
-msgid "BoM Version"
-msgstr "Version Stückliste"
-
-#. module: mrp_plm
-#: code:addons/mrp_plm/models/mrp_eco.py:0
+#: code:addons/mrp_plm/models/mrp_eco.py:154
 #, python-format
 msgid "BoM and Routing"
-msgstr "Stückliste und Arbeitsplan"
+msgstr "SL und Stoffströme"
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_kanban
@@ -470,10 +455,10 @@ msgstr "Änderungen beim Arbeitsplan."
 
 #. module: mrp_plm
 #. openerp-web
-#: code:addons/mrp_plm/static/src/xml/mrp_plm_templates.xml:0
+#: code:addons/mrp_plm/static/src/xml/mrp_plm_templates.xml:25
 #, python-format
 msgid "Close"
-msgstr "Abschliessen"
+msgstr "Schließen"
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__color
@@ -487,12 +472,12 @@ msgid "Color Index"
 msgstr "Farbkennzeichnung"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_approval__status__comment
+#: selection:mrp.eco.approval,status:0
 msgid "Commented"
 msgstr "Kommentiert"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_approval_template__approval_type__comment
+#: selection:mrp.eco.approval.template,approval_type:0
 msgid "Comments only"
 msgstr "Nur Kommentare"
 
@@ -509,8 +494,8 @@ msgstr "Konfiguration"
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_bom_change__conflict
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco__state__conflict
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
+#: selection:mrp.eco,state:0
 msgid "Conflict"
 msgstr "Konflikt"
 
@@ -532,13 +517,13 @@ msgstr "Erstellen Sie eine Stückliste"
 #. module: mrp_plm
 #: model_terms:ir.actions.act_window,help:mrp_plm.mrp_eco_stage_action
 msgid "Create a new ECO stage"
-msgstr "Eine neue ECO Phase erstellen"
+msgstr ""
 
 #. module: mrp_plm
 #: model_terms:ir.actions.act_window,help:mrp_plm.mrp_eco_type_action_dashboard
 #: model_terms:ir.actions.act_window,help:mrp_plm.mrp_eco_type_action_form
 msgid "Create a new ECO type"
-msgstr "Erstellen Sie einen neuen ECO-Typ"
+msgstr ""
 
 #. module: mrp_plm
 #: model_terms:ir.actions.act_window,help:mrp_plm.mrp_eco_action
@@ -627,13 +612,8 @@ msgid "Displayed Image"
 msgstr "Angezeigtes Bild"
 
 #. module: mrp_plm
-#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_view_form
-msgid "Documents"
-msgstr "Dokumente"
-
-#. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco__state__done
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
+#: selection:mrp.eco,state:0
 msgid "Done"
 msgstr "Erledigt"
 
@@ -662,12 +642,12 @@ msgstr "ECO-Analyse"
 #. module: mrp_plm
 #: model:ir.model,name:mrp_plm.model_mrp_eco_approval
 msgid "ECO Approval"
-msgstr "ECO-Zulassung"
+msgstr ""
 
 #. module: mrp_plm
 #: model:ir.model,name:mrp_plm.model_mrp_eco_approval_template
 msgid "ECO Approval Template"
-msgstr "ECO-Genehmigung Vorlage"
+msgstr ""
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__bom_change_ids
@@ -677,12 +657,12 @@ msgstr "ECO-BoM-Änderungen"
 #. module: mrp_plm
 #: model:ir.model,name:mrp_plm.model_mrp_eco_bom_change
 msgid "ECO BoM changes"
-msgstr "Änderungsauftrag Stücklistenänderungen"
+msgstr ""
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_bom_change__eco_rebase_id
 msgid "ECO Rebase"
-msgstr "Änderungsauftrag Rebase"
+msgstr ""
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__routing_change_ids
@@ -711,7 +691,7 @@ msgstr "ECO-Tags"
 #. module: mrp_plm
 #: model:ir.model,name:mrp_plm.model_mrp_eco_type
 msgid "ECO Type"
-msgstr "ECO-Typ"
+msgstr ""
 
 #. module: mrp_plm
 #: model:ir.actions.act_window,name:mrp_plm.mrp_eco_type_action_form
@@ -747,8 +727,6 @@ msgid "ECO(s)"
 msgstr "ECO(s)"
 
 #. module: mrp_plm
-#. openerp-web
-#: code:addons/mrp_plm/static/src/js/mrp_bom_report.js:0
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_type__nb_ecos
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_routing__eco_ids
 #: model:ir.model.fields,field_description:mrp_plm.field_product_product__eco_ids
@@ -758,8 +736,6 @@ msgstr "ECO(s)"
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_view_calendar
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_routing_view_form_inherit_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.product_template_view_form_inherit_plm
-#: model_terms:ir.ui.view,arch_db:mrp_plm.report_mrp_bom_inherit_mrp_plm
-#, python-format
 msgid "ECOs"
 msgstr "ECOs"
 
@@ -769,13 +745,13 @@ msgid "Eco"
 msgstr "ECO"
 
 #. module: mrp_plm
-#: code:addons/mrp_plm/models/mrp_eco.py:0
+#: code:addons/mrp_plm/models/mrp_eco.py:663
 #, python-format
 msgid "Eco BoM"
 msgstr "ECO-BoM"
 
 #. module: mrp_plm
-#: code:addons/mrp_plm/models/mrp_eco.py:0
+#: code:addons/mrp_plm/models/mrp_eco.py:675
 #, python-format
 msgid "Eco Routing"
 msgstr "ECO-Arbeitsplan"
@@ -811,12 +787,6 @@ msgid "Email Alias"
 msgstr "E-Mail Alias"
 
 #. module: mrp_plm
-#: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__email_cc
-#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_view_form
-msgid "Email cc"
-msgstr "E-Mail cc"
-
-#. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_bom_change__eco_id
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_routing_change__eco_id
 msgid "Engineering Change"
@@ -844,11 +814,6 @@ msgstr "Technische Änderungsaufträge"
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_type_dashboard_view_kanban
 msgid "Engineering Changes"
 msgstr "Technische Änderungen"
-
-#. module: mrp_plm
-#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_view_form
-msgid "Extra Info"
-msgstr "Weitere Informationen"
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
@@ -899,12 +864,12 @@ msgid "Group by..."
 msgstr "Gruppierung ..."
 
 #. module: mrp_plm
-#: model:ir.module.category,description:mrp_plm.module_category_manufacturing_plm
+#: model:ir.module.category,description:mrp_plm.module_category_plm
 msgid "Helps you manage your product's lifecycles."
 msgstr "Hilft Ihnen, den Lebenszyklus Ihres Produktes zu verwalten."
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco__priority__1
+#: selection:mrp.eco,priority:0
 msgid "High"
 msgstr "Hoch"
 
@@ -930,30 +895,24 @@ msgstr ""
 "für die Erstellung von Aufgaben beinhaltet)."
 
 #. module: mrp_plm
-#: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__activity_exception_icon
-msgid "Icon"
-msgstr "Icon"
-
-#. module: mrp_plm
-#: model:ir.model.fields,help:mrp_plm.field_mrp_eco__activity_exception_icon
-msgid "Icon to indicate an exception activity."
-msgstr "Symbol, um eine Ausnahmeaktivität anzuzeigen."
+#: model:ir.model.fields,help:mrp_plm.field_mrp_eco__message_unread
+#: model:ir.model.fields,help:mrp_plm.field_mrp_eco_type__message_unread
+msgid "If checked new messages require your attention."
+msgstr "Falls markiert, benötigen neue Nachrichten Ihre Kenntnisnahme."
 
 #. module: mrp_plm
 #: model:ir.model.fields,help:mrp_plm.field_mrp_eco__message_needaction
-#: model:ir.model.fields,help:mrp_plm.field_mrp_eco__message_unread
 #: model:ir.model.fields,help:mrp_plm.field_mrp_eco_type__message_needaction
-#: model:ir.model.fields,help:mrp_plm.field_mrp_eco_type__message_unread
 msgid "If checked, new messages require your attention."
 msgstr "Falls markiert, benötigen neue Nachrichten Ihre Kenntnisnahme."
 
 #. module: mrp_plm
 #: model:ir.model.fields,help:mrp_plm.field_mrp_eco__message_has_error
-#: model:ir.model.fields,help:mrp_plm.field_mrp_eco__message_has_sms_error
 #: model:ir.model.fields,help:mrp_plm.field_mrp_eco_type__message_has_error
-#: model:ir.model.fields,help:mrp_plm.field_mrp_eco_type__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr "Wenn gewählt, ist das Senden einiger Nachrichten fehlgeschlagen."
+msgstr ""
+"Das Senden mancher Nachrichten ist fehlgeschlagen wenn dieses Fenster "
+"angekreuzt ist."
 
 #. module: mrp_plm
 #: model:ir.model.fields,help:mrp_plm.field_mrp_bom__active
@@ -974,11 +933,6 @@ msgstr ""
 " Änderungsauftrag verbergen, ohne ihn zu entfernen."
 
 #. module: mrp_plm
-#: model:ir.model.fields,field_description:mrp_plm.field_mrp_bom__image_128
-msgid "Image 128"
-msgstr "Bild 128"
-
-#. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_kanban
 msgid "Important Messages"
 msgstr "Wichtige Nachrichten"
@@ -990,9 +944,8 @@ msgid "In #{kanban_getcolorname(record.color.raw_value)}"
 msgstr "In #{kanban_getcolorname(record.color.raw_value)}"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco__kanban_state__normal
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco__state__progress
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
+#: selection:mrp.eco,kanban_state:0 selection:mrp.eco,state:0
 #: model:mrp.eco.stage,name:mrp_plm.ecostage_progress
 msgid "In Progress"
 msgstr "In Arbeit"
@@ -1001,11 +954,6 @@ msgstr "In Arbeit"
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_approval__is_approved
 msgid "Is Approved"
 msgstr "Wurde genehmigt"
-
-#. module: mrp_plm
-#: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_approval__is_closed
-msgid "Is Closed"
-msgstr "Geschlossen"
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__message_is_follower
@@ -1019,7 +967,7 @@ msgid "Is Rejected"
 msgstr "Wurde abgelehnt"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_approval_template__approval_type__mandatory
+#: selection:mrp.eco.approval.template,approval_type:0
 msgid "Is required to approve"
 msgstr "Bedarf einer Genehmigung"
 
@@ -1043,7 +991,7 @@ msgstr "Bausatz"
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_tag____last_update
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_type____last_update
 msgid "Last Modified on"
-msgstr "Letzte Änderung am"
+msgstr "Zuletzt geändert am"
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__write_uid
@@ -1055,7 +1003,7 @@ msgstr "Letzte Änderung am"
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_tag__write_uid
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_type__write_uid
 msgid "Last Updated by"
-msgstr "Zuletzt aktualisiert von"
+msgstr "Zuletzt aktualisiert durch"
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__write_date
@@ -1075,15 +1023,15 @@ msgid "Late Activities"
 msgstr "Verspätete Aktivitäten"
 
 #. module: mrp_plm
-#: model:ir.model.fields,help:mrp_plm.field_mrp_eco__email_cc
-msgid "List of cc from incoming emails."
-msgstr "Liste der cc aus eingehenden E-Mails."
-
-#. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__message_main_attachment_id
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_type__message_main_attachment_id
 msgid "Main Attachment"
 msgstr "Hauptanhänge"
+
+#. module: mrp_plm
+#: model:res.groups,name:mrp_plm.group_plm_manager
+msgid "Manager"
+msgstr "Manager"
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_routing_change__upd_time_cycle_manual
@@ -1099,7 +1047,7 @@ msgstr "Stammdaten"
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__message_has_error
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_type__message_has_error
 msgid "Message Delivery error"
-msgstr "Fehler beim Senden der Nachricht"
+msgstr "Error beim senden der Nachricht"
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__message_ids
@@ -1114,6 +1062,11 @@ msgstr "MRP-ECO-Tags"
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
+msgid "My Activities"
+msgstr "Meine Aktivitäten"
+
+#. module: mrp_plm
+#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
 msgid "My Change Orders"
 msgstr "Meine Änderungsaufträge"
 
@@ -1124,6 +1077,7 @@ msgstr "Meine Validierungen"
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_stage__name
+#: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_tag__name
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_type__name
 msgid "Name"
 msgstr "Name"
@@ -1189,12 +1143,12 @@ msgid "Next Activity Type"
 msgstr "Nächster Aktivitätstyp"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco__priority__0
+#: selection:mrp.eco,priority:0
 msgid "Normal"
 msgstr "Normal"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_approval__status__none
+#: selection:mrp.eco.approval,status:0
 msgid "Not Yet"
 msgstr "Noch nicht"
 
@@ -1213,8 +1167,8 @@ msgstr "Anzahl der Aktionen"
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__message_has_error_counter
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_type__message_has_error_counter
-msgid "Number of errors"
-msgstr "Anzahl der Fehler"
+msgid "Number of error"
+msgstr "Fehlernummer"
 
 #. module: mrp_plm
 #: model:ir.model.fields,help:mrp_plm.field_mrp_eco__message_needaction_counter
@@ -1258,6 +1212,11 @@ msgstr ""
 "dies die Anlage neuer Datensätze vollständig."
 
 #. module: mrp_plm
+#: selection:mrp.eco,activity_state:0
+msgid "Overdue"
+msgstr "Überfällig"
+
+#. module: mrp_plm
 #: model:ir.ui.menu,name:mrp_plm.menu_mrp_plm_dashboard
 msgid "Overview"
 msgstr "Übersicht"
@@ -1268,7 +1227,7 @@ msgid "Owner"
 msgstr "Besitzer"
 
 #. module: mrp_plm
-#: model:ir.module.category,name:mrp_plm.module_category_manufacturing_plm
+#: model:ir.module.category,name:mrp_plm.module_category_plm
 #: model:ir.ui.menu,name:mrp_plm.menu_mrp_plm_root
 msgid "PLM"
 msgstr "PLM"
@@ -1298,6 +1257,11 @@ msgstr ""
 "Das übergeordnete Datenmodell des Alias. Dieses Modell, welches die EMail "
 "Alias Referenz enthält, gehört nicht zwangsläufig zum Modell unterhalb von "
 "alias_model_id (Beispiel: project (parent_model) und task (model))"
+
+#. module: mrp_plm
+#: selection:mrp.eco,activity_state:0
+msgid "Planned"
+msgstr "Geplant"
 
 #. module: mrp_plm
 #: model:ir.model.fields,help:mrp_plm.field_mrp_eco_type__alias_contact
@@ -1353,6 +1317,7 @@ msgid "Priority"
 msgstr "Priorität"
 
 #. module: mrp_plm
+#: model:ir.model,name:mrp_plm.model_product_product
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__product_tmpl_id
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_bom_change__product_id
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_bom_view_kanban
@@ -1362,7 +1327,7 @@ msgid "Product"
 msgstr "Produkt"
 
 #. module: mrp_plm
-#: code:addons/mrp_plm/models/mrp_eco.py:0
+#: code:addons/mrp_plm/models/mrp_eco.py:151
 #, python-format
 msgid "Product Only"
 msgstr "Nur Produkt"
@@ -1389,8 +1354,8 @@ msgstr "Menge"
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_bom_change__rebase_id
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco__state__rebase
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
+#: selection:mrp.eco,state:0
 msgid "Rebase"
 msgstr "Umstellen"
 
@@ -1404,7 +1369,7 @@ msgstr ""
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_type__alias_force_thread_id
 msgid "Record Thread ID"
-msgstr "Datensatz-Diskussions-ID"
+msgstr "Aufzeichnung Diskussion ID"
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__name
@@ -1417,7 +1382,7 @@ msgid "Reject"
 msgstr "Ablehnen"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_approval__status__rejected
+#: selection:mrp.eco.approval,status:0
 msgid "Rejected"
 msgstr "Abgelehnt"
 
@@ -1427,10 +1392,10 @@ msgid "Related attachment"
 msgstr "Zugehöriger Anhang"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_bom_change__change_type__remove
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_routing_change__change_type__remove
+#: selection:mrp.eco.bom.change,change_type:0
+#: selection:mrp.eco.routing.change,change_type:0
 msgid "Remove"
-msgstr "Entfernen"
+msgstr "Löschen"
 
 #. module: mrp_plm
 #: model:ir.ui.menu,name:mrp_plm.menu_mrp_plm_reporting
@@ -1453,15 +1418,15 @@ msgid "Responsible User"
 msgstr "Manager Veranstaltung"
 
 #. module: mrp_plm
+#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_view_form
+msgid "Rev :"
+msgstr "Rev.:"
+
+#. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_bom__revision_ids
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_routing__revision_ids
 msgid "Revision"
 msgstr "Revision"
-
-#. module: mrp_plm
-#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_view_form
-msgid "Revision :"
-msgstr ""
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_approval__name
@@ -1470,7 +1435,7 @@ msgid "Role"
 msgstr "Rolle"
 
 #. module: mrp_plm
-#: code:addons/mrp_plm/models/mrp_eco.py:0
+#: code:addons/mrp_plm/models/mrp_eco.py:154
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__routing_id
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
 #, python-format
@@ -1499,12 +1464,6 @@ msgid "Routings"
 msgstr "Arbeitspläne"
 
 #. module: mrp_plm
-#: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__message_has_sms_error
-#: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_type__message_has_sms_error
-msgid "SMS Delivery error"
-msgstr "SMS Zustellungsfehler"
-
-#. module: mrp_plm
 #: model:ir.ui.menu,name:mrp_plm.menu_mrp_plm_search
 msgid "Search"
 msgstr "Suchen"
@@ -1514,7 +1473,7 @@ msgstr "Suchen"
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_stage__sequence
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_type__sequence
 msgid "Sequence"
-msgstr "Sequenz"
+msgstr "Reihenfolge"
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_kanban
@@ -1523,7 +1482,7 @@ msgstr "Titelbild setzen"
 
 #. module: mrp_plm
 #. openerp-web
-#: code:addons/mrp_plm/static/src/xml/mrp_plm_templates.xml:0
+#: code:addons/mrp_plm/static/src/xml/mrp_plm_templates.xml:8
 #, python-format
 msgid "Set a Cover Image"
 msgstr "Ein Titelbild hinterlegen"
@@ -1547,6 +1506,22 @@ msgstr "Übernehmen der Änderungen anzeigen"
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
 msgid "Show all records which has next action date is before today"
 msgstr "Alle Datensätze mit vor heute geplanten Aktionen anzeigen"
+
+#. module: mrp_plm
+#: model:ir.model.fields,field_description:mrp_plm.field_mrp_bom__image_small
+msgid "Small-sized image"
+msgstr "Miniaturbild"
+
+#. module: mrp_plm
+#: model:ir.model.fields,help:mrp_plm.field_mrp_bom__image_small
+msgid ""
+"Small-sized image of the product. It is automatically resized as a 64x64px "
+"image, with aspect ratio preserved. Use this field anywhere a small image is"
+" required."
+msgstr ""
+"Kleines Bild für das Produkt. Es wird automatisch  auf 64x64px skaliert. Das"
+" Seitenverhältnis bleibt erhalten. Benutzen Sie dieses Feld überall, wo Sie "
+"es in dieser Größe benötigen können."
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_kanban
@@ -1595,7 +1570,7 @@ msgstr ""
 "Geplant: anstehende Aktivitäten."
 
 #. module: mrp_plm
-#: code:addons/mrp_plm/models/mrp_eco.py:0
+#: code:addons/mrp_plm/models/mrp_eco.py:347
 #, python-format
 msgid "Successfully Rebased !"
 msgstr "Erfolgreich umgestellt!"
@@ -1610,14 +1585,9 @@ msgstr ""
 "Stimmen Sie zu?"
 
 #. module: mrp_plm
-#: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_tag__name
-msgid "Tag Name"
-msgstr "Tag Bezeichnung"
-
-#. module: mrp_plm
-#: model:ir.model.constraint,message:mrp_plm.constraint_mrp_eco_tag_name_uniq
+#: sql_constraint:mrp.eco.tag:0
 msgid "Tag name already exists !"
-msgstr "Stichwort existiert bereits!"
+msgstr "Schlagwort existiert bereits!"
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__tag_ids
@@ -1696,7 +1666,7 @@ msgstr ""
 
 #. module: mrp_plm
 #. openerp-web
-#: code:addons/mrp_plm/static/src/xml/mrp_plm_templates.xml:0
+#: code:addons/mrp_plm/static/src/xml/mrp_plm_templates.xml:20
 #, python-format
 msgid ""
 "There is no available image to be set as cover. Add an image as an "
@@ -1713,10 +1683,15 @@ msgid "To Apply"
 msgstr "Zu übernehmen"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco__state__confirmed
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
+#: selection:mrp.eco,state:0
 msgid "To Do"
 msgstr "Zu erledigen"
+
+#. module: mrp_plm
+#: selection:mrp.eco,activity_state:0
+msgid "Today"
+msgstr "Heute"
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
@@ -1730,11 +1705,6 @@ msgstr "Heutige Aktivitäten"
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_stage__type_id
 msgid "Type"
 msgstr "Typ"
-
-#. module: mrp_plm
-#: model:ir.model.fields,help:mrp_plm.field_mrp_eco__activity_exception_decoration
-msgid "Type of the exception activity on record."
-msgstr "Typ der Ausnahmeaktivität im Datensatz."
 
 #. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_bom_change__uom_change
@@ -1751,11 +1721,11 @@ msgstr "Ungelesene Nachrichten"
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco__message_unread_counter
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_type__message_unread_counter
 msgid "Unread Messages Counter"
-msgstr "Anzahl ungelesener Nachrichten"
+msgstr "Zähler der ungelesenen Nachrichten"
 
 #. module: mrp_plm
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_bom_change__change_type__update
-#: model:ir.model.fields.selection,name:mrp_plm.selection__mrp_eco_routing_change__change_type__update
+#: selection:mrp.eco.bom.change,change_type:0
+#: selection:mrp.eco.routing.change,change_type:0
 msgid "Update"
 msgstr "Aktualisieren"
 
@@ -1799,9 +1769,19 @@ msgid "Version"
 msgstr "Version"
 
 #. module: mrp_plm
+#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
+msgid "Waiting Any Validation"
+msgstr "Auf Validierung warten"
+
+#. module: mrp_plm
 #: model:ir.model.fields,field_description:mrp_plm.field_mrp_eco_type__nb_approvals
 msgid "Waiting Approvals"
 msgstr "Ausstehende Genehmigungen"
+
+#. module: mrp_plm
+#: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_search
+msgid "Waiting My Validation"
+msgstr "Meine Validierung abwarten"
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_kanban
@@ -1836,7 +1816,7 @@ msgid "Work Centers"
 msgstr "Arbeitsplätze"
 
 #. module: mrp_plm
-#: code:addons/mrp_plm/models/mrp_eco.py:0
+#: code:addons/mrp_plm/models/mrp_eco.py:489
 #, python-format
 msgid "You cannot change the stage, as approvals are required in the process."
 msgstr ""
@@ -1844,17 +1824,12 @@ msgstr ""
 "werden."
 
 #. module: mrp_plm
-#: code:addons/mrp_plm/models/mrp_eco.py:0
+#: code:addons/mrp_plm/models/mrp_eco.py:479
 #, python-format
 msgid "You cannot change the stage, as approvals are still required."
 msgstr ""
 "Sie können die Stufe nicht ändern, da noch einige Genehmigungen benötigt "
 "werden."
-
-#. module: mrp_plm
-#: model_terms:ir.ui.view,arch_db:mrp_plm.message_approval
-msgid "by"
-msgstr "durch"
 
 #. module: mrp_plm
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_stage_view_form
@@ -1865,8 +1840,3 @@ msgstr "z. B. Technikabteilung"
 #: model_terms:ir.ui.view,arch_db:mrp_plm.mrp_eco_kanban
 msgid "oe_kanban_text_red"
 msgstr "oe_kanban_text_red"
-
-#. module: mrp_plm
-#: model_terms:ir.ui.view,arch_db:mrp_plm.message_approval
-msgid "was"
-msgstr ""

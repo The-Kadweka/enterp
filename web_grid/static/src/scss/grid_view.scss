@@ -5,9 +5,7 @@
         margin-bottom: 0;
         table-layout: fixed;
         min-width: 100%;
-        @include media-breakpoint-up(sm) {
-            width: auto;
-        }
+        width: auto;
         max-width: none;
     }
     th, td {
@@ -37,7 +35,7 @@
     tbody {
         background-color: $o-view-background-color;
         text-align: right;
-        th div {
+        th > div {
             display: flex;
             > div {
                 flex: 1 1 auto;
@@ -123,8 +121,7 @@
                 th {
                     padding-left: $table-cell-padding-sm;
                     white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
+                    text-align: left;
                 }
                 color: lighten($o-main-text-color, 15%);
                 background-color: lighten($o-brand-lightsecondary, 4%);
@@ -157,12 +154,5 @@
         .oe_view_nocontent_img_link {
             padding:10px;
         }
-    }
-}
-
-@include media-breakpoint-down(sm) {
-    .o_grid_range.show > ul.dropdown-menu {
-        display: inline-flex;
-        min-width: 0px;
     }
 }

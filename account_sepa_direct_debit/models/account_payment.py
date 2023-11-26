@@ -32,7 +32,6 @@ class AccountPayment(models.Model):
     @api.model
     def split_node(self, string_node, max_size):
         # Split a string node according to its max_size in byte
-        string_node = self._sanitize_communication(string_node)
         byte_node = string_node.encode()
         if len(byte_node) <= max_size:
             return string_node, ''
@@ -55,8 +54,10 @@ class AccountPayment(models.Model):
                 - it contains only latin characters
                 - it does not contain any //
                 - it does not start or end with /
+                - it is maximum 140 characters long
             (these are the SEPA compliance criteria)
         """
+        communication = communication[:140]
         while '//' in communication:
             communication = communication.replace('//', '/')
         if communication.startswith('/'):
@@ -78,7 +79,7 @@ class AccountPayment(models.Model):
 
         super(AccountPayment, self).post()
 
-    def generate_xml(self, company_id, required_collection_date, askBatchBooking):
+    def generate_xml(self, company_id, required_collection_date):
         """ Generates a SDD XML file containing the payments corresponding to this recordset,
         associating them to the given company, with the specified
         collection date.
@@ -91,7 +92,7 @@ class AccountPayment(models.Model):
         payments_per_journal = self._group_payments_per_bank_journal()
         payment_info_counter = 0
         for (journal, journal_payments) in payments_per_journal.items():
-            journal_payments._sdd_xml_gen_payment_group(company_id, required_collection_date, askBatchBooking,payment_info_counter, journal, CstmrDrctDbtInitn)
+            journal_payments._sdd_xml_gen_payment_group(company_id, required_collection_date, payment_info_counter, journal, CstmrDrctDbtInitn)
             payment_info_counter += 1
 
 
@@ -101,8 +102,8 @@ class AccountPayment(models.Model):
         """ Returns the sdd mandate that can be used to generate this payment, or
         None if there is none.
         """
-        return self.env['sdd.mandate']._sdd_get_usable_mandate(
-            self.company_id.id or self.env.company.id,
+        return self.env['sdd.mandate']._get_usable_mandate(
+            self.company_id.id or self.env.user.company_id.id,
             self.partner_id.commercial_partner_id.id,
             self.payment_date)
 
@@ -118,13 +119,18 @@ class AccountPayment(models.Model):
         create_xml_node(InitgPty, 'Nm', self.split_node(company_id.name, 70)[0])
         create_xml_node_chain(InitgPty, ['Id','OrgId','Othr','Id'], company_id.sdd_creditor_identifier)
 
-    def _sdd_xml_gen_payment_group(self, company_id, required_collection_date, askBatchBooking, payment_info_counter, journal, CstmrDrctDbtInitn):
-        """ Generates a group of payments in the same PmtInfo node, provided
-        that they share the same journal."""
+    def _sdd_xml_gen_partner(self, company_id, required_collection_date, payment_info_counter, mandate, CstmrDrctDbtInitn):
+        """ Appends to a SDD XML file being generated all the data related to a partner
+        and his payments. self must be a recordset whose payments share the same partner.
+
+        /!\ => Grouping the payments by mandate caused problems with Dutch banks, because
+        of the too large number of distinct transactions in the file. We fixed that so that we now
+        group on payment journal. This function is not used anymore
+        and will be removed. It has been replaced by _sdd_xml_gen_payment_group.
+        """
         PmtInf = create_xml_node(CstmrDrctDbtInitn, 'PmtInf')
         create_xml_node(PmtInf, 'PmtInfId', str(payment_info_counter))
         create_xml_node(PmtInf, 'PmtMtd', 'DD')
-        create_xml_node(PmtInf, 'BtchBookg',askBatchBooking and 'true' or 'false')
         create_xml_node(PmtInf, 'NbOfTxs', str(len(self)))
         create_xml_node(PmtInf, 'CtrlSum', float_repr(sum(x.amount for x in self), precision_digits=2))  # This sum ignores the currency, it is used as a checksum (see SEPA rulebook)
 
@@ -136,6 +142,39 @@ class AccountPayment(models.Model):
 
         create_xml_node(PmtInf, 'ReqdColltnDt', fields.Date.from_string(required_collection_date).strftime("%Y-%m-%d"))
         create_xml_node_chain(PmtInf, ['Cdtr','Nm'], self.split_node(company_id.name, 70)[0])  # SEPA regulation gives a maximum size of 70 characters for this field
+        create_xml_node_chain(PmtInf, ['CdtrAcct','Id','IBAN'], mandate.payment_journal_id.bank_account_id.sanitized_acc_number)
+        create_xml_node_chain(PmtInf, ['CdtrAgt', 'FinInstnId', 'BIC'], (mandate.payment_journal_id.bank_id.bic or '').replace(' ', '').upper())
+
+        CdtrSchmeId_Othr = create_xml_node_chain(PmtInf, ['CdtrSchmeId','Id','PrvtId','Othr','Id'], company_id.sdd_creditor_identifier)[-2]
+        create_xml_node_chain(CdtrSchmeId_Othr, ['SchmeNm','Prtry'], 'SEPA')
+
+        partner = None
+        for partner_payment in self:
+            if not partner:
+                partner = partner_payment.partner_id
+            elif partner != partner_payment.partner_id:
+                raise UserError("Trying to generate a single XML payment group for payments with different partners.")
+
+            partner_payment.sdd_xml_gen_payment(company_id, mandate.partner_id, self.split_node(partner_payment.name, 35)[0], PmtInf)
+
+    def _sdd_xml_gen_payment_group(self, company_id, required_collection_date, payment_info_counter, journal, CstmrDrctDbtInitn):
+        """ Generates a group of payments in the same PmtInfo node, provided
+        that they share the same journal."""
+        PmtInf = create_xml_node(CstmrDrctDbtInitn, 'PmtInf')
+        create_xml_node(PmtInf, 'PmtInfId', str(payment_info_counter))
+        create_xml_node(PmtInf, 'PmtMtd', 'DD')
+        create_xml_node(PmtInf, 'BtchBookg', bool(self.env['ir.config_parameter'].sudo().get_param('account_sepa_direct_debit_no_batch_booking')) and 'false' or 'true')
+        create_xml_node(PmtInf, 'NbOfTxs', str(len(self)))
+        create_xml_node(PmtInf, 'CtrlSum', float_repr(sum(x.amount for x in self), precision_digits=2))  # This sum ignores the currency, it is used as a checksum (see SEPA rulebook)
+
+        PmtTpInf = create_xml_node_chain(PmtInf, ['PmtTpInf','SvcLvl','Cd'], 'SEPA')[0]
+        create_xml_node_chain(PmtTpInf, ['LclInstrm','Cd'], 'CORE')
+        create_xml_node(PmtTpInf, 'SeqTp', 'RCUR')
+        #Note: RCUR refers to the COLLECTION of payments, not the type of mandate used
+        #This value is only used for informatory purpose.
+
+        create_xml_node(PmtInf, 'ReqdColltnDt', fields.Date.from_string(required_collection_date).strftime("%Y-%m-%d"))
+        create_xml_node_chain(PmtInf, ['Cdtr','Nm'], company_id.name[:70])  # SEPA regulation gives a maximum size of 70 characters for this field
         create_xml_node_chain(PmtInf, ['CdtrAcct','Id','IBAN'], journal.bank_account_id.sanitized_acc_number)
         create_xml_node_chain(PmtInf, ['CdtrAgt', 'FinInstnId', 'BIC'], (journal.bank_id.bic or '').replace(' ', '').upper())
 
@@ -170,22 +209,15 @@ class AccountPayment(models.Model):
 
         MndtRltdInf = create_xml_node_chain(DrctDbtTxInf, ['DrctDbtTx','MndtRltdInf','MndtId'], self.sdd_mandate_id.name)[-2]
         create_xml_node(MndtRltdInf, 'DtOfSgntr', fields.Date.to_string(self.sdd_mandate_id.start_date))
+        create_xml_node_chain(DrctDbtTxInf, ['DbtrAgt', 'FinInstnId', 'BIC'], (self.sdd_mandate_id.partner_bank_id.bank_id.bic or '').replace(' ', '').upper())
+        Dbtr = create_xml_node_chain(DrctDbtTxInf, ['Dbtr','Nm'], self.sdd_mandate_id.partner_bank_id.acc_holder_name or partner.name or partner.parent_id.name)[0]
 
-        if self.sdd_mandate_id.partner_bank_id.bank_id.bic:
-            create_xml_node_chain(DrctDbtTxInf, ['DbtrAgt', 'FinInstnId', 'BIC'], (self.sdd_mandate_id.partner_bank_id.bank_id.bic).replace(' ', '').upper())
-        else:
-            create_xml_node_chain(DrctDbtTxInf, ['DbtrAgt', 'FinInstnId', 'Othr', 'Id'], 'NOTPROVIDED')
-
-        debtor_name = self.sdd_mandate_id.partner_bank_id.acc_holder_name or partner.name or partner.parent_id.name
-        Dbtr = create_xml_node_chain(DrctDbtTxInf, ['Dbtr', 'Nm'], self.split_node(debtor_name, 70)[0])[0]
-
-        contact_address = partner._display_address(without_company=True)
-        if contact_address:
+        if partner.contact_address:
             PstlAdr = create_xml_node(Dbtr, 'PstlAdr')
             if partner.country_id and partner.country_id.code:
                 create_xml_node(PstlAdr, 'Ctry', partner.country_id.code)
             n_line = 0
-            contact_address = contact_address.replace('\n', ' ').strip()
+            contact_address = partner.contact_address.replace('\n', ' ').strip()
             while contact_address and n_line < 2:
                 create_xml_node(PstlAdr, 'AdrLine', self.split_node(contact_address, 70)[0])
                 contact_address = self.split_node(contact_address, 70)[1]
@@ -200,7 +232,23 @@ class AccountPayment(models.Model):
         create_xml_node_chain(DrctDbtTxInf, ['DbtrAcct','Id','IBAN'], self.sdd_mandate_id.partner_bank_id.sanitized_acc_number)
 
         if self.communication:
-            create_xml_node_chain(DrctDbtTxInf, ['RmtInf', 'Ustrd'], self.split_node(self.communication, 140)[0])
+            create_xml_node_chain(DrctDbtTxInf, ['RmtInf', 'Ustrd'], self._sanitize_communication(self.communication))
+
+    def _group_payments_per_mandate(self):
+        """ Groups the payments of this recordset per associated mandate, in a dictionnary of recordsets.
+
+        /!\ => Grouping the payments by mandate caused problems with Dutch banks, because
+        of the too large number of distinct transactions in the file. We fixed that so that we now
+        group on payment journal. This function is not used anymore
+        and will be removed. It has been replaced by _sdd_xml_gen_payment_group.
+        """
+        rslt = {}
+        for payment in self:
+            if rslt.get(payment.sdd_mandate_id, False):
+                rslt[payment.sdd_mandate_id] += payment
+            else:
+                rslt[payment.sdd_mandate_id] = payment
+        return rslt
 
     def _group_payments_per_bank_journal(self):
         """ Groups the payments of this recordset per associated journal, in a dictionnary of recordsets.
@@ -224,14 +272,18 @@ class AccountPayment(models.Model):
             if mandate.one_off:
                 mandate.action_close_mandate()
 
+
+class AccountRegisterPaymentsWizard(models.TransientModel):
+    _inherit = "account.register.payments"
+
     def create_payments(self):
         if self.payment_method_code == 'sdd':
             rslt = self.env['account.payment']
             for invoice in self.invoice_ids:
-                mandate = invoice._sdd_get_usable_mandate()
+                mandate = invoice._get_usable_mandate()
                 if not mandate:
                     raise UserError(_("This invoice cannot be paid via SEPA Direct Debit, as there is no valid mandate available for its customer at its creation date."))
-                rslt += invoice._sdd_pay_with_mandate(mandate)
+                rslt += invoice.pay_with_mandate(mandate)
             return rslt
 
-        return super(AccountPayment, self).create_payments()
+        return super(AccountRegisterPaymentsWizard, self).create_payments()

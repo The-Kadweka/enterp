@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from datetime import datetime
-from odoo import models, fields
+from odoo import models, fields, api
 
 
 class ebay_link_listing(models.TransientModel):
@@ -11,11 +11,8 @@ class ebay_link_listing(models.TransientModel):
 
     ebay_id = fields.Char('eBay Listing ID')
 
+    @api.one
     def link_listing(self):
-        for listing in self:
-            listing._link_listing()
-
-    def _link_listing(self):
         response = self.env['product.template'].ebay_execute('GetItem', {
             'ItemID': self.ebay_id,
             'DetailLevel': 'ReturnAll'
@@ -48,14 +45,14 @@ class ebay_link_listing(models.TransientModel):
             ]).id if 'Storefront' in item else False,
             'ebay_price': currency._convert(
                 float(item['StartPrice']['value']),
-                self.env.company.currency_id,
-                self.env.company,
+                self.env.user.company_id.currency_id,
+                self.env.user.company_id,
                 fields.Date.today()
             ),
             'ebay_buy_it_now_price': currency._convert(
                 float(item['BuyItNowPrice']['value']),
-                self.env.company.currency_id,
-                self.env.company,
+                self.env.user.company_id.currency_id,
+                self.env.user.company_id,
                 fields.Date.today()
             ),
             'ebay_listing_type': item['ListingType'],
@@ -100,16 +97,21 @@ class ebay_link_listing(models.TransientModel):
                 variations = [variations]
             for variation in variations:
                 specs = variation['VariationSpecifics']['NameValueList']
+                attrs = []
                 if not isinstance(specs, list):
                     specs = [specs]
-                variant = product._get_variant_from_ebay_specs(specs)
+                for spec in specs:
+                    attr = self.env['product.attribute.value'].search([('name', '=', spec['Value'])])
+                    attrs.append(('attribute_value_ids', '=', attr.id))
+                variant = self.env['product.product'].search(attrs).filtered(
+                    lambda l: l.product_tmpl_id.id == product.id)
                 variant.write({
                     'ebay_use': True,
                     'ebay_quantity_sold': variation['SellingStatus']['QuantitySold'],
                     'ebay_fixed_price': currency._convert(
                         float(variation['StartPrice']['value']),
-                        self.env.company.currency_id,
-                        self.env.company,
+                        self.env.user.company_id.currency_id,
+                        self.env.user.company_id,
                         fields.Date.today()
                     ),
                     'ebay_quantity': int(variation['Quantity']) - int(variation['SellingStatus']['QuantitySold']),
@@ -120,8 +122,8 @@ class ebay_link_listing(models.TransientModel):
                 'ebay_quantity_sold': item['SellingStatus']['QuantitySold'],
                 'ebay_fixed_price': currency._convert(
                     float(item['StartPrice']['value']),
-                    self.env.company.currency_id,
-                    self.env.company,
+                    self.env.user.company_id.currency_id,
+                    self.env.user.company_id,
                     fields.Date.today()
                 ),
                 'ebay_quantity': int(item['Quantity']) - int(item['SellingStatus']['QuantitySold']),

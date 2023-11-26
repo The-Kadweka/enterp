@@ -18,6 +18,7 @@ class YodleeProviderAccount(models.Model):
 
     provider_type = fields.Selection(selection_add=[('yodlee', 'Yodlee')])
 
+    @api.multi
     def _get_available_providers(self):
         ret = super(YodleeProviderAccount, self)._get_available_providers()
         ret.append('yodlee')
@@ -33,8 +34,9 @@ class YodleeProviderAccount(models.Model):
         fastlink_url = 'https://usyirestmasternode.yodleeinteractive.com/authenticate/odooinc/?channelAppName=usyirestmaster'
         return {'login': login, 'secret': secret, 'url': url, 'fastlink_url': fastlink_url}
 
+    @api.multi
     def register_new_user(self):
-        company_id = self.env.company
+        company_id = self.env.user.company_id
         username = self.env.registry.db_name + '_' + str(uuid.uuid4())
 
         # Implement funky password policy from Yodlee's REST API
@@ -62,6 +64,7 @@ class YodleeProviderAccount(models.Model):
         company_id.yodlee_user_login = username
         company_id.yodlee_user_password = password
 
+    @api.multi
     def do_cobrand_login(self):
         credentials = self._get_yodlee_credentials()
         requestBody = json.dumps({'cobrand': {'cobrandLogin': credentials['login'], 'cobrandPassword': credentials['secret']}})
@@ -70,12 +73,13 @@ class YodleeProviderAccount(models.Model):
         except requests.exceptions.Timeout:
             raise UserError(_('Timeout: the server did not reply within 30s'))
         self.check_yodlee_error(resp)
-        company_id = self.company_id or self.env.company
+        company_id = self.company_id or self.env.user.company_id
         company_id.yodlee_access_token = resp.json().get('session').get('cobSession')
 
+    @api.multi
     def do_user_login(self):
         credentials = self._get_yodlee_credentials()
-        company_id = self.company_id or self.env.company
+        company_id = self.company_id or self.env.user.company_id
         headerVal = {'Authorization': '{cobSession=' + company_id.yodlee_access_token + '}'}
         requestBody = json.dumps({'user': {'loginName': company_id.yodlee_user_login, 'password': company_id.yodlee_user_password}})
         try:
@@ -85,6 +89,7 @@ class YodleeProviderAccount(models.Model):
         self.check_yodlee_error(resp)
         company_id.yodlee_user_access_token = resp.json().get('user').get('session').get('userSession')
 
+    @api.multi
     def get_auth_tokens(self):
         self.do_cobrand_login()
         self.do_user_login()
@@ -104,13 +109,13 @@ class YodleeProviderAccount(models.Model):
             resp.raise_for_status()
         except (requests.HTTPError, ValueError):
             message = ('%s\n\n' + _('(Diagnostic: %r for URL %s)')) % (resp.text.strip(), resp.status_code, resp.url)
-            if self and self.id:
-                self.log_message(message)
+            self.log_message(message)
             raise UserError(message)
 
+    @api.multi
     def yodlee_fetch(self, url, params, data, type_request='POST'):
         credentials = self._get_yodlee_credentials()
-        company_id = self.company_id or self.env.company
+        company_id = self.company_id or self.env.user.company_id
         service_url = url
         url = credentials['url'] + url
         if not company_id.yodlee_user_login:
@@ -137,17 +142,20 @@ class YodleeProviderAccount(models.Model):
             return self.yodlee_fetch(service_url, params, data, type_request=type_request)
         return resp.json()
 
+    @api.multi
     def get_login_form(self, site_id, provider, beta=False):
         if provider != 'yodlee':
             return super(YodleeProviderAccount, self).get_login_form(site_id, provider, beta)
         return self.open_yodlee_action(site_id, 'add', beta)
 
+    @api.multi
     def update_credentials(self):
         if self.provider_type != 'yodlee':
             return super(YodleeProviderAccount, self).update_credentials()
         self.ensure_one()
         return self.open_yodlee_action(self.provider_account_identifier, 'edit')
 
+    @api.multi
     def manual_sync(self, return_action=True):
         if self.provider_type != 'yodlee':
             return super(YodleeProviderAccount, self).manual_sync()
@@ -166,7 +174,7 @@ class YodleeProviderAccount(models.Model):
                 'fastlinkUrl': self._get_yodlee_credentials()['fastlink_url'],
                 'paramsUrl': paramsUrl,
                 'callbackUrl': callbackUrl,
-                'userToken': self.env.company.yodlee_user_access_token,
+                'userToken': self.env.user.company_id.yodlee_user_access_token,
                 'beta': beta,
                 'state': state,
                 'accessTokens': resp_json.get('user').get('accessTokens')[0],
@@ -183,6 +191,7 @@ class YodleeProviderAccount(models.Model):
         else:
             return status
 
+    @api.multi
     def callback_institution(self, informations, state, journal_id):
         action = self.env.ref('account.open_account_journal_dashboard_kanban').id
         try:
@@ -192,7 +201,7 @@ class YodleeProviderAccount(models.Model):
         element = type(resp_json) is list and len(resp_json) > 0 and resp_json[0] or {}
         if element.get('providerAccountId'):
             new_provider_account = self.search([('provider_account_identifier', '=', element.get('providerAccountId')),
-                ('company_id', '=', self.env.company.id)], limit=1)
+                ('company_id', '=', self.env.user.company_id.id)], limit=1)
             if len(new_provider_account) == 0:
                 vals = {
                     'name': element.get('bankName') or _('Online institution'),
@@ -229,6 +238,7 @@ class YodleeProviderAccount(models.Model):
         else:
             return action
 
+    @api.multi
     def add_update_accounts(self):
         params = {'providerAccountId': self.provider_account_identifier}
         resp_json = self.yodlee_fetch('/accounts', params, {}, 'GET')
@@ -262,6 +272,7 @@ class YodleeProviderAccount(models.Model):
                         transactions.append({'journal': account_search.journal_ids[0].name, 'count': transactions_count})
         return {'added': account_added, 'transactions': transactions}
 
+    @api.multi
     def _update_status(self, status, info):
         self.write({
             'status': status,
@@ -280,7 +291,7 @@ class YodleeProviderAccount(models.Model):
                 'status': info.get('status'),
                 'status_code': info.get('statusCode'),
                 'message': info.get('statusMessage'),
-                'last_refresh': info.get('lastRefreshed', '').replace('T', ' ').replace('Z', ''),
+                'last_refresh': info.get('lastRefreshed'),
                 'action_required': False if info.get('status') == 'SUCCESS' else True,
                 })
             if info.get('status') == 'FAILED':
@@ -297,6 +308,7 @@ class YodleeProviderAccount(models.Model):
             if account.journal_ids and self.status == 'SUCCESS':
                 account.retrieve_transactions()
 
+    @api.multi
     def unlink(self):
         for provider in self:
             if provider.provider_type == 'yodlee' and provider.provider_account_identifier:
@@ -385,6 +397,7 @@ class YodleeAccount(models.Model):
     yodlee_account_status = fields.Char(help='Active/Inactive on Yodlee system', readonly=True)
     yodlee_status_code = fields.Integer(readonly=True)
 
+    @api.multi
     def retrieve_transactions(self):
         if (self.account_online_provider_id.provider_type != 'yodlee'):
             return super(YodleeAccount, self).retrieve_transactions()

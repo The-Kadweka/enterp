@@ -12,7 +12,6 @@
         background-image: url(/web/static/lib/pdfjs/web/images/texture.png);
         background-repeat: repeat;
         color: $o-wo-tablet-text;
-        height: auto;
 
         font-size: 16px;
 
@@ -37,10 +36,6 @@
                 text-transform: capitalize;
             }
 
-            &.fa-plus-square-o {
-                margin-bottom: 1px;
-            }
-
             &.o_workorder_icon_btn {
                 padding: 0.4em;
 
@@ -62,7 +57,6 @@
         .o_input {
             background-color: $o-wo-tablet-bg;
             color: $o-wo-tablet-text;
-            padding: 0.4em 1em;
         }
 
         .o_field_widget {
@@ -75,28 +69,8 @@
             flex: 1 0 auto;
             align-items: center;
 
-            &.workorder_bar_left {
-                word-break: break-all;
-                flex-shrink: 1;
-            }
-
-            @include media-breakpoint-down(sm) {
-                justify-content: flex-start;
-                &.workorder_bar_left {
-                    flex-flow: wrap;
-                }
-            }
-
             &.o_workorder_bar_content_right {
                 justify-content: flex-end;
-                @include media-breakpoint-down(sm) {
-                    justify-content: flex-start;
-                    .o_actions {
-                        display: flex;
-                        flex-flow: column;
-                        width: 100%;
-                    }
-                }
             }
         }
 
@@ -112,18 +86,12 @@
             flex-flow: row wrap;
             padding: $o-wo-tablet-padding*0.5 $o-wo-tablet-padding;
             padding-left: $o-wo-tablet-padding - $o-wo-tablet-btn-margin;
-            @include media-breakpoint-down(sm) {
-                flex-flow: column;
-            }
         }
 
         // Last top Block
         .workorder_actions {
             display: flex;
             flex-flow: row nowrap;
-            @include media-breakpoint-down(sm) {
-                flex-flow: column;
-            }
             padding: $o-wo-tablet-padding*0.5 $o-wo-tablet-padding - $o-wo-tablet-btn-margin $o-wo-tablet-padding;
             box-shadow: 0 1px 1px rgba(black, 0.3);
             font-size: 1.2em;
@@ -135,35 +103,67 @@
             font-size: 0.9em;
 
             // Final resume table
-            table.o_list_table {
+            table.o_list_view {
                 color: $body-color;
+            }
+
+            // Add a picture
+            .workorder_picture {
+                margin: 5px 0;
+
+                .o_field_image {
+                    float: left;
+                    position: relative;
+                    margin-bottom: $o-wo-tablet-padding;
+
+                    img {
+                        height: 70px;
+                    }
+                    .o_form_image_controls {
+                        height: 100%;
+                        background-color: transparent;
+                        cursor: zoom-in;
+
+                        .o_clear_file_button {
+                            position: absolute;
+                            bottom: 0;
+                            right: 0;
+                            background-color: #00A09D;
+                            cursor: pointer;
+                            padding: 4px 8px;
+                            margin: 0;
+                            color: white;
+                        }
+
+                        .o_form_binary_progress {
+                            position: absolute;
+                            bottom: -18px;
+                            left: 0;
+                            width: 100%;
+                            text-align: center;
+                        }
+                    }
+                    .o_hidden_input_file  {
+                        display: none;
+                    }
+                }
+
+                #workorder_picture_button {
+                    margin-top: 0;
+                    @include o-position-absolute($top: 33%, $left: 106%);
+                }
             }
 
             // Horizontal form
             .o_workorder_form {
                 padding-bottom: $o-wo-tablet-padding*0.5;
                 justify-content: space-between;
-                @include media-breakpoint-down(sm) {
-                    flex-flow: column;
-                    align-items: flex-start;
-                }
 
                 > div {
                     flex: 1 0 auto;
                 }
 
                 .o_workorder_field {
-                    > div.o_workorder_lot {
-                        width: 100%;
-                        justify-content: center;
-                        > .o_lot_number {
-                            width: 50%;
-                            &:not(.o_with_button) button.o_external_button {
-                                display: block !important;
-                                visibility: hidden;
-                            }
-                        }
-                    }
                     > div {
                         display: inline-flex;
                         align-items: baseline;
@@ -194,11 +194,9 @@
         display: flex;
         flex: 1 0 auto;
 
-        div.o_field_pdfviewer, span.o_embed_url_viewer {
+        div.o_field_pdfviewer {
             margin: 0;
-            @include media-breakpoint-up(md) {
-                height: auto;
-            }
+            height: auto;
             position: relative;
             display: flex;
             flex: 1 0 auto;

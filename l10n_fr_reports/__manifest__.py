@@ -11,11 +11,12 @@ Accounting reports for France
 ================================
 
     """,
-    'category': 'Accounting/Accounting',
+    'category': 'Accounting',
     'depends': ['l10n_fr', 'account_reports'],
     'data': [
         'data/profit_loss.xml',
         'data/balance_sheet.xml',
+        'data/vat_report.xml',
     ],
     'demo': [],
     'auto_install': True,

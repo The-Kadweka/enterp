@@ -61,11 +61,11 @@
               <label for="product_variant_ids"
                 attrs="{'invisible': ['|',('ebay_listing_type','=', 'Chinese'),('product_variant_count', '=', 1)]}"
                 />
-              <field name="product_variant_ids" widget="one2many"
+              <field name="product_variant_ids" widget="one2many_list"
                 attrs="{'required': False,'invisible': ['|',('ebay_listing_type','=', 'Chinese'),('product_variant_count', '=', 1)]}">
                 <tree string="Variants" editable="bottom" create="false" delete="false">
                   <field name="currency_id" invisible="1"/>
-                  <field name="product_template_attribute_value_ids" widget="many2many_tags" readonly="1"/>
+                  <field name="attribute_value_ids" widget="many2many_tags"/>
                   <field name="ebay_use"/>
                   <field name="ebay_fixed_price" string="Fixed Price" widget="monetary"/>
                   <field name="ebay_quantity"/>
@@ -99,15 +99,15 @@
       <field name="model">product.template</field>
       <field name="inherit_id" ref="product.product_template_tree_view"/>
       <field name="arch" type="xml">
-        <xpath expr="//field[@name='activity_exception_decoration']" position="before">
-          <field name="ebay_listing_status" optional="show"/>
-        </xpath>
+        <tree position="inside">
+          <field name="ebay_listing_status"/>
+        </tree>
       </field>
     </record>
 
     <!-- server actions to add option in the menu "More" -->
     <record id="action_list_items" model="ir.actions.server">
-      <field name="name">eBay: List products</field>
+      <field name="name">Ebay: List Product Templates on eBay</field>
       <field name="model_id" ref="sale.model_product_template"/>
       <field name="binding_model_id" ref="product.model_product_template"/>
       <field name="state">code</field>
@@ -118,7 +118,7 @@ if records:
     </record>
 
     <record id="action_revise_items" model="ir.actions.server">
-      <field name="name">eBay: Revise products</field>
+      <field name="name">Ebay: Revise Product Templates on eBay</field>
       <field name="model_id" ref="sale.model_product_template"/>
       <field name="binding_model_id" ref="product.model_product_template"/>
       <field name="state">code</field>
@@ -129,7 +129,7 @@ if records:
     </record>
 
     <record id="action_relist_items" model="ir.actions.server">
-      <field name="name">eBay: Relist products</field>
+      <field name="name">Ebay: Relist Product Templates on eBay</field>
       <field name="model_id" ref="sale.model_product_template"/>
       <field name="binding_model_id" ref="product.model_product_template"/>
       <field name="state">code</field>
@@ -140,7 +140,7 @@ if records:
     </record>
 
     <record id="action_end_items_listings" model="ir.actions.server">
-      <field name="name">eBay: End product listings</field>
+      <field name="name">Ebay: End Product Templates Listings on eBay</field>
       <field name="model_id" ref="sale.model_product_template"/>
       <field name="binding_model_id" ref="product.model_product_template"/>
       <field name="state">code</field>
@@ -151,7 +151,7 @@ if records:
     </record>
 
     <record id="action_unlink_items_listings" model="ir.actions.server">
-      <field name="name">eBay: Unlink product listings</field>
+      <field name="name">Ebay: Unlink eBay Product Templates Listings</field>
       <field name="model_id" ref="sale.model_product_template"/>
       <field name="binding_model_id" ref="product.model_product_template"/>
       <field name="state">code</field>

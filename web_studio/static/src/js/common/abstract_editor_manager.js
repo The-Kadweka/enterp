@@ -29,18 +29,23 @@ var AbstractEditorManager = Widget.extend({
     },
     /**
      * @override
+     * @param {Widget} parent
+     * @param {Object} params
+     * @param {Object} params.env - environment (model and ids)
+     *    (id, context, etc.)
      */
-    init: function () {
+    init: function (parent, params) {
         this._super.apply(this, arguments);
 
         this.editor = undefined;
         this.sidebar = undefined;
-        this.sidebarScrollTop = undefined;
 
         this.mode = 'edition';  // the other mode is 'rendering' in XML editor
 
         this.operations = [];
         this.operations_undone = [];
+
+        this.env = params.env;
 
         this.mdp = new concurrency.MutexedDropPrevious();
 
@@ -66,7 +71,7 @@ var AbstractEditorManager = Widget.extend({
 
                 self.sidebar = self._instantiateSidebar();
                 defs.push(self.sidebar.prependTo(self.$el));
-                return Promise.all(defs);
+                return $.when.apply($, defs);
             });
         });
     },
@@ -111,7 +116,7 @@ var AbstractEditorManager = Widget.extend({
      *
      * @param {Boolean} remove_last_op
      * @param {Boolean} from_xml
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _applyChanges: function (remove_last_op, from_xml) {
         var self = this;
@@ -119,7 +124,7 @@ var AbstractEditorManager = Widget.extend({
         var lastOp = this.operations.slice(-1)[0];
         var lastOpID = lastOp && lastOp.id;
 
-        bus.trigger('toggle_snack_bar', 'saving');
+        bus.trigger('toggle_snack_bar', _t('Saving...'));
 
         var def;
         if (from_xml) {
@@ -127,7 +132,7 @@ var AbstractEditorManager = Widget.extend({
                 this,
                 lastOp.view_id,
                 lastOp.new_arch
-            )).guardedCatch(function () {
+            )).fail(function () {
                 self.trigger_up('studio_error', {error: 'view_rendering'});
             });
         } else {
@@ -138,18 +143,16 @@ var AbstractEditorManager = Widget.extend({
                         serverOperations.push(_.omit(op, 'id'));
                     }
                 });
-                var prom = self._editView(
+                return self._editView(
                     self.view_id,
                     self.studio_view_arch,
                     serverOperations
-                );
-                prom.guardedCatch(function () {
+                ).fail(function () {
                     self.trigger_up('studio_error', {error: 'wrong_xpath'});
                     return self._undo(lastOpID, true).then(function () {
-                        return Promise.reject();
+                        return $.Deferred().reject();
                     });
                 });
-                return prom;
             });
         }
         return def
@@ -166,7 +169,7 @@ var AbstractEditorManager = Widget.extend({
                     // TODO: the sidebar will be updated by clicking on the node
                     self._updateSidebar(self.sidebar.state.mode);
                 }
-                bus.trigger('toggle_snack_bar', 'saved');
+                bus.trigger('toggle_snack_bar', _t('Saved'), true);
             });
     },
     /**
@@ -175,10 +178,10 @@ var AbstractEditorManager = Widget.extend({
      * @param {Object} result
      * @param {String} [opID]
      * @param {boolean} [from_xml]
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _applyChangeHandling: function (result, opID, from_xml) {
-        return Promise.resolve();
+        return $.when();
     },
     /**
      * To be overriden.
@@ -193,7 +196,7 @@ var AbstractEditorManager = Widget.extend({
     /**
      * @private
      * @param {Object} op
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _do: function (op) {
         op.id = _.uniqueId('op_');
@@ -207,12 +210,12 @@ var AbstractEditorManager = Widget.extend({
      *
      * @private
      * @param {String} [mode]
-     * @param {Object} [params]
-     * @returns {Promise<Object>}
+     * @param {Object} [node]
+     * @returns {Deferred<Object>}
      */
-    _getSidebarState: function (mode, params) {
+    _getSidebarState: function (mode, node) {
         var newState = mode ? {mode: mode} : this.sidebar.state;
-        return Promise.resolve(newState);
+        return $.when(newState);
     },
     /**
      * To be overriden.
@@ -224,10 +227,10 @@ var AbstractEditorManager = Widget.extend({
      * @param {Integer} view_id
      * @param {String} studio_view_arch
      * @param {Array} operations
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _editView: function (view_id, studio_view_arch, operations) {
-        return Promise.resolve();
+        return $.when();
     },
     /**
      * To be overriden.
@@ -238,19 +241,19 @@ var AbstractEditorManager = Widget.extend({
      * @private
      * @param {Integer} view_id
      * @param {String} view_arch
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _editViewArch: function (view_id, view_arch) {
-        return Promise.resolve();
+        return $.when();
     },
     /**
      * To be overriden.
      *
      * @param {Object} params
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _instantiateEditor: function (params) {
-        return Promise.resolve();
+        return $.when();
     },
     /**
      * To be overriden.
@@ -265,7 +268,7 @@ var AbstractEditorManager = Widget.extend({
      * Redo the last operation.
      *
      * @private
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _redo: function () {
         if (!this.operations_undone.length) {
@@ -303,39 +306,28 @@ var AbstractEditorManager = Widget.extend({
      *
      * @private
      * @param {String} [mode]
-     * @param {Object} [params]
-     * @returns {Promise}
+     * @param {Object} [node]
+     * @returns {Deferred}
      */
-    _updateSidebar: function (mode, params) {
+    _updateSidebar: function (mode, node) {
         var self = this;
 
-        if  (this.sidebar.$el) {
-            // as the sidebar is updated via trigger_up (`sidebar_tab_changed`),
-            // we might want to update a sidebar which wasn't started yet
+        // TODO: scroll top is calculated to 'o_web_studio_sidebar_content'
+        var scrolltop = this.sidebar.$el.scrollTop();
 
-            // TODO: scroll top is calculated to 'o_web_studio_sidebar_content'
-            this.sidebarScrollTop = this.sidebar.$el.scrollTop();
-        }
-
-        return this._getSidebarState(mode, params).then(function (newState) {
+        return this._getSidebarState(mode, node).then(function (newState) {
             var oldSidebar = self.sidebar;
             var previousState = oldSidebar.getLocalState ? oldSidebar.getLocalState() : undefined;
-            const newSidebar = self._instantiateSidebar(newState, previousState);
-            self.sidebar = newSidebar;
+            self.sidebar = self._instantiateSidebar(newState, previousState);
 
             var fragment = document.createDocumentFragment();
-            return newSidebar.appendTo(fragment).then(function () {
+            return self.sidebar.appendTo(fragment).then(function () {
                 oldSidebar.destroy();
-                if (!newSidebar.isDestroyed()) {
-                    newSidebar.$el.prependTo(self.$el);
-                    if (newSidebar.on_attach_callback) {
-                        newSidebar.on_attach_callback();
-                    }
-                    newSidebar.$el.scrollTop(self.sidebarScrollTop);
-                    // the XML editor replaces the sidebar in this case
-                    if (self.mode === 'rendering') {
-                        newSidebar.$el.detach();
-                    }
+                self.sidebar.$el.prependTo(self.$el);
+                self.sidebar.$el.scrollTop(scrolltop);
+                // the XML editor replaces the sidebar in this case
+                if (self.mode === 'rendering') {
+                    self.sidebar.$el.detach();
                 }
             });
         });
@@ -346,11 +338,11 @@ var AbstractEditorManager = Widget.extend({
      * @private
      * @param {String} [opID] unique operation identifier
      * @param {Boolean} [forget=False]
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _undo: function (opID, forget) {
         if (!this.operations.length) {
-            return Promise.resolve();
+            return $.Deferred().resolve();
         }
 
         // find the operation to undo and update the operations stack
@@ -421,7 +413,7 @@ var AbstractEditorManager = Widget.extend({
         this.XMLEditor = new XMLEditor(this, this.view_id, {
             position: 'left',
             doNotLoadSCSS: true,
-            doNotLoadJS: true,
+
         });
 
         this.XMLEditor.prependTo(this.$el).then(function () {

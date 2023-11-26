@@ -15,6 +15,7 @@ class IrModelData(models.Model):
             vals['studio'] = True
         return super(IrModelData, self).create(vals)
 
+    @api.multi
     def write(self, vals):
         """ When editing an ir.model.data with Studio, we put it in noupdate to
                 avoid the customizations to be dropped when upgrading the module.

@@ -14,15 +14,15 @@ QUnit.module('mail', {}, function () {
         },
     });
 
-    QUnit.test('activity menu widget: documents request button', async function (assert) {
-        assert.expect(6);
+    QUnit.test('activity menu widget: documents request button', function (assert) {
+        assert.expect(2);
 
         var activityMenu = new ActivityMenu();
-        testUtils.mock.addMockEnvironment(activityMenu, {
+        testUtils.addMockEnvironment(activityMenu, {
             services: this.services,
             mockRPC: function (route, args) {
                 if (args.method === 'systray_get_activities') {
-                    return Promise.resolve([]);
+                    return $.when([]);
                 }
                 return this._super.apply(this, arguments);
             },
@@ -32,26 +32,13 @@ QUnit.module('mail', {}, function () {
                         "should open the document request form");
                 },
             },
-            session: {
-                async user_has_group(group) {
-                    if (group === 'documents.group_documents_user') {
-                        assert.step('user_has_group:documents.group_documents_user');
-                        return true;
-                    }
-                    return this._super(...arguments);
-                },
-            },
         });
-        await activityMenu.appendTo($('#qunit-fixture'));
+        activityMenu.appendTo($('#qunit-fixture'));
 
-        await testUtils.dom.click(activityMenu.$('> .dropdown-toggle'));
-        assert.hasClass(activityMenu.$('.dropdown-menu'), 'show',
-            "dropdown should be expanded");
-        assert.verifySteps(['user_has_group:documents.group_documents_user']);
-        assert.containsOnce(activityMenu, '.o_sys_documents_request');
-        await testUtils.dom.click(activityMenu.$('.o_sys_documents_request'));
-        assert.doesNotHaveClass(activityMenu.$('.dropdown-menu'), 'show',
-            "dropdown should be collapsed");
+        var $requestButton = activityMenu.$('.o_sys_documents_request');
+        assert.strictEqual($requestButton.length, 1, "there should be a request document button");
+
+        $requestButton.click();
 
         activityMenu.destroy();
     });

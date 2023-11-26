@@ -29,8 +29,6 @@ var Model = {
     init: function () {
         this._super.apply(this, arguments);
         this.batchPayments = [];
-        this.modes  = [...this.modes, 'batch'];
-        this.filter_batch = "";
     },
 
     //--------------------------------------------------------------------------
@@ -42,7 +40,7 @@ var Model = {
      *
      * @param {Object} context
      * @param {number[]} context.statement_ids
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     load: function (context) {
         var self = this;
@@ -54,7 +52,7 @@ var Model = {
      *
      * @param {string} handle
      * @param {number} batchId
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     selectBatch: function(handle, batchId) {
         return this._rpc({
@@ -69,7 +67,7 @@ var Model = {
      * @override
      *
      * @param {(string|string[])} handle
-     * @returns {Promise<Object>} resolved with an object who contains
+     * @returns {Deferred<Object>} resolved with an object who contains
      *   'handles' key
      */
     validate: function (handle) {
@@ -95,7 +93,7 @@ var Model = {
      *
      * @private
      * @param {Object}
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _computeLine: function (line) {
         if (line.st_line.partner_id) {
@@ -111,7 +109,7 @@ var Model = {
      * @private
      * @param {string} handle
      * @param {number} batchId
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _addSelectedBatchLines: function (handle, batchId, batchLines) {
         var line = this.getLine(handle);
@@ -151,17 +149,16 @@ var Model = {
         this._formatLineProposition(line, batchLines);
         for (var k in batchLines) {
             this._addProposition(line, batchLines[k]);
-            line['mv_lines_match_rp'] = _.filter(line['mv_lines_match_rp'], l => l['id'] != batchLines[k].id);
         }
         line.batch_payment_id = batchId;
-        return Promise.all([this._computeLine(line)]);
+        return $.when(this._computeLine(line), this._performMoveLine(handle));
     },
     /**
      * load data from
      * - 'account.bank.statement' fetch the batch payments data
      *
      * @param {number[]} statement_ids
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _updateBatchPayments: function(statement_ids) {
         var self = this;
@@ -173,23 +170,6 @@ var Model = {
             .then(function (data) {
                 self.batchPayments = data;
             });
-    },
-    changeFilter: function (handle, filter) {
-        var line = this.getLine(handle);
-        if (line.mode == 'batch') {
-            this.filter_batch = filter;
-            return Promise.resolve();
-        } else {
-            return this._super.apply(this, arguments);
-        }
-    },
-    _getAvailableModes: function(handle) {
-        var line = this.getLine(handle);
-        var modes = this._super(handle);
-        if (line.batchPayments && line.batchPayments.length) {
-            modes.push('batch')
-        }
-        return modes;
     },
 };
 
@@ -214,15 +194,12 @@ var Renderer = {
      */
     update: function (state) {
         this._super(state);
-        this.$(".o_notebook .tab-content .batch_payments_selector").html("");
+        this.$(".match_controls .batch_payments_selector").remove();
         if (state.relevant_payments.length) {
-            this.$(".o_notebook .tab-content .batch_payments_selector").append(QWeb.render("batch.payment.tab", {
-                payments: state.relevant_payments.filter(pay => pay.name.toUpperCase().includes(this.model.filter_batch.toUpperCase())
-                                                             || pay.date.toUpperCase().includes(this.model.filter_batch.toUpperCase())),
-                filter: this.model.filter_batch,
+            this.$(".match_controls .fa-search").after(QWeb.render("batch_payments_selector", {
+                batchPayments: state.relevant_payments,
             }));
         }
-        this.$(".o_notebook .batch_payments_selector").toggleClass('d-none', state.relevant_payments.length == 0);
     },
 
     //--------------------------------------------------------------------------

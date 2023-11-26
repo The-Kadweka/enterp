@@ -17,18 +17,22 @@ _logger = logging.getLogger(__name__)
 class HrContract(models.Model):
     _inherit = 'hr.contract'
 
-    origin_contract_id = fields.Many2one('hr.contract', string="Origin Contract", domain="[('company_id', '=', company_id)]", help="The contract from which this contract has been duplicated.")
+    origin_contract_id = fields.Many2one('hr.contract', string="Origin Contract", help="The contract from which this contract has been duplicated.")
     access_token = fields.Char('Security Token', copy=False)
     access_token_consumed = fields.Boolean('Consumed Access Token')
     access_token_end_date = fields.Date('Access Token Validity Date', copy=False)
-    applicant_id = fields.Many2one('hr.applicant', domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+    sign_request_ids = fields.Many2many('sign.request', string="Requested Signatures")
+    sign_request_count = fields.Integer(compute='_compute_sign_request_count')
+    active_employee = fields.Boolean(related='employee_id.active', string="Active Employee", readonly=False)
+    applicant_id = fields.Many2one('hr.applicant')
     contract_reviews_count = fields.Integer(compute="_compute_contract_reviews_count", string="Proposed Contracts Count")
     contract_type = fields.Selection([
         ('PFI', 'PFI'),
         ('CDI', 'CDI'),
         ('CDD', 'CDD')], string="Contract Type", default="PFI")
+    hr_responsible_id = fields.Many2one('res.users', "HR Responsible", track_visibility='onchange',
+        help="Person responsible of validating the employee's contracts.")
     default_contract_id = fields.Many2one('hr.contract', string="Contract Template",
-        domain="[('company_id', '=', company_id)]",
         help="Default contract used when making an offer to an applicant.")
     sign_template_id = fields.Many2one('sign.template', string="New Contract Document Template",
         help="Default document that the applicant will have to sign to accept a contract offer.")
@@ -36,17 +40,19 @@ class HrContract(models.Model):
         help="Default document that the employee will have to sign to update his contract.")
     signatures_count = fields.Integer(compute='_compute_signatures_count', string='# Signatures',
         help="The number of signatures on the pdf contract with the most signatures.")
-    id_card = fields.Binary(related='employee_id.id_card', groups="hr_contract.group_hr_contract_manager")
-    image_1920 = fields.Image(related='employee_id.image_1920', groups="hr_contract.group_hr_contract_manager")
-    driving_license = fields.Binary(related='employee_id.driving_license', groups="hr_contract.group_hr_contract_manager")
-    mobile_invoice = fields.Binary(related='employee_id.mobile_invoice', groups="hr_contract.group_hr_contract_manager")
-    sim_card = fields.Binary(related='employee_id.sim_card', groups="hr_contract.group_hr_contract_manager")
-    internet_invoice = fields.Binary(related="employee_id.internet_invoice", groups="hr_contract.group_hr_contract_manager")
 
     @api.depends('sign_request_ids.nb_closed')
     def _compute_signatures_count(self):
         for contract in self:
-            contract.signatures_count = max(contract.sign_request_ids.mapped('nb_closed') or [0])
+            if not contract.sign_request_ids:
+                contract.sign_request_count = 0.0
+            else:
+                contract.signatures_count = max(contract.sign_request_ids.mapped('nb_closed'))
+
+    @api.depends('sign_request_ids')
+    def _compute_sign_request_count(self):
+        for contract in self:
+            contract.sign_request_count = len(contract.sign_request_ids)
 
     @api.depends('origin_contract_id')
     def _compute_contract_reviews_count(self):
@@ -111,6 +117,33 @@ class HrContract(models.Model):
         validity = self.env['ir.config_parameter'].sudo().get_param('hr_contract_salary.access_token_validity', default=30)
         return fields.Date.to_string(fields.Date.from_string(today) + timedelta(days=int(validity)))
 
+    def action_accept_package(self):
+        if self.origin_contract_id.employee_id:
+            self.origin_contract_id.state = 'close'
+        self.state = 'open'
+        self.access_token_consumed = True
+        self.employee_id.active = True
+        if not self.new_car and self.car_id:
+            if self.origin_contract_id and self.origin_contract_id.car_id \
+                    and self.origin_contract_id.car_id != self.car_id:
+                self.origin_contract_id.car_id.driver_id = False
+
+    def action_refuse_package(self):
+        self.state = 'close'
+
+    def open_sign_requests(self):
+        self.ensure_one()
+        if len(self.sign_request_ids.ids) == 1:
+            return self.sign_request_ids.go_to_document()
+        else:
+            return {
+                'type': 'ir.actions.act_window',
+                'name': 'Signature Requests',
+                'view_mode': 'tree,form',
+                'res_model': 'sign.request',
+                'domain': [('id', 'in', self.sign_request_ids.ids)]
+            }
+
     def action_show_contract_reviews(self):
         return {
             "type": "ir.actions.act_window",
@@ -147,6 +180,7 @@ class HrContract(models.Model):
             }
             return {
                 'type': 'ir.actions.act_window',
+                'view_type': 'form',
                 'view_mode': 'form',
                 'res_model': 'mail.compose.message',
                 'views': [(compose_form_id, 'form')],

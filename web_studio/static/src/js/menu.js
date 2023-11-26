@@ -49,7 +49,7 @@ Menu.include({
      * Renders the Studio menu (a navbar below the main navbar).
      *
      * @param {Object} action
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     renderStudioMenu: function (action) {
         if (this.studio_menu) {
@@ -172,7 +172,7 @@ Menu.include({
     /**
      * @private
      * @param {Integer} attachment_id
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _setBackgroundImage: function (attachment_id) {
         return this._rpc({
@@ -200,7 +200,7 @@ Menu.include({
             this._setBackgroundImage(result.id)
                 .then(function () {
                     window.location.reload();
-                }).guardedCatch(function () {
+                }).fail(function () {
                     framework.unblockUI();
                 });
 
@@ -253,6 +253,7 @@ Menu.include({
             },
         }, {
             on_close: function () {
+                core.bus.trigger('clear_cache'); // invalidate cache
                 self.trigger_up('reload_menu_data'); // reload menus
             },
         });
@@ -274,7 +275,7 @@ Menu.include({
                     },
                 }).then(function () {
                     window.location.reload();
-                }).guardedCatch(function () {
+                }).fail(function () {
                     framework.unblockUI();
                 });
             }

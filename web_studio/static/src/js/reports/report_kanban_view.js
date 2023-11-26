@@ -14,6 +14,14 @@ var _t = core._t;
 
 var StudioReportKanbanController = KanbanController.extend({
     /**
+     * @override
+     * @param {Object} params.studioActionEnv action env being currently edited
+     */
+    init: function (parent, model, renderer, params) {
+        this._super.apply(this, arguments);
+        this.studioActionEnv = params.studioActionEnv;
+    },
+    /**
      * Warn the Studio submenu that the report is not edited anymore.
      */
     on_reverse_breadcrumb: function () {
@@ -46,10 +54,11 @@ var StudioReportKanbanController = KanbanController.extend({
                 fieldNames: ['report_name'],
             });
         }
-        Promise.resolve(def).then(function (result) {
+        $.when(def).then(function (result) {
             var id = data.id || result;
             var report = self.model.get(id, {raw: true});
             self.do_action('web_studio.action_edit_report', {
+                studioActionEnv: self.studioActionEnv,
                 report: report,
                 on_reverse_breadcrumb: self.on_reverse_breadcrumb,
             });
@@ -66,7 +75,7 @@ var StudioReportKanbanController = KanbanController.extend({
      * @override
      */
     _onButtonNew: function () {
-        var model = this.initialState.context.default_model;
+        var model = this.initialState.context.search_default_model;
         new NewReportDialog(this, model).open();
     },
     /**
@@ -102,6 +111,14 @@ var StudioReportKanbanView = KanbanView.extend({
     config: _.extend({}, KanbanView.prototype.config, {
         Controller: StudioReportKanbanController,
     }),
+    /**
+     * @override
+     * @param {Object} params.studioActionEnv action env being currently edited
+     */
+    init: function (viewInfo, params) {
+        this._super.apply(this, arguments);
+        this.controllerParams.studioActionEnv = params.studioActionEnv;
+    },
 });
 
 var NewReportDialog = Dialog.extend({
@@ -147,7 +164,7 @@ var NewReportDialog = Dialog.extend({
      * @private
      * @param {String} modelName
      * @param {String} layout
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _createNewReport: function (modelName, layout) {
         return this._rpc({

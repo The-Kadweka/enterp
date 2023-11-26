@@ -3,7 +3,7 @@
 
 {
     'name' : 'Sale Intrastat',
-    'category': 'Accounting/Accounting',
+    'category': 'Accounting',
     'description': """
         Bridge module between sale and intrastat.
     """,

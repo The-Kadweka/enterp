@@ -12,7 +12,6 @@ from odoo import api, fields, models, _
 from odoo.tools import format_date
 from odoo.exceptions import UserError, CacheMiss, MissingError, ValidationError
 from odoo.addons.account_online_synchronization.models.odoofin_auth import OdooFinAuth
-from odoo.tools.misc import get_lang
 
 _logger = logging.getLogger(__name__)
 pattern = re.compile("^[a-z0-9-_]+$")
@@ -121,7 +120,7 @@ class AccountOnlineLink(models.Model):
     state = fields.Selection([('connected', 'Connected'), ('error', 'Error'), ('disconnected', 'Not Connected')], default='disconnected',
         tracking=True, required=True, readonly=True)
     auto_sync = fields.Boolean(default=True, string="Automatic synchronization", help="If possible, we will try to automatically fetch new transactions for this record")
-    company_id = fields.Many2one('res.company', required=True, default=lambda self: self.env.company)
+    company_id = fields.Many2one('res.company', required=True, default=lambda self: self.env.user.company_id)
 
     # Information received from OdooFin, should not be tampered with
     name = fields.Char(help="Institution Name", readonly=True)
@@ -178,10 +177,13 @@ class AccountOnlineLink(models.Model):
     def _show_fetched_transactions_action(self, stmt_line_ids):
         if self.env.context.get('dont_show_transactions'):
             return
+        # If we don't have any statement
+        if not stmt_line_ids or not stmt_line_ids.mapped('statement_id'):
+            return {'type': 'ir.actions.client', 'tag': 'reload'}
         return {
             'type': 'ir.actions.client',
             'tag': 'bank_statement_reconciliation_view',
-            'context': {'statement_line_ids': stmt_line_ids.ids, 'company_ids': self.mapped('company_id').ids},
+            'context': {'statement_ids': stmt_line_ids.mapped('statement_id').ids, 'company_ids': self.mapped('company_id').ids},
         }
 
     #######################################################
@@ -204,10 +206,12 @@ class AccountOnlineLink(models.Model):
         proxy_mode = self.env['ir.config_parameter'].sudo().get_param('account_online_synchronization.proxy_mode') or 'production'
         if not pattern.match(proxy_mode):
             raise UserError(_('Invalid value for proxy_mode config parameter.'))
+        if not url.startswith('/'):
+            raise UserError(_('Invalid value for url %s') % (url,))
         endpoint_url = 'https://%s.odoofin.com%s' % (proxy_mode, url)
         data['utils'] = {
             'request_timeout': timeout,
-            'lang': get_lang(self.env).code,
+            'lang': self.env.context.get('lang', 'en_US'),
             'server_version': odoo.release.serie,
             'db_uuid': self.env['ir.config_parameter'].sudo().get_param('database.uuid'),
             'cron': self.env.context.get('cron', False)
@@ -409,7 +413,7 @@ class AccountOnlineLink(models.Model):
         # Exchange token to retrieve client_id and refresh_token from proxy account
         data = {
             'exchange_token': exchange_token,
-            'company_id': self.env.company.id,
+            'company_id': self.env.user.company_id.id,
             'user_id': self.env.user.id
         }
         resp_json = self._fetch_odoo_fin('/proxy/v1/exchange_token', data=data, ignore_status=True)
@@ -477,7 +481,7 @@ class AccountOnlineLink(models.Model):
         if self.client_id and self.sudo().refresh_token:
             self._get_access_token()
         proxy_mode = self.env['ir.config_parameter'].sudo().get_param('account_online_synchronization.proxy_mode') or 'production'
-        country = self.env.company.country_id
+        country = self.env.user.company_id.country_id
         action = {
             'type': 'ir.actions.client',
             'tag': 'odoo_fin_connector',
@@ -488,7 +492,7 @@ class AccountOnlineLink(models.Model):
                 'accessToken': self.access_token,
                 'mode': mode,
                 'includeParam': {
-                    'lang': get_lang(self.env).code,
+                    'lang': self.env.context.get('lang', 'en_US'),
                     'countryCode': country.code,
                     'countryName': country.display_name,
                     'serverVersion': odoo.release.serie

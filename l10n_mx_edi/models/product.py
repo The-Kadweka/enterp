@@ -14,14 +14,6 @@ class ProductTemplate(models.Model):
         'of the product or service covered by the present concept. Must be '
         'used a key from the SAT catalog.',
         domain=[('applies_to', '=', 'product')])
-    l10n_mx_edi_tariff_fraction_id = fields.Many2one(
-        'l10n_mx_edi.tariff.fraction', string='Tariff Fraction',
-        help='It is used to express the key of the tariff fraction '
-        'corresponding to the description of the product to export.')
-    l10n_mx_edi_umt_aduana_id = fields.Many2one(
-        'uom.uom', 'UMT Aduana', help='Used in complement '
-        '"Comercio Exterior" to indicate in the products the '
-        'TIGIE Units of Measurement. It is based in the SAT catalog.')
 
 
 class ProductUoM(models.Model):
@@ -33,9 +25,6 @@ class ProductUoM(models.Model):
         'the standardized unit of measure code applicable to the quantity '
         'expressed in the concept. The unit must correspond to the '
         'description in the concept.', domain=[('applies_to', '=', 'uom')])
-    l10n_mx_edi_code_aduana = fields.Char(
-        'Customs code', help='Used in the complement of "Comercio Exterior" to'
-        ' indicate in the products the UoM. It is based in the SAT catalog.')
 
 
 class ProductSatCode(models.Model):
@@ -68,6 +57,7 @@ class ProductSatCode(models.Model):
         help='If this record is not active, this cannot be selected.',
         default=True)
 
+    @api.multi
     def name_get(self):
         result = []
         for prod in self:
@@ -82,36 +72,4 @@ class ProductSatCode(models.Model):
         else:
             domain = ['|', ('name', 'ilike', name), ('code', 'ilike', name)]
         sat_code_ids = self._search(expression.AND([domain, args]), limit=limit, access_rights_uid=name_get_uid)
-        return models.lazy_name_get(self.browse(sat_code_ids).with_user(name_get_uid))
-
-
-class L10nMXEdiTariffFraction(models.Model):
-    _name = 'l10n_mx_edi.tariff.fraction'
-    _description = "Mexican EDI Tariff Fraction"
-
-    code = fields.Char(help='Code defined in the SAT to this record.')
-    name = fields.Char(help='Name defined in the SAT catalog to this record.')
-    uom_code = fields.Char(
-        help='UoM code related with this tariff fraction. This value is '
-        'defined in the SAT catalog and will be assigned in the attribute '
-        '"UnidadAduana" in the merchandise.')
-    active = fields.Boolean(
-        help='If the tariff fraction has expired it could be disabled to '
-        'do not allow select the record.', default=True)
-
-    def name_get(self):
-        result = []
-        for tariff in self:
-            result.append((tariff.id, "%s %s" % (
-                tariff.code, tariff.name or '')))
-        return result
-
-    @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
-        args = args or []
-        if operator == 'ilike' and not (name or '').strip():
-            domain = []
-        else:
-            domain = ['|', ('name', 'ilike', name), ('code', 'ilike', name)]
-        ids = self._search(expression.AND([domain, args]), limit=limit, access_rights_uid=name_get_uid)
-        return self.browse(ids).name_get()
+        return self.browse(sat_code_ids).name_get()

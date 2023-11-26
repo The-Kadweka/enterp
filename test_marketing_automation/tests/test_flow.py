@@ -10,10 +10,7 @@ from odoo.tools import mute_logger
 
 from odoo.addons.test_marketing_automation.tests.common import MarketingCampaignTestBase
 
-from odoo.tests import tagged
 
-
-@tagged('marketing_automation')
 class MarketingCampaignTest(MarketingCampaignTestBase):
 
     @mute_logger('odoo.addons.base.models.ir_model', 'odoo.models')
@@ -22,10 +19,10 @@ class MarketingCampaignTest(MarketingCampaignTestBase):
         self.mock_datetime.now.return_value = date
         self.mock_datetime2.now.return_value = date
 
-        Campaign = self.env['marketing.campaign'].with_user(self.user_market)
-        Activity = self.env['marketing.activity'].with_user(self.user_market)
-        MassMail = self.env['mailing.mailing'].with_user(self.user_market)
-        ServerAction = self.env['ir.actions.server'].with_user(self.user_market)
+        Campaign = self.env['marketing.campaign'].sudo(self.user_market)
+        Activity = self.env['marketing.activity'].sudo(self.user_market)
+        MassMail = self.env['mail.mass_mailing'].sudo(self.user_market)
+        ServerAction = self.env['ir.actions.server'].sudo(self.user_market)
 
         # Create campaign
         campaign = Campaign.create({
@@ -37,7 +34,6 @@ class MarketingCampaignTest(MarketingCampaignTestBase):
         # Create first activity flow
         mass_mailing = MassMail.create({
             'name': 'Hello',
-            'subject': 'Hello',
             'body_html': '<div>My Email Body</div>',
             'mailing_model_id': self.test_model.id,
             'use_in_marketing_automation': True,
@@ -62,11 +58,11 @@ for record in records:
         })
         act_1 = Activity.create({
             'name': 'Update name',
-            'activity_domain': '%s' % ([('name', 'ilike', 'Test')]),
+            'domain': '%s' % ([('name', 'ilike', 'Test')]),
             'campaign_id': campaign.id,
             'parent_id': act_0.id,
             'activity_type': 'action',
-            'server_action_id': server_action.id,
+            'server_action_id': server_action.sudo(self.user_market).id,
             'trigger_type': 'act',
             'interval_number': '1',
             'interval_type': 'hours',
@@ -141,64 +137,10 @@ for record in records:
             for record in self.test_rec4])
 
     @mute_logger('odoo.addons.base.ir.ir_model', 'odoo.models')
-    def test_unique_field_many2one(self):
-        self.test_rec3.write({'partner_id': self.test_partner2.id})
-
-        Campaign = self.env['marketing.campaign'].with_user(self.user_market)
-        Activity = self.env['marketing.activity'].with_user(self.user_market)
-        MassMail = self.env['mailing.mailing'].with_user(self.user_market)
-
-        partner_field = self.env['ir.model.fields'].search(
-            [('model_id', '=', self.test_model.id), ('name', '=', 'partner_id')])
-
-        campaign = Campaign.create({
-            'name': 'My First Campaign',
-            'model_id': self.test_model.id,
-            'domain': '%s' % ([('name', '!=', 'Invalid')]),
-            'unique_field_id': partner_field.id,
-        })
-
-        mass_mailing = MassMail.create({
-            'name': 'Hello',
-            'subject': 'Hello',
-            'body_html': '<div>My Email Body</div>',
-            'mailing_model_id': self.test_model.id,
-            'use_in_marketing_automation': True,
-        })
-        act_0 = Activity.create({
-            'name': 'Enter the campaign',
-            'campaign_id': campaign.id,
-            'activity_type': 'email',
-            'mass_mailing_id': mass_mailing.id,
-            'trigger_type': 'begin',
-            'interval_number': '0',
-        })
-
-        campaign.action_start_campaign()
-        self.assertEqual(campaign.state, 'running')
-        campaign.sync_participants()
-
-        self.assertEqual(campaign.running_participant_count, 2)
-        self.assertEqual(
-            self.TestModel.browse(campaign.participant_ids.mapped('res_id')).mapped(partner_field.name),
-            (self.test_rec1 | self.test_rec2).mapped(partner_field.name)
-        )
-
-        self.test_rec_new = self.TestModel.create({'name': 'Test_New', 'partner_id': self.test_partner3.id})
-        self.test_rec_old = self.TestModel.create({'name': 'Test_Old', 'partner_id': self.test_partner2.id})
-        campaign.sync_participants()
-
-        self.assertEqual(campaign.running_participant_count, 3)
-        self.assertEqual(
-            self.TestModel.browse(campaign.participant_ids.mapped('res_id')).mapped(partner_field.name),
-            (self.test_rec1 | self.test_rec2 | self.test_rec_new).mapped(partner_field.name)
-        )
-
-    @mute_logger('odoo.addons.base.ir.ir_model', 'odoo.models')
-    def test_unique_field(self):
-        Campaign = self.env['marketing.campaign'].with_user(self.user_market)
-        Activity = self.env['marketing.activity'].with_user(self.user_market)
-        MassMail = self.env['mailing.mailing'].with_user(self.user_market)
+    def test_missing_record(self):
+        Campaign = self.env['marketing.campaign'].sudo(self.user_market)
+        Activity = self.env['marketing.activity'].sudo(self.user_market)
+        MassMail = self.env['mail.mass_mailing'].sudo(self.user_market)
 
         name_field = self.env['ir.model.fields'].search(
             [('model_id', '=', self.test_model.id), ('name', '=', 'display_name')])
@@ -207,12 +149,10 @@ for record in records:
             'name': 'My First Campaign',
             'model_id': self.test_model.id,
             'domain': '%s' % ([('name', '!=', 'Invalid')]),
-            'unique_field_id': name_field.id,
         })
 
         mass_mailing = MassMail.create({
             'name': 'Hello',
-            'subject': 'Hello',
             'body_html': '<div>My Email Body</div>',
             'mailing_model_id': self.test_model.id,
             'use_in_marketing_automation': True,
@@ -234,102 +174,17 @@ for record in records:
 
         self.assertEqual(campaign.running_participant_count, 4)
         self.assertEqual(
-            set(self.TestModel.browse(campaign.participant_ids.mapped('res_id')).mapped(name_field.name)),
-            set(first_recordset.mapped(name_field.name))
+            set(campaign.participant_ids.mapped('res_id')),
+            set(first_recordset.ids)
         )
 
-        self.test_rec_new = self.TestModel.create({'name': 'Test_4'})
-        self.test_rec_old = self.TestModel.create({'name': 'Test_1'})
+        self.test_rec1.unlink()
         campaign.sync_participants()
 
-        # the record with a new value should have been added, not the other
-        self.assertEqual(campaign.running_participant_count, 5)
+        # the missing record should have been removed (and not caused any crash)
+        self.assertEqual(campaign.running_participant_count, 3)
+        # note that the participant itself is not removed, only its state is modified (from running to unlinked)
         self.assertEqual(
-            set(self.TestModel.browse(campaign.participant_ids.mapped('res_id')).mapped(name_field.name)),
-            set((first_recordset | self.test_rec_new).mapped(name_field.name))
+            set(campaign.participant_ids.mapped('res_id')),
+            set(first_recordset.ids)
         )
-
-    @mute_logger('odoo.addons.base.ir.ir_model', 'odoo.models')
-    def test_campaign_duplicate(self):
-        """
-        The copy/duplicate of a campaign :
-            - COPY activities, new activities related to the new campaign
-            - DO NOT COPY the recipients AND the trace_ids AND the state (draft by default)
-            - Normal Copy of other fields
-            - Copy child of activity and keep coherence in parent_id
-        """
-        Campaign = self.env['marketing.campaign'].with_user(self.user_market)
-        Activity = self.env['marketing.activity'].with_user(self.user_market)
-        MassMail = self.env['mailing.mailing'].with_user(self.user_market)
-
-        # Create campaign
-        campaign = Campaign.create({
-            'name': 'COPY CAMPAIGN',
-            'model_id': self.test_model.id,
-            'domain': '%s' % ([('name', '!=', 'Invalid')]),
-        })
-
-        # Create first activity flow
-        mass_mailing = MassMail.create({
-            'name': 'Hello',
-            'subject': 'Hello',
-            'body_html': '<div>My Email Body</div>',
-            'mailing_model_id': self.test_model.id,
-            'use_in_marketing_automation': True,
-        })
-        name_activity = "Name of the activity (2 after the duplicate with the same name)"
-        act_0 = Activity.create({
-            'name': name_activity,
-            'campaign_id': campaign.id,
-            'activity_type': 'email',
-            'mass_mailing_id': mass_mailing.id,
-            'trigger_type': 'begin',
-            'interval_number': '0',
-        })
-
-        child_act_1 = Activity.create({
-            'name': 'child_activity',
-            'campaign_id': campaign.id,
-            'activity_type': 'email',
-            'mass_mailing_id': mass_mailing.id,
-            'parent_id': act_0.id,
-            'trigger_type': 'act',
-            'interval_number': '1',
-            'interval_type': 'hours',
-        })
-
-        self.assertEqual(int(Activity.search_count([('name', '=', name_activity)])), 1)
-
-        # User starts and syncs its campaign
-        campaign.action_start_campaign()
-        self.assertEqual(campaign.state, 'running')
-        campaign.sync_participants()
-
-        # Begin activity should contain a trace for each participant (4)
-        self.assertEqual(
-            act_0.trace_ids.mapped('participant_id'),
-            campaign.participant_ids,
-        )
-
-        campaign2 = campaign.copy()
-
-        # Check if campaign activities is unchanged
-        self.assertEqual(len(campaign.marketing_activity_ids), 2)
-
-        # Two activities with the same name but not related to the same campaign
-        self.assertEqual(int(Activity.search_count([('name', '=', name_activity)])), 2)
-        self.assertEqual(len(campaign2.marketing_activity_ids), 2)
-
-        # The copied child activity has not the old activity as parent,
-        # but the new one
-        self.assertTrue(
-            campaign2.marketing_activity_ids[1].parent_id,
-            campaign2.marketing_activity_ids[0])
-
-        # State = draft
-        self.assertEqual(campaign2.state, 'draft')
-
-        act_0_copy = campaign2.marketing_activity_ids[0]
-        # No participant and no trace (in the activity) is copied
-        self.assertEqual(len(campaign2.participant_ids), 0)
-        self.assertEqual(len(act_0_copy.trace_ids), 0)

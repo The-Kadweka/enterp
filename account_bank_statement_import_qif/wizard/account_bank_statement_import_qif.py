@@ -9,7 +9,6 @@ import dateutil.parser
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-from odoo.tools import ustr
 
 
 logger = logging.getLogger(__name__)
@@ -30,10 +29,10 @@ class AccountBankStatementImport(models.TransientModel):
         help="Although the historic QIF date format is month-first (mm/dd/yy), many financial institutions use the local format."
              "Therefore, it is frequent outside the US to have QIF date formated day-first (dd/mm/yy).")
 
-    @api.onchange('attachment_ids')
+    @api.onchange('data_file')
     def _onchange_data_file(self):
-        file_contents = self.attachment_ids.mapped('datas')
-        self.show_qif_date_format = any(self._check_qif(base64.b64decode(content)) for content in file_contents)
+        file_content = self.data_file and base64.b64decode(self.data_file) or b""
+        self.show_qif_date_format = self._check_qif(file_content)
 
     def _find_additional_data(self, *args):
         """ As .QIF format does not allow us to detect the journal, we need to let the user choose it.
@@ -52,7 +51,7 @@ class AccountBankStatementImport(models.TransientModel):
 
         data_list = [
             line.rstrip(b'\r\n')
-            for line in io.BytesIO(data_file.strip())
+            for line in io.BytesIO(data_file)
         ]
         try:
             header = data_list[0].strip().split(b':')[1]
@@ -81,9 +80,9 @@ class AccountBankStatementImport(models.TransientModel):
                     total += amount
                     vals_line['amount'] = amount
                 elif line[:1] == CHECK_NUMBER:
-                    vals_line['ref'] = ustr(data)
+                    vals_line['ref'] = data.decode('utf-8')
                 elif line[:1] == PAYEE:
-                    name = ustr(data)
+                    name = data.decode('utf-8')
                     vals_line['name'].append(name)
                     # Since QIF doesn't provide account numbers, we'll have to find res.partner and res.partner.bank here
                     # (normal behavious is to provide 'account_number', which the generic module uses to find partner/bank)
@@ -92,7 +91,7 @@ class AccountBankStatementImport(models.TransientModel):
                         vals_line['bank_account_id'] = partner_bank.id
                         vals_line['partner_id'] = partner_bank.partner_id.id
                 elif line[:1] == MEMO:
-                    vals_line['name'].append(ustr(data))
+                    vals_line['name'].append(data.decode('utf-8'))
                 elif line[:1] == END_OF_ITEM:
                     if vals_line['name']:
                         vals_line['name'] = u': '.join(vals_line['name'])

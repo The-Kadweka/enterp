@@ -1,15 +1,13 @@
 # coding: utf-8
 
 import base64
-from datetime import timedelta
 import os
 import time
 
-from lxml import objectify
+from lxml import etree, objectify
 
 from odoo.exceptions import ValidationError
 from odoo.tools import misc
-from odoo.tests.common import Form
 
 from . import common
 
@@ -17,6 +15,8 @@ from . import common
 class TestL10nMxEdiInvoice(common.InvoiceTransactionCase):
     def setUp(self):
         super(TestL10nMxEdiInvoice, self).setUp()
+        self.refund_model = self.env['account.invoice.refund']
+
         self.cert = misc.file_open(os.path.join(
             'l10n_mx_edi', 'demo', 'pac_credentials', 'certificate.cer'), 'rb').read()
         self.cert_key = misc.file_open(os.path.join(
@@ -31,29 +31,22 @@ class TestL10nMxEdiInvoice(common.InvoiceTransactionCase):
         self.xml_expected = objectify.fromstring(self.xml_expected_str)
         isr_tag = self.env['account.account.tag'].search(
             [('name', '=', 'ISR')])
-        for rep_line in self.tax_negative.invoice_repartition_line_ids:
-            rep_line.tag_ids |= isr_tag
-        iva_tag = self.env['account.account.tag'].search(
-            [('name', '=', 'IVA')])
-        for rep_line in self.tax_positive.invoice_repartition_line_ids:
-            rep_line.tag_ids |= iva_tag
-        self.payment_method_manual_out = self.env.ref(
-            "account.account_payment_method_manual_out")
+        self.tax_negative.tag_ids |= isr_tag
 
     def l10n_mx_edi_basic_configuration(self):
         self.company.write({
             'currency_id': self.mxn.id,
             'name': 'YourCompany',
-            'l10n_mx_edi_fiscal_regime': '601',
         })
         self.company.partner_id.write({
             'vat': 'EKU9003173C9',
             'country_id': self.env.ref('base.mx').id,
             'zip': '37200',
+            'property_account_position_id': self.fiscal_position.id,
         })
         certificate = self.env['l10n_mx_edi.certificate'].create({
-            'content': base64.encodebytes(self.cert),
-            'key': base64.encodebytes(self.cert_key),
+            'content': base64.encodestring(self.cert),
+            'key': base64.encodestring(self.cert_key),
             'password': self.cert_password,
         })
         self.account_settings.create({
@@ -70,8 +63,8 @@ class TestL10nMxEdiInvoice(common.InvoiceTransactionCase):
         invoice = self.create_invoice()
         invoice.sudo().journal_id.l10n_mx_address_issued_id = self.company_partner.id
         invoice.move_name = 'INV/2017/999'
-        invoice.post()
-        self.assertEqual(invoice.state, "posted")
+        invoice.action_invoice_open()
+        self.assertEqual(invoice.state, "open")
         self.assertEqual(invoice.l10n_mx_edi_pac_status, "signed",
                          invoice.message_ids.mapped('body'))
 
@@ -80,7 +73,7 @@ class TestL10nMxEdiInvoice(common.InvoiceTransactionCase):
         # -------------------------------------------------------
         xml_attachment = self.env['ir.attachment'].search([
             ('res_id', '=', invoice.id),
-            ('res_model', '=', 'account.move'),
+            ('res_model', '=', 'account.invoice'),
             ('name', '=', invoice.l10n_mx_edi_cfdi_name)])
         error_msg = 'You cannot delete a set of documents which has a legal'
         with self.assertRaisesRegexp(ValidationError, error_msg):
@@ -90,8 +83,8 @@ class TestL10nMxEdiInvoice(common.InvoiceTransactionCase):
         pdf_attachment = self.env['ir.attachment'].with_context({}).create({
             'name': pdf_filename,
             'res_id': invoice.id,
-            'res_model': 'account.move',
-            'datas': base64.encodebytes(b'%PDF-1.3'),
+            'res_model': 'account.invoice',
+            'datas': base64.encodestring(b'%PDF-1.3'),
         })
         pdf_attachment.unlink()
 
@@ -99,15 +92,12 @@ class TestL10nMxEdiInvoice(common.InvoiceTransactionCase):
         # Testing discount
         # ----------------
         invoice_disc = invoice.copy()
-        move_form = Form(invoice_disc)
-        with move_form.invoice_line_ids.edit(0) as line_form:
-            line_form.discount = 10
-            line_form.price_unit = 500
-            line_form.tax_ids.add(self.tax_positive)
-            line_form.tax_ids.add(self.tax_negative)
-        move_form.save()
-        invoice_disc.post()
-        self.assertEqual(invoice_disc.state, "posted")
+        for line in invoice_disc.invoice_line_ids:
+            line.discount = 10
+            line.price_unit = 500
+        invoice_disc.compute_taxes()
+        invoice_disc.action_invoice_open()
+        self.assertEqual(invoice_disc.state, "open")
         self.assertEqual(invoice_disc.l10n_mx_edi_pac_status, "signed",
                          invoice.message_ids.mapped('body'))
         xml = invoice_disc.l10n_mx_edi_get_xml_etree()
@@ -142,8 +132,8 @@ class TestL10nMxEdiInvoice(common.InvoiceTransactionCase):
                          invoice.message_ids.mapped('body'))
         xml_attachs = invoice.l10n_mx_edi_retrieve_attachments()
         self.assertEqual(len(xml_attachs), 2)
-        xml_1 = objectify.fromstring(base64.decodebytes(xml_attachs[0].datas))
-        xml_2 = objectify.fromstring(base64.decodebytes(xml_attachs[1].datas))
+        xml_1 = objectify.fromstring(base64.decodestring(xml_attachs[0].datas))
+        xml_2 = objectify.fromstring(base64.decodestring(xml_attachs[1].datas))
         if hasattr(xml_2, 'Addenda'):
             xml_2.remove(xml_2.Addenda)
         self.assertEqualXML(xml_1, xml_2)
@@ -151,7 +141,8 @@ class TestL10nMxEdiInvoice(common.InvoiceTransactionCase):
         # -----------------------
         # Testing cancel PAC process
         # -----------------------
-        invoice.with_context(called_from_cron=True).button_cancel()
+        invoice.sudo().journal_id.update_posted = True
+        invoice.with_context(called_from_cron=True).action_invoice_cancel()
         self.assertEqual(invoice.state, "cancel")
         self.assertTrue(
             invoice.l10n_mx_edi_pac_status in ['cancelled', 'to_cancel'],
@@ -163,55 +154,6 @@ class TestL10nMxEdiInvoice(common.InvoiceTransactionCase):
         # -----------------------
         invoice.l10n_mx_edi_update_sat_status()
         self.assertNotEqual(invoice.l10n_mx_edi_sat_status, "cancelled")
-
-    def test_l10n_mx_edi_invoice_fixed_tax(self):
-        invoice = self.create_invoice()
-        fixed_tax = self.tax_model.create({
-            'name': 'Fixed tax',
-            'amount': -2.0,
-            'amount_type':'fixed',
-            'type_tax_use': 'sale',
-            'include_base_amount': False,
-        })
-        fixed_tax.l10n_mx_cfdi_tax_type = 'Tasa'
-        isr_tag = self.env['account.account.tag'].search(
-            [('name', '=', 'ISR')])
-        for rep_line in fixed_tax.invoice_repartition_line_ids:
-            rep_line.tag_ids |= isr_tag
-        move_form = Form(invoice)
-        with move_form.invoice_line_ids.edit(0) as line_form:
-            line_form.tax_ids.add(fixed_tax)
-        move_form.save()
-        invoice.post()
-        self.assertEqual(invoice.state, "posted")
-        self.assertEqual(invoice.l10n_mx_edi_pac_status, "signed",
-                         invoice.message_ids.mapped('body'))
-
-    def test_l10n_mx_edi_invoice_fixed_cuota_ieps(self):
-        invoice = self.create_invoice()
-        fixed_tax = self.tax_model.create({
-            'name': 'Cigarette tax',
-            'amount': 0.35,
-            'amount_type': 'fixed',
-            'type_tax_use': 'sale',
-            'include_base_amount': False,
-        })
-        fixed_tax.l10n_mx_cfdi_tax_type = 'Cuota'
-        ieps_tag = self.env['account.account.tag'].search(
-            [('name', '=', 'IEPS')])
-        for rep_line in fixed_tax.invoice_repartition_line_ids:
-            rep_line.tag_ids |= ieps_tag
-
-        move_form = Form(invoice)
-        with move_form.invoice_line_ids.edit(0) as line_form:
-            line_form.tax_ids.add(self.tax_positive)
-            line_form.tax_ids.add(fixed_tax)
-        move_form.save()
-
-        invoice.post()
-        self.assertEqual(invoice.state, "posted")
-        self.assertEqual(invoice.l10n_mx_edi_pac_status, "signed",
-                         invoice.message_ids.mapped('body'))
 
     def test_multi_currency(self):
         invoice = self.create_invoice()
@@ -242,22 +184,20 @@ class TestL10nMxEdiInvoice(common.InvoiceTransactionCase):
         invoice = self.create_invoice()
         addenda_autozone = self.ref('l10n_mx_edi.l10n_mx_edi_addenda_autozone')
         invoice.sudo().partner_id.l10n_mx_edi_addenda = addenda_autozone
-        invoice.sudo().invoice_user_id.partner_id.ref = '8765'
+        invoice.sudo().user_id.partner_id.ref = '8765'
         invoice.message_ids.unlink()
-        invoice.post()
-        self.assertEqual(invoice.state, "posted")
+        invoice.action_invoice_open()
+        self.assertEqual(invoice.state, "open")
         self.assertEqual(invoice.l10n_mx_edi_pac_status, "signed",
                          invoice.message_ids.mapped('body'))
-        xml_str = base64.decodebytes(invoice.message_ids[-2].attachment_ids.datas)
+        xml_str = base64.decodestring(invoice.message_ids[-2].attachment_ids.datas)
         xml = objectify.fromstring(xml_str)
         xml_expected = objectify.fromstring(
             '<ADDENDA10 xmlns:cfdi="http://www.sat.gob.mx/cfd/3" '
             'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
             'xsi:noNamespaceSchemaLocation="https://azfes.autozone.com/xsd/Addenda_Merch_32.xsd" '
             'VERSION="1.0" BUYER="%s" VENDOR_ID="8765" '
-            'POID="%s" EMAIL="%s"/>' % (
-                              invoice.partner_id.name,
-                              invoice.name,
+            'EMAIL="%s"/>' % (invoice.partner_id.name,
                               invoice.company_id.partner_id.email))
         xml_addenda = xml.Addenda.xpath('//ADDENDA10')[0]
         self.assertEqualXML(xml_addenda, xml_expected)
@@ -272,47 +212,46 @@ class TestL10nMxEdiInvoice(common.InvoiceTransactionCase):
         # Testing invoice refund to verify CFDI related section
         # -----------------------
         invoice = self.create_invoice()
-        invoice.post()
-        refund = self.env['account.move.reversal'].with_context(
+        invoice.action_invoice_open()
+        refund = self.refund_model.with_context(
             active_ids=invoice.ids).create({
-                'refund_method': 'refund',
-                'reason': 'Refund Test',
-                'date': invoice.invoice_date,
-                'move_id': invoice.ids[0],
+                'filter_refund': 'refund',
+                'description': 'Refund Test',
+                'date': invoice.date_invoice,
             })
-        result = refund.reverse_moves()
-        refund_id = result.get('res_id')
-        refund = self.env['account.move'].browse(refund_id)
+        result = refund.invoice_refund()
+        refund_id = result.get('domain')[1][2]
+        refund = self.invoice_model.browse(refund_id)
         refund.refresh()
-        refund.post()
+        refund.action_invoice_open()
         xml = refund.l10n_mx_edi_get_xml_etree()
         self.assertEquals(xml.CfdiRelacionados.CfdiRelacionado.get('UUID'),
                           invoice.l10n_mx_edi_cfdi_uuid,
                           'Invoice UUID is different to CFDI related')
 
         # -----------------------
+        # Testing invoice without product to verify no traceback
+        # -----------------------
+        invoice = self.create_invoice()
+        invoice.invoice_line_ids[0].product_id = False
+        invoice.compute_taxes()
+        invoice.action_invoice_open()
+        self.assertEqual(invoice.state, "open")
+
+        # -----------------------
         # Testing case with include base amount
         # -----------------------
         invoice = self.create_invoice()
-        tax_ieps = self.tax_model.create({
+        tax_ieps = self.tax_positive.copy({
             'name': 'IEPS 9%',
             'amount': 9.0,
-            'include_base_amount':True,
-            'price_include': True,
-            'type_tax_use': 'sale',
-            'amount_type': 'percent',
+            'include_base_amount': True,
         })
-        tax_ieps.l10n_mx_cfdi_tax_type = 'Tasa'
-        ieps_tag = self.env['account.account.tag'].search(
-            [('name', '=', 'IEPS')])
-        for rep_line in tax_ieps.invoice_repartition_line_ids:
-            rep_line.tag_ids |= ieps_tag
-        move_form = Form(invoice)
-        with move_form.invoice_line_ids.edit(0) as line_form:
-            line_form.tax_ids.add(self.tax_positive)
-            line_form.tax_ids.add(tax_ieps)
-        move_form.save()
-        invoice.post()
+        self.tax_positive.sequence = 3
+        for line in invoice.invoice_line_ids:
+            line.invoice_line_tax_id = [self.tax_positive.id, tax_ieps.id]
+        invoice.compute_taxes()
+        invoice.action_invoice_open()
         self.assertEqual(invoice.l10n_mx_edi_pac_status, "signed",
                          invoice.message_ids.mapped('body'))
         xml_total = invoice.l10n_mx_edi_get_xml_etree().get('Total')
@@ -323,20 +262,22 @@ class TestL10nMxEdiInvoice(common.InvoiceTransactionCase):
         # Testing send payment by email
         # -----------------------
         invoice = self.create_invoice()
-        invoice.post()
+        invoice.action_invoice_open()
+        ctx = {'active_model': 'account.invoice', 'active_ids': [invoice.id]}
         bank_journal = self.env['account.journal'].search([
             ('type', '=', 'bank')], limit=1)
-        payment_register = Form(self.env['account.payment'].with_context(active_model='account.move', active_ids=invoice.ids))
-        payment_register.payment_date = invoice.date
-        payment_register.l10n_mx_edi_payment_method_id = self.env.ref(
-                'l10n_mx_edi.payment_method_efectivo')
-        payment_register.payment_method_id = self.env.ref(
-                "account.account_payment_method_manual_in")
-        payment_register.journal_id = bank_journal
-        payment_register.communication = invoice.name
-        payment_register.amount = invoice.amount_total
-        payment = payment_register.save()
-        payment.post()
+        register_payments = self.env['account.register.payments'].with_context(
+            ctx).create({
+                'payment_date': invoice.date,
+                'l10n_mx_edi_payment_method_id': self.env.ref(
+                    'l10n_mx_edi.payment_method_efectivo').id,
+                'payment_method_id': self.env.ref(
+                    "account.account_payment_method_manual_in").id,
+                'journal_id': bank_journal.id,
+                'communication': invoice.number,
+                'amount': invoice.amount_total, })
+        payment = register_payments.create_payments()
+        payment = self.env['account.payment'].search(payment.get('domain', []))
         self.assertEqual(payment.l10n_mx_edi_pac_status, "signed",
                          payment.message_ids.mapped('body'))
         default_template = self.env.ref(
@@ -354,79 +295,3 @@ class TestL10nMxEdiInvoice(common.InvoiceTransactionCase):
         attachment = payment.l10n_mx_edi_retrieve_attachments()
         self.assertEqual(len(attachment), 2,
                          'Documents not attached correctly')
-
-    def test_l10n_mx_edi_payment(self):
-        journal = self.env['account.journal'].search(
-            [('type', '=', 'bank')], limit=1)
-        self.company.l10n_mx_edi_fiscal_regime = '601'
-        invoice = self.create_invoice()
-        invoice.move_name = 'INV/2017/999'
-        today = self.env['l10n_mx_edi.certificate'].sudo().get_mx_current_datetime()
-        invoice.post()
-        self.assertEqual(invoice.l10n_mx_edi_pac_status, "signed",
-                         invoice.message_ids.mapped("body"))
-        payment_register = Form(self.env['account.payment'].with_context(active_model='account.move', active_ids=invoice.ids))
-        payment_register.payment_date = today.date() - timedelta(days=5)
-        payment_register.l10n_mx_edi_payment_method_id = self.payment_method_cash
-        payment_register.payment_method_id = self.payment_method_manual_out
-        payment_register.journal_id = journal
-        payment_register.communication = invoice.name
-        payment_register.amount = invoice.amount_total
-        payment_register.save().post()
-
-        payment = invoice._get_reconciled_payments()
-        self.assertEqual(
-            payment.l10n_mx_edi_pac_status, 'signed',
-            payment.message_ids.mapped('body'))
-
-    def test_l10n_mx_edi_invoice_custom(self):
-        """Test Invoice for information custom  with three cases:
-        - Information custom wrong for sat
-        - Information custom correct for sat
-        - Invoice with more the one information custom correct"""
-
-        invoice = self.create_invoice()
-        invoice.move_name = 'INV/2017/997'
-        customs_num = '15  48  30  001234'
-        msg = ("Error in the products:.*%s.* The format of the customs "
-               "number is incorrect.*For example: 15  48  3009  0001234") % (
-                   invoice.invoice_line_ids.product_id.name)
-        with self.assertRaisesRegexp(ValidationError, msg):
-            invoice.invoice_line_ids.l10n_mx_edi_customs_number = customs_num
-
-        node_expected = '''
-        <cfdi:InformacionAduanera xmlns:cfdi="http://www.sat.gob.mx/cfd/3"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        NumeroPedimento="15  48  3009  0001234"/>
-        '''
-        invoice = self.create_invoice()
-        invoice.move_name = 'INV/2017/998'
-        customs_number = '15  48  3009  0001234'
-        invoice.invoice_line_ids.l10n_mx_edi_customs_number = customs_number
-        invoice.post()
-        self.assertEqual(invoice.l10n_mx_edi_pac_status, "signed",
-                         invoice.message_ids.mapped('body'))
-        xml = invoice.l10n_mx_edi_get_xml_etree()
-        xml_expected = objectify.fromstring(node_expected)
-        self.assertEqualXML(xml.Conceptos.Concepto.InformacionAduanera,
-                            xml_expected)
-
-        node_expected_2 = '''
-        <cfdi:InformacionAduanera xmlns:cfdi="http://www.sat.gob.mx/cfd/3"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        NumeroPedimento="15  48  3009  0001235"/>
-        '''
-        invoice = self.create_invoice()
-        invoice.move_name = 'INV/2017/999'
-        customs_number = '15  48  3009  0001234,15  48  3009  0001235'
-        invoice.invoice_line_ids.l10n_mx_edi_customs_number = customs_number
-        invoice.post()
-        self.assertEqual(invoice.l10n_mx_edi_pac_status, "signed",
-                         invoice.message_ids.mapped('body'))
-        xml = invoice.l10n_mx_edi_get_xml_etree()
-        xml_expected = objectify.fromstring(node_expected)
-        xml_expected_2 = objectify.fromstring(node_expected_2)
-        self.assertEqualXML(xml.Conceptos.Concepto.InformacionAduanera[0],
-                            xml_expected)
-        self.assertEqualXML(xml.Conceptos.Concepto.InformacionAduanera[1],
-                            xml_expected_2)

@@ -1,28 +1,27 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* helpdesk
+# * helpdesk
 # 
 # Translators:
-# นัจ-ณวัสน์ เอกสิรินิธิพล <nawhath.aek@hotmail.com>, 2020
-# Prawit Boonthue <prawit.boonthue@gmail.com>, 2020
-# Ekasit Saichompu <ekasitb@gmail.com>, 2020
-# Somchart Jabsung <jabsung.s@gmail.com>, 2020
-# LAO <sumonchai@gmail.com>, 2020
-# Pornvibool Tippayawat <pornvibool.t@gmail.com>, 2020
-# gsong <gsong2014@foxmail.com>, 2020
-# Martin Trigaux, 2020
-# Seksan Poltree <seksan.poltree@gmail.com>, 2020
-# Khwunchai Jaengsawang <khwunchai.j@ku.th>, 2020
+# นัจ-ณวัสน์ เอกสิรินิธิพล <nawhath.aek@hotmail.com>, 2018
+# LAO <sumonchai@gmail.com>, 2018
+# Ekasit Saichompu <ekasitb@gmail.com>, 2018
+# gsong <gsong2014@foxmail.com>, 2018
+# Somchart Jabsung <jabsung.s@gmail.com>, 2018
+# Martin Trigaux, 2018
+# Seksan Poltree <seksan.poltree@gmail.com>, 2018
+# Khwunchai Jaengsawang <khwunchai.j@ku.th>, 2018
+# Pornvibool Tippayawat <pornvibool.t@gmail.com>, 2019
 # Odoo Thaidev <odoothaidev@gmail.com>, 2020
-# Wichanon Jamwutthipreecha, 2022
+# Wichanon Jamwutthipreecha, 2021
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-05 12:35+0000\n"
-"PO-Revision-Date: 2019-08-26 09:35+0000\n"
-"Last-Translator: Wichanon Jamwutthipreecha, 2022\n"
+"POT-Creation-Date: 2019-01-15 15:18+0000\n"
+"PO-Revision-Date: 2018-08-24 11:38+0000\n"
+"Last-Translator: Wichanon Jamwutthipreecha, 2021\n"
 "Language-Team: Thai (https://www.transifex.com/odoo/teams/41243/th/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -44,8 +43,8 @@ msgid "${object.display_name}"
 msgstr ""
 
 #. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.index
-msgid "% Customer Satisfaction"
+#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__percentage_satisfaction
+msgid "% Happy"
 msgstr ""
 
 #. module: helpdesk
@@ -62,9 +61,11 @@ msgid ""
 msgstr ""
 
 #. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
-msgid "&amp;times;"
-msgstr "&amp;times;"
+#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
+msgid ""
+"(Un)archiving a helpdesk team automatically (un)archives its tickets. Do you"
+" want to proceed?"
+msgstr ""
 
 #. module: helpdesk
 #: model:mail.template,body_html:helpdesk.rating_ticket_request_email_template
@@ -76,11 +77,7 @@ msgid ""
 "    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"width:100%; margin:0;\">\n"
 "    <tbody>\n"
 "        <tr><td valign=\"top\" style=\"font-size: 14px;\">\n"
-"            % if partner.name:\n"
-"                Hello ${partner.name},<br/>\n"
-"            % else:\n"
-"                Hello,<br/>\n"
-"            % endif\n"
+"            Hello ${partner.name},<br/>\n"
 "            Please take a moment to rate our services related to the ticket \"<strong>${object.name}</strong>\"\n"
 "            % if object.rating_get_rated_partner_id().name:\n"
 "                assigned to <strong>${object.rating_get_rated_partner_id().name}</strong>.<br/>\n"
@@ -151,18 +148,12 @@ msgid ""
 "    Dear ${object.sudo().partner_id.name or 'Madam/Sir'},<br/><br/>\n"
 "    Your request\n"
 "    % if object.get_portal_url():\n"
-"    <a href=\"/my/ticket/${object.id}/${object.access_token}\">${object.name}</a>\n"
+"    <a href=\"/helpdesk/ticket/${object.id}/${object.access_token}\">${object.name}</a>\n"
 "    % endif\n"
 "    has been received and is being reviewed by our ${object.team_id.name or ''} team.\n"
 "    The reference of your ticket is ${object.id}.<br/><br/>\n"
-"\n"
-"    <div style=\"text-align: center; margin: 16px 0px 16px 0px;\">\n"
-"        <a style=\"background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;\" href=\"${object.get_portal_url()}\">View the ticket</a><br/>\n"
-"    </div>\n"
-"\n"
-"    To add additional comments, reply to this email.<br/><br/>\n"
-"\n"
-"    Thank you,<br/><br/>\n"
+"    To add additional comments, reply to this email.<br/>\n"
+"    Thanks you,<br/><br/>\n"
 "    ${object.team_id.name or 'Helpdesk'} Team.\n"
 "</div>\n"
 "        "
@@ -170,7 +161,7 @@ msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/js/tours/helpdesk.js:0
+#: code:addons/helpdesk/static/src/js/tour.js:58
 #, python-format
 msgid ""
 "<b>Stars</b> mark the <b>ticket priority</b>. You can change it directly "
@@ -180,7 +171,7 @@ msgstr ""
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
 msgid "<em class=\"text-muted\"><small>No description</small></em>"
-msgstr "<em class=\"text-muted\"><small>ไม่มีคำอธิบาย</small></em>"
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.index
@@ -218,14 +209,17 @@ msgid ""
 "<i class=\"fa fa-envelope-o\" title=\"Domain alias\" role=\"img\" aria-"
 "label=\"Domain alias\"/>&amp;nbsp;"
 msgstr ""
-"<i class=\"fa fa-envelope-o\" title=\"Domain alias\" role=\"img\" aria-"
-"label=\"Domain alias\"/>&amp;nbsp;"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
 msgid ""
 "<i class=\"fa fa-fw fa-arrow-right\" role=\"img\" aria-label=\"Rating URL\" "
 "title=\"Rating URL\"/>"
+msgstr ""
+
+#. module: helpdesk
+#: model_terms:ir.ui.view,arch_db:helpdesk.index
+msgid "<i/> Customer Satisfaction Ration:"
 msgstr ""
 
 #. module: helpdesk
@@ -236,23 +230,7 @@ msgstr ""
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
 msgid "<small class=\"text-right\">Status:</small>"
-msgstr "<small class=\"text-right\">สถานะ:</small>"
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
-msgid ""
-"<small>\n"
-"                    If the issue has been solved, you can close the request.\n"
-"                </small>"
 msgstr ""
-"<small>\n"
-"                    หากปัญหาได้รับการแก้ไขแล้ว คุณสามารถปิดคำขอได้\n"
-"                </small>"
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
-msgid "<small><b>Close this ticket</b></small>"
-msgstr "<small><b>ปิดทิกเก็ตนี้</b></small>"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_kanban
@@ -264,32 +242,32 @@ msgstr ""
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.view_partner_form_inherit_helpdesk
 msgid "<span class=\"o_stat_text\"> Tickets</span>"
-msgstr "<span class=\"o_stat_text\"> ทิกเก็ต</span>"
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
 msgid "<strong class=\"col-lg-2\">Assigned to</strong>"
-msgstr "<strong class=\"col-lg-2\">มอบหมายถึง</strong>"
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
 msgid "<strong class=\"col-lg-2\">Description</strong>"
-msgstr "<strong class=\"col-lg-2\">คำอธิบาย</strong>"
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
 msgid "<strong class=\"col-lg-2\">Managed by</strong>"
-msgstr "<strong class=\"col-lg-2\">จัดการโดย</strong>"
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
 msgid "<strong class=\"col-lg-2\">Reported by</strong>"
-msgstr "<strong class=\"col-lg-2\">รายงานโดย</strong>"
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
 msgid "<strong class=\"col-lg-2\">Reported on</strong>"
-msgstr "<strong class=\"col-lg-2\">รายงานเมื่อ</strong>"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__alias_defaults
@@ -310,6 +288,15 @@ msgid ""
 msgstr ""
 
 #. module: helpdesk
+#: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__kanban_state
+msgid ""
+"A ticket's kanban state indicates special situations affecting it:\n"
+"* Normal is the default situation\n"
+"* Blocked indicates something is preventing the progress of this issue\n"
+"* Ready for next stage indicates the issue is ready to be pulled to the next stage"
+msgstr ""
+
+#. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__use_api
 msgid "API"
 msgstr ""
@@ -317,7 +304,7 @@ msgstr ""
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__description
 msgid "About Team"
-msgstr "เกี่ยวกับทีม"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__access_warning
@@ -343,11 +330,6 @@ msgid "Activities"
 msgstr "กิจกรรม"
 
 #. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__activity_exception_decoration
-msgid "Activity Exception Decoration"
-msgstr "การตกแต่งข้อยกเว้นกิจกรรม"
-
-#. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__activity_state
 msgid "Activity State"
 msgstr "สถานะกิจกรรม"
@@ -359,27 +341,12 @@ msgid "Activity Types"
 msgstr "Activity Types"
 
 #. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_stage_view_form
-msgid "Add a description..."
-msgstr "เพิ่มคำอธิบาย"
-
-#. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/js/tours/helpdesk.js:0
+#: code:addons/helpdesk/static/src/js/tour.js:63
 #, python-format
 msgid ""
 "Add columns to configure <b>stages for your tickets</b>.<br/><i>e.g. "
 "Awaiting Customer Feedback, Customer Followup, ...</i>"
-msgstr ""
-
-#. module: helpdesk
-#: model:res.groups,name:helpdesk.group_helpdesk_manager
-msgid "Administrator"
-msgstr "ผู้ดูแลระบบ"
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
-msgid "After Sales"
 msgstr ""
 
 #. module: helpdesk
@@ -408,27 +375,15 @@ msgid "Aliased Model"
 msgstr "Aliased Model"
 
 #. module: helpdesk
-#: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_sla__priority__0
-#: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_sla_report_analysis__priority__0
-#: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_ticket__priority__0
+#: selection:helpdesk.sla,priority:0 selection:helpdesk.ticket,priority:0
 msgid "All"
 msgstr "ทั้งหมด"
 
 #. module: helpdesk
 #: model:ir.actions.act_window,name:helpdesk.helpdesk_ticket_action_main
-#: model:ir.ui.menu,name:helpdesk.helpdesk_ticket_menu_all
+#: model:ir.actions.act_window,name:helpdesk.helpdesk_ticket_action_main_tree
+#: model:ir.ui.menu,name:helpdesk.helpdesk_ticket_menu_main
 msgid "All Tickets"
-msgstr "ทิกเก็ตทั้งหมด"
-
-#. module: helpdesk
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_team__allow_portal_ticket_closing
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
-msgid "Allow customers to close their tickets"
-msgstr "อนุญาตให้ลูกค้าปิดทิกเก็ตได้"
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
-msgid "Allow product returns from tickets"
 msgstr ""
 
 #. module: helpdesk
@@ -439,14 +394,9 @@ msgid ""
 msgstr ""
 
 #. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__is_self_assigned
-msgid "Am I assigned"
-msgstr ""
-
-#. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_view_form
 msgid "Apply on"
-msgstr "ใช้เมื่อ"
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_kanban
@@ -454,11 +404,7 @@ msgid "Archive"
 msgstr "เก็บ"
 
 #. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_view_form
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_view_search
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_search
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_form
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis_closed
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search
@@ -466,27 +412,22 @@ msgid "Archived"
 msgstr "ถูกเก็บ"
 
 #. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
-msgid "Are you sure you wish to proceed?"
-msgstr "คุณแน่ใจหรือว่าต้องการดำเนินการต่อ?"
-
-#. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_form
 msgid "Assign To Me"
-msgstr "มอบหมายให้ฉัน"
+msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/js/tours/helpdesk.js:0
+#: code:addons/helpdesk/static/src/js/tour.js:39
 #, python-format
 msgid "Assign the ticket to someone."
 msgstr ""
 
 #. module: helpdesk
-#: code:addons/helpdesk/models/helpdesk_ticket.py:0
+#: code:addons/helpdesk/models/helpdesk_ticket.py:421
 #, python-format
 msgid "Assign to me"
-msgstr "มอบหมายให้ฉัน"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__assign_method
@@ -494,28 +435,15 @@ msgid "Assignation Method"
 msgstr ""
 
 #. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__user_id
-msgid "Assigned To"
-msgstr "มอบหมายให้กับ"
-
-#. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__user_id
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search
 msgid "Assigned to"
 msgstr "มอบหมายให้"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis_closed
+#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search
 msgid "Assignee"
-msgstr "ผู้ได้รับมอบหมาย"
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_stage_view_form
-msgid ""
-"At each stage employees can block or make task/issue ready for next stage.\n"
-"                            You can define here labels that will be displayed for the state instead\n"
-"                            of the default labels."
 msgstr ""
 
 #. module: helpdesk
@@ -525,11 +453,16 @@ msgid "Attachment Count"
 msgstr "จำนวนไฟล์แนบ"
 
 #. module: helpdesk
+#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_stage__template_id
+msgid "Automated Answer Email Template"
+msgstr ""
+
+#. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_stage__template_id
 msgid ""
 "Automated email sent to the ticket's customer when the ticket reaches this "
 "stage."
-msgstr "อีเมลอัตโนมัติที่ส่งไปยังลูกค้าของทิกเก็ตเมื่อทิกเก็ตมาถึงขั้นตอนนี้"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__assign_method
@@ -543,21 +476,21 @@ msgstr ""
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.team_rating_progress_data
 msgid "Average"
-msgstr "เฉลี่ย"
+msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:104
 #, python-format
 msgid "Avg 7 days"
-msgstr "เฉลี่ย 7 วัน"
+msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:35
 #, python-format
 msgid "Avg Open Hours"
-msgstr "เวลาเปิดทำการเฉลี่ย"
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.team_rating_progress_data
@@ -565,19 +498,12 @@ msgid "Bad"
 msgstr "แย่"
 
 #. module: helpdesk
-#: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_team__assign_method__balanced
+#: selection:helpdesk.team,assign_method:0
 msgid "Balanced"
 msgstr "ดุลแล้ว"
 
 #. module: helpdesk
-#: code:addons/helpdesk/models/helpdesk.py:0
-#: model:helpdesk.stage,legend_blocked:helpdesk.stage_cancelled
-#: model:helpdesk.stage,legend_blocked:helpdesk.stage_in_progress
-#: model:helpdesk.stage,legend_blocked:helpdesk.stage_new
-#: model:helpdesk.stage,legend_blocked:helpdesk.stage_solved
-#: model:helpdesk.ticket,legend_blocked:helpdesk.helpdesk_ticket_1
-#: model:helpdesk.ticket,legend_blocked:helpdesk.helpdesk_ticket_2
-#, python-format
+#: selection:helpdesk.ticket,kanban_state:0
 msgid "Blocked"
 msgstr "บล็อค"
 
@@ -603,14 +529,21 @@ msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/js/tours/helpdesk.js:0
+#: code:addons/helpdesk/static/src/js/tour.js:67
+#, python-format
+msgid "Click here and select \"Helpdesk Teams\" for further configuration."
+msgstr ""
+
+#. module: helpdesk
+#. openerp-web
+#: code:addons/helpdesk/static/src/js/tour.js:18
 #, python-format
 msgid "Click here to view this team's tickets."
 msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/js/tours/helpdesk.js:0
+#: code:addons/helpdesk/static/src/js/tour.js:52
 #, python-format
 msgid ""
 "Click these cards to open their form view, or <b>drag &amp; drop</b> them "
@@ -619,69 +552,40 @@ msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:123
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:127
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:136
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:140
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:149
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:153
 #, python-format
 msgid "Click to set"
-msgstr "คลิกเพื่อตั้งค่า"
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
-msgid "Close"
-msgstr "ปิด"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__close_date
 msgid "Close date"
-msgstr "วันที่ปิด"
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
-msgid "Close the ticket"
-msgstr "ปิดทิกเก็ต"
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
-msgid "Close ticket"
-msgstr "ปิดทิกเก็ต"
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search
-msgid "Closed"
-msgstr "ปิดแล้ว"
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_report_analysis_view_search
-msgid "Closed Ticket"
 msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:81
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis
+#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search
 #, python-format
 msgid "Closed Tickets"
-msgstr "ปิดทิกเก็ตแล้ว"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.actions.act_window,name:helpdesk.helpdesk_ticket_action_7days_analysis
 #: model:ir.actions.act_window,name:helpdesk.helpdesk_ticket_action_close_analysis
 msgid "Closed Tickets Analysis"
-msgstr "การวิเคราะห์ทิกเก็ตที่ปิดแล้ว"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__closed_by_partner
-msgid "Closed by Partner"
-msgstr "ปิดโดยพาร์ทเนอร์"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_stage__is_close
-msgid "Closing Stage"
-msgstr "ขั้นตอนการปิด"
+msgid "Closing Kanban Stage"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_tag__color
@@ -689,20 +593,13 @@ msgid "Color"
 msgstr "สี"
 
 #. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_status__color
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__color
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__color
 msgid "Color Index"
 msgstr "ดัชนีสี"
 
 #. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__kanban_state_label
-msgid "Column Status"
-msgstr "สถานะคอลัมน์"
-
-#. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla__company_id
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__company_id
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__company_id
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__company_id
 msgid "Company"
@@ -730,11 +627,6 @@ msgid "Contact"
 msgstr "ผู้ติดต่อ"
 
 #. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__use_coupons
-msgid "Coupons"
-msgstr "คูปอง"
-
-#. module: helpdesk
 #: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_sla_action
 #: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_sla_action_main
 msgid "Create a new Service Level Agreement (SLA) policy"
@@ -748,7 +640,7 @@ msgstr ""
 #. module: helpdesk
 #: model_terms:ir.actions.act_window,help:helpdesk.email_template_action_helpdesk
 msgid "Create a new template"
-msgstr "สร้างเทมเพลตใหม่"
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.actions.act_window,help:helpdesk.action_upcoming_sla_fail_all_tickets
@@ -777,14 +669,12 @@ msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_ticket_action_main
-#: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_ticket_action_main_my
 #: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_ticket_action_main_tree
 msgid "Create your first ticket."
 msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla__create_uid
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_status__create_uid
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_stage__create_uid
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_tag__create_uid
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__create_uid
@@ -795,7 +685,6 @@ msgstr "สร้างโดย"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla__create_date
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_status__create_date
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_stage__create_date
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_tag__create_date
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__create_date
@@ -805,22 +694,13 @@ msgid "Created on"
 msgstr "สร้างเมื่อ"
 
 #. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_report_analysis_view_search
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search
-msgid "Creation Date"
-msgstr "วันที่สร้าง"
-
-#. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
 msgid "Current stage of this ticket"
-msgstr "ขั้นตอนปัจจุบันของทิกเก็ตนี้"
+msgstr ""
 
 #. module: helpdesk
-#: code:addons/helpdesk/models/helpdesk_ticket.py:0
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__partner_id
+#: code:addons/helpdesk/models/helpdesk_ticket.py:332
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__partner_id
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_report_analysis_view_search
 #, python-format
 msgid "Customer"
 msgstr "ลูกค้า"
@@ -828,10 +708,10 @@ msgstr "ลูกค้า"
 #. module: helpdesk
 #: model:helpdesk.team,name:helpdesk.helpdesk_team1
 msgid "Customer Care"
-msgstr "การดูแลลูกค้า"
+msgstr ""
 
 #. module: helpdesk
-#: code:addons/helpdesk/models/helpdesk_ticket.py:0
+#: code:addons/helpdesk/models/helpdesk_ticket.py:334
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__partner_email
 #, python-format
 msgid "Customer Email"
@@ -848,53 +728,44 @@ msgid "Customer Portal URL"
 msgstr "Portal"
 
 #. module: helpdesk
+#. openerp-web
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:89
+#, python-format
+msgid "Customer Rating"
+msgstr "ลูกค้า"
+
+#. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.team_rating_data
 msgid "Customer Satisfaction"
 msgstr "ความพึงพอใจของลูกค้า"
 
 #. module: helpdesk
-#: code:addons/helpdesk/models/helpdesk_ticket.py:0
+#: code:addons/helpdesk/models/helpdesk_ticket.py:319
+#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_form
 #, python-format
 msgid "Customer Tickets"
 msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:85
 #, python-format
 msgid "Customer satisfaction analysis"
 msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:121
 #, python-format
 msgid "Daily Target"
-msgstr "เป้าหมายรายวัน"
-
-#. module: helpdesk
-#. openerp-web
-#: code:addons/helpdesk/static/src/js/helpdesk_dashboard.js:0
-#, python-format
-msgid "Dashboard"
-msgstr "แดชบอร์ด"
-
-#. module: helpdesk
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_sla_status__reached_datetime
-msgid "Datetime at which the SLA stage was reached for the first time"
-msgstr "วันที่เวลาที่ถึงขั้นตอน SLA เป็นครั้งแรก"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__sla_exceeded_days
-msgid "Day to reach SLA"
 msgstr ""
 
 #. module: helpdesk
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_sla_report_analysis__sla_exceeded_days
-msgid ""
-"Day to reach the stage of the SLA, without taking the working calendar into "
-"account"
-msgstr "วันที่จะเข้าสู่ขั้นตอนของ SLA โดยไม่ต้องคำนึงถึงปฏิทินการทำงาน"
+#. openerp-web
+#: code:addons/helpdesk/static/src/js/helpdesk_dashboard.js:224
+#, python-format
+msgid "Dashboard"
+msgstr "แดชบอร์ด"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla__time_days
@@ -907,7 +778,7 @@ msgid "Days to reach given stage based on ticket creation date"
 msgstr ""
 
 #. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_status__deadline
+#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__deadline
 msgid "Deadline"
 msgstr "เส้นตาย"
 
@@ -922,7 +793,6 @@ msgid "Delete"
 msgstr "ลบ"
 
 #. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_stage__description
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__description
 #: model_terms:ir.ui.view,arch_db:helpdesk.portal_helpdesk_ticket
 msgid "Description"
@@ -936,12 +806,12 @@ msgstr "รายละเอียดสำหรับ customer portal"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_view_form
 msgid "Description of the policy..."
-msgstr "คำอธิบายของนโยบาย..."
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_form
 msgid "Description of the ticket..."
-msgstr "คำอธิบายของทิกเก็ต..."
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model,name:helpdesk.model_digest_digest
@@ -949,14 +819,7 @@ msgid "Digest"
 msgstr "จัดระเบียบ"
 
 #. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
-msgid "Discard"
-msgstr "ยกเลิก"
-
-#. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla__display_name
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__display_name
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_status__display_name
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_stage__display_name
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_tag__display_name
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__display_name
@@ -971,7 +834,7 @@ msgid "Display Rating on Customer Portal"
 msgstr ""
 
 #. module: helpdesk
-#: code:addons/helpdesk/models/digest.py:0
+#: code:addons/helpdesk/models/digest.py:16
 #, python-format
 msgid "Do not have access, skip this data for user's digest email"
 msgstr "ไม่มีสิทธิ์เข้าถึงข้ามข้อมูลนี้สำหรับอีเมลสรุปข้อมูลของผู้ใช้"
@@ -992,24 +855,14 @@ msgid "Edit"
 msgstr "แก้ไข"
 
 #. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_stage__template_id
-msgid "Email Template"
-msgstr "แม่แบบอีเมล"
-
-#. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__use_alias
 msgid "Email alias"
 msgstr ""
 
 #. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__email_cc
-msgid "Email cc"
-msgstr "cc อีเมล"
-
-#. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__email
 msgid "Email on Customer"
-msgstr "อีเมลถึงลูกค้า"
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:digest.tip,tip_description:helpdesk.digest_tip_helpdesk_0
@@ -1021,11 +874,11 @@ msgstr ""
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__use_website_helpdesk_slides
 msgid "Enable eLearning"
-msgstr "เปิดใช้งาน eLearning"
+msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/js/tours/helpdesk.js:0
+#: code:addons/helpdesk/static/src/js/tour.js:29
 #, python-format
 msgid ""
 "Enter a subject or title for this ticket.<br/><i>(e.g. Problem with "
@@ -1034,40 +887,19 @@ msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/js/tours/helpdesk.js:0
+#: code:addons/helpdesk/static/src/js/tour.js:34
 #, python-format
 msgid "Enter the customer. Feel free to create it on the fly."
 msgstr ""
 
 #. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_status__exceeded_days
-msgid "Excedeed Working Days"
-msgstr "เกินวันทำงาน"
-
-#. module: helpdesk
-#: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_sla_report_analysis__sla_status__failed
-#: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_sla_status__status__failed
-msgid "Failed"
-msgstr "ล้มเหลว"
-
-#. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__sla_fail
 msgid "Failed SLA Policy"
-msgstr "นโยบาย SLA ล้มเหลว"
-
-#. module: helpdesk
-#: model:ir.filters,name:helpdesk.helpdesk_sla_report_analysis_filter_stage_failed
-msgid "Failed SLA Stage per Month"
-msgstr "ขั้นตอน SLA ที่ล้มเหลวต่อเดือน"
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_report_analysis_view_search
-msgid "Failed Ticket"
 msgstr ""
 
 #. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis
-msgid "First Assignation Date"
+#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_kanban
+msgid "Failed SLA: {{record.sla_name.raw_value}}"
 msgstr ""
 
 #. module: helpdesk
@@ -1077,8 +909,13 @@ msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_stage__fold
-msgid "Folded in Kanban"
-msgstr "พับในคัมบัง"
+msgid "Folded"
+msgstr ""
+
+#. module: helpdesk
+#: model:ir.model.fields,help:helpdesk.field_helpdesk_stage__fold
+msgid "Folded in kanban view"
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
@@ -1086,7 +923,6 @@ msgid ""
 "Follow this team to automatically track the events associated to tickets of "
 "this team."
 msgstr ""
-"ติดตามทีมนี้เพื่อติดตามอีเวนต์ที่เกี่ยวข้องกับทิกเก็ตของทีมนี้โดยอัตโนมัติ"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__message_follower_ids
@@ -1121,41 +957,10 @@ msgstr "กิจกรรมในอนาคต"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
-msgid "Generate credit notes from tickets"
-msgstr ""
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
 msgid "Get in touch with your website visitors"
-msgstr "ติดต่อกับผู้เยี่ยมชมเว็บไซต์ของคุณ"
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
-msgid "Grant coupons from Tickets"
 msgstr ""
 
 #. module: helpdesk
-#: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_ticket__kanban_state__done
-msgid "Green"
-msgstr "เขียว"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_stage__legend_done
-msgid "Green Kanban Label"
-msgstr "ป้ายคัมบังสีเขียว"
-
-#. module: helpdesk
-#: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_ticket__kanban_state__normal
-msgid "Grey"
-msgstr "สีเทา"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_stage__legend_normal
-msgid "Grey Kanban Label"
-msgstr "ป้ายคัมบังสีเทา"
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_report_analysis_view_search
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis_closed
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search
@@ -1165,24 +970,12 @@ msgstr "จัดกลุ่มโดย"
 #. module: helpdesk
 #: model:mail.activity.type,name:helpdesk.mail_act_helpdesk_handle
 msgid "Handle Ticket"
-msgstr "การจัดการทิกเก็ต"
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.team_rating_progress_data
 msgid "Happy"
-msgstr "มีความสุข"
-
-#. module: helpdesk
-#. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
-#, python-format
-msgid "Happy Rating"
-msgstr "ให้คะแนนความสุข"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__sla_reached_late
-msgid "Has SLA reached late"
-msgstr "SLA มาถึงล่าช้าหรือไม่?"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__use_website_helpdesk_forum
@@ -1198,22 +991,22 @@ msgstr "ฝ่ายช่วยเหลือ"
 #. module: helpdesk
 #: model:ir.actions.act_window,name:helpdesk.helpdesk_team_dashboard_action_main
 msgid "Helpdesk Overview"
-msgstr "ภาพรวมการดูแลช่วยเหลือ"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model,name:helpdesk.model_helpdesk_sla
 msgid "Helpdesk SLA Policies"
-msgstr "นโยบาย SLA ของการดูแลช่วยเหลือ"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model,name:helpdesk.model_helpdesk_stage
 msgid "Helpdesk Stage"
-msgstr "ขั้นตอนการดูแลช่วยเหลือ"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model,name:helpdesk.model_helpdesk_tag
 msgid "Helpdesk Tags"
-msgstr "แท็การดูแลช่วยเหลือ"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model,name:helpdesk.model_helpdesk_team
@@ -1237,7 +1030,7 @@ msgstr ""
 #: model:ir.actions.act_window,name:helpdesk.helpdesk_team_action
 #: model:ir.ui.menu,name:helpdesk.helpdesk_team_menu
 msgid "Helpdesk Teams"
-msgstr "ทีมดูแลช่วยเหลือ"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model,name:helpdesk.model_helpdesk_ticket
@@ -1255,27 +1048,32 @@ msgstr ""
 #. module: helpdesk
 #: model:ir.model,name:helpdesk.model_helpdesk_ticket_type
 msgid "Helpdesk Ticket Type"
-msgstr "ประเภททิกเก็ตดูแลช่วยเหลือ"
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_graph_main
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_pivot_main
 msgid "Helpdesk Tickets"
-msgstr "ทิกเก็ตดูแลช่วยเหลือ"
+msgstr ""
+
+#. module: helpdesk
+#: model:ir.actions.server,name:helpdesk.helpdesk_sla_cron_ir_actions_server
+#: model:ir.cron,cron_name:helpdesk.helpdesk_sla_cron
+#: model:ir.cron,name:helpdesk.helpdesk_sla_cron
+msgid "Helpdesk: compute SLAs"
+msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:23
 #, python-format
 msgid "High Priority ("
-msgstr "ระดับความสำคัญสูง ("
+msgstr ""
 
 #. module: helpdesk
-#: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_sla__priority__2
-#: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_sla_report_analysis__priority__2
-#: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_ticket__priority__2
+#: selection:helpdesk.sla,priority:0 selection:helpdesk.ticket,priority:0
 msgid "High priority"
-msgstr "ระดับความสำคัญสูง"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla__time_hours
@@ -1294,8 +1092,6 @@ msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla__id
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__id
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_status__id
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_stage__id
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_tag__id
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__id
@@ -1310,40 +1106,24 @@ msgid ""
 "ID of the parent record holding the alias (example: project holding the task"
 " creation alias)"
 msgstr ""
-"ID ของเร็กคอร์ดหลักที่มีนามแฝง (ตัวอย่าง: โครงการที่มีนามแฝงในการสร้างงาน)"
 
 #. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__activity_exception_icon
-msgid "Icon"
-msgstr "ไอคอน"
-
-#. module: helpdesk
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__activity_exception_icon
-msgid "Icon to indicate an exception activity."
-msgstr "ไอคอนเพื่อระบุกิจกรรมข้อยกเว้น"
+#: model:ir.model.fields,help:helpdesk.field_helpdesk_team__message_unread
+#: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__message_unread
+msgid "If checked new messages require your attention."
+msgstr "ถ้าเลือก ข้อความใหม่จะต้องการความสนใจจากคุณ"
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__message_needaction
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_team__message_unread
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__message_needaction
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__message_unread
 msgid "If checked, new messages require your attention."
 msgstr "ถ้าเลือก ข้อความใหม่จะต้องการความสนใจจากคุณ"
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__message_has_error
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_team__message_has_sms_error
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__message_has_error
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr "หากเลือกข้อความบางข้อความมีข้อผิดพลาดในการจัดส่ง"
-
-#. module: helpdesk
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__closed_by_partner
-msgid ""
-"If checked, this means the ticket was closed through the customer portal by "
-"the customer."
-msgstr "หากเลือก แสดงว่าทิกเก็ตถูกปิดผ่านพอร์ทัลลูกค้าโดยลูกค้า"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_kanban
@@ -1354,7 +1134,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_kanban
 msgid "In #{kanban_getcolorname(record.color.raw_value)}"
-msgstr "ใน #{kanban_getcolorname(record.color.raw_value)}"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__use_website_helpdesk_livechat
@@ -1362,32 +1142,15 @@ msgid ""
 "In Channel: You can create a new ticket by typing /helpdesk [ticket title]. "
 "You can search ticket by typing /helpdesk_search [Keyword1],[Keyword2],."
 msgstr ""
-"ในช่อง: คุณสามารถสร้างทิกเก็ตใหม่ได้โดยพิมพ์ /helpdesk [ชื่อทิกเก็ต] "
-"คุณสามารถค้นหาทิกเก็ตได้โดยพิมพ์ /helpdesk_search [Keyword1],[Keyword2],."
 
 #. module: helpdesk
-#: code:addons/helpdesk/models/helpdesk.py:0
-#: model:helpdesk.stage,legend_normal:helpdesk.stage_cancelled
-#: model:helpdesk.stage,legend_normal:helpdesk.stage_in_progress
-#: model:helpdesk.stage,legend_normal:helpdesk.stage_new
-#: model:helpdesk.stage,legend_normal:helpdesk.stage_solved
 #: model:helpdesk.stage,name:helpdesk.stage_in_progress
-#: model:helpdesk.ticket,legend_normal:helpdesk.helpdesk_ticket_1
-#: model:helpdesk.ticket,legend_normal:helpdesk.helpdesk_ticket_2
-#, python-format
 msgid "In Progress"
 msgstr "กำลังดำเนินการ"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
 msgid "Incoming emails create tickets"
-msgstr ""
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
-msgid ""
-"Individuals to whom the tickets will be automatically assigned. Keep empty "
-"for everyone to be part of the team."
 msgstr ""
 
 #. module: helpdesk
@@ -1402,51 +1165,37 @@ msgid "Issue"
 msgstr "ปัญหา"
 
 #. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__legend_blocked
-msgid "Kanban Blocked Explanation"
-msgstr "คำอธิบายบล็อกคัมบัง"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__legend_normal
-msgid "Kanban Ongoing Explanation"
-msgstr "คำอธิบายอย่างต่อเนื่องคัมบัง"
-
-#. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__kanban_state
 msgid "Kanban State"
 msgstr "สถานะคัมบัง"
 
 #. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__legend_done
-msgid "Kanban Valid Explanation"
-msgstr "คำอธิบายที่ถูกต้องคัมบัง"
+#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
+msgid "Keep empty for everyone to see this team"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_digest_digest__kpi_helpdesk_tickets_closed_value
 msgid "Kpi Helpdesk Tickets Closed Value"
-msgstr "ค่าปิดของทิกเก็ตดูแลช่วยเหลือ Kpi"
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.team_rating_data
 msgid "Last 3 months"
-msgstr "3 เดือนล่าสุด "
+msgstr ""
 
 #. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_report_analysis_view_search
 #: model_terms:ir.ui.view,arch_db:helpdesk.team_rating_data
 msgid "Last 30 days"
-msgstr "30 วันล่าสุด"
+msgstr ""
 
 #. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_report_analysis_view_search
 #: model_terms:ir.ui.view,arch_db:helpdesk.team_rating_data
 msgid "Last 7 days"
-msgstr "7 วันล่าสุด"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla____last_update
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis____last_update
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_status____last_update
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_stage____last_update
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_tag____last_update
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team____last_update
@@ -1456,13 +1205,7 @@ msgid "Last Modified on"
 msgstr "แก้ไขครั้งสุดท้ายเมื่อ"
 
 #. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__date_last_stage_update
-msgid "Last Stage Update"
-msgstr "อัปเดตขั้นตอนสุดท้าย"
-
-#. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla__write_uid
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_status__write_uid
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_stage__write_uid
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_tag__write_uid
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__write_uid
@@ -1473,7 +1216,6 @@ msgstr "อัพเดทครั้งสุดท้ายโดย"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla__write_date
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_status__write_date
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_stage__write_date
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_tag__write_date
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__write_date
@@ -1490,19 +1232,14 @@ msgstr "กิจกรรมล่าสุด"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.team_rating_data
 msgid "Latest Feedbacks"
-msgstr "ผลตอบรับล่าสุด"
-
-#. module: helpdesk
-#. openerp-web
-#: code:addons/helpdesk/static/src/js/tours/helpdesk.js:0
-#, python-format
-msgid "Let's create your first ticket."
 msgstr ""
 
 #. module: helpdesk
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__email_cc
-msgid "List of cc from incoming emails."
-msgstr "รายการ cc จากอีเมลขาเข้า"
+#. openerp-web
+#: code:addons/helpdesk/static/src/js/tour.js:23
+#, python-format
+msgid "Let's create your first ticket."
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__use_website_helpdesk_livechat
@@ -1510,11 +1247,9 @@ msgid "Live chat"
 msgstr ""
 
 #. module: helpdesk
-#: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_sla__priority__1
-#: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_sla_report_analysis__priority__1
-#: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_ticket__priority__1
+#: selection:helpdesk.sla,priority:0 selection:helpdesk.ticket,priority:0
 msgid "Low priority"
-msgstr "ระดับความสำคัญต่ำ"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__message_main_attachment_id
@@ -1523,9 +1258,14 @@ msgid "Main Attachment"
 msgstr "ไฟล์แนบหลัก"
 
 #. module: helpdesk
-#: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_team__assign_method__manual
+#: model:res.groups,name:helpdesk.group_helpdesk_manager
+msgid "Manager"
+msgstr "ผู้จัดการ"
+
+#. module: helpdesk
+#: selection:helpdesk.team,assign_method:0
 msgid "Manually"
-msgstr "ด้วยตนเอง"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__medium_id
@@ -1541,7 +1281,7 @@ msgstr "ส่งข้อความผิดพลาด"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
 msgid "Message and communication history"
-msgstr "ประวัติข้อความและการสื่อสาร"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__message_ids
@@ -1551,59 +1291,63 @@ msgstr "ข้อความ"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla__priority
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__priority
 msgid "Minimum Priority"
-msgstr "ลำดับความสำคัญขั้นต่ำ"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_sla__stage_id
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_sla_status__sla_stage_id
 msgid "Minimum stage a ticket needs to reach in order to satisfy this SLA."
-msgstr "ขั้นตอนขั้นต่ำที่ต้องไปถึงเพื่อให้เป็นไปตามความต้องการ SLA นี้"
+msgstr ""
+
+#. module: helpdesk
+#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search
+msgid "My Activities"
+msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:74
 #, python-format
 msgid "My Performance"
-msgstr "ประสิทธิภาพของฉัน"
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_report_analysis_view_search
-msgid "My Ticket"
-msgstr "ทิกเก็ตของฉัน"
+msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
-#: model:ir.ui.menu,name:helpdesk.helpdesk_ticket_menu_my
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:13
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis_closed
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search
 #, python-format
 msgid "My Tickets"
-msgstr "ทิกเก็ตของฉัน"
+msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:21
 #, python-format
 msgid "My high priority tickets"
 msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:15
 #, python-format
 msgid "My open tickets"
 msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:27
 #, python-format
 msgid "My urgent tickets"
 msgstr ""
+
+#. module: helpdesk
+#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_stage__name
+#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_tag__name
+#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket_type__name
+msgid "Name"
+msgstr "ชื่อ"
 
 #. module: helpdesk
 #: model:helpdesk.stage,name:helpdesk.stage_new
@@ -1611,7 +1355,7 @@ msgid "New"
 msgstr "ใหม่"
 
 #. module: helpdesk
-#: code:addons/helpdesk/controllers/portal.py:0
+#: code:addons/helpdesk/controllers/portal.py:35
 #, python-format
 msgid "Newest"
 msgstr "ใหม่สุด"
@@ -1641,6 +1385,11 @@ msgid "No tickets to display"
 msgstr ""
 
 #. module: helpdesk
+#: selection:helpdesk.ticket,kanban_state:0
+msgid "Normal"
+msgstr "ปกติ"
+
+#. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__message_needaction_counter
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__message_needaction_counter
 msgid "Number of Actions"
@@ -1649,18 +1398,13 @@ msgstr "จำนวนกิจกรรม"
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__attachment_number
 msgid "Number of Attachments"
-msgstr "จำนวนสิ่งที่แนบ"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__partner_ticket_count
-msgid "Number of closed tickets from the same partner"
 msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__message_has_error_counter
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__message_has_error_counter
-msgid "Number of errors"
-msgstr "จำนวนข้อผิดพลาด"
+msgid "Number of error"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__message_needaction_counter
@@ -1675,27 +1419,19 @@ msgid "Number of messages with delivery error"
 msgstr "จํานวนข้อความที่มีข้อผิดพลาดในการส่ง"
 
 #. module: helpdesk
+#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__partner_tickets
+msgid "Number of tickets from the same partner"
+msgstr ""
+
+#. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__message_unread_counter
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__message_unread_counter
 msgid "Number of unread messages"
 msgstr "จํานวนข้อความที่ยังไม่ได้อ่าน"
 
 #. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_view_form
-msgid ""
-"Number of working days/hours to reach the given stage based on the ticket's "
-"creation date."
-msgstr ""
-
-#. module: helpdesk
-#: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_sla_report_analysis__sla_status__ongoing
-#: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_sla_status__status__ongoing
-msgid "Ongoing"
-msgstr "กำลังดำเนินการ"
-
-#. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/js/helpdesk_dashboard.js:0
+#: code:addons/helpdesk/static/src/js/helpdesk_dashboard.js:189
 #, python-format
 msgid "Only Integer Value should be valid."
 msgstr "ค่าควรจำนวนเต็มเท่านั้นที่ถูกต้อง"
@@ -1706,23 +1442,17 @@ msgid ""
 "Only apply the SLA to a specific ticket type. If left empty it will apply to"
 " all types."
 msgstr ""
-"ใช้ SLA กับทิกเก็ตบางประเภทเท่านั้น หากเว้นว่างไว้จะนำไปใช้กับทุกประเภท"
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search
-msgid "Open"
-msgstr "เปิด"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis
+#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search
 msgid "Open Tickets"
-msgstr "เปิดทิกเก็ต"
+msgstr ""
 
 #. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__ticket_open_hours
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__open_hours
+#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__close_hours
 msgid "Open Time (hours)"
-msgstr "เวลาที่เปิด (ชั่วโมง)"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__alias_force_thread_id
@@ -1731,39 +1461,11 @@ msgid ""
 "attached, even if they did not reply to it. If set, this will disable the "
 "creation of new records completely."
 msgstr ""
-"ID ทางเลือกของเธรด (บันทึก) ที่จะแนบข้อความขาเข้าทั้งหมด "
-"แม้ว่าพวกเขาจะไม่ตอบกลับก็ตาม หากตั้งค่าไว้ "
-"การดำเนินการนี้จะปิดใช้งานการสร้างระเบียนใหม่ทั้งหมด"
 
 #. module: helpdesk
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_stage__legend_blocked
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__legend_blocked
-msgid ""
-"Override the default value displayed for the blocked state for kanban "
-"selection, when the task or issue is in that stage."
-msgstr ""
-"แทนที่ค่าเริ่มต้นที่แสดงสำหรับสถานะที่ถูกบล็อกสำหรับการเลือกคัมบัง "
-"เมื่องานหรือปัญหาอยู่ในระยะนั้น"
-
-#. module: helpdesk
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_stage__legend_done
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__legend_done
-msgid ""
-"Override the default value displayed for the done state for kanban "
-"selection, when the task or issue is in that stage."
-msgstr ""
-"แทนที่ค่าเริ่มต้นที่แสดงสำหรับสถานะที่เสร็จสิ้นเพื่อการเลือกคัมบัง "
-"เมื่องานหรือปัญหาอยู่ในขั้นตอนนั้น"
-
-#. module: helpdesk
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_stage__legend_normal
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__legend_normal
-msgid ""
-"Override the default value displayed for the normal state for kanban "
-"selection, when the task or issue is in that stage."
-msgstr ""
-"แทนที่ค่าเริ่มต้นที่แสดงสำหรับสถานะปกติเพื่อการเลือกคัมบัง "
-"เมื่องานหรือปัญหาอยู่ในขั้นตอนนั้น"
+#: selection:helpdesk.ticket,activity_state:0
+msgid "Overdue"
+msgstr "เกินกำหนด"
 
 #. module: helpdesk
 #: model:ir.ui.menu,name:helpdesk.helpdesk_menu_team_dashboard
@@ -1778,12 +1480,12 @@ msgstr "เจ้าของ"
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__alias_parent_model_id
 msgid "Parent Model"
-msgstr "โมเดลหลัก"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__alias_parent_thread_id
 msgid "Parent Record Thread ID"
-msgstr "ID เธรดเรกคอร์ดหลัก"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__alias_parent_model_id
@@ -1792,32 +1494,29 @@ msgid ""
 " necessarily the model given by alias_model_id (example: project "
 "(parent_model) and task (model))"
 msgstr ""
-"โมเดลหลักถือนามแฝง "
-"โมเดลที่มีการอ้างอิงนามแฝงไม่จำเป็นต้องเป็นโมเดลที่กำหนดโดย alias_model_id "
-"(ตัวอย่าง: โครงการ (parent_model) และงาน (แบบจำลอง))"
-
-#. module: helpdesk
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_team__rating_percentage_satisfaction
-msgid "Percentage of happy ratings"
-msgstr "เปอร์เซ็นการให้คะแนนความสุข"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
 msgid "Performance"
-msgstr "ประสิทธิภาพ"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.actions.act_window,name:helpdesk.helpdesk_ticket_action_team_performance
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_graph_analysis
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_pivot_analysis
 msgid "Performance Analysis"
-msgstr "การวิเคราะห์ประสิทธิภาพการทำงาน"
+msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:77
 #, python-format
 msgid "Performance Report"
+msgstr ""
+
+#. module: helpdesk
+#: selection:helpdesk.ticket,activity_state:0
+msgid "Planned"
 msgstr ""
 
 #. module: helpdesk
@@ -1828,10 +1527,6 @@ msgid ""
 "- partners: only authenticated partners\n"
 "- followers: only followers of the related document or members of following channels\n"
 msgstr ""
-"นโยบายการโพสต์ข้อความบนเอกสารโดยใช้เมลล์เกตเวย์\n"
-"- ทุกคน: ทุกคนโพสต์ได้\n"
-"- พาร์ทเนอร์: พาร์ทเนอร์ที่ได้รับการรับรองเท่านั้น\n"
-"- ผู้ติดตาม: เฉพาะผู้ติดตามเอกสารที่เกี่ยวข้องหรือสมาชิกของช่องดังต่อไปนี้\n"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__access_url
@@ -1851,7 +1546,7 @@ msgstr "ผลิตภาพ"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
 msgid "Publish this team's ratings on your website"
-msgstr "เผยแพร่การให้คะแนนของทีมนี้บนเว็บไซต์ของคุณ"
+msgstr ""
 
 #. module: helpdesk
 #: model:helpdesk.ticket.type,name:helpdesk.type_question
@@ -1864,19 +1559,14 @@ msgid "Question and answer section on your website"
 msgstr ""
 
 #. module: helpdesk
-#: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_team__assign_method__randomly
-msgid "Random"
-msgstr "สุ่มค่า"
+#: selection:helpdesk.team,assign_method:0
+msgid "Randomly"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__rating_ids
 msgid "Rating"
 msgstr "การให้คะแนน"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__rating_avg
-msgid "Rating Average"
-msgstr "คะแนนเฉลี่ย"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__rating_last_feedback
@@ -1891,26 +1581,16 @@ msgstr "ให้คะแนนภาพสุดท้าย"
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__rating_last_value
 msgid "Rating Last Value"
-msgstr "เรตติ้งค่าสุดท้าย"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__rating_percentage_satisfaction
-msgid "Rating Satisfaction"
-msgstr "การให้คะแนนความพึงพอใจ"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__rating_count
 msgid "Rating count"
-msgstr "จำนวนการให้คะแนน"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__rating_ids
-msgid "Ratings"
-msgstr "การให้คะแนน"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__use_rating
-msgid "Ratings on tickets"
+msgid "Ratings"
 msgstr ""
 
 #. module: helpdesk
@@ -1921,34 +1601,16 @@ msgstr ""
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_view_form
 msgid "Reach Stage"
-msgstr "ถึงขั้นตอน"
+msgstr ""
 
 #. module: helpdesk
-#: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_sla_report_analysis__sla_status__reached
-#: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_sla_status__status__reached
-msgid "Reached"
-msgstr "บรรลุแล้ว"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_status__reached_datetime
-msgid "Reached Date"
-msgstr "ถึงวันที่แล้ว"
-
-#. module: helpdesk
-#: code:addons/helpdesk/models/helpdesk.py:0
-#: model:helpdesk.stage,legend_done:helpdesk.stage_cancelled
-#: model:helpdesk.stage,legend_done:helpdesk.stage_in_progress
-#: model:helpdesk.stage,legend_done:helpdesk.stage_new
-#: model:helpdesk.stage,legend_done:helpdesk.stage_solved
-#: model:helpdesk.ticket,legend_done:helpdesk.helpdesk_ticket_1
-#: model:helpdesk.ticket,legend_done:helpdesk.helpdesk_ticket_2
-#, python-format
-msgid "Ready for Next Stage"
-msgstr "เตรียมพร้อมสำหรับขั้นตอนถัดไป"
+#: selection:helpdesk.ticket,kanban_state:0
+msgid "Ready for next stage"
+msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:170
 #, python-format
 msgid "Ready to boost your customer service?"
 msgstr ""
@@ -1961,52 +1623,19 @@ msgstr "เหตุผลของการให้คะแนน"
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__alias_force_thread_id
 msgid "Record Thread ID"
-msgstr "บันทึกหัวข้อ ID"
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
-msgid "Record timesheets on your tickets"
 msgstr ""
 
 #. module: helpdesk
-#: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_ticket__kanban_state__blocked
-msgid "Red"
-msgstr "สีแดง"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_stage__legend_blocked
-msgid "Red Kanban Label"
-msgstr "ป้ายคัมบังสีแดง"
+#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
+msgid ""
+"Record timesheets on your tickets and reinvoice time to you customer through"
+" tasks."
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.portal_helpdesk_ticket
 msgid "Ref"
 msgstr "อ้างอิง"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__use_credit_notes
-msgid "Refunds"
-msgstr "การคืนเงิน"
-
-#. module: helpdesk
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_team__use_helpdesk_sale_timesheet
-msgid "Reinvoice the time spent on ticket through tasks."
-msgstr "ออกใบแจ้งหนี้เวลาที่ใช้กับทิกเก็ตอีกครั้งผ่านงาน"
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
-msgid "Reinvoice time to your customer through tasks"
-msgstr ""
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
-msgid "Repair broken products"
-msgstr ""
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__use_product_repairs
-msgid "Repairs"
-msgstr "งานซ่อมแซม"
 
 #. module: helpdesk
 #: model:ir.ui.menu,name:helpdesk.helpdesk_ticket_report_menu_main
@@ -2021,33 +1650,17 @@ msgstr "ผู้ใช้ที่รับผิดชอบ"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_kanban
 msgid "Restore"
-msgstr "คืนค่า"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__use_product_returns
-msgid "Returns"
-msgstr "คืน"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__sla_id
-msgid "SLA"
-msgstr "SLA"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__sla_deadline
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__sla_deadline
-msgid "SLA Deadline"
-msgstr "วันสิ้นสุด SLA "
+msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:51
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis_closed
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search
 #, python-format
 msgid "SLA Failed"
-msgstr "SLA ล้มเหลว"
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis
@@ -2061,17 +1674,18 @@ msgstr ""
 #: model:ir.ui.menu,name:helpdesk.helpdesk_sla_menu_main
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_view_tree
 msgid "SLA Policies"
-msgstr "นโยบาย SLA"
+msgstr ""
 
 #. module: helpdesk
+#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__sla_id
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_view_form
 msgid "SLA Policy"
-msgstr "นโยบาย SLA"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla__description
 msgid "SLA Policy Description"
-msgstr "คำอธิบายนโยบาย SLA"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla__name
@@ -2079,54 +1693,17 @@ msgid "SLA Policy Name"
 msgstr ""
 
 #. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__sla_reached_datetime
-msgid "SLA Reached Date"
-msgstr "SLA ถึงวันที่แล้ว"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__sla_stage_id
-msgid "SLA Stage"
-msgstr "ขั้นตอน SLA"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__sla_status_ids
-msgid "SLA Status"
-msgstr "สถานะ SLA "
-
-#. module: helpdesk
-#: model:ir.actions.act_window,name:helpdesk.helpdesk_sla_report_analysis_action
-#: model:ir.model,name:helpdesk.model_helpdesk_sla_report_analysis
-#: model:ir.ui.menu,name:helpdesk.helpdesk_ticket_report_menu_sla_analysis
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_report_analysis_view_graph
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_report_analysis_view_pivot
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_report_analysis_view_search
-msgid "SLA Status Analysis"
-msgstr "การวิเคราะห์สถานะ SLA"
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_report_analysis_view_search
-msgid "SLA Status Deadline"
+#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__sla_name
+msgid "SLA Policy name"
 msgstr ""
 
 #. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__sla_status_failed
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_report_analysis_view_search
-msgid "SLA Status Failed"
-msgstr "สถานะ SLA ล้มเหลว"
+#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__sla_active
+msgid "SLA active"
+msgstr ""
 
 #. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__sla_ids
-msgid "SLAs"
-msgstr "SLAs"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__message_has_sms_error
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__message_has_sms_error
-msgid "SMS Delivery error"
-msgstr "ข้อผิดพลาดในการส่ง SMS"
-
-#. module: helpdesk
-#: code:addons/helpdesk/controllers/portal.py:0
+#: code:addons/helpdesk/controllers/portal.py:18
 #, python-format
 msgid "Salesperson"
 msgstr "พนักงานขาย"
@@ -2134,28 +1711,28 @@ msgstr "พนักงานขาย"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
 msgid "Save this page and refresh to activate the feature"
-msgstr "บันทึกหน้านี้และรีเฟรชเพื่อเปิดใช้งานฟีเจอร์"
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
 msgid "Save this page and refresh to activate the feature."
-msgstr "บันทึกหน้านี้และรีเฟรชเพื่อเปิดใช้งานฟีเจอร์"
+msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/js/tours/helpdesk.js:0
+#: code:addons/helpdesk/static/src/js/tour.js:43
 #, python-format
 msgid "Save this ticket and the modifications you've made to it."
-msgstr "บันทึกทิกเก็ตนี้และการแก้ไขที่คุณได้ทำไว้"
+msgstr ""
 
 #. module: helpdesk
-#: code:addons/helpdesk/controllers/portal.py:0
+#: code:addons/helpdesk/controllers/portal.py:39
 #, python-format
 msgid "Search <span class=\"nolabel\"> (in Content)</span>"
-msgstr "ค้นหา <span class=\"nolabel\"> (ในเนื้อหา)</span>"
+msgstr ""
 
 #. module: helpdesk
-#: code:addons/helpdesk/controllers/portal.py:0
+#: code:addons/helpdesk/controllers/portal.py:36
 #, python-format
 msgid "Search ID"
 msgstr ""
@@ -2163,25 +1740,25 @@ msgstr ""
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_view_search
 msgid "Search SLA Policies"
-msgstr "ค้นหานโยบาย SLA"
+msgstr ""
 
 #. module: helpdesk
-#: code:addons/helpdesk/controllers/portal.py:0
+#: code:addons/helpdesk/controllers/portal.py:42
 #, python-format
 msgid "Search in All"
-msgstr "ค้นหาในทั้งหมด"
+msgstr ""
 
 #. module: helpdesk
-#: code:addons/helpdesk/controllers/portal.py:0
+#: code:addons/helpdesk/controllers/portal.py:41
 #, python-format
 msgid "Search in Customer"
-msgstr "ค้นหาในลูกค้า"
+msgstr ""
 
 #. module: helpdesk
-#: code:addons/helpdesk/controllers/portal.py:0
+#: code:addons/helpdesk/controllers/portal.py:40
 #, python-format
 msgid "Search in Messages"
-msgstr "ค้นหาในข้อความ"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__access_token
@@ -2191,7 +1768,7 @@ msgstr "ความปลอดภัย"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
 msgid "See Customer Satisfaction"
-msgstr "ดูความพึงพอใจของลูกค้า"
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
@@ -2201,7 +1778,7 @@ msgstr ""
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
 msgid "Self-Service"
-msgstr "การบริการตัวเอง"
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
@@ -2210,7 +1787,7 @@ msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:173
 #, python-format
 msgid "Send an email to"
 msgstr ""
@@ -2251,22 +1828,17 @@ msgstr "แบ่งปัน"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
 msgid "Share presentation and videos, and organize into courses"
-msgstr "แชร์งานนำเสนอและวิดีโอและจัดระเบียบเป็นหลักสูตร"
+msgstr ""
 
 #. module: helpdesk
 #: model:res.groups,name:helpdesk.group_use_sla
 msgid "Show SLA Policies"
-msgstr "แสดงนโยบาย SLA"
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search
 msgid "Show all records which has next action date is before today"
 msgstr "Show all records which has next action date is before today"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_status__sla_id
-msgid "Sla"
-msgstr "Sla"
 
 #. module: helpdesk
 #: model:helpdesk.stage,name:helpdesk.stage_solved
@@ -2283,7 +1855,7 @@ msgstr "ต้นฉบับ"
 msgid ""
 "Specific team that uses this stage. Other teams will not be able to see or "
 "use this stage."
-msgstr "เฉพาะทีมที่ใช้ขั้นตอนนี้ ทีมอื่นจะไม่สามารถเห็นหรือใช้ขั้นตอนนี้ได้"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__stage_id
@@ -2293,20 +1865,9 @@ msgid "Stage"
 msgstr "สถานะ"
 
 #. module: helpdesk
-#: model:mail.message.subtype,description:helpdesk.mt_ticket_stage
 #: model:mail.message.subtype,name:helpdesk.mt_ticket_stage
 msgid "Stage Changed"
 msgstr "สถานะเปลี่ยนแปลง"
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_stage_view_form
-msgid "Stage Description and Tooltips"
-msgstr "คำอธิบายขั้นตอนและทูลทิป"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_stage__name
-msgid "Stage Name"
-msgstr "ชื่อขั้นตอน"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_stage_view_form
@@ -2325,7 +1886,7 @@ msgstr "ขั้นตอน"
 msgid ""
 "Stages the team will use. This team's tickets will only be able to be in "
 "these stages."
-msgstr "ขั้นตอนที่ทีมงานจะใช้ ทิกเก็ตของทีมจะอยู่ในขั้นตอนเหล่านี้เท่านั้น"
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_stage_action
@@ -2335,16 +1896,14 @@ msgid ""
 msgstr ""
 
 #. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__sla_status
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_status__status
 #: model_terms:ir.ui.view,arch_db:helpdesk.portal_helpdesk_ticket
 msgid "Status"
 msgstr "สถานะ"
 
 #. module: helpdesk
-#: model:ir.filters,name:helpdesk.helpdesk_sla_report_analysis_filter_status_per_deadline
-msgid "Status Per Deadline"
-msgstr "สถานะต่อกำหนดเวลา"
+#: model:mail.message.subtype,description:helpdesk.mt_ticket_stage
+msgid "Status Changed"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__activity_state
@@ -2360,7 +1919,7 @@ msgstr ""
 "ที่วางแผนไว้: กิจกรรมในอนาคต"
 
 #. module: helpdesk
-#: code:addons/helpdesk/controllers/portal.py:0
+#: code:addons/helpdesk/controllers/portal.py:36
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__name
 #, python-format
 msgid "Subject"
@@ -2378,16 +1937,16 @@ msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:98
 #, python-format
 msgid "Success Rate"
-msgstr "อัตราความสำเร็จ"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.actions.act_window,name:helpdesk.helpdesk_ticket_action_7dayssuccess
 #: model:ir.actions.act_window,name:helpdesk.helpdesk_ticket_action_success
 msgid "Success Rate Analysis"
-msgstr "การวิเคราะห์อัตราความสำเร็จ"
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tag_view_tree
@@ -2396,12 +1955,7 @@ msgid "Tag"
 msgstr "ป้ายกำกับ"
 
 #. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_tag__name
-msgid "Tag Name"
-msgstr "ชื่อป้ายกำกับ"
-
-#. module: helpdesk
-#: model:ir.model.constraint,message:helpdesk.constraint_helpdesk_tag_name_uniq
+#: sql_constraint:helpdesk.tag:0
 msgid "Tag name already exists !"
 msgstr "ชื่อป้ายกำกับมีอยู่แล้ว"
 
@@ -2423,37 +1977,25 @@ msgstr "เป้าหมาย"
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_res_users__helpdesk_target_rating
 msgid "Target Customer Rating"
-msgstr "คะแนนลูกค้าเป้าหมาย"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla__stage_id
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_status__sla_stage_id
 msgid "Target Stage"
-msgstr "ขั้นตอนเป้าหมาย"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_res_users__helpdesk_target_success
 msgid "Target Success Rate"
-msgstr "เป้าหมายอัตราความสำเร็จ"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_res_users__helpdesk_target_closed
 msgid "Target Tickets to Close"
-msgstr "ทิกเก็ตเป้าหมายที่จะปิด"
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_stage_view_form
-msgid "Task in progress. Click to block or set as done."
-msgstr "อยู่ระหว่างดำเนินการ คลิกเพื่อบล็อกหรือตั้งเป็นเสร็จสิ้น"
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_stage_view_form
-msgid "Task is blocked. Click to unblock or set as done."
-msgstr "งานถูกบล็อก คลิกเพื่อเลิกบล็อกหรือตั้งเป็นเสร็จสิ้น"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla__team_id
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__team_id
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_stage__team_ids
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis_closed
@@ -2469,7 +2011,7 @@ msgstr "สมาชิกในทีม"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_search
 msgid "Team Search"
-msgstr "ค้นหาทีม"
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.index
@@ -2487,20 +2029,12 @@ msgid "Templates"
 msgstr "แม่แบบ"
 
 #. module: helpdesk
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__sla_deadline
-msgid "The closest deadline of all SLA applied on this ticket"
-msgstr "วันสิ้นสุดเวลาที่ใกล้เคียงที่สุดของ SLA ทั้งหมดที่ใช้กับทิกเก็ตนี้"
-
-#. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__alias_model_id
 msgid ""
 "The model (Odoo Document Kind) to which this alias corresponds. Any incoming"
 " email that does not reply to an existing record will cause the creation of "
 "a new record of this model (e.g. a Project Task)"
 msgstr ""
-"โมเดล (ชนิดเอกสาร Odoo) ซึ่งสอดคล้องกับนามแฝงนี้ อีเมลขาเข้าใดๆ "
-"ที่ไม่ตอบกลับเรกคอร์ดที่มีอยู่จะทำให้เกิดการสร้างเรกคอร์ดใหม่ของโมเดลนี้ "
-"(เช่น งานโครงการ)"
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__alias_name
@@ -2508,8 +2042,6 @@ msgid ""
 "The name of the email alias, e.g. 'jobs' if you want to catch emails for "
 "<jobs@example.odoo.com>"
 msgstr ""
-"ชื่อของนามแฝงอีเมล เช่น 'งาน' หากคุณต้องการรับอีเมลสำหรับ "
-"<jobs@example.odoo.com>"
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__alias_user_id
@@ -2519,13 +2051,10 @@ msgid ""
 "the sender (From) address, or will use the Administrator account if no "
 "system user is found for that address."
 msgstr ""
-"เจ้าของบันทึกที่สร้างขึ้นเมื่อได้รับอีเมลในนามแฝงนี้ "
-"หากไม่ได้ตั้งค่าฟิลด์นี้ ระบบจะพยายามค้นหาเจ้าของที่ถูกต้องตามที่อยู่ผู้ส่ง "
-"(จาก) หรือจะใช้บัญชีผู้ดูแลระบบหากไม่พบผู้ใช้ระบบสำหรับที่อยู่นั้น"
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:94
 #, python-format
 msgid ""
 "The success rate is based on the tickets which passed the SLA policies "
@@ -2533,33 +2062,16 @@ msgid ""
 msgstr ""
 
 #. module: helpdesk
-#: code:addons/helpdesk/controllers/portal.py:0
-#, python-format
-msgid "The team does not allow ticket closing through portal"
-msgstr "ทีมไม่อนุญาตให้ปิดทิกเก็ตผ่านพอร์ทัล"
-
-#. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.portal_helpdesk_ticket
 msgid "There are currently no Ticket for your account."
-msgstr "ขณะนี้ไม่มีทิกเก็ตสำหรับบัญชีของคุณ"
-
-#. module: helpdesk
-#. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
-#, python-format
-msgid "This dashboard will activate once you have created your first ticket."
 msgstr ""
 
 #. module: helpdesk
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__assign_hours
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__close_hours
-msgid "This duration is based on the working calendar of the team"
-msgstr "ระยะเวลานี้อิงตามปฏิทินการทำงานของทีม"
-
-#. module: helpdesk
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__open_hours
-msgid "This duration is not based on the working calendar of the team"
-msgstr "ระยะเวลานี้ไม่อิงกับปฏิทินการทำงานของทีม"
+#. openerp-web
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:171
+#, python-format
+msgid "This dashboard will activate once you have created your first ticket."
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__campaign_id
@@ -2567,13 +2079,11 @@ msgid ""
 "This is a name that helps you keep track of your different campaign efforts,"
 " e.g. Fall_Drive, Christmas_Special"
 msgstr ""
-"ชื่อนี้ช่วยให้คุณติดตามความพยายามของแคมเปญต่างๆ เช่น Fall_Drive, "
-"Christmas_Special"
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__medium_id
 msgid "This is the method of delivery, e.g. Postcard, Email, or Banner Ad"
-msgstr "นี้เป็นวิธีการจัดส่งเช่น โปสการ์ด อีเมล หรือแบนเนอร์โฆษณา"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__source_id
@@ -2581,7 +2091,6 @@ msgid ""
 "This is the source of the link, e.g. Search Engine, another domain, or name "
 "of email list"
 msgstr ""
-"นี่เป็นที่มาของลิงก์ เช่น เครื่องมือค้นหา โดเมนอื่น หรือชื่อรายการอีเมล"
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__use_helpdesk_timesheet
@@ -2589,31 +2098,11 @@ msgid "This required to have project module installed."
 msgstr ""
 
 #. module: helpdesk
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_stage__fold
-msgid ""
-"This stage is folded in the kanban view when there are no records in that "
-"stage to display."
-msgstr ""
-"ขั้นตอนนี้ถูกพับในมุมมองคัมบัง เมื่อไม่มีการบันทึกในขั้นตอนนั้นที่จะแสดง"
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_stage_view_form
-msgid "This step is done. Click to block or set in progress."
-msgstr "ขั้นตอนนี้เสร็จสิ้น คลิกเพื่อบล็อกหรือตั้งค่าอยู่ระหว่างดำเนินการ"
-
-#. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:30
 #, python-format
 msgid "Three stars, maximum score"
-msgstr "สามดาว คะแนนสูงสุด"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__ticket_id
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_status__ticket_id
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_activity
-msgid "Ticket"
-msgstr "ทิกเก็ต"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.actions.act_window,name:helpdesk.helpdesk_ticket_action_dashboard
@@ -2621,70 +2110,29 @@ msgstr "ทิกเก็ต"
 #: model:ir.actions.act_window,name:helpdesk.helpdesk_ticket_action_dashboard_urgent
 #: model:ir.actions.act_window,name:helpdesk.helpdesk_ticket_team_analysis_action
 msgid "Ticket Analysis"
-msgstr "การวิเคราะห์ทิกเก็ต"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__ticket_closed
-msgid "Ticket Closed"
-msgstr "ปิดทิกเก็ต"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__create_date
-msgid "Ticket Create Date"
-msgstr "วันที่สร้างทิกเก็ต"
+msgstr ""
 
 #. module: helpdesk
 #: model:mail.message.subtype,name:helpdesk.mt_team_ticket_new
 #: model:mail.message.subtype,name:helpdesk.mt_ticket_new
 msgid "Ticket Created"
-msgstr "สร้างทิกเก็ตแล้ว"
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_report_analysis_view_search
-msgid "Ticket Creation Date"
 msgstr ""
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__ticket_deadline
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_report_analysis_view_search
-msgid "Ticket Deadline"
-msgstr "วันสิ้นสุดทิกเก็ต"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__ticket_failed
-msgid "Ticket Failed"
-msgstr "ทิกเก็ตล้มเหลว"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search
 msgid "Ticket ID"
-msgstr "ไอดีทิกเก็ต"
-
-#. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_tree
-msgid "Ticket Name"
 msgstr ""
 
 #. module: helpdesk
 #: model:mail.message.subtype,name:helpdesk.mt_team_ticket_rated
 #: model:mail.message.subtype,name:helpdesk.mt_ticket_rated
 msgid "Ticket Rated"
-msgstr "คะแนนทิกเก็ต"
-
-#. module: helpdesk
-#: model:ir.model,name:helpdesk.model_helpdesk_sla_status
-msgid "Ticket SLA Status"
-msgstr "Ticket SLA Status"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__ticket_stage_id
-msgid "Ticket Stage"
-msgstr "ขั้นตอนทิกเก็ต"
+msgstr ""
 
 #. module: helpdesk
 #: model:mail.message.subtype,name:helpdesk.mt_team_ticket_stage
 msgid "Ticket Stage Changed"
-msgstr "เปลี่ยนขั้นตอนทิกเก็ต"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.actions.act_window,name:helpdesk.helpdesk_tag_action
@@ -2695,29 +2143,17 @@ msgstr ""
 #. module: helpdesk
 #: model:ir.actions.act_window,name:helpdesk.helpdesk_ticket_type_action
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla__ticket_type_id
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__ticket_type_id
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__ticket_type_id
 #: model:ir.ui.menu,name:helpdesk.helpdesk_ticket_type_menu
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search
 msgid "Ticket Type"
-msgstr "ประเภททิกเก็ต"
-
-#. module: helpdesk
-#: code:addons/helpdesk/controllers/portal.py:0
-#, python-format
-msgid "Ticket closed by the customer"
-msgstr "ทิกเก็ตถูกปิดโดยลูกค้า"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__allow_portal_ticket_closing
-msgid "Ticket closing"
 msgstr ""
 
 #. module: helpdesk
 #: model:mail.message.subtype,description:helpdesk.mt_ticket_new
 msgid "Ticket created"
-msgstr "ทิกเก็ตที่สร้างแล้ว"
+msgstr ""
 
 #. module: helpdesk
 #: model:mail.message.subtype,description:helpdesk.mt_ticket_rated
@@ -2726,13 +2162,11 @@ msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:17
 #: model:ir.actions.act_window,name:helpdesk.action_upcoming_sla_fail_all_tickets
 #: model:ir.actions.act_window,name:helpdesk.action_upcoming_sla_fail_tickets
 #: model:ir.actions.act_window,name:helpdesk.helpdesk_ticket_action_Archived
 #: model:ir.actions.act_window,name:helpdesk.helpdesk_ticket_action_high_priorities
-#: model:ir.actions.act_window,name:helpdesk.helpdesk_ticket_action_main_my
-#: model:ir.actions.act_window,name:helpdesk.helpdesk_ticket_action_main_tree
 #: model:ir.actions.act_window,name:helpdesk.helpdesk_ticket_action_sla
 #: model:ir.actions.act_window,name:helpdesk.helpdesk_ticket_action_sla_high
 #: model:ir.actions.act_window,name:helpdesk.helpdesk_ticket_action_sla_urgent
@@ -2743,7 +2177,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__ticket_ids
 #: model:ir.model.fields,field_description:helpdesk.field_res_partner__ticket_count
 #: model:ir.model.fields,field_description:helpdesk.field_res_users__ticket_count
-#: model:ir.ui.menu,name:helpdesk.helpdesk_ticket_menu_main
 #: model:ir.ui.menu,name:helpdesk.helpdesk_ticket_report_menu
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_tree
@@ -2752,19 +2185,19 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:helpdesk.portal_my_home_menu_helpdesk
 #, python-format
 msgid "Tickets"
-msgstr "ทิกเก็ต"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_digest_digest__kpi_helpdesk_tickets_closed
 msgid "Tickets Closed"
-msgstr "ทิกเก็ตที่ปิดแล้ว"
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis_closed
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search
 msgid "Tickets Search"
-msgstr "ค้นหาทิกเก็ต"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_stage__is_close
@@ -2772,8 +2205,6 @@ msgid ""
 "Tickets in this stage are considered as done. This is used notably when "
 "computing SLAs and KPIs on tickets."
 msgstr ""
-"ทิกเก็ตในขั้นตอนนี้ถือว่าเสร็จสิ้น สิ่งนี้ถูกใช้อย่างโดดเด่นเมื่อคำนวณ SLA "
-"และ KPI บนตั๋ว"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
@@ -2783,21 +2214,9 @@ msgstr ""
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_sla__priority
 msgid "Tickets under this priority will not be taken into account."
-msgstr "ทิกเก็ตภายใต้ลำดับความสำคัญนี้จะไม่ถูกนำมาพิจารณา"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__use_helpdesk_sale_timesheet
-msgid "Time Reinvoicing"
 msgstr ""
 
 #. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__ticket_close_hours
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__close_hours
-msgid "Time to close (hours)"
-msgstr "เวลาที่จะปิด (ชั่วโมง)"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__ticket_assignation_hours
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__assign_hours
 msgid "Time to first assignation (hours)"
 msgstr ""
@@ -2808,28 +2227,9 @@ msgid "Timesheet on Ticket"
 msgstr ""
 
 #. module: helpdesk
-#: model_terms:ir.actions.act_window,help:helpdesk.action_upcoming_sla_fail_all_tickets
-#: model_terms:ir.actions.act_window,help:helpdesk.action_upcoming_sla_fail_tickets
-#: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_ticket_action_Archived
-#: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_ticket_action_high_priorities
-#: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_ticket_action_main
-#: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_ticket_action_main_my
-#: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_ticket_action_main_tree
-#: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_ticket_action_sla
-#: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_ticket_action_sla_high
-#: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_ticket_action_sla_urgent
-#: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_ticket_action_slafailed
-#: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_ticket_action_team
-#: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_ticket_action_unassigned
-#: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_ticket_action_urgent
-msgid ""
-"To get things done, use activities and status on tickets.<br>\n"
-"                Chat in real time or by email to collaborate efficiently."
-msgstr ""
-
-#. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:74
+#: selection:helpdesk.ticket,activity_state:0
 #, python-format
 msgid "Today"
 msgstr "วันนี้"
@@ -2851,15 +2251,10 @@ msgstr "ทวิตเตอร์"
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:24
 #, python-format
 msgid "Two stars, with a maximum of three"
-msgstr "สองดาว โดยมากที่สุดคือสาม"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket_type__name
-msgid "Type"
-msgstr "ประเภท"
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_ticket_type_action
@@ -2867,14 +2262,14 @@ msgid "Type allows to organize tickets."
 msgstr ""
 
 #. module: helpdesk
-#: model:ir.model.constraint,message:helpdesk.constraint_helpdesk_ticket_type_name_uniq
+#: sql_constraint:helpdesk.ticket.type:0
 msgid "Type name already exists !"
-msgstr "ชื่อประเภทมีอยู่แล้ว !"
+msgstr ""
 
 #. module: helpdesk
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__activity_exception_decoration
-msgid "Type of the exception activity on record."
-msgstr "พิมพ์กิจกรรมข้อยกเว้นบนบันทึก"
+#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
+msgid "URL to Submit Issue"
+msgstr "URL สำหรับส่งปัญหา"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__portal_rating_url
@@ -2882,17 +2277,13 @@ msgid "URL to Submit an Issue"
 msgstr ""
 
 #. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search
-msgid "Unassigned"
-msgstr "ไม่ได้มอบหมาย"
-
-#. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__unassigned_tickets
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis_closed
+#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search
 msgid "Unassigned Tickets"
-msgstr "ทิกเก็ตที่ไม่ได้มอบหมาย"
+msgstr ""
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__message_unread
@@ -2915,45 +2306,23 @@ msgstr ""
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__upcoming_sla_fail_tickets
 msgid "Upcoming SLA Fail Tickets"
-msgstr "ทิกเก็ตล้มเหลว SLA ที่กำลังจะมีขึ้น"
+msgstr ""
 
 #. module: helpdesk
-#: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_sla__priority__3
-#: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_sla_report_analysis__priority__3
-#: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_ticket__priority__3
+#: selection:helpdesk.sla,priority:0 selection:helpdesk.ticket,priority:0
 msgid "Urgent"
 msgstr "เร่งด่วน"
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:29
 #, python-format
 msgid "Urgent ("
-msgstr "เร่งด่วน ("
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__use_coupons
-msgid "Use Coupons"
-msgstr "ใช้คูปอง"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__use_credit_notes
-msgid "Use Credit Notes"
-msgstr "ใช้ใบลดนี้"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__use_product_repairs
-msgid "Use Repairs"
-msgstr "ใช้การซ่อมแซม"
-
-#. module: helpdesk
-#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__use_product_returns
-msgid "Use Returns"
-msgstr "ใช้การคืน"
+msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/js/tours/helpdesk.js:0
+#: code:addons/helpdesk/static/src/js/tour.js:48
 #, python-format
 msgid "Use the breadcrumbs to go back to the Kanban view."
 msgstr ""
@@ -2970,40 +2339,38 @@ msgstr "ผู้ใช้งาน"
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:52
 #, python-format
 msgid "View failed tickets"
 msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:57
 #, python-format
 msgid "View high priority failed tickets"
 msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
-msgid "View this team's ratings on the following page:<br/>"
+msgid "View this teams ratings on this page:<br/>"
 msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:62
 #, python-format
 msgid "View urgent failed tickets"
 msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/js/tours/helpdesk.js:0
+#: code:addons/helpdesk/static/src/js/tour.js:13
 #, python-format
 msgid ""
 "Want to <b>boost your customer satisfaction</b>?<br/><i>Click Helpdesk to "
 "start.</i>"
 msgstr ""
-"ต้องการ "
-"<b>เพิ่มความพึงพอใจให้กับลูกค้าของคุณ</b>?<br/><i>คลิกที่การดูและช่วยเหลือเพื่อเริ่มต้น</i>"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__use_website_helpdesk_form
@@ -3024,7 +2391,7 @@ msgstr "ประวัติการสื่อสารเว็บไซต
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:167
 #, python-format
 msgid "Welcome"
 msgstr "ยินดีต้อนรับ"
@@ -3036,9 +2403,6 @@ msgid ""
 "balanced assignation, tickets are assigned to the user with the least amount"
 " of open tickets."
 msgstr ""
-"ด้วยการมอบหมายแบบสุ่ม ผู้ใช้ทุกคนจะได้รับตั๋วจำนวนเท่ากัน "
-"ด้วยการมอบหมายที่สมดุล "
-"ตั๋วจะถูกกำหนดให้กับผู้ใช้ด้วยจำนวนตั๋วที่เปิดน้อยที่สุด"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__resource_calendar_id
@@ -3046,38 +2410,14 @@ msgid "Working Hours"
 msgstr "ชั่วโมงทำงาน"
 
 #. module: helpdesk
-#: model:ir.model.fields,help:helpdesk.field_helpdesk_sla_status__exceeded_days
-msgid ""
-"Working days exceeded for reached SLAs compared with deadline. Positive "
-"number means the SLA was eached after the deadline."
-msgstr ""
-"เกินวันทำงานสำหรับ SLA ที่บรรลุเมื่อเทียบกับกำหนดเวลา จำนวนบวกหมายถึง SLA "
-"แต่ละรายการหลังเส้นตาย"
-
-#. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/js/helpdesk_dashboard.js:0
+#: code:addons/helpdesk/static/src/js/helpdesk_dashboard.js:189
 #, python-format
 msgid "Wrong value entered!"
 msgstr "ใส่ค่าผิด!"
 
 #. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_stage_view_form
-msgid ""
-"You can also add a description to help your coworkers understand the meaning"
-" and purpose of the stage."
-msgstr ""
-"คุณยังสามารถเพิ่มคำอธิบายเพื่อช่วยให้เพื่อนร่วมงานของคุณเข้าใจความหมายและวัตถุประสงค์ของงาน"
-
-#. module: helpdesk
-#: model:ir.model.constraint,message:helpdesk.constraint_res_users_target_closed_not_zero
-#: model:ir.model.constraint,message:helpdesk.constraint_res_users_target_rating_not_zero
-#: model:ir.model.constraint,message:helpdesk.constraint_res_users_target_success_not_zero
-msgid "You cannot have negative targets"
-msgstr "คุณไม่สามารถกำหนดเป้าหมายเชิงลบได้"
-
-#. module: helpdesk
-#: code:addons/helpdesk/models/helpdesk.py:0
+#: code:addons/helpdesk/models/helpdesk.py:108
 #, python-format
 msgid "You must have team members assigned to change the assignation method."
 msgstr ""
@@ -3095,7 +2435,7 @@ msgstr ""
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_view_form
 msgid "e.g. Close urgent tickets within 36 hours"
-msgstr "เช่น ปิดทิกเกตด่วนภายใน 36 ชม."
+msgstr ""
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
@@ -3108,18 +2448,18 @@ msgid "hours<br/>"
 msgstr ""
 
 #. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
-msgid "team search"
-msgstr "ค้นหาทีม"
+#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_kanban
+msgid "oe_kanban_text_red"
+msgstr "oe_kanban_text_red"
 
 #. module: helpdesk
-#: model_terms:ir.ui.view,arch_db:helpdesk.index
-msgid "tickets"
+#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
+msgid "team search"
 msgstr ""
 
 #. module: helpdesk
 #. openerp-web
-#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:0
+#: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:173
 #, python-format
 msgid "to create a ticket."
 msgstr ""

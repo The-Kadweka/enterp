@@ -1,23 +1,23 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_calendar
+# * website_calendar
 # 
 # Translators:
-# Martin Trigaux, 2019
-# Fishfur A Banter <fishfurbanter@gmail.com>, 2019
-# Yihya Hugirat <hugirat@gmail.com>, 2019
-# hed shefer <hed@laylinetech.com>, 2019
+# Martin Trigaux, 2018
+# Fishfur A Banter <fishfurbanter@gmail.com>, 2018
+# ExcaliberX <excaliberx@gmail.com>, 2018
+# Yihya Hugirat <hugirat@gmail.com>, 2018
+# שהאב חוסיין <shhab89@gmail.com>, 2018
 # דודי מלכה <Dudimalka6@gmail.com>, 2019
 # ZVI BLONDER <ZVIBLONDER@gmail.com>, 2020
-# Ha Ketem <haketem@gmail.com>, 2022
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-07 07:21+0000\n"
-"PO-Revision-Date: 2019-08-26 09:39+0000\n"
-"Last-Translator: Ha Ketem <haketem@gmail.com>, 2022\n"
+"POT-Creation-Date: 2018-10-08 07:15+0000\n"
+"PO-Revision-Date: 2018-08-24 11:49+0000\n"
+"Last-Translator: ZVI BLONDER <ZVIBLONDER@gmail.com>, 2020\n"
 "Language-Team: Hebrew (https://www.transifex.com/odoo/teams/41243/he/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -26,7 +26,7 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % 1 == 0) ? 1: (n % 10 == 0 && n % 1 == 0 && n > 10) ? 2 : 3;\n"
 
 #. module: website_calendar
-#: code:addons/website_calendar/models/calendar_appointment.py:0
+#: code:addons/website_calendar/models/calendar_appointment.py:66
 #, python-format
 msgid " (copy)"
 msgstr " (העתק)"
@@ -42,7 +42,7 @@ msgid "#{day['today_cls'] and 'Today' or ''}"
 msgstr "#{יום['today_cls'] ו 'היום' או ''}"
 
 #. module: website_calendar
-#: code:addons/website_calendar/controllers/main.py:0
+#: code:addons/website_calendar/controllers/main.py:142
 #, python-format
 msgid "%s with %s"
 msgstr "%s עם %s"
@@ -58,7 +58,7 @@ msgid "+1 (650) 691-3277"
 msgstr "+1 (650) 691-3277"
 
 #. module: website_calendar
-#: code:addons/website_calendar/controllers/main.py:0
+#: code:addons/website_calendar/controllers/main.py:186
 #, python-format
 msgid ", All Day"
 msgstr ", כל היום"
@@ -69,6 +69,11 @@ msgid "-- select a country --"
 msgstr "-- בחר ארץ --"
 
 #. module: website_calendar
+#: model:calendar.alarm,name:website_calendar.calendar_alarm_data_1h_sms
+msgid "1 Hour SMS text"
+msgstr ""
+
+#. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_validated
 msgid ""
 "<br/>\n"
@@ -76,11 +81,6 @@ msgid ""
 msgstr ""
 "<br/>\n"
 "                            מאוחר מדי לבטל באופן מקוון, אנא צור קשר עם המשתתף בדרך אחרת אם באמת לא תוכל להגיע."
-
-#. module: website_calendar
-#: model_terms:ir.ui.view,arch_db:website_calendar.calendar_appointment_type_view_kanban
-msgid "<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" title=\"Manage\"/>"
-msgstr "<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" title=\"Manage\"/>"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_validated
@@ -173,17 +173,12 @@ msgstr "הודעת טקסט לתזכורת נשלחת אליך לפני פגיש
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_event__access_token
 msgid "Access Token"
-msgstr "אסימון גישה"
+msgstr "Access Token"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_needaction
 msgid "Action Needed"
 msgstr "נדרשת פעולה"
-
-#. module: website_calendar
-#: model:res.groups,name:website_calendar.group_calendar_manager
-msgid "Administrator"
-msgstr "מנהל מערכת"
 
 #. module: website_calendar
 #: model:ir.actions.act_window,name:website_calendar.website_calendar_report
@@ -259,6 +254,7 @@ msgid "Appointment<span class=\"chevron\"/>"
 msgstr "פגישה<span class=\"chevron\"/>"
 
 #. module: website_calendar
+#: model:ir.module.category,name:website_calendar.module_category_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.calendar_appointment_type_view_form
 #: model_terms:ir.ui.view,arch_db:website_calendar.calendar_event_view_graph
 #: model_terms:ir.ui.view,arch_db:website_calendar.calendar_event_view_pivot
@@ -273,7 +269,7 @@ msgstr "שיטת שיוך"
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_attachment_count
 msgid "Attachment Count"
-msgstr "כמות קבצים מצורפים"
+msgstr "ספירת קבצים מצורפים"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_validated
@@ -298,17 +294,7 @@ msgstr "עובדים זמינים"
 #. module: website_calendar
 #: model:ir.ui.menu,name:website_calendar.calendar_appointment_type_menu_action
 msgid "Calendar"
-msgstr "לוח שנה"
-
-#. module: website_calendar
-#: model:ir.model,name:website_calendar.model_calendar_event
-msgid "Calendar Event"
-msgstr "אירוע לוח שנה"
-
-#. module: website_calendar
-#: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__can_publish
-msgid "Can Publish"
-msgstr "יכול לפרסם"
+msgstr "יומן"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__min_cancellation_hours
@@ -316,12 +302,12 @@ msgid "Cancel Before (hours)"
 msgstr "בטל לפני (שעות)"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_question__question_type__checkbox
+#: selection:calendar.appointment.question,question_type:0
 msgid "Checkboxes (multiple answers)"
 msgstr "תיבות סימון (תשובות מרובות)"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_type__assignation_method__chosen
+#: selection:calendar.appointment.type,assignation_method:0
 msgid "Chosen by the Customer"
 msgstr "נבחר על ידי הלקוח"
 
@@ -350,7 +336,7 @@ msgstr "אישור<span class=\"chevron\"/>"
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_validated
 msgid "Confirmed"
-msgstr "אושר"
+msgstr "מאושר"
 
 #. module: website_calendar
 #: model:ir.model,name:website_calendar.model_res_partner
@@ -359,13 +345,13 @@ msgstr "איש קשר"
 
 #. module: website_calendar
 #. openerp-web
-#: code:addons/website_calendar/static/src/js/appointment_employee_url.js:0
+#: code:addons/website_calendar/static/src/js/appointment_employee_url.js:67
 #, python-format
 msgid "Copied !"
 msgstr "הועתק !"
 
 #. module: website_calendar
-#: code:addons/website_calendar/controllers/main.py:0
+#: code:addons/website_calendar/controllers/main.py:123
 #, python-format
 msgid "Country: %s"
 msgstr ""
@@ -381,7 +367,7 @@ msgstr "צור סוג פגישה חדש"
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_slot__create_uid
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__create_uid
 msgid "Created by"
-msgstr "נוצר על-ידי"
+msgstr "נוצר על ידי"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_answer__create_date
@@ -407,10 +393,10 @@ msgstr "תיאור:"
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_slot__display_name
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__display_name
 msgid "Display Name"
-msgstr "הצג שם"
+msgstr "השם המוצג"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_question__question_type__select
+#: selection:calendar.appointment.question,question_type:0
 msgid "Dropdown (one answer)"
 msgstr "נפתח (תשובה אחת)"
 
@@ -420,21 +406,21 @@ msgid "Duration:"
 msgstr "משך:"
 
 #. module: website_calendar
-#: model_terms:ir.ui.view,arch_db:website_calendar.calendar_appointment_type_view_kanban
-msgid "Edit"
-msgstr "ערוך"
-
-#. module: website_calendar
-#: code:addons/website_calendar/controllers/main.py:0
+#: code:addons/website_calendar/controllers/main.py:125
 #, python-format
 msgid "Email: %s"
-msgstr "מייל: %s"
+msgstr ""
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__employee_ids
 #: model_terms:ir.ui.view,arch_db:website_calendar.calendar_appointment_type_view_form
 msgid "Employees"
 msgstr "עובדים"
+
+#. module: website_calendar
+#: model:ir.model,name:website_calendar.model_calendar_event
+msgid "Event"
+msgstr "אירוע"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_follower_ids
@@ -449,7 +435,7 @@ msgstr "עוקבים (ערוצים)"
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_partner_ids
 msgid "Followers (Partners)"
-msgstr "עוקבים (לקוחות/ספקים)"
+msgstr "עוקבים (שותפים)"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_calendar
@@ -457,7 +443,7 @@ msgid "Fri"
 msgstr "שישי"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__5
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Friday"
 msgstr "שישי"
 
@@ -484,16 +470,19 @@ msgid "ID"
 msgstr "מזהה"
 
 #. module: website_calendar
-#: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__message_needaction
 #: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__message_unread
+msgid "If checked new messages require your attention."
+msgstr "אם מסומן אז הודעה חדשה דורשת התייחסותכם."
+
+#. module: website_calendar
+#: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "אם מסומן, הודעות חדשות דורשות את תשומת לבך."
+msgstr "אם סומן, הודעות חדשות דורשות את תשומת הלב שלך."
 
 #. module: website_calendar
 #: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__message_has_error
-#: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr "אם מסומן, בחלק מההודעות קיימת שגיאת משלוח."
+msgstr "אם סומן, לחלק מההודעות יש שגיאת משלוח."
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.setup
@@ -523,8 +512,8 @@ msgstr "האם עוקב"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__is_published
-msgid "Is Published"
-msgstr "מפורסם"
+msgid "Is published"
+msgstr "מתפרסם"
 
 #. module: website_calendar
 #: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__country_ids
@@ -540,7 +529,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_slot____last_update
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type____last_update
 msgid "Last Modified on"
-msgstr "שינוי אחרון ב"
+msgstr "תאריך שינוי אחרון"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_answer__write_uid
@@ -548,7 +537,7 @@ msgstr "שינוי אחרון ב"
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_slot__write_uid
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__write_uid
 msgid "Last Updated by"
-msgstr "עודכן לאחרונה על-ידי"
+msgstr "עודכן לאחרונה על ידי"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_answer__write_date
@@ -556,7 +545,7 @@ msgstr "עודכן לאחרונה על-ידי"
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_slot__write_date
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__write_date
 msgid "Last Updated on"
-msgstr "עדכון אחרון ב"
+msgstr "תאריך עדכון אחרון"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__location
@@ -576,12 +565,17 @@ msgstr "מיקום:"
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_main_attachment_id
 msgid "Main Attachment"
-msgstr "קובץ ראשי מצורף "
+msgstr "קובץ מצורף ראשי"
+
+#. module: website_calendar
+#: model:res.groups,name:website_calendar.group_calendar_manager
+msgid "Manager"
+msgstr "מנהל"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_has_error
 msgid "Message Delivery error"
-msgstr "הודעת שגיאת שליחה"
+msgstr "הודעת שגיאת משלוח"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_ids
@@ -590,10 +584,10 @@ msgid "Messages"
 msgstr "הודעות"
 
 #. module: website_calendar
-#: code:addons/website_calendar/controllers/main.py:0
+#: code:addons/website_calendar/controllers/main.py:124
 #, python-format
 msgid "Mobile: %s"
-msgstr "נייד: %s"
+msgstr ""
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_calendar
@@ -601,25 +595,25 @@ msgid "Mon"
 msgstr "שני"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__1
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Monday"
 msgstr "שני"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_question__question_type__text
+#: selection:calendar.appointment.question,question_type:0
 msgid "Multi-line text"
 msgstr "טקסט מרובה שורות"
 
 #. module: website_calendar
 #. openerp-web
-#: code:addons/website_calendar/static/src/js/website_calendar.editor.js:0
+#: code:addons/website_calendar/static/src/js/website_calendar.editor.js:30
 #, python-format
 msgid "Name"
 msgstr "שם"
 
 #. module: website_calendar
 #. openerp-web
-#: code:addons/website_calendar/static/src/js/website_calendar.editor.js:0
+#: code:addons/website_calendar/static/src/js/website_calendar.editor.js:29
 #, python-format
 msgid "New Appointment Type"
 msgstr "סוג פגישה חדש"
@@ -642,13 +636,13 @@ msgstr "מספר הפעולות"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_has_error_counter
-msgid "Number of errors"
-msgstr "מספר השגיאות"
+msgid "Number of error"
+msgstr "מספר שגיאה"
 
 #. module: website_calendar
 #: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__message_needaction_counter
 msgid "Number of messages which requires an action"
-msgstr "מספר ההודעות המחייבות פעולה"
+msgstr "מספר ההודעות שדורשות פעולה"
 
 #. module: website_calendar
 #: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__message_has_error_counter
@@ -688,7 +682,6 @@ msgstr "סוג פגישה מקוונת"
 #. module: website_calendar
 #: model:ir.actions.act_window,name:website_calendar.calendar_appointment_type_action
 #: model:ir.actions.act_window,name:website_calendar.calendar_event_action_reporting
-#: model:ir.module.category,name:website_calendar.module_category_calendar
 #: model:ir.ui.menu,name:website_calendar.appointment_type_menu
 #: model:ir.ui.menu,name:website_calendar.menu_schedule_report_all
 #: model:ir.ui.menu,name:website_calendar.website_appointment_type_menu
@@ -699,10 +692,10 @@ msgstr "פגישות מקוונות"
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_question__placeholder
 msgid "Placeholder"
-msgstr "Placeholder"
+msgstr "בעל תפקיד"
 
 #. module: website_calendar
-#: code:addons/website_calendar/models/calendar_appointment.py:0
+#: code:addons/website_calendar/models/calendar_appointment.py:302
 #, python-format
 msgid "Please enter a valid hour between 0:00 to 24:00 for your slots."
 msgstr "אנא הכנס שעה תקינה בין השעות 0:00 ל- 24:00 לחלונות זמנים שלך."
@@ -730,12 +723,12 @@ msgid "Questions"
 msgstr "שאלות"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_question__question_type__radio
+#: selection:calendar.appointment.question,question_type:0
 msgid "Radio (one answer)"
 msgstr "רדיו (תשובה אחת)"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_type__assignation_method__random
+#: selection:calendar.appointment.type,assignation_method:0
 msgid "Random"
 msgstr "אקראי"
 
@@ -747,7 +740,7 @@ msgstr "תזכורות"
 #. module: website_calendar
 #: model:ir.ui.menu,name:website_calendar.menu_schedule_report
 msgid "Reporting"
-msgstr "דוחות"
+msgstr "דיווח"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_question__question_required
@@ -760,24 +753,9 @@ msgid "Restrict Countries"
 msgstr "הגבלת ארצות"
 
 #. module: website_calendar
-#: model_terms:ir.ui.view,arch_db:website_calendar.calendar_appointment_type_view_kanban
-msgid "SCHEDULED"
-msgstr "מתוזמן"
-
-#. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__is_seo_optimized
 msgid "SEO optimized"
 msgstr "אופטימיזציה לקידום אתרים"
-
-#. module: website_calendar
-#: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_has_sms_error
-msgid "SMS Delivery error"
-msgstr "שגיאת שליחת SMS"
-
-#. module: website_calendar
-#: model:calendar.alarm,name:website_calendar.calendar_alarm_data_1h_sms
-msgid "SMS Text Message - 1 Hours"
-msgstr "הודעת SMS - שעה אחת "
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_calendar
@@ -785,14 +763,14 @@ msgid "Sat"
 msgstr "שבת"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__6
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Saturday"
 msgstr "שבת"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.calendar_appointment_type_view_form
 msgid "Schedule Appointment"
-msgstr "תזמן פגישה"
+msgstr "פגישה מתוזמנת"
 
 #. module: website_calendar
 #: model:calendar.appointment.type,name:website_calendar.calendar_appointment
@@ -826,7 +804,7 @@ msgid "Sequence"
 msgstr "רצף"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_question__question_type__char
+#: selection:calendar.appointment.question,question_type:0
 msgid "Single line text"
 msgstr "טקסט שורה בודדת"
 
@@ -851,7 +829,7 @@ msgid "Sun"
 msgstr "ראשון"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__7
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Sunday"
 msgstr "ראשון"
 
@@ -866,7 +844,7 @@ msgid "Thu"
 msgstr "חמישי"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__4
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Thursday"
 msgstr "חמישי"
 
@@ -907,7 +885,7 @@ msgid "Tue"
 msgstr "שלישי"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__2
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Tuesday"
 msgstr "שלישי"
 
@@ -919,7 +897,7 @@ msgstr "הודעות שלא נקראו"
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_unread_counter
 msgid "Unread Messages Counter"
-msgstr "מספר הודעות שלא נקראו"
+msgstr "מונה הודעות שלא נקראו"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.index
@@ -929,7 +907,7 @@ msgstr "הצג זמינות <span class=\"fa fa-arrow-right\"/>"
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__website_published
 msgid "Visible on current website"
-msgstr "גלוי באתר האינטרנט הנוכחי"
+msgstr "גלוי באתר הנוכחי"
 
 #. module: website_calendar
 #: model_terms:calendar.appointment.type,message_confirmation:website_calendar.calendar_appointment
@@ -943,32 +921,32 @@ msgstr ""
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__website_message_ids
 msgid "Website Messages"
-msgstr "הודעות מאתר האינטרנט"
+msgstr "הודעות מהאתר אינטרנט"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__website_url
 msgid "Website URL"
-msgstr "כתובת אתר אינטרנט"
+msgstr "כתובת אתר (url)"
 
 #. module: website_calendar
 #: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__website_message_ids
 msgid "Website communication history"
-msgstr "היסטוריית התקשרויות מאתר האינטרנט"
+msgstr "היסטוריית תקשורת מהאתר"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__website_meta_description
 msgid "Website meta description"
-msgstr "תגית תיאור אתר אינטרנט"
+msgstr "תיאור מקוצר לאתר ( meta description)"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__website_meta_keywords
 msgid "Website meta keywords"
-msgstr "תגית מילות מפתח אתר אינטרנט"
+msgstr "מילות מפתח לאתר (meta keywords)"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__website_meta_title
 msgid "Website meta title"
-msgstr "תגית כותרת אתר אינטרנט"
+msgstr "שורת כותרת לאתר (meta title)"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__website_meta_og_img
@@ -981,7 +959,7 @@ msgid "Wed"
 msgstr "רביעי"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__3
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Wednesday"
 msgstr "רביעי"
 
@@ -1019,7 +997,7 @@ msgstr "הדוא\"ל שלך"
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_form
 msgid "Your Name"
-msgstr "השם שלך"
+msgstr "שם מלא"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_form
@@ -1049,7 +1027,7 @@ msgstr "שעות מעכשיו!"
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_form
 msgid "on"
-msgstr "ב"
+msgstr "ב־"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_calendar

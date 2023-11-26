@@ -25,23 +25,25 @@ return AceEditor.extend({
      * @override
      */
     _saveView: function (session) {
-        var self = this;
+        var def = $.Deferred();
+
         var view = this.views[session.id];
         var old_arch = view.arch;
         var new_arch = session.text;
 
-        return new Promise(function (resolve, reject) {
-            self.trigger_up('save_xml_editor', {
-                view_id: session.id,
-                old_arch: old_arch,
-                new_arch: new_arch,
-                on_success: function () {
-                    self._toggleDirtyInfo(session.id, "xml", false);
-                    view.arch = new_arch;
-                    resolve();
-                },
-            });
+        var self = this;
+        this.trigger_up('save_xml_editor', {
+            view_id: session.id,
+            old_arch: old_arch,
+            new_arch: new_arch,
+            on_success: function () {
+                self._toggleDirtyInfo(session.id, "xml", false);
+                view.arch = new_arch;
+                def.resolve();
+            },
         });
+
+        return def;
     },
 });
 

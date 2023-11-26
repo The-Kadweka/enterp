@@ -1,15 +1,12 @@
 odoo.define('web_studio.reportEditComponents', function (require) {
 "use strict";
 
-var config = require('web.config');
 var core = require('web.core');
+var config = require('web.config');
 var utils = require('web.utils');
 var fieldRegistry = require('web.field_registry');
 var ModelFieldSelector = require('web.ModelFieldSelector');
 var StandaloneFieldManagerMixin = require('web.StandaloneFieldManagerMixin');
-
-var Wysiwyg = require('web_editor.wysiwyg');
-var SummernoteManager = require('web_editor.rte.summernote');
 
 var Abstract = require('web_studio.AbstractReportComponent');
 var DomainSelectorDialog = require('web.DomainSelectorDialog');
@@ -30,12 +27,6 @@ var AbstractEditComponent = Abstract.extend(StandaloneFieldManagerMixin, {
     }),
     /**
      * @override
-     * @param {Object} params
-     * @param {Object} params.context
-     * @param {Object} params.node
-     * @param {Object} [params.state]
-     * @param {string[]} [params.componentsList] the list of components for the
-     *                                           node
      */
     init: function (parent, params) {
         this._super.apply(this, arguments);
@@ -43,7 +34,6 @@ var AbstractEditComponent = Abstract.extend(StandaloneFieldManagerMixin, {
         this.state = params.state || {};
         this.node = params.node;
         this.context = params.context;
-        this.componentsList = params.componentsList;
         // TODO: check if using a real model with widgets is reasonnable or if
         // we should use actual html components in QWEB
         this.directiveFields = {};
@@ -53,7 +43,6 @@ var AbstractEditComponent = Abstract.extend(StandaloneFieldManagerMixin, {
 
         // add in init: directive => field selector
         this.fieldSelector = {};
-
     },
     /**
      * @override
@@ -95,7 +84,7 @@ var AbstractEditComponent = Abstract.extend(StandaloneFieldManagerMixin, {
                 });
             });
         var defParent = this._super.apply(this, arguments);
-        return Promise.all([defDirective, defParent]);
+        return $.when(defDirective, defParent);
     },
 
     //--------------------------------------------------------------------------
@@ -304,60 +293,53 @@ var AbstractEditComponent = Abstract.extend(StandaloneFieldManagerMixin, {
         var self = this;
         e.stopPropagation();  // TODO: is it really useful on an OdooEvent
 
-        e.data.dataPointID = this.directiveRecordId;
+        e.data.dataPointID = self.directiveRecordId;
+        StandaloneFieldManagerMixin._onFieldChanged.call(this, e);
 
-        var always = function () {
-            for (var directiveKey in self.fieldSelector) {
-                if (self.fieldSelector[directiveKey] === e.target) {
-                    break;
-                }
+        for (var directiveKey in this.fieldSelector) {
+            if (this.fieldSelector[directiveKey] === e.target) {
+                break;
             }
+        }
 
-            var newAttrs = {};
-            _.each(self.fieldSelector, function (fieldType, directiveKey) {
-                if (!e.data.forceChange && e.target !== self.fieldSelector[directiveKey]) {
-                    return;
-                }
-                var data = self.model.get(self.directiveRecordId).data;
-                var fieldValue = data[directiveKey];
-                // TODO: for relation field, maybe set id (or ids) in fieldValue to
-                // avoid overwritting _triggerViewChange in every directive
-                if (e.data.chain) {
-                    fieldValue = e.data.chain.join('.');
-                }
-                if (fieldValue.res_ids) {
-                    fieldValue = fieldValue.res_ids.slice();
-                }
-                newAttrs[directiveKey] = fieldValue;
-            });
-
+        var newAttrs = {};
+        _.each(this.fieldSelector, function (fieldType, directiveKey) {
+            if (!e.data.forceChange && e.target !== self.fieldSelector[directiveKey]) {
+                return;
+            }
+            var data = self.model.get(self.directiveRecordId).data;
+            var fieldValue = data[directiveKey];
+            // TODO: for relation field, maybe set id (or ids) in fieldValue to
+            // avoid overwritting _triggerViewChange in every directive
             if (e.data.chain) {
-                e.data.dataPointID = self.directiveRecordId;
-                e.data.changes = newAttrs;
+                fieldValue = e.data.chain.join('.');
             }
+            if (fieldValue.res_ids) {
+                fieldValue = fieldValue.res_ids.slice();
+            }
+            newAttrs[directiveKey] = fieldValue;
+        });
 
-            self._triggerViewChange(newAttrs);
-        };
+        if (e.data.chain) {
+            e.data.dataPointID = this.directiveRecordId;
+            e.data.changes = newAttrs;
+        }
 
-        StandaloneFieldManagerMixin._onFieldChanged.call(this, e).then(always, always);
+        this._triggerViewChange(newAttrs);
     },
 });
 
-
-var loadColors;
 var LayoutEditable = AbstractEditComponent.extend({
     name: 'layout',
     template : 'web_studio.ReportLayoutEditable',
     events : _.extend({}, AbstractEditComponent.prototype.events, {
         "change .o_web_studio_margin>input": "_onMarginInputChange",
         "change .o_web_studio_width>input": "_onWidthInputChange",
-        "click .o_web_studio_font_size .dropdown-item-text": "_onFontSizeChange",
+        "change .o_web_studio_font_size>select": "_onFontSizeInputChange",
         "change .o_web_studio_table_style > select": "_onTableStyleInputChange",
         "click .o_web_studio_text_decoration button": "_onTextDecorationChange",
-        "click .o_web_studio_text_alignment button": "_onTextAlignmentChange",
         "change .o_web_studio_classes>input": "_onClassesChange",
         "click .o_web_studio_colors .o_web_studio_reset_color": "_onResetColor",
-        "click .o_web_studio_colors .o_web_studio_custom_color": "_onCustomColor",
     }),
     /**
      * @override
@@ -365,14 +347,13 @@ var LayoutEditable = AbstractEditComponent.extend({
     init: function (parent, params) {
         this._super.apply(this, arguments);
 
-        this.debug = config.isDebug();
+        this.debug = config.debug;
         this.isTable = params.node.tag === 'table';
-        this.isNodeText = _.contains(this.componentsList, 'text');
         this.allClasses = params.node.attrs.class || "";
         this.classesArray =(params.node.attrs.class || "").split(' ');
         this.stylesArray =(params.node.attrs.style || "").split(';');
 
-        var fontSizeRegExp= new RegExp(/^\s*(h[123456]{1})|(small)|(display-[1234]{1})\s*$/gim);
+        var fontSizeRegExp= new RegExp(/^\s*(h[123456]{1})|(small)\s*$/gim);
         var backgroundColorRegExp= new RegExp(/^\s*background\-color\s*:/gi);
         var colorRegExp= new RegExp(/^\s*color\s*:/gi);
         var widthRegExp= new RegExp(/^\s*width\s*:/gi);
@@ -397,10 +378,7 @@ var LayoutEditable = AbstractEditComponent.extend({
         this.color = _.find(this.stylesArray, function(item) {
             return colorRegExp.test(item);
         });
-        // the width on div.col is set with col-. instead of width style
-        this.displayWidth = !(params.node.tag === 'div' && _.find(this.classesArray, function(item) {
-            return item.indexOf('col') !== -1;
-        }));
+
         this.originalWidth =  _.find(this.stylesArray, function(item) {
             return widthRegExp.test(item);
         });
@@ -416,19 +394,7 @@ var LayoutEditable = AbstractEditComponent.extend({
         this.bold =_.contains(this.classesArray, 'o_bold');
         this.underline = _.contains(this.classesArray, 'o_underline');
 
-        this.alignment = _.intersection(this.classesArray, ['text-left', 'text-center', 'text-right'])[0];
-        this.displayAlignment = !_.contains(['inline', 'float'], this.node.$nodes.css('display'));
-
         this.allClasses = params.node.attrs.class || "";
-
-        new SummernoteManager(this);
-    },
-    /**
-     * @override
-     */
-    willStart: async function () {
-        await this._super();
-        this._groupColors = await this._getColors();
     },
     /**
      * Override to re-render the color picker on each component rendering.
@@ -438,52 +404,20 @@ var LayoutEditable = AbstractEditComponent.extend({
     renderElement: function() {
         var self = this;
         this._super.apply(this, arguments);
-        this.$('.o_web_studio_background_colorpicker .o_web_studio_color_palette').append(this._createPalette());
-        this.$('.o_web_studio_background_colorpicker').on("mousedown", 'button[data-color]', function (e) {
-            self._onColorChange($(e.currentTarget).data('value').replace('text-', 'bg-'), "background");
+        $.summernote.renderer.createPalette(this.$el,$.summernote.options);
+        this.$el.find(".o_web_studio_background_colorpicker .note-color-palette button").on("click", function(e) {
+            self._onColorChange(e.currentTarget, "background");
         });
-        this.$('.o_web_studio_font_colorpicker .o_web_studio_color_palette').append(this._createPalette());
-        this.$('.o_web_studio_font_colorpicker').on("mousedown", 'button[data-color]', function (e) {
-            self._onColorChange($(e.currentTarget).data('value'), "font");
+
+        this.$el.find(".o_web_studio_font_colorpicker .note-color-palette button").on("click", function(e) {
+            self._onColorChange(e.currentTarget, "font");
         });
      },
-
-
 
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
-    /**
-     * @private
-     * @returns {JQuery Node}
-     */
-    _createPalette: function () {
-        var self = this;
-        var $fontPlugin = $('<div/>');
-        this._groupColors.forEach(function (color) {
-            var $row;
-            if (typeof color === 'string') {
-                $row = $('<h6/>').text(color);
-            } else {
-                $row = $('<div class="o_web_studio_color_row"/>');
-                color.forEach(function (color) {
-                    var $button = $('<button/>').appendTo($row);
-                    $button.attr('data-color', color);
-                    if (color.startsWith('#')) {
-                        $button.css('background-color', color);
-                        $button.attr('data-value', color);
-                    } else {
-                        $button.addClass('bg-' + color);
-                        $button.attr('data-value', 'text-' + color);
-                    }
-                    $row.append($button);
-                });
-            }
-            $fontPlugin.append($row);
-        });
-        return $fontPlugin;
-    },
     /**
      * @private
      * @param {String} marginName the short name of the margin property (mt for
@@ -502,49 +436,6 @@ var LayoutEditable = AbstractEditComponent.extend({
             }
         }
     },
-    /**
-     * @private
-     * @returns {Array}
-     */
-    _getColors: async function () {
-        if (!('web_editor.colorpicker' in qweb.templates)) {
-            await this._rpc({
-                model: 'ir.ui.view',
-                method: 'read_template',
-                args: ['web_editor.colorpicker'],
-            }).then(function (template) {
-                return qweb.add_template('<templates>' + template + '</templates>');
-            });
-        }
-
-        var groupColors = [];
-        var $clpicker = $(qweb.render('web_editor.colorpicker'));
-        $clpicker.children('.o_colorpicker_section').each(function () {
-            groupColors.push($(this).attr('data-display'));
-            var colors = [];
-            $(this.children).each(function () {
-                if ($(this).hasClass('clearfix')) {
-                    groupColors.push(colors);
-                    colors = [];
-                } else {
-                    colors.push($(this).attr('data-color') || '');
-                }
-            });
-            groupColors.push(colors);
-        });
-
-        groupColors = groupColors.concat([
-            ['#FF0000', '#FF9C00', '#FFFF00', '#00FF00', '#00FFFF', '#0000FF', '#9C00FF', '#FF00FF'],
-            ['#F7C6CE', '#FFE7CE', '#FFEFC6', '#D6EFD6', '#CEDEE7', '#CEE7F7', '#D6D6E7', '#E7D6DE'],
-            ['#E79C9C', '#FFC69C', '#FFE79C', '#B5D6A5', '#A5C6CE', '#9CC6EF', '#B5A5D6', '#D6A5BD'],
-            ['#E76363', '#F7AD6B', '#FFD663', '#94BD7B', '#73A5AD', '#6BADDE', '#8C7BC6', '#C67BA5'],
-            ['#CE0000', '#E79439', '#EFC631', '#6BA54A', '#4A7B8C', '#3984C6', '#634AA5', '#A54A7B'],
-            ['#9C0000', '#B56308', '#BD9400', '#397B21', '#104A5A', '#085294', '#311873', '#731842'],
-            ['#630000', '#7B3900', '#846300', '#295218', '#083139', '#003163', '#21104A', '#4A1031']
-        ]);
-
-        return groupColors;
-    },
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -555,13 +446,13 @@ var LayoutEditable = AbstractEditComponent.extend({
      * @param {JQelement} $elem
      * @param {String} type either font or background
      */
-    _onColorChange: function (value, type) {
-        var isClass = /^(text|bg)-/ .test(value);
-        if (isClass) {
-            this._editDomAttribute("class", value, type === "background" ? this["background-color-class"] : this["font-color-class"]);
+    _onColorChange: function ($elem, type) {
+        var params = $elem.dataset;
+        if (params.event) {
+            this._editDomAttribute("class", params.value, type === "background" ? this["background-color-class"] : this["font-color-class"]);
         } else {
             var attributeName = type === "background" ? 'background-color' : 'color';
-            this._editDomAttribute("style", attributeName + ':' + value, this[attributeName]);
+            this._editDomAttribute("style", attributeName + ':' + params.value, this[attributeName]);
         }
     },
     /**
@@ -583,27 +474,9 @@ var LayoutEditable = AbstractEditComponent.extend({
      * @private
      * @param {JQEvent} e
      */
-    _onCustomColor: function (e) {
+    _onFontSizeInputChange: function(e) {
         e.preventDefault();
-        core.bus.trigger('color_picker_dialog_demand', {
-            color: 'rgb(255, 0, 0)',
-            onSave: function (color) {
-                var $button = $('<button/>');
-                $button.attr('data-color', color);
-                $button.attr('data-value', color);
-                $button.css('background-color', color);
-                $(e.target).closest('.dropdown-item').find('.o_web_studio_custom_colors').append($button);
-                $button.mousedown();
-            }
-        });
-    },
-    /**
-     * @private
-     * @param {JQEvent} e
-     */
-    _onFontSizeChange: function (e) {
-        e.preventDefault();
-        this._editDomAttribute('class', $(e.currentTarget).data('value'), this.fontSize);
+        this._editDomAttribute("class", e.target.value, this.fontSize);
     },
     /**
      * @private
@@ -643,16 +516,6 @@ var LayoutEditable = AbstractEditComponent.extend({
                 this._editDomAttribute("style", null, this.color);
             }
         }
-    },
-    /**
-     * @private
-     * @param {JQEvent} e
-     */
-    _onTextAlignmentChange : function(e) {
-        e.preventDefault();
-        var data = $(e.currentTarget).data();
-        var toAdd = this.alignment !== data.property ? data.property : null;
-        this._editDomAttribute("class", toAdd, this.alignment);
     },
     /**
      * @private
@@ -756,7 +619,7 @@ var TIf = AbstractEditComponent.extend({
         var value = Domain.prototype.conditionToDomain(this.node.attrs['t-if'] || '');
         var dialog = new DomainSelectorDialog(this, 'record_fake_model', value, {
             readonly: this.mode === "readonly",
-            debugMode: config.isDebug(),
+            debugMode: config.debug,
             fields: availableKeys,
             default: [[availableKeys[0].name, '!=', false]],
             operators: ["=", "!=", ">", "<", ">=", "<=", "in", "not in", "set", "not set"],
@@ -766,16 +629,6 @@ var TIf = AbstractEditComponent.extend({
             self.$('input').val(condition === 'True' ? '' : condition).trigger('change');
         });
     },
-
-    /**
-    * @override
-    */
-    _onDirectiveChange: function (e) {
-        if (e.target.name === "t-if") {
-            return this._super.apply(this, arguments);
-        }
-        e.stopPropagation();
-    }
 });
 
 var TElse = AbstractEditComponent.extend({
@@ -841,7 +694,7 @@ var TEsc = AbstractEditComponent.extend({
      */
     start: function () {
         var self = this;
-        return this._super.apply(this, arguments).then(function () {
+        this._super.apply(this, arguments).then(function () {
             return self.fieldSelector['t-esc'].appendTo(self.$('.o_web_studio_tesc_escexpression'));
         });
     },
@@ -870,11 +723,10 @@ var TSet = AbstractEditComponent.extend({
      */
     start: function () {
         var self = this;
-        return this._super.apply(this, arguments).then(function () {
-            return Promise.all([
+        this._super.apply(this, arguments).then(function () {
+            return $.when(
                 self.fieldSelector['t-set'].appendTo(self.$('.o_web_studio_tset_setexpression')),
-                self.fieldSelector['t-value'].appendTo(self.$('.o_web_studio_tset_valueexpression'))
-            ]);
+                self.fieldSelector['t-value'].appendTo(self.$('.o_web_studio_tset_valueexpression')));
         });
     },
 });
@@ -903,10 +755,9 @@ var TForeach = AbstractEditComponent.extend({
     start: function () {
         var self = this;
         return this._super.apply(this, arguments).then(function () {
-            return Promise.all([
+            return $.when(
                 self.fieldSelector['t-as'].appendTo(self.$('.o_web_studio_tas_asexpression')),
-                self.fieldSelector['t-foreach'].appendTo(self.$('.o_web_studio_tforeach_foreachexpression'))
-            ]);
+                self.fieldSelector['t-foreach'].appendTo(self.$('.o_web_studio_tforeach_foreachexpression')));
         });
     },
 });
@@ -962,12 +813,11 @@ var BlockTotal = AbstractEditComponent.extend({
     start: function () {
         var self = this;
         return this._super.apply(this, arguments).then(function () {
-            return Promise.all([
+            return $.when(
                 self.fieldSelector.total_currency_id.appendTo(self.$('.o_web_studio_report_currency_id')),
                 self.fieldSelector.total_amount_untaxed.appendTo(self.$('.o_web_studio_report_amount_untaxed')),
                 self.fieldSelector.total_amount_total.appendTo(self.$('.o_web_studio_report_amount_total')),
-                self.fieldSelector.total_amount_by_groups.appendTo(self.$('.o_web_studio_report_amount_by_groups'))
-            ]);
+                self.fieldSelector.total_amount_by_groups.appendTo(self.$('.o_web_studio_report_amount_by_groups')));
         });
     },
     /**
@@ -1013,10 +863,9 @@ var Column = AbstractEditComponent.extend({
     start: function () {
         var self = this;
         return this._super.apply(this, arguments).then(function () {
-            return Promise.all([
+            return $.when(
                 self.fieldSelector.size.prependTo(self.$('.o_web_studio_size')),
-                self.fieldSelector.offset.prependTo(self.$('.o_web_studio_offset'))
-            ]);
+                self.fieldSelector.offset.prependTo(self.$('.o_web_studio_offset')));
         });
     },
     /**
@@ -1043,9 +892,6 @@ var Text = AbstractEditComponent.extend({
     template : 'web_studio.ReportText',
     selector: TextSelectorTags.split(',').join(filter + ',') + filter,
     blacklist: TextSelectorTags,
-    custom_events: {
-        wysiwyg_blur: '_onBlurWysiwygEditor',
-    },
     /**
      * @override
      */
@@ -1074,7 +920,7 @@ var Text = AbstractEditComponent.extend({
             .then(function () {
                 return self.fieldSelector.text.appendTo(self.$('.o_web_studio_text'));
             }).then(function () {
-                return self._startWysiwygEditor();
+                self._startSummernote();
             });
     },
 
@@ -1082,17 +928,12 @@ var Text = AbstractEditComponent.extend({
     // Private
     //--------------------------------------------------------------------------
 
-    _onBlurWysiwygEditor: function () {
+    _startSummernote: function () {
         var self = this;
-        return this.wysiwyg.save().then(function (result) {
-            if (result.isDirty) {
-                self._triggerViewChange({text: result.html});
-            }
-        });
-    },
-    _startWysiwygEditor: function () {
-        var self = this;
-        this.wysiwyg = new Wysiwyg(this, {
+        var initialValue = this.directiveFields.text.value;
+        var value = initialValue;
+        this.$textarea = this.$('textarea:first');
+        this.$textarea.summernote({
             focus: false,
             height: 180,
             toolbar: [
@@ -1104,22 +945,26 @@ var Text = AbstractEditComponent.extend({
             ],
             prettifyHtml: false,
             styleWithSpan: false,
+            inlinemedia: ['p'],
             lang: "odoo",
-            disableDragAndDrop: true,
-            recordInfo: {
-                context: this.context,
+            onChange: function (v) {
+                value = v;
             },
+            onBlur: function () {
+                if (initialValue === value) {
+                    return;
+                }
+                self.trigger_up('field_changed', {
+                    forceChange: true,
+                    changes: {
+                        text: value,
+                    }
+                });
+            },
+            disableDragAndDrop: true,
         });
-        this.$textarea = this.$('textarea:first').val(this.directiveFields.text.value);
-
-        this.$textarea.off().on('input', function (e) { // to test simple
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            self.wysiwyg.setValue($(this).val());
-            self.wysiwyg.trigger_up('wysiwyg_blur');
-        });
-
-        return this.wysiwyg.attachTo(this.$textarea);
+        // trigger a mouseup to refresh the editor toolbar
+        this.$('.note-editable:first').trigger('mouseup');
     },
     /**
      * @override
@@ -1340,7 +1185,7 @@ var TOptions = AbstractEditComponent.extend( {
             this.$('.o_web_studio_toption_widget select').val(this.widget.key);
             defs.push(this._updateWidgetOptions());
         }
-        return Promise.all(defs);
+        return $.when.apply($, defs);
     },
 
     //--------------------------------------------------------------------------
@@ -1362,7 +1207,7 @@ var TOptions = AbstractEditComponent.extend( {
     },
     /**
      * @private
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _updateWidgetOptions: function () {
         var self = this;
@@ -1382,7 +1227,7 @@ var TOptions = AbstractEditComponent.extend( {
             }
 
         });
-        return Promise.all(defs).then (function () {
+        return $.when.apply($, defs).then (function () {
             self.$el.find('.o_studio_report_options_container').append($options);
         });
     },

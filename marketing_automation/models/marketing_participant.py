@@ -39,9 +39,7 @@ class MarketingParticipant(models.Model):
         operator = 'not in' if operator in NEGATIVE_TERM_OPERATORS else 'in'
         return [('id', operator, ir_model_ids)]
 
-    campaign_id = fields.Many2one(
-        'marketing.campaign', string='Campaign',
-        index=True, ondelete='cascade', required=True)
+    campaign_id = fields.Many2one('marketing.campaign', string='Campaign', ondelete='cascade', required=True)
     model_id = fields.Many2one(
         'ir.model', string='Object', related='campaign_id.model_id',
         index=True, readonly=True, store=True)
@@ -59,15 +57,12 @@ class MarketingParticipant(models.Model):
         ('unlinked', 'Removed'),
         ], default='running', index=True, required=True,
         help='Removed means the related record does not exist anymore.')
-    is_test = fields.Boolean('Test Record', default=False)
 
     @api.depends('model_name', 'res_id')
     def _compute_resource_ref(self):
         for participant in self:
             if participant.model_name and participant.model_name in self.env:
                 participant.resource_ref = '%s,%s' % (participant.model_name, participant.res_id or 0)
-            else:
-                participant.resource_ref = None
 
     def _set_resource_ref(self):
         for participant in self:
@@ -133,7 +128,6 @@ class MarketingTrace(models.Model):
         'marketing.participant', string='Participant',
         index=True, ondelete='cascade', required=True)
     res_id = fields.Integer(string='Document ID', related='participant_id.res_id', index=True, store=True, readonly=False)
-    is_test = fields.Boolean(string='Test Trace', related='participant_id.is_test', index=True, store=True, readonly=True)
     activity_id = fields.Many2one(
         'marketing.activity', string='Activity',
         index=True, ondelete='cascade', required=True)
@@ -153,13 +147,13 @@ class MarketingTrace(models.Model):
     parent_id = fields.Many2one('marketing.trace', string='Parent', index=True, ondelete='cascade')
     child_ids = fields.One2many('marketing.trace', 'parent_id', string='Direct child traces')
     # statistics
-    mailing_trace_ids = fields.One2many('mailing.trace', 'marketing_trace_id', string='Mass mailing statistics')
-    sent = fields.Datetime(related='mailing_trace_ids.sent', readonly=False)
-    exception = fields.Datetime(related='mailing_trace_ids.exception', readonly=False)
-    opened = fields.Datetime(related='mailing_trace_ids.opened', readonly=False)
-    replied = fields.Datetime(related='mailing_trace_ids.replied', readonly=False)
-    bounced = fields.Datetime(related='mailing_trace_ids.bounced', readonly=False)
-    clicked = fields.Datetime(related='mailing_trace_ids.clicked', readonly=False)
+    mail_statistics_ids = fields.One2many('mail.mail.statistics', 'marketing_trace_id', string='Mass mailing statistics')
+    sent = fields.Datetime(related='mail_statistics_ids.sent', readonly=False)
+    exception = fields.Datetime(related='mail_statistics_ids.exception', readonly=False)
+    opened = fields.Datetime(related='mail_statistics_ids.opened', readonly=False)
+    replied = fields.Datetime(related='mail_statistics_ids.replied', readonly=False)
+    bounced = fields.Datetime(related='mail_statistics_ids.bounced', readonly=False)
+    clicked = fields.Datetime(related='mail_statistics_ids.clicked', readonly=False)
 
     def participant_action_cancel(self):
         self.action_cancel(message=_('Manually'))

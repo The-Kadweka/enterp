@@ -28,7 +28,7 @@
                 <div class="row" id='complement'>
                     <div class="barcode col-3">
                         <t t-set="sello" t-value="xml.get('Sello', 'No identificado')[-8:]"/>
-                        <img alt="Barcode" t-att-src="'/report/barcode/?type=QR&amp;value=%s&amp;width=180&amp;height=180' % quote_plus(
+                        <img alt="Barcode" t-att-src="'/report/barcode/?type=QR&amp;value=%s' % quote_plus(
                             'https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx?' + keep_query(
                                 re=o.l10n_mx_edi_cfdi_supplier_rfc, rr=o.l10n_mx_edi_cfdi_customer_rfc,
                                 tt=0, id=o.l10n_mx_edi_cfdi_uuid)
@@ -51,7 +51,7 @@
                             <span>Original chain complement of digital certification SAT</span>
                         </div>
                         <div class="digital-stamp-content">
-                            <span t-esc="tfd_original_string"/>
+                            <span class="nowrap" t-esc="tfd_original_string"/>
                         </div>
                         <div t-if="xml.Emisor.xpath('cfdi:ExpedidoEn', namespaces=xml.nsmap)" class="digital-stamp">
                             <span>Issued from</span>
@@ -122,7 +122,7 @@
                     </thead>
                     <tbody>
                         <tr t-foreach="docs_related" t-as="inv">
-                            <td><span t-esc="o.invoice_ids.filtered(lambda i: i.l10n_mx_edi_cfdi_uuid == inv.get('IdDocumento')).name or ''"/></td>
+                            <td><span t-esc="o.invoice_ids.filtered(lambda i: i.l10n_mx_edi_cfdi_uuid == inv.get('IdDocumento')).number or ''"/></td>
                             <td><span t-esc="inv.get('IdDocumento')"/></td>
                             <td class="text-right"><span t-esc="inv.get('NumParcialidad', '')"/></td>
                             <td class="text-right"><span t-esc="inv.get('ImpSaldoAnt', '')"/></td>
@@ -146,11 +146,11 @@
                     </thead>
                     <tbody>
                         <tr t-foreach="o.invoice_ids" t-as="inv">
-                            <td><span t-field="inv.invoice_date"/></td>
-                            <td><span t-field="inv.name"/></td>
+                            <td><span t-field="inv.date_invoice"/></td>
+                            <td><span t-field="inv.number"/></td>
                             <td class="text-right"><span t-field="inv.amount_total"/></td>
-                            <td class="text-right"><span t-esc="inv.amount_total - inv.amount_residual" t-options="{'widget': 'monetary', 'display_currency': inv.currency_id}"/></td>
-                            <td class="text-right"><span t-field="inv.amount_residual"/></td>
+                            <td class="text-right"><span t-esc="inv.amount_total - inv.residual" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                            <td class="text-right"><span t-field="inv.residual"/></td>
                         </tr>
                     </tbody>
                 </table>

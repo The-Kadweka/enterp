@@ -45,7 +45,7 @@ var HelpdeskDashboardRenderer = KanbanRenderer.extend({
     /**
      * @override
      * @private
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _render: function () {
         var self = this;
@@ -138,14 +138,14 @@ var HelpdeskDashboardModel = KanbanModel.extend({
     },
     /**
      * @œverride
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     load: function () {
         return this._loadDashboard(this._super.apply(this, arguments));
     },
     /**
      * @œverride
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     reload: function () {
         return this._loadDashboard(this._super.apply(this, arguments));
@@ -157,8 +157,8 @@ var HelpdeskDashboardModel = KanbanModel.extend({
 
     /**
      * @private
-     * @param {Promise} super_def a promise that resolves with a dataPoint id
-     * @returns {Promise -> string} resolves to the dataPoint id
+     * @param {Deferred} super_def a deferred that resolves with a dataPoint id
+     * @returns {Deferred -> string} resolves to the dataPoint id
      */
     _loadDashboard: function (super_def) {
         var self = this;
@@ -166,9 +166,7 @@ var HelpdeskDashboardModel = KanbanModel.extend({
             model: 'helpdesk.team',
             method: 'retrieve_dashboard',
         });
-        return Promise.all([super_def, dashboard_def]).then(function(results) {
-            var id = results[0];
-            var dashboardValues = results[1];
+        return $.when(super_def, dashboard_def).then(function(id, dashboardValues) {
             self.dashboardValues[id] = dashboardValues;
             return id;
         });
@@ -212,7 +210,7 @@ var HelpdeskDashboardController = KanbanController.extend({
     _onDashboardOpenAction: function (e) {
         var self = this;
         var action_name = e.data.action_name;
-        if (_.contains(['action_view_rating_today', 'action_view_rating_7days'], action_name)) {
+        if (_.contains(['helpdesk_rating_today', 'helpdesk_rating_7days'], action_name)) {
             return this._rpc({model: this.modelName, method: action_name})
                 .then(function (data) {
                     if (data) {

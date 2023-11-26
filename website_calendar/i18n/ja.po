@@ -1,27 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_calendar
+# * website_calendar
 # 
 # Translators:
-# SHIMIZU Taku <shimizu.taku@gmail.com>, 2019
-# Martin Trigaux, 2019
-# Manami Hashi <manami@roomsfor.hk>, 2019
-# kent_ocean <ke.tanabe@gmail.com>, 2019
-# Takahiro MURAKAMI <murakami@date-yakkyoku.com>, 2019
-# Norimichi Sugimoto <norimichi.sugimoto@tls-ltd.co.jp>, 2019
-# Tim Siu Lai <tl@roomsfor.hk>, 2019
-# NANIWA Masahiro <naniwa.masahiro@gmail.com>, 2019
-# Yoshi Tashiro (Quartile) <tashiro@roomsfor.hk>, 2020
+# SHIMIZU Taku <shimizu.taku@gmail.com>, 2018
+# Martin Trigaux, 2018
+# Manami Hashi <manami@roomsfor.hk>, 2018
+# kent_ocean <ke.tanabe@gmail.com>, 2018
+# Takahiro MURAKAMI <murakami@date-yakkyoku.com>, 2018
+# Norimichi Sugimoto <norimichi.sugimoto@tls-ltd.co.jp>, 2018
+# Yoshi Tashiro <tashiro@roomsfor.hk>, 2020
 # Noma Yuki, 2020
-# Ryoko Tsuda <ryoko@quartile.co>, 2022
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-07 07:21+0000\n"
-"PO-Revision-Date: 2019-08-26 09:39+0000\n"
-"Last-Translator: Ryoko Tsuda <ryoko@quartile.co>, 2022\n"
+"POT-Creation-Date: 2018-10-08 07:15+0000\n"
+"PO-Revision-Date: 2018-08-24 11:49+0000\n"
+"Last-Translator: Noma Yuki, 2020\n"
 "Language-Team: Japanese (https://www.transifex.com/odoo/teams/41243/ja/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -30,7 +27,7 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: website_calendar
-#: code:addons/website_calendar/models/calendar_appointment.py:0
+#: code:addons/website_calendar/models/calendar_appointment.py:66
 #, python-format
 msgid " (copy)"
 msgstr "(コピー)"
@@ -46,7 +43,7 @@ msgid "#{day['today_cls'] and 'Today' or ''}"
 msgstr "#{day['today_cls'] and 'Today' or ''}"
 
 #. module: website_calendar
-#: code:addons/website_calendar/controllers/main.py:0
+#: code:addons/website_calendar/controllers/main.py:142
 #, python-format
 msgid "%s with %s"
 msgstr "%sと%s"
@@ -62,7 +59,7 @@ msgid "+1 (650) 691-3277"
 msgstr "+1 (650) 691-3277"
 
 #. module: website_calendar
-#: code:addons/website_calendar/controllers/main.py:0
+#: code:addons/website_calendar/controllers/main.py:186
 #, python-format
 msgid ", All Day"
 msgstr "、 一日中"
@@ -73,6 +70,11 @@ msgid "-- select a country --"
 msgstr "- 国を選択 -"
 
 #. module: website_calendar
+#: model:calendar.alarm,name:website_calendar.calendar_alarm_data_1h_sms
+msgid "1 Hour SMS text"
+msgstr ""
+
+#. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_validated
 msgid ""
 "<br/>\n"
@@ -80,11 +82,6 @@ msgid ""
 msgstr ""
 "<br/>\n"
 "オンラインでキャンセルするには遅すぎます。本当に出席できない場合は、別の方法で参加者に連絡してください。"
-
-#. module: website_calendar
-#: model_terms:ir.ui.view,arch_db:website_calendar.calendar_appointment_type_view_kanban
-msgid "<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" title=\"Manage\"/>"
-msgstr "<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" title=\"Manage\"/>"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_validated
@@ -109,7 +106,7 @@ msgstr "<span>日々</span>"
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.calendar_appointment_type_view_form
 msgid "<span> hours before</span>"
-msgstr "<span>時間前</span>"
+msgstr "<span>数時間前</span>"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.calendar_appointment_type_view_form
@@ -184,11 +181,6 @@ msgid "Action Needed"
 msgstr "要アクション"
 
 #. module: website_calendar
-#: model:res.groups,name:website_calendar.group_calendar_manager
-msgid "Administrator"
-msgstr "管理者"
-
-#. module: website_calendar
 #: model:ir.actions.act_window,name:website_calendar.website_calendar_report
 #: model:ir.ui.menu,name:website_calendar.menu_schedule_report_online
 msgid "All Appointments"
@@ -260,6 +252,7 @@ msgid "Appointment<span class=\"chevron\"/>"
 msgstr "アポイントメント<span class=\"chevron\"/>"
 
 #. module: website_calendar
+#: model:ir.module.category,name:website_calendar.module_category_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.calendar_appointment_type_view_form
 #: model_terms:ir.ui.view,arch_db:website_calendar.calendar_event_view_graph
 #: model_terms:ir.ui.view,arch_db:website_calendar.calendar_event_view_pivot
@@ -302,27 +295,17 @@ msgid "Calendar"
 msgstr "カレンダ"
 
 #. module: website_calendar
-#: model:ir.model,name:website_calendar.model_calendar_event
-msgid "Calendar Event"
-msgstr "カレンダーイベント"
-
-#. module: website_calendar
-#: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__can_publish
-msgid "Can Publish"
-msgstr "公開可能"
-
-#. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__min_cancellation_hours
 msgid "Cancel Before (hours)"
 msgstr "前にキャンセル(時間)"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_question__question_type__checkbox
+#: selection:calendar.appointment.question,question_type:0
 msgid "Checkboxes (multiple answers)"
 msgstr "チェックボックス(複数回答)"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_type__assignation_method__chosen
+#: selection:calendar.appointment.type,assignation_method:0
 msgid "Chosen by the Customer"
 msgstr "お客様が選択"
 
@@ -360,13 +343,13 @@ msgstr "連絡先"
 
 #. module: website_calendar
 #. openerp-web
-#: code:addons/website_calendar/static/src/js/appointment_employee_url.js:0
+#: code:addons/website_calendar/static/src/js/appointment_employee_url.js:67
 #, python-format
 msgid "Copied !"
 msgstr "コピーされました。"
 
 #. module: website_calendar
-#: code:addons/website_calendar/controllers/main.py:0
+#: code:addons/website_calendar/controllers/main.py:123
 #, python-format
 msgid "Country: %s"
 msgstr "国:%s"
@@ -411,7 +394,7 @@ msgid "Display Name"
 msgstr "表示名"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_question__question_type__select
+#: selection:calendar.appointment.question,question_type:0
 msgid "Dropdown (one answer)"
 msgstr "ドロップダウン(1つの回答)"
 
@@ -421,12 +404,7 @@ msgid "Duration:"
 msgstr "期間:"
 
 #. module: website_calendar
-#: model_terms:ir.ui.view,arch_db:website_calendar.calendar_appointment_type_view_kanban
-msgid "Edit"
-msgstr "編集"
-
-#. module: website_calendar
-#: code:addons/website_calendar/controllers/main.py:0
+#: code:addons/website_calendar/controllers/main.py:125
 #, python-format
 msgid "Email: %s"
 msgstr "メール:%s"
@@ -436,6 +414,11 @@ msgstr "メール:%s"
 #: model_terms:ir.ui.view,arch_db:website_calendar.calendar_appointment_type_view_form
 msgid "Employees"
 msgstr "従業員"
+
+#. module: website_calendar
+#: model:ir.model,name:website_calendar.model_calendar_event
+msgid "Event"
+msgstr "イベント"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_follower_ids
@@ -458,7 +441,7 @@ msgid "Fri"
 msgstr "金曜日"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__5
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Friday"
 msgstr "金曜"
 
@@ -484,14 +467,17 @@ msgid "ID"
 msgstr "ID"
 
 #. module: website_calendar
-#: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__message_needaction
 #: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__message_unread
+msgid "If checked new messages require your attention."
+msgstr "チェックされている場合は、新しいメッセージに注意が必要です。"
+
+#. module: website_calendar
+#: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__message_needaction
 msgid "If checked, new messages require your attention."
 msgstr "チェックされている場合は、新しいメッセージに注意が必要です。"
 
 #. module: website_calendar
 #: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__message_has_error
-#: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr "チェックした場合、一部のメッセージが配信エラーが発生しています。"
 
@@ -523,8 +509,8 @@ msgstr "フォロー中　"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__is_published
-msgid "Is Published"
-msgstr "公開済"
+msgid "Is published"
+msgstr ""
 
 #. module: website_calendar
 #: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__country_ids
@@ -578,6 +564,11 @@ msgid "Main Attachment"
 msgstr "主な添付"
 
 #. module: website_calendar
+#: model:res.groups,name:website_calendar.group_calendar_manager
+msgid "Manager"
+msgstr "マネジャー"
+
+#. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_has_error
 msgid "Message Delivery error"
 msgstr "メッセージ配信エラー"
@@ -589,7 +580,7 @@ msgid "Messages"
 msgstr "メッセージ"
 
 #. module: website_calendar
-#: code:addons/website_calendar/controllers/main.py:0
+#: code:addons/website_calendar/controllers/main.py:124
 #, python-format
 msgid "Mobile: %s"
 msgstr "モバイル:%s"
@@ -600,25 +591,25 @@ msgid "Mon"
 msgstr "月曜日"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__1
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Monday"
 msgstr "月曜"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_question__question_type__text
+#: selection:calendar.appointment.question,question_type:0
 msgid "Multi-line text"
 msgstr "複数行のテキスト"
 
 #. module: website_calendar
 #. openerp-web
-#: code:addons/website_calendar/static/src/js/website_calendar.editor.js:0
+#: code:addons/website_calendar/static/src/js/website_calendar.editor.js:30
 #, python-format
 msgid "Name"
 msgstr "名称"
 
 #. module: website_calendar
 #. openerp-web
-#: code:addons/website_calendar/static/src/js/website_calendar.editor.js:0
+#: code:addons/website_calendar/static/src/js/website_calendar.editor.js:29
 #, python-format
 msgid "New Appointment Type"
 msgstr "新しい予定タイプ"
@@ -641,7 +632,7 @@ msgstr "アクションの数"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_has_error_counter
-msgid "Number of errors"
+msgid "Number of error"
 msgstr "エラー数"
 
 #. module: website_calendar
@@ -687,7 +678,6 @@ msgstr "オンライン予約タイプ"
 #. module: website_calendar
 #: model:ir.actions.act_window,name:website_calendar.calendar_appointment_type_action
 #: model:ir.actions.act_window,name:website_calendar.calendar_event_action_reporting
-#: model:ir.module.category,name:website_calendar.module_category_calendar
 #: model:ir.ui.menu,name:website_calendar.appointment_type_menu
 #: model:ir.ui.menu,name:website_calendar.menu_schedule_report_all
 #: model:ir.ui.menu,name:website_calendar.website_appointment_type_menu
@@ -701,7 +691,7 @@ msgid "Placeholder"
 msgstr "プレースホルダ"
 
 #. module: website_calendar
-#: code:addons/website_calendar/models/calendar_appointment.py:0
+#: code:addons/website_calendar/models/calendar_appointment.py:302
 #, python-format
 msgid "Please enter a valid hour between 0:00 to 24:00 for your slots."
 msgstr ""
@@ -729,12 +719,12 @@ msgid "Questions"
 msgstr "質問"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_question__question_type__radio
+#: selection:calendar.appointment.question,question_type:0
 msgid "Radio (one answer)"
 msgstr "ラジオ(1つの答え)"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_type__assignation_method__random
+#: selection:calendar.appointment.type,assignation_method:0
 msgid "Random"
 msgstr "ランダム"
 
@@ -759,24 +749,9 @@ msgid "Restrict Countries"
 msgstr "国を制限する"
 
 #. module: website_calendar
-#: model_terms:ir.ui.view,arch_db:website_calendar.calendar_appointment_type_view_kanban
-msgid "SCHEDULED"
-msgstr "スケジュール"
-
-#. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__is_seo_optimized
 msgid "SEO optimized"
 msgstr "SEO最適化"
-
-#. module: website_calendar
-#: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_has_sms_error
-msgid "SMS Delivery error"
-msgstr "SMS配信エラー"
-
-#. module: website_calendar
-#: model:calendar.alarm,name:website_calendar.calendar_alarm_data_1h_sms
-msgid "SMS Text Message - 1 Hours"
-msgstr "SMSテキストメッセージ-1時間"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_calendar
@@ -784,7 +759,7 @@ msgid "Sat"
 msgstr "土曜日"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__6
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Saturday"
 msgstr "土曜"
 
@@ -825,7 +800,7 @@ msgid "Sequence"
 msgstr "付番"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_question__question_type__char
+#: selection:calendar.appointment.question,question_type:0
 msgid "Single line text"
 msgstr "1行のテキスト"
 
@@ -850,7 +825,7 @@ msgid "Sun"
 msgstr "日曜日"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__7
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Sunday"
 msgstr "日曜"
 
@@ -865,7 +840,7 @@ msgid "Thu"
 msgstr "木曜日"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__4
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Thursday"
 msgstr "木曜"
 
@@ -906,7 +881,7 @@ msgid "Tue"
 msgstr "火曜日"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__2
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Tuesday"
 msgstr "火曜"
 
@@ -980,7 +955,7 @@ msgid "Wed"
 msgstr "水曜日"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__3
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Wednesday"
 msgstr "水曜"
 

@@ -3,7 +3,7 @@
 
 {
     'name': 'Import OFX Bank Statement',
-    'category': 'Accounting/Accounting',
+    'category': 'Accounting',
     'version': '1.0',
     'depends': ['account_bank_statement_import'],
     'description': """

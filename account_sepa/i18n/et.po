@@ -1,24 +1,21 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_sepa
+# * account_sepa
 # 
 # Translators:
-# Martin Trigaux, 2020
-# Egon Raamat <egon@avalah.ee>, 2020
+# Martin Trigaux, 2018
+# Egon Raamat <egon@avalah.ee>, 2018
 # Eneli Õigus <enelioigus@gmail.com>, 2020
 # Piia Paurson <piia@avalah.ee>, 2020
 # Triine Aavik <triine@avalah.ee>, 2020
-# Andre Roomet <andreroomet@gmail.com>, 2021
-# Aveli Kannel <aveli@avalah.ee>, 2021
-# Anna, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server saas~11.5+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-27 09:32+0000\n"
-"PO-Revision-Date: 2019-08-26 09:34+0000\n"
-"Last-Translator: Anna, 2023\n"
+"POT-Creation-Date: 2018-09-21 14:06+0000\n"
+"PO-Revision-Date: 2018-08-24 11:36+0000\n"
+"Last-Translator: Triine Aavik <triine@avalah.ee>, 2020\n"
 "Language-Team: Estonian (https://www.transifex.com/odoo/teams/41243/et/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -27,16 +24,10 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
-#, python-format
-msgid "A bank account is not defined."
-msgstr "Pangakontot ei ole lisatud."
-
-#. module: account_sepa
 #: code:addons/account_sepa/models/account_payment.py:0
 #, python-format
 msgid "A bank account must be set on the following documents: "
-msgstr "Pangakonto tuleb lisada järgmistele dokumentidele:"
+msgstr ""
 
 #. module: account_sepa
 #: model:ir.model,name:account_sepa.model_account_batch_payment
@@ -54,9 +45,12 @@ msgid "Config Settings"
 msgstr "Seadistused"
 
 #. module: account_sepa
-#: model:ir.model.fields,field_description:account_sepa.field_account_payment__display_qr_code
-msgid "Display Qr Code"
+#: model:ir.model,name:account_sepa.model_account_abstract_payment
+msgid ""
+"Contains the logic shared between models which allows to register payments"
 msgstr ""
+"Sisaldab loogikat, mis on jagatud mudelite vahel ning võimaldab "
+"registreerida makseid"
 
 #. module: account_sepa
 #: model:ir.model.fields,help:account_sepa.field_res_company__sepa_orgid_issr
@@ -67,12 +61,12 @@ msgstr ""
 "Üksus, mis määrab identifitseerimise (nt KBE-BCO või Finanzamt Muenchen IV)."
 
 #. module: account_sepa
-#: model:ir.model.fields.selection,name:account_sepa.selection__res_company__sepa_pain_version__pain_001_001_03
+#: selection:res.company,sepa_pain_version:0
 msgid "Generic"
 msgstr "Üldine"
 
 #. module: account_sepa
-#: model:ir.model.fields.selection,name:account_sepa.selection__res_company__sepa_pain_version__pain_001_003_03
+#: selection:res.company,sepa_pain_version:0
 msgid "German Version"
 msgstr "Saksa versioon"
 
@@ -89,8 +83,8 @@ msgid "Identification assigned by an institution (eg. VAT number)."
 msgstr "Institutsiooni pool määratud identifitseerimine (nt KM number)."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:44
+#: code:addons/account_sepa/models/account_batch_payment.py:51
 #, python-format
 msgid ""
 "In result, the file might not be accepted by all bank as a valid SEPA Credit"
@@ -118,12 +112,6 @@ msgstr ""
 "tähemärki."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_journal.py:0
-#, python-format
-msgid "Partner %s has not bank account defined."
-msgstr "Partneril %s ei ole pangakonto lisatud"
-
-#. module: account_sepa
 #: model_terms:ir.ui.view,arch_db:account_sepa.account_journal_dashboard_kanban_view_inherited
 msgid "Payment to send via SEPA"
 msgstr "SEPA kaudu saadetav makse"
@@ -139,31 +127,27 @@ msgid "Payments to send via SEPA"
 msgstr "SEPA kaudu saadetavad maksed"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:42
 #, python-format
 msgid "Please note that the following warning has been raised:"
 msgstr "Pange tähele, et on tõstatatud järgmine hoiatus:"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:46
 #, python-format
 msgid "Please note that the following warnings have been raised:"
 msgstr ""
 
 #. module: account_sepa
-#: model:ir.model.fields,field_description:account_sepa.field_account_payment__qr_code_url
-msgid "Qr Code Url"
-msgstr ""
+#: model:ir.model.fields,field_description:account_sepa.field_account_payment__partner_bank_account_id
+#: model:ir.model.fields,field_description:account_sepa.field_account_register_payments__partner_bank_account_id
+msgid "Recipient Bank Account"
+msgstr "Saaja pangakonto"
 
 #. module: account_sepa
-#: model:ir.model,name:account_sepa.model_account_payment_register
-msgid "Register Payment"
-msgstr "Lisa makse"
-
-#. module: account_sepa
-#: model_terms:ir.ui.view,arch_db:account_sepa.view_sepa_credit_transfer_search
-msgid "SCT Payments To Send"
-msgstr ""
+#: model:ir.model,name:account_sepa.model_account_register_payments
+msgid "Register Payments"
+msgstr "Lisa maksed"
 
 #. module: account_sepa
 #: model:account.payment.method,name:account_sepa.account_payment_method_sepa_ct
@@ -171,7 +155,12 @@ msgid "SEPA Credit Transfer"
 msgstr "SEPA pangaülekanne"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_journal_dashboard.py:0
+#: model_terms:ir.ui.view,arch_db:account_sepa.view_sepa_credit_transfer_search
+msgid "SEPA Credit Transfer Payments To Send"
+msgstr "Saatmist ootavad maksed SEPA pangaülekandega"
+
+#. module: account_sepa
+#: code:addons/account_sepa/models/account_journal_dashboard.py:23
 #, python-format
 msgid "SEPA Credit Transfers to Send"
 msgstr "Saatmist ootavad SEPA pangaülekanded"
@@ -195,15 +184,9 @@ msgstr ""
 "vaja teha mõningaid parandusi."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_payment.py:0
-#, python-format
-msgid "Scan me with your banking app."
-msgstr "Skaneeri mind oma panga rakendusega."
-
-#. module: account_sepa
 #: model:ir.model.fields,field_description:account_sepa.field_account_batch_payment__sct_generic
 msgid "Sct Generic"
-msgstr "Sct üldine"
+msgstr ""
 
 #. module: account_sepa
 #: model:ir.model.fields,field_description:account_sepa.field_account_batch_payment__sct_warning
@@ -211,7 +194,7 @@ msgid "Sct Warning"
 msgstr ""
 
 #. module: account_sepa
-#: model:ir.model.fields.selection,name:account_sepa.selection__res_company__sepa_pain_version__pain_001_001_03_ch_02
+#: selection:res.company,sepa_pain_version:0
 msgid "Swiss Version"
 msgstr "Šveitsi versioon"
 
@@ -229,13 +212,7 @@ msgstr ""
 "saaja IBAN ja panga BIC numbrit ei tuvastata."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_payment.py:0
-#, python-format
-msgid "The SEPA QR Code information is not set correctly."
-msgstr ""
-
-#. module: account_sepa
-#: code:addons/account_sepa/models/account_journal.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:353
 #, python-format
 msgid ""
 "The account %s, linked to partner '%s', is not of type IBAN.\n"
@@ -245,7 +222,7 @@ msgstr ""
 "SEPA funktsioonide kasutamiseks on vaja kehtivat IBAN-i kontot."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:103
 #, python-format
 msgid ""
 "The account %s, of journal '%s', is not of type IBAN.\n"
@@ -255,7 +232,7 @@ msgstr ""
 "SEPA funktsioonide kasutamiseks on vaja kehtivat IBAN-i kontot."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_payment.py:0
+#: code:addons/account_sepa/models/account_payment.py:47
 #, python-format
 msgid ""
 "The account '%s' (journal %s) requires a Bank Identification Code (BIC) to "
@@ -265,14 +242,14 @@ msgstr ""
 "makseks. Palun esmalt seadista see."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_journal.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:317
 #, python-format
 msgid ""
 "The amount of the payment '%s' is too high. The maximum permitted is %s."
 msgstr "Makse summa \"%s\" on liiga kõrge. Maksimaalne lubatud summa on %s."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:90
 #, python-format
 msgid ""
 "The creditor bank account %s used in payment %s is not identified by a BIC"
@@ -280,7 +257,7 @@ msgstr ""
 "Kreeditori pangakontot %s, mida kasutatakse makses %s, BIC-i ei tuvastata."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:92
 #, python-format
 msgid ""
 "The creditor bank account %s used in payment %s is not identified by an IBAN"
@@ -288,7 +265,7 @@ msgstr ""
 "Kreeditori pangakontot %s, mida kasutatakse makses %s, IBAN-i ei tuvastata."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:111
 #, python-format
 msgid ""
 "The following payments have no recipient bank account set: %s. \n"
@@ -296,7 +273,7 @@ msgid ""
 msgstr ""
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_payment.py:0
+#: code:addons/account_sepa/models/account_payment.py:45
 #, python-format
 msgid ""
 "The journal '%s' requires a proper IBAN account to pay via SEPA. Please "
@@ -306,7 +283,7 @@ msgstr ""
 "seadista see."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_payment.py:0
+#: code:addons/account_sepa/models/account_payment.py:56
 #, python-format
 msgid ""
 "The partner account '%s' requires a Bank Identification Code (BIC) to pay "
@@ -316,7 +293,7 @@ msgstr ""
 "(BIC). Palun esmalt seadista see."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:18
 #, python-format
 msgid ""
 "The text used in SEPA files can only contain the following characters :\n"
@@ -334,19 +311,19 @@ msgstr ""
 "/ - ? : ( ) . , ' + (tühik)"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:88
 #, python-format
 msgid "The transaction %s is instructed in another currency than EUR"
 msgstr "Tehing %s toimub mõnes teises valuutas kui EUR"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_journal.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:347
 #, python-format
 msgid "There is no Bank Identifier Code recorded for bank account '%s'"
 msgstr "Pangakontol \"%s\" ei ole salvestatud panga identifitseerimise koodi"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_journal.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:191
 #, python-format
 msgid ""
 "There is no Bank Identifier Code recorded for bank account '%s' of journal "
@@ -356,7 +333,7 @@ msgstr ""
 "andmikus \"%s\""
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_journal.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:189
 #, python-format
 msgid "Too many transactions for a single file."
 msgstr "Liiga palju tehinguid ühe faili jaoks."
@@ -378,7 +355,7 @@ msgid "Your Company Name"
 msgstr "Teie ettevõtte nimi"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:84
 #, python-format
 msgid "Your bank account is not labelled in EUR"
 msgstr "Teie pangakonto ei ole märgitud eurodes"

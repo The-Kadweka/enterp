@@ -3,17 +3,19 @@
 # * sign
 # 
 # Translators:
-# Sengtha Chay <sengtha@gmail.com>, 2018
 # Chan Nath <channath@gmail.com>, 2018
+# Sengtha Chay <sengtha@gmail.com>, 2018
 # Samkhann Seang <seangsamkhann@gmail.com>, 2018
 # AN Souphorn <ansouphorn@gmail.com>, 2018
+# Lux Sok <sok.lux@gmail.com>, 2019
+# 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~11.5+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-09-27 08:43+0000\n"
-"PO-Revision-Date: 2018-09-27 08:43+0000\n"
-"Last-Translator: AN Souphorn <ansouphorn@gmail.com>, 2018\n"
+"POT-Creation-Date: 2019-11-14 07:50+0000\n"
+"PO-Revision-Date: 2018-08-24 11:48+0000\n"
+"Last-Translator: Lux Sok <sok.lux@gmail.com>, 2019\n"
 "Language-Team: Khmer (https://www.transifex.com/odoo/teams/41243/km/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -25,52 +27,52 @@ msgstr ""
 #: model:ir.model.fields,field_description:sign.field_res_partner__signature_count
 #: model:ir.model.fields,field_description:sign.field_res_users__signature_count
 msgid "# Signatures"
-msgstr ""
+msgstr "# ហត្ថលេខា"
 
 #. module: sign
 #: code:addons/sign/models/sign_request.py:249
 #, python-format
 msgid "%s : Signature request"
-msgstr ""
+msgstr "%s: ស្នើសុំហត្ថលេខា"
 
 #. module: sign
-#: code:addons/sign/controllers/main.py:183
+#: code:addons/sign/controllers/main.py:200
 #, python-format
 msgid "%s couldn't sign the document due to an insufficient credit error."
-msgstr ""
+msgstr "%sមិនអាចចុះហត្ថលេខាលើឯកសារដោយសារកំហុសឥណទានមិនគ្រប់គ្រាន់។"
 
 #. module: sign
 #: code:addons/sign/models/sign_request.py:290
 #: code:addons/sign/models/sign_request.py:311
 #, python-format
 msgid "%s has been signed"
-msgstr ""
+msgstr "%sត្រូវបានចុះហត្ថលេខា"
 
 #. module: sign
 #: code:addons/sign/controllers/main.py:207
 #, python-format
 msgid "%s validated the signature by SMS with the phone number %s."
-msgstr ""
+msgstr "%sមានសុពលភាពហត្ថលេខាដោយSMS ជាមួយលេខទូរស័ព្ទ%s។"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_template_mail_follower
 msgid ") has added you as a follower of the document"
-msgstr ""
+msgstr ") បានបន្ថែមអ្នក ជាអ្នកតាមដានឯកសារ"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_template_mail_request
 msgid ") has requested your signature on the document"
-msgstr ""
+msgstr ") បានស្នើសុំហត្ថលេខារបស់អ្នកនៅលើឯកសារ"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign._doc_sign
 msgid "- <em>Waiting Signature</em>"
-msgstr ""
+msgstr "-<em> រង់ចាំហត្ថលេខា</em>"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign._doc_sign
 msgid "<br/>(the email access has not been sent)"
-msgstr ""
+msgstr "<br/>(ការចូលប្រើអ៊ីមែលមិនត្រូវបានផ្ញើទេ)"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_template_share_view_form
@@ -79,21 +81,23 @@ msgid ""
 "there must be either no fields to fill or only one responsible for all the "
 "fields!</span>"
 msgstr ""
+"<span attrs=\"{'invisible': [('url', '!=', False)]}\">ដើម្បីអាចចែករំលែកបាន "
+"មិនត្រូវមានផ្នែកណាដែលត្រូវបំពេញឬមានតែម្នាក់ទទួលខុសត្រូវចំពោះផ្នែកទាំងអស់នោះទេ!</span> "
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_request_view_form
 msgid "<span class=\"o_stat_text\"> Signed</span>"
-msgstr ""
+msgstr "<span class=\"o_stat_text\">បាន​ចុះហត្ថលេខា</span> "
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.res_partner_view_form
 msgid "<span class=\"o_stat_text\">Signature Requests</span>"
-msgstr ""
+msgstr "<span class=\"o_stat_text\">សំណើចុះហត្ថលេខា</span>"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_request_view_form
 msgid "<span class=\"o_stat_text\">View</span>"
-msgstr ""
+msgstr "<span class=\"o_stat_text\">មើល</span>"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_template_share_view_form
@@ -103,11 +107,16 @@ msgid ""
 "who clicks on the link. The link is private, only those that receive the "
 "link will be able to sign it.</span>"
 msgstr ""
+"<span class=\"text-muted\" attrs=\"{'invisible': [('url', '=', "
+"False)]}\">ចែករំលែកតំណនេះហើយ Odoo "
+"នឹងបង្កើតឯកសារថ្មីសម្រាប់មនុស្សម្នាក់ដែលចុចលើតំណភ្ជាប់។ "
+"តំណភ្ជាប់មានលក្ខណៈឯកជន "
+"មានតែអ្នកដែលទទួលបានតំណរភ្ជាប់នឹងអាចចុះហត្ថលេខាលើវាបាន។</span>"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_item_type_view_form
 msgid "<span>(1.0 = full page size)</span>"
-msgstr ""
+msgstr "<span>(1.0 = ទំហំទំព័រពេញ)</span>"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_template_mail_completed
@@ -116,6 +125,8 @@ msgid ""
 "<strong>Warning</strong> do not forward this email to other people!<br/>\n"
 "            They will be able to access this document and sign it as yourself."
 msgstr ""
+"<strong>ការព្រមាន</strong>កុំបញ្ជូនអ៊ីមែលនេះទៅមនុស្សផ្សេងទៀត!<br/>\n"
+" ពួកគេនឹងអាចចូលមើលឯកសារនេះហើយចុះហត្ថលេខាលើវាដោយខ្លួនអ្នក។"
 
 #. module: sign
 #. openerp-web
@@ -125,11 +136,13 @@ msgid ""
 "A SMS will be sent to the following phone number. Please update it if it's "
 "not relevant."
 msgstr ""
+"សារនឹងត្រូវបានផ្ញើទៅលេខទូរស័ព្ទខាងក្រោម។ "
+"សូមធ្វើបច្ចុប្បន្នភាពប្រសិនបើវាមិនទាក់ទង។ "
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__message_needaction
 msgid "Action Needed"
-msgstr ""
+msgstr "តម្រូវការសកម្មភាព"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__active
@@ -141,47 +154,47 @@ msgstr "សកម្ម"
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__activity_ids
 msgid "Activities"
-msgstr ""
+msgstr "សកម្មភាព"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__activity_state
 msgid "Activity State"
-msgstr ""
+msgstr "ស្ថានភាពសកម្មភាព"
 
 #. module: sign
 #. openerp-web
 #: code:addons/sign/static/src/js/sign_backend.js:238
 #, python-format
 msgid "Add Initials"
-msgstr ""
+msgstr "បន្ថែមខាងដើម"
 
 #. module: sign
 #. openerp-web
 #: code:addons/sign/static/src/js/sign_backend.js:247
 #, python-format
 msgid "Add on all pages"
-msgstr ""
+msgstr "បន្ថែមលើទំព័រទាំងអស់"
 
 #. module: sign
 #. openerp-web
 #: code:addons/sign/static/src/js/sign_backend.js:243
 #, python-format
 msgid "Add once"
-msgstr ""
+msgstr "បន្ថែមម្តង"
 
 #. module: sign
 #. openerp-web
 #: code:addons/sign/static/src/js/sign_common.js:496
 #, python-format
 msgid "Adopt Your Signature"
-msgstr ""
+msgstr "អនុម័តហត្ថលេខារបស់អ្នក"
 
 #. module: sign
 #. openerp-web
 #: code:addons/sign/static/src/js/sign_common.js:502
 #, python-format
 msgid "Adopt and Sign"
-msgstr ""
+msgstr "អនុម័តនិងចុះហត្ថលេខា"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_request_view_kanban
@@ -198,29 +211,29 @@ msgstr "ឯកសារ"
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_template__attachment_id
 msgid "Attachment"
-msgstr ""
+msgstr "ឯកសារ​ភ្ជាប់"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__message_attachment_count
 msgid "Attachment Count"
-msgstr ""
+msgstr "ចំនួនឯកសារភ្ជាប់"
 
 #. module: sign
 #. openerp-web
 #: code:addons/sign/static/src/xml/sign_common.xml:38
 #, python-format
 msgid "Auto"
-msgstr ""
+msgstr "ស្វ័យប្រវត្ត"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_item_type__auto_field
 msgid "Automatic Partner Field"
-msgstr ""
+msgstr "ផ្នែកដៃគូដោយស្វ័យប្រវត្តិ"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_request_view_kanban
 msgid "Avatar"
-msgstr ""
+msgstr "រូបតំណាង"
 
 #. module: sign
 #. openerp-web
@@ -232,6 +245,9 @@ msgid ""
 "for all purposes when it is used on documents, including legally binding "
 "contracts."
 msgstr ""
+"ដោយចុចលើ Adopt និង Sign ខ្ញុំយល់ស្របថាហត្ថលេខា / "
+"អាទិសង្កេតដែលបានជ្រើសរើសនឹងក្លាយជាតំណាងអេឡិចត្រូនិកដែលមានហត្ថលេខា / "
+"អាទិសង្កេតសរសេរដោយដៃរបស់ខ្ញុំផ្ទាល់សម្រាប់គោលបំណងទាំងអស់នៅពេលដែលវាត្រូវបានប្រើលើឯកសាររួមទាំងកិច្ចសន្យាជាប់កាតព្វកិច្ចស្របច្បាប់។ "
 
 #. module: sign
 #. openerp-web
@@ -246,33 +262,34 @@ msgstr "លុបចោល"
 #. module: sign
 #: selection:sign.request,state:0
 msgid "Canceled"
-msgstr ""
+msgstr "លុបចោល"
 
 #. module: sign
 #: model:sign.item.type,name:sign.sign_item_type_checkbox
+#: model:sign.item.type,placeholder:sign.sign_item_type_checkbox
 #: selection:sign.item.type,type:0
 msgid "Checkbox"
-msgstr ""
+msgstr "ប្រអប់ធីក"
 
 #. module: sign
 #: model:ir.actions.act_window,name:sign.sign_template_action
 #: model:ir.actions.act_window,name:sign.sign_template_with_archived_action
 msgid "Choose a Template"
-msgstr ""
+msgstr "ជ្រើសរើសគំរូ"
 
 #. module: sign
 #. openerp-web
 #: code:addons/sign/static/src/xml/sign_common.xml:36
 #, python-format
 msgid "Clear Signature"
-msgstr ""
+msgstr "លុបហត្ថលេខា"
 
 #. module: sign
 #. openerp-web
 #: code:addons/sign/static/src/js/sign_common.js:648
 #, python-format
 msgid "Click to start"
-msgstr ""
+msgstr "ចុចដើម្បីចាប់ផ្តើម"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_template_share_view_form
@@ -283,12 +300,12 @@ msgstr "បិទ"
 #: model:ir.model.fields,field_description:sign.field_sign_request__color
 #: model:ir.model.fields,field_description:sign.field_sign_template__color
 msgid "Color"
-msgstr ""
+msgstr "ព័ណ៍"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_template_tag__color
 msgid "Color Index"
-msgstr ""
+msgstr "ការកំណត់ព័ណ៌"
 
 #. module: sign
 #: model:sign.item.role,name:sign.sign_item_role_company
@@ -299,17 +316,17 @@ msgstr "ក្រុមហ៊ុន"
 #. module: sign
 #: selection:sign.request.item,state:0
 msgid "Completed"
-msgstr ""
+msgstr "បានបញ្ចប់ "
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__completed_document
 msgid "Completed Document"
-msgstr ""
+msgstr "ឯកសារបញ្ចប់"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__nb_closed
 msgid "Completed Signatures"
-msgstr ""
+msgstr "ហត្ថលេខាដែលបានបញ្ចប់"
 
 #. module: sign
 #: model:ir.ui.menu,name:sign.menu_sign_configuration
@@ -324,14 +341,14 @@ msgstr "ទំនាក់ទំនង"
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_send_request__follower_ids
 msgid "Copy to"
-msgstr ""
+msgstr "ចម្លង​ទៅ "
 
 #. module: sign
 #. openerp-web
 #: code:addons/sign/static/src/js/sign_common.js:326
 #, python-format
 msgid "Create: \""
-msgstr ""
+msgstr "បង្កើត: \" "
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_item__create_uid
@@ -379,24 +396,25 @@ msgstr ""
 
 #. module: sign
 #: model:sign.item.type,name:sign.sign_item_type_date
+#: model:sign.item.type,placeholder:sign.sign_item_type_date
 msgid "Date"
 msgstr "កាលបរិច្ឆេត"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_item_type__default_height
 msgid "Default Height"
-msgstr ""
+msgstr "កម្ពស់លំនាំដើម"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_item_type__default_width
 msgid "Default Width"
-msgstr ""
+msgstr "ទទឹងលំនាំដើម"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_request_view_kanban
 #: model_terms:ir.ui.view,arch_db:sign.sign_template_view_kanban
 msgid "Delete"
-msgstr ""
+msgstr "លុប"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_request_view_kanban
@@ -406,17 +424,17 @@ msgstr "ពិស្តារ"
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_res_users__sign_signature
 msgid "Digital Signature"
-msgstr ""
+msgstr "ហត្ថលេខាឌីជីថល"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.res_users_view_form
 msgid "Digital Signatures"
-msgstr ""
+msgstr "ហត្ថលេខាឌីជីថល"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_res_users__sign_initials
 msgid "Digitial Initials"
-msgstr ""
+msgstr "ចាប់ផ្តើមឌីជីថល"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_request_send_copy_view_form
@@ -426,7 +444,7 @@ msgstr "បោះបង់"
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_item_view_form
 msgid "Display"
-msgstr ""
+msgstr "បង្ហាញ"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_item__display_name
@@ -466,7 +484,7 @@ msgstr ""
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_item__template_id
 msgid "Document Template"
-msgstr ""
+msgstr "គំរូបឯកសារ"
 
 #. module: sign
 #. openerp-web
@@ -506,7 +524,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:sign.sign_request_view_kanban
 #: model_terms:ir.ui.view,arch_db:sign.sign_template_view_kanban
 msgid "Dropdown menu"
-msgstr ""
+msgstr "ម៉ឺនុយទម្លាក់ចុះ"
 
 #. module: sign
 #. openerp-web
@@ -525,7 +543,7 @@ msgstr ""
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_template_view_kanban
 msgid "Edit"
-msgstr ""
+msgstr "កែសម្រួល"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_template_view_kanban
@@ -585,7 +603,7 @@ msgstr "ចំណូលចិត្ត"
 #: model:ir.model.fields,field_description:sign.field_sign_item_type__name
 #, python-format
 msgid "Field Name"
-msgstr ""
+msgstr "ឈ្មោះវាល"
 
 #. module: sign
 #: model:ir.ui.menu,name:sign.sign_item_type_menu
@@ -600,13 +618,13 @@ msgstr ""
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_template__datas
 msgid "File Content"
-msgstr ""
+msgstr "មាតិការឯកសារ"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__reference
 #: model:ir.model.fields,field_description:sign.field_sign_send_request__filename
 msgid "Filename"
-msgstr ""
+msgstr "ឈ្មោះឯកសារ"
 
 #. module: sign
 #. openerp-web
@@ -619,29 +637,29 @@ msgstr ""
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__message_follower_ids
 msgid "Followers"
-msgstr ""
+msgstr "អ្នកតាម"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__message_channel_ids
 msgid "Followers (Channels)"
-msgstr ""
+msgstr "អ្នកតាម (ឆានែល)"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__message_partner_ids
 msgid "Followers (Partners)"
-msgstr ""
+msgstr "អ្នកដើរតាម (ដៃគូរ)"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign._doc_sign
 msgid "From:"
-msgstr ""
+msgstr "ចាប់ពី"
 
 #. module: sign
 #. openerp-web
 #: code:addons/sign/static/src/xml/sign_common.xml:28
 #, python-format
 msgid "Full Name"
-msgstr ""
+msgstr "ឈ្មោះ​ពេញ"
 
 #. module: sign
 #: selection:sign.request,state:0
@@ -651,7 +669,7 @@ msgstr ""
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_request_view_search
 msgid "Future Activities"
-msgstr ""
+msgstr "សកម្មភាពទៅមុខ"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_request_view_form
@@ -666,7 +684,7 @@ msgstr "ជា​ក្រុម​តាម"
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_item__height
 msgid "Height"
-msgstr ""
+msgstr "តំលៃខ្ពស់"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_item__id
@@ -687,17 +705,17 @@ msgstr "ID"
 #. module: sign
 #: model:ir.model.fields,help:sign.field_sign_request__message_unread
 msgid "If checked new messages require your attention."
-msgstr ""
+msgstr "ប្រសិនបើបានពិនិត្យសារថ្មីតម្រូវឱ្យអ្នកយកចិត្តទុកដាក់។"
 
 #. module: sign
 #: model:ir.model.fields,help:sign.field_sign_request__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr ""
+msgstr "ប្រសិនបើបានគូសធីកសារថ្មីទាមទារការយកចិត្តទុកដាក់របស់អ្នក។"
 
 #. module: sign
 #: model:ir.model.fields,help:sign.field_sign_request__message_has_error
 msgid "If checked, some messages have a delivery error."
-msgstr ""
+msgstr "ប្រសិនបើបានគូសធីកសារខ្លះមានកំហុសបញ្ជូន។"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_request_view_kanban
@@ -708,7 +726,7 @@ msgstr ""
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_item_view_form
 msgid "Information"
-msgstr ""
+msgstr "ពត៌មាន"
 
 #. module: sign
 #: selection:sign.item.type,type:0
@@ -717,13 +735,14 @@ msgstr ""
 
 #. module: sign
 #: model:sign.item.type,name:sign.sign_item_type_initial
+#: model:sign.item.type,placeholder:sign.sign_item_type_initial
 msgid "Initials"
 msgstr ""
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__message_is_follower
 msgid "Is Follower"
-msgstr ""
+msgstr "ត្រូវតាមអ្នក"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_template_share__is_one_responsible
@@ -791,7 +810,7 @@ msgstr "ផ្លាស់ប្តូរចុងក្រោយ"
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_request_view_search
 msgid "Late Activities"
-msgstr ""
+msgstr "សកម្មភាពចុងក្រោយ"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request_item__latitude
@@ -813,7 +832,7 @@ msgstr ""
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.doc_sign
 msgid "Logo"
-msgstr ""
+msgstr "រូបសញ្ញា"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request_item__longitude
@@ -830,12 +849,12 @@ msgstr ""
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__message_main_attachment_id
 msgid "Main Attachment"
-msgstr ""
+msgstr "ឯកសារភ្ជាប់សំខាន់"
 
 #. module: sign
 #: model:res.groups,name:sign.group_sign_manager
 msgid "Manager"
-msgstr ""
+msgstr "អ្នកគ្រប់គ្រង"
 
 #. module: sign
 #. openerp-web
@@ -847,12 +866,12 @@ msgstr ""
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_send_request__message
 msgid "Message"
-msgstr ""
+msgstr "សារ"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__message_has_error
 msgid "Message Delivery error"
-msgstr ""
+msgstr "កំហុសក្នុងការផ្ញើសារ"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__message_ids
@@ -867,12 +886,12 @@ msgstr ""
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request_item__sms_number
 msgid "Mobile"
-msgstr ""
+msgstr "ទូរស័ព្ទដៃ"
 
 #. module: sign
 #: selection:sign.item.type,type:0
 msgid "Multiline Text"
-msgstr ""
+msgstr "អត្ថបទពហុ"
 
 #. module: sign
 #: model:sign.item.type,name:sign.sign_item_type_multiline_text
@@ -888,7 +907,7 @@ msgstr ""
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_request_view_search
 msgid "My Documents"
-msgstr ""
+msgstr "ឯកសាររបស់ខ្ញុំ"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_request_view_search
@@ -941,17 +960,17 @@ msgstr ""
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr ""
+msgstr "កាលកំណត់សកម្មភាពបន្ទាប់"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__activity_summary
 msgid "Next Activity Summary"
-msgstr ""
+msgstr "ការសង្ខេបសកម្មភាពបន្ទាប់"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__activity_type_id
 msgid "Next Activity Type"
-msgstr ""
+msgstr "ប្រភេទសកម្មភាពបន្ទាប់"
 
 #. module: sign
 #: model_terms:ir.actions.act_window,help:sign.sign_request_action
@@ -972,32 +991,32 @@ msgstr ""
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__message_needaction_counter
 msgid "Number of Actions"
-msgstr ""
+msgstr "ចំនួនសកម្មភាព"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__message_has_error_counter
 msgid "Number of error"
-msgstr ""
+msgstr "ចំនួនកំហុស"
 
 #. module: sign
 #: model:ir.model.fields,help:sign.field_sign_request__message_needaction_counter
 msgid "Number of messages which requires an action"
-msgstr ""
+msgstr "ចំនួនសារដែលទាមទារសកម្មភាព"
 
 #. module: sign
 #: model:ir.model.fields,help:sign.field_sign_request__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr ""
+msgstr "ចំនួនសារដែលមានកំហុសឆ្គងនៃការដឹកជញ្ជូន"
 
 #. module: sign
 #: model:ir.model.fields,help:sign.field_sign_request__message_unread_counter
 msgid "Number of unread messages"
-msgstr ""
+msgstr "ចំនួនសារមិនទាន់អាន"
 
 #. module: sign
 #: model:res.groups,name:sign.group_sign_user
 msgid "Officer"
-msgstr ""
+msgstr "មន្រ្តី"
 
 #. module: sign
 #. openerp-web
@@ -1009,7 +1028,7 @@ msgstr "យលព្រម"
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_template_share_view_form
 msgid "Open"
-msgstr ""
+msgstr "បើក"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_template__redirect_url
@@ -1036,7 +1055,7 @@ msgstr ""
 #. module: sign
 #: selection:sign.request,activity_state:0
 msgid "Overdue"
-msgstr ""
+msgstr "ហួសកំណត់"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request_item__partner_id
@@ -1064,12 +1083,12 @@ msgstr ""
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_item_type__placeholder
 msgid "Placeholder"
-msgstr ""
+msgstr "កន្លែងដាក់។"
 
 #. module: sign
 #: selection:sign.request,activity_state:0
 msgid "Planned"
-msgstr ""
+msgstr "គ្រោងទុក"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.doc_sign
@@ -1108,12 +1127,12 @@ msgstr ""
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__progress
 msgid "Progress"
-msgstr ""
+msgstr "ដំណើរការ"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request_send_copy__request_id
 msgid "Request"
-msgstr ""
+msgstr "ស្នើរសុំ"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__request_item_infos
@@ -1125,7 +1144,7 @@ msgstr ""
 #: code:addons/sign/static/src/js/sign_backend.js:90
 #, python-format
 msgid "Request a Signature"
-msgstr ""
+msgstr "ស្នើសុំហត្ថលេខា។"
 
 #. module: sign
 #: model_terms:ir.actions.act_window,help:sign.sign_request_action
@@ -1137,12 +1156,12 @@ msgstr ""
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__nb_total
 msgid "Requested Signatures"
-msgstr ""
+msgstr "ហត្ថលេខាដែលបានស្នើសុំ"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_item__required
 msgid "Required"
-msgstr ""
+msgstr "ចាំបាច់"
 
 #. module: sign
 #. openerp-web
@@ -1173,7 +1192,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:sign.field_sign_item__responsible_id
 #, python-format
 msgid "Responsible"
-msgstr ""
+msgstr "ការទទួលខុសត្រូវ"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_template__responsible_count
@@ -1183,24 +1202,24 @@ msgstr ""
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__activity_user_id
 msgid "Responsible User"
-msgstr ""
+msgstr "អ្នកទទួលខុសត្រូវ"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_request_view_kanban
 #: model_terms:ir.ui.view,arch_db:sign.sign_template_view_kanban
 msgid "Restore"
-msgstr ""
+msgstr "ស្ដារ"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request_item__role_id
 #: model:ir.model.fields,field_description:sign.field_sign_send_request_signer__role_id
 msgid "Role"
-msgstr ""
+msgstr "មុខងារ"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_item_role_view_tree
 msgid "Role Name"
-msgstr ""
+msgstr "ឈ្មោះតួនាទី"
 
 #. module: sign
 #: model:ir.ui.menu,name:sign.sign_item_role_menu
@@ -1229,13 +1248,13 @@ msgstr ""
 #: code:addons/sign/static/src/xml/sign_backend.xml:49
 #, python-format
 msgid "Saved"
-msgstr ""
+msgstr "ដែលបានរក្សាទុក"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__access_token
 #: model:ir.model.fields,field_description:sign.field_sign_request_item__access_token
 msgid "Security Token"
-msgstr ""
+msgstr "ពាក្យសម្ងាត់សុវត្ថិភាព"
 
 #. module: sign
 #. openerp-web
@@ -1267,7 +1286,7 @@ msgstr "បញ្ជូន"
 #: code:addons/sign/static/src/xml/sign_common.xml:88
 #, python-format
 msgid "Send SMS"
-msgstr ""
+msgstr "ផ្ញើរសារ SMS"
 
 #. module: sign
 #: model:ir.actions.act_window,name:sign.action_sign_send_request
@@ -1315,7 +1334,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:sign.sign_template_view_kanban
 #, python-format
 msgid "Share"
-msgstr ""
+msgstr "ចែករំលែក"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_template__share_link
@@ -1335,7 +1354,7 @@ msgstr "បង្ហាញកំណត់ត្រាទាំងអស់ដែ
 #: model:ir.ui.menu,name:sign.menu_document
 #, python-format
 msgid "Sign"
-msgstr ""
+msgstr "ចុះឈ្មោះ"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_send_request_view_form
@@ -1392,10 +1411,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:sign.field_sign_request_item__signature
 #: model_terms:ir.ui.view,arch_db:sign._doc_sign
 #: model:sign.item.type,name:sign.sign_item_type_signature
+#: model:sign.item.type,placeholder:sign.sign_item_type_signature
 #: selection:sign.item.type,type:0
 #, python-format
 msgid "Signature"
-msgstr ""
+msgstr "ហត្តលេខា"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_item_value__sign_item_id
@@ -1434,7 +1454,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:sign.field_sign_request_item__sign_request_id
 #: model_terms:ir.ui.view,arch_db:sign.sign_send_request_view_form
 msgid "Signature Request"
-msgstr ""
+msgstr "សំណើរហត្ថលេខា"
 
 #. module: sign
 #: code:addons/sign/models/sign_request.py:160
@@ -1467,7 +1487,7 @@ msgstr ""
 #. module: sign
 #: model:ir.model,name:sign.model_sign_template
 msgid "Signature Template"
-msgstr ""
+msgstr "គំរូហត្ថលេខា"
 
 #. module: sign
 #. openerp-web
@@ -1549,7 +1569,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:sign.field_sign_request__state
 #: model:ir.model.fields,field_description:sign.field_sign_request_item__state
 msgid "State"
-msgstr ""
+msgstr "ទីតំាង"
 
 #. module: sign
 #: model:ir.model.fields,help:sign.field_sign_request__activity_state
@@ -1559,6 +1579,10 @@ msgid ""
 "Today: Activity date is today\n"
 "Planned: Future activities."
 msgstr ""
+"ស្ថានភាពផ្អែកលើសកម្មភាព\n"
+"ហួសកាលកំណត់: កាលបរិច្ឆេទដល់កំណត់ត្រូវបានកន្លងផុតទៅហើយ\n"
+"ថ្ងៃនេះ: កាលបរិច្ឆេទសកម្មភាពនៅថ្ងៃនេះ\n"
+"គ្រោងទុក: សកម្មភាពនាពេលអនាគត។"
 
 #. module: sign
 #. openerp-web
@@ -1575,12 +1599,12 @@ msgstr "ចំណងជើង"
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_template_tag__name
 msgid "Tag Name"
-msgstr ""
+msgstr "ឈ្មោះស្លាក។"
 
 #. module: sign
 #: sql_constraint:sign.template.tag:0
 msgid "Tag name already exists !"
-msgstr ""
+msgstr "មានស្លាកឈ្មោះរួចហើយ!"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_template__tag_ids
@@ -1594,7 +1618,7 @@ msgstr "ធែក"
 #: model:ir.model.fields,field_description:sign.field_sign_template_share__template_id
 #: model_terms:ir.ui.view,arch_db:sign.sign_request_view_search
 msgid "Template"
-msgstr ""
+msgstr "គំរូ"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_request_view_search
@@ -1604,20 +1628,20 @@ msgstr ""
 #. module: sign
 #: model:ir.ui.menu,name:sign.sign_template_menu
 msgid "Templates"
-msgstr ""
+msgstr "គម្រូ"
 
 #. module: sign
 #: model:sign.item.type,name:sign.sign_item_type_text
 #: selection:sign.item.type,type:0
 msgid "Text"
-msgstr ""
+msgstr "អត្ថបទ"
 
 #. module: sign
 #. openerp-web
 #: code:addons/sign/static/src/js/sign_common.js:869
 #, python-format
 msgid "Thank You !"
-msgstr ""
+msgstr "សូមអរគុណ!"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_template_mail_completed
@@ -1632,6 +1656,12 @@ msgid ""
 msgstr ""
 
 #. module: sign
+#: code:addons/sign/models/sign_template.py:79
+#, python-format
+msgid "This file cannot be read. Is it a valid PDF?"
+msgstr ""
+
+#. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_request_view_form
 msgid ""
 "This will delete all the already completed documents of this request and "
@@ -1641,7 +1671,7 @@ msgstr ""
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_item_type__tip
 msgid "Tip"
-msgstr ""
+msgstr "គន្លឹះ"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_request_view_search
@@ -1651,12 +1681,12 @@ msgstr ""
 #. module: sign
 #: selection:sign.request,activity_state:0
 msgid "Today"
-msgstr ""
+msgstr "ថ្ងៃនេះ"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_request_view_search
 msgid "Today Activities"
-msgstr ""
+msgstr "សកម្មភាពថ្ងៃនេះ"
 
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_item__type_id
@@ -1687,7 +1717,7 @@ msgstr "សារមិនទាន់អាន"
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_request__message_unread_counter
 msgid "Unread Messages Counter"
-msgstr ""
+msgstr "រាប់សារមិនទាន់អាន"
 
 #. module: sign
 #: model_terms:ir.actions.act_window,help:sign.sign_template_action
@@ -1712,7 +1742,7 @@ msgstr "អ្នកប្រើ"
 #: code:addons/sign/static/src/xml/sign_backend.xml:27
 #, python-format
 msgid "Validate"
-msgstr ""
+msgstr "ធ្វើ​ឱ្យ​មាន​សុពលភាព"
 
 #. module: sign
 #. openerp-web
@@ -1729,7 +1759,7 @@ msgstr ""
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_item_value__value
 msgid "Value"
-msgstr ""
+msgstr "តំលៃ"
 
 #. module: sign
 #. openerp-web
@@ -1772,7 +1802,7 @@ msgstr ""
 #: code:addons/sign/static/src/js/sign_common.js:1080
 #, python-format
 msgid "Warning"
-msgstr ""
+msgstr "ព្រមាន"
 
 #. module: sign
 #. openerp-web
@@ -1794,7 +1824,7 @@ msgstr "ប្រវត្តិទំនាក់ទំនងវែបសាយ
 #. module: sign
 #: model:ir.model.fields,field_description:sign.field_sign_item__width
 msgid "Width"
-msgstr ""
+msgstr "ទទឹង"
 
 #. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_send_request_view_form
@@ -1828,30 +1858,50 @@ msgid ""
 msgstr ""
 
 #. module: sign
-#: code:addons/sign/models/sign_request.py:574
+#: code:addons/sign/models/sign_template.py:84
+#, python-format
+msgid ""
+"Your PDF file shouldn't be encrypted with a password in order to be used as "
+"a signature template"
+msgstr ""
+
+#. module: sign
+#: model:sign.item.type,placeholder:sign.sign_item_type_company
+msgid "Your company"
+msgstr ""
+
+#. module: sign
+#: code:addons/sign/models/sign_request.py:564
 #, python-format
 msgid "Your confirmation code is %s"
 msgstr ""
 
 #. module: sign
 #. openerp-web
-#: code:addons/sign/static/src/xml/sign_common.xml:76
-#: code:addons/sign/static/src/xml/sign_common.xml:78
+#: code:addons/sign/static/src/xml/sign_common.xml:77
+#: code:addons/sign/static/src/xml/sign_common.xml:79
+#: model:sign.item.type,placeholder:sign.sign_item_type_email
 #, python-format
 msgid "Your email"
 msgstr ""
 
 #. module: sign
 #. openerp-web
-#: code:addons/sign/static/src/xml/sign_common.xml:70
-#: code:addons/sign/static/src/xml/sign_common.xml:72
+#: code:addons/sign/static/src/xml/sign_common.xml:71
+#: code:addons/sign/static/src/xml/sign_common.xml:73
+#: model:sign.item.type,placeholder:sign.sign_item_type_name
 #, python-format
 msgid "Your name"
 msgstr ""
 
 #. module: sign
+#: model:sign.item.type,placeholder:sign.sign_item_type_phone
+msgid "Your phone"
+msgstr ""
+
+#. module: sign
 #. openerp-web
-#: code:addons/sign/static/src/js/sign_common.js:870
+#: code:addons/sign/static/src/js/sign_common.js:906
 #, python-format
 msgid "Your signature has been saved."
 msgstr ""
@@ -1881,6 +1931,14 @@ msgstr ""
 #. module: sign
 #: model:sign.item.type,tip:sign.sign_item_type_initial
 msgid "mark it"
+msgstr ""
+
+#. module: sign
+#. openerp-web
+#: code:addons/sign/static/src/js/sign_common.js:956
+#: code:addons/sign/static/src/js/sign_common.js:1023
+#, python-format
+msgid "next"
 msgstr ""
 
 #. module: sign

@@ -25,12 +25,11 @@ Key Features
   # Categories can be used to filter modules in modules listing
   # Check https://github.com/odoo/odoo/blob/master/odoo/addons/base/data/ir_module_category_data.xml
   # for the full list
-  'category': 'Sales/Sales',
+  'category': 'Sales',
   'version': '1.0',
-  'application': True,
 
   # any module necessary for this one to work correctly
-  'depends': ['base', 'sale_management', 'stock', 'delivery', 'attachment_indexation'],
+  'depends': ['base', 'sale_management', 'stock', 'delivery', 'document'],
   'external_dependencies': {'python': ['ebaysdk']},
 
   # always loaded
@@ -39,11 +38,10 @@ Key Features
       'security/sale_ebay_security.xml',
       'wizard/ebay_link_listing_views.xml',
       'views/product_views.xml',
-      'views/res_currency_views.xml',
-      'views/res_country_views.xml',
       'views/res_config_settings_views.xml',
       'views/res_partner_views.xml',
       'views/stock_picking_views.xml',
+      'data/mail_template_data.xml',
       'data/ir_cron_data.xml',
       'data/sale_ebay_data.xml',
       'data/product_data.xml',
@@ -54,6 +52,7 @@ Key Features
   'js': ['static/src/js/*.js'],
   'css': ['static/src/css/*.css'],
   'qweb': ['static/src/xml/*.xml'],
-  'license': 'OEEL-1',
+  'application': False,
+    'license': 'OEEL-1',
   'uninstall_hook': 'uninstall_hook',
 }

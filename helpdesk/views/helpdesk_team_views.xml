@@ -10,7 +10,6 @@
                 <field name="sequence" widget="handle"/>
                 <field name="name" class="field_name"/>
                 <field name="alias_id"/>
-                <field name="company_id" groups="base.group_multi_company"/>
             </tree>
         </field>
     </record>
@@ -18,6 +17,7 @@
     <record id="helpdesk_sla_action" model="ir.actions.act_window">
         <field name="name">SLA Policies</field>
         <field name="res_model">helpdesk.sla</field>
+        <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
         <field name="context">{'default_team_id': active_id, 'search_default_team_id': active_id}</field>
         <field name="help" type="html">
@@ -37,6 +37,7 @@
     <record id="email_template_action_helpdesk" model="ir.actions.act_window" >
             <field name="name">Templates</field>
             <field name="res_model">mail.template</field>
+            <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="domain">[('team_id', '=', active_id)]</field>
             <field name="context">{'default_team_id': active_id}</field>
@@ -66,22 +67,26 @@
         <field name="arch" type="xml">
             <form string="team search" class="oe_form_configuration">
                 <sheet>
-                    <div class="oe_button_box" name="button_box"/>
-                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="toggle_active" type="object"
+                                confirm="(Un)archiving a helpdesk team automatically (un)archives its tickets. Do you want to proceed?"
+                                class="oe_stat_button" icon="fa-archive">
+                            <field name="active" widget="boolean_button" options='{"terminology": "archive"}'/>
+                        </button>
+                    </div>
                     <div class="oe_title" id='title'>
                         <label for="name" class="oe_edit_only"/>
                         <h1 id="name"><field name="name" placeholder="Helpdesk Team..."/></h1>
                     </div>
-                    <field name="active" invisible="1"/>
                     <field name="description" placeholder="Description for customer portal"/>
-                    <field name="company_id" groups="base.group_multi_company" required="1"/>
+                    <field name="company_id" groups="base.group_multi_company"/>
                     <h2>Productivity</h2>
                     <div class="row mt16 o_settings_container" id="productivity">
                         <div class="col-lg-6 o_setting_box">
                             <div class="o_setting_right_pane">
                                 <label for="member_ids"/>
                                 <div class="text-muted">
-                                    Individuals to whom the tickets will be automatically assigned. Keep empty for everyone to be part of the team.
+                                    Keep empty for everyone to see this team
                                 </div>
                                 <div>
                                     <field name="member_ids" widget="many2many_tags" options="{'color_field': 'color'}" class="mt16"/>
@@ -95,7 +100,7 @@
                                     How to assign newly created tickets to the right person
                                 </div>
                                 <div>
-                                    <field name="assign_method" class="mt16 o_light_label" widget="radio"/>
+                                    <field name="assign_method" class="mt16"/>
                                 </div>
                             </div>
                         </div>
@@ -190,25 +195,9 @@
                             <div class="o_setting_right_pane">
                                 <label for="use_helpdesk_timesheet"/>
                                 <div class="text-muted">
-                                    Record timesheets on your tickets
+                                    Record timesheets on your tickets and reinvoice time to you customer through tasks.
                                 </div>
                                 <div id='helpdesk_timesheet' attrs="{'invisible': [('use_helpdesk_timesheet', '=', False)]}">
-                                    <div class="text-warning mb4 mt16">
-                                        Save this page and refresh to activate the feature
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 o_setting_box" id="sale_timesheet" attrs="{'invisible': [('use_helpdesk_timesheet', '=', False)]}">
-                            <div class="o_setting_left_pane">
-                                <field name="use_helpdesk_sale_timesheet"/>
-                            </div>
-                            <div class="o_setting_right_pane">
-                                <label for="use_helpdesk_sale_timesheet"/>
-                                <div class="text-muted">
-                                    Reinvoice time to your customer through tasks
-                                </div>
-                                <div id='helpdesk_sale_timesheet' attrs="{'invisible': [('use_helpdesk_sale_timesheet', '=', False)]}">
                                     <div class="text-warning mb4 mt16">
                                         Save this page and refresh to activate the feature
                                     </div>
@@ -251,8 +240,8 @@
                                     Allow your customers to easily rate your services. Activate this option will add a default email template on non folded closing stages
                                 </div>
                                 <div id="use_rating" attrs="{'invisible': [('use_rating', '=', False)]}">
-                                    <field name="rating_percentage_satisfaction" invisible="1"/>
-                                    <div attrs="{'invisible': [('use_rating', '=', True), ('rating_percentage_satisfaction', '!=', -1)]}" class="mt16">
+                                    <field name="percentage_satisfaction" invisible="1"/>
+                                    <div attrs="{'invisible': [('use_rating', '=', True), ('percentage_satisfaction', '!=', -1)]}" class="mt16">
                                         <i>No customer feedback yet.</i>
                                     </div>
                                 </div>
@@ -268,9 +257,10 @@
                                     Publish this team's ratings on your website
                                 </div>
                                 <div attrs="{'invisible': ['|', ('portal_show_rating', '=', False), ('portal_rating_url','=',False)]}" class="mt16">
-                                    View this team's ratings on the following page:<br/>
+                                    View this teams ratings on this page:<br/>
                                     <a type="button" class="btn-link" target="_blank" role="button"><i class="fa fa-fw fa-arrow-right" role="img" aria-label="Rating URL" title="Rating URL"/>
-                                        <field name="portal_rating_url" nolabel="1" readonly="1" class="oe_inline" widget="url"/>
+                                        <label for="portal_rating_url" string="URL to Submit Issue"/>
+                                        <field name="portal_rating_url" readonly="1" class="oe_inline" widget="url"/>
                                     </a>
                                 </div>
                             </div>
@@ -305,84 +295,6 @@
                                 </div>
                                 <div id="use_website_helpdesk_slides" attrs="{'invisible': [('use_website_helpdesk_slides', '=', False)]}">
                                     <div class="text-warning mb4 mt16" id="o_slide_option">
-                                        Save this page and refresh to activate the feature.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 o_setting_box">
-                            <div class="o_setting_left_pane">
-                                <field name="allow_portal_ticket_closing"/>
-                            </div>
-                            <div class="o_setting_right_pane">
-                                <label for="allow_portal_ticket_closing"/>
-                                <div class="text-muted">
-                                    Allow customers to close their tickets
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <h2>After Sales</h2>
-                    <div class="row mt32 o_settings_container" id="after-sales">
-                        <div class="col-lg-6 o_setting_box">
-                            <div class="o_setting_left_pane">
-                                <field name="use_credit_notes"/>
-                            </div>
-                            <div class="o_setting_right_pane">
-                                <label for="use_credit_notes"/>
-                                <div class="text-muted">
-                                    Generate credit notes from tickets
-                                </div>
-                                <div id="use_credit_notes" attrs="{'invisible': [('use_credit_notes', '=', False)]}">
-                                    <div class="text-warning mb4 mt16">
-                                        Save this page and refresh to activate the feature.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 o_setting_box">
-                            <div class="o_setting_left_pane">
-                                <field name="use_coupons"/>
-                            </div>
-                            <div class="o_setting_right_pane">
-                                <label for="use_coupons"/>
-                                <div class="text-muted">
-                                    Grant coupons from Tickets
-                                </div>
-                                <div id="use_coupons" attrs="{'invisible': [('use_coupons', '=', False)]}">
-                                    <div class="text-warning mb4 mt16">
-                                        Save this page and refresh to activate the feature.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 o_setting_box">
-                            <div class="o_setting_left_pane">
-                                <field name="use_product_returns"/>
-                            </div>
-                            <div class="o_setting_right_pane">
-                                <label for="use_product_returns"/>
-                                <div class="text-muted">
-                                    Allow product returns from tickets
-                                </div>
-                                <div id="use_product_returns" attrs="{'invisible': [('use_product_returns', '=', False)]}">
-                                    <div class="text-warning mb4 mt16">
-                                        Save this page and refresh to activate the feature.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 o_setting_box">
-                            <div class="o_setting_left_pane">
-                                <field name="use_product_repairs"/>
-                            </div>
-                            <div class="o_setting_right_pane">
-                                <label for="use_product_repairs"/>
-                                <div class="text-muted">
-                                    Repair broken products
-                                </div>
-                                <div id="use_product_repairs" attrs="{'invisible': [('use_product_repairs', '=', False)]}">
-                                    <div class="text-warning mb4 mt16">
                                         Save this page and refresh to activate the feature.
                                     </div>
                                 </div>
@@ -425,24 +337,24 @@
                 <field name="alias_domain"/>
                 <field name="alias_id"/>
                 <field name="use_rating"/>
-                <field name="rating_percentage_satisfaction" invisible="1"/>
+                <field name="percentage_satisfaction" invisible="1"/>
                 <field name="use_sla"/>
                 <field name="upcoming_sla_fail_tickets"/>
                 <field name="unassigned_tickets"/>
                 <templates>
                     <t t-name="kanban-box">
-                        <div t-attf-class="#{!selection_mode ? kanban_color(record.color.raw_value) : ''}">
+                        <div t-attf-class="#{kanban_color(record.color.raw_value)}">
                             <span class="oe_kanban_color_help" t-attf-title="In #{kanban_getcolorname(record.color.raw_value)}" role="img" t-attf-aria-label="In #{kanban_getcolorname(record.color.raw_value)}"/>
                             <div t-attf-class="o_kanban_card_header">
                                 <div class="o_kanban_card_header_title">
                                     <div class="o_primary"><field name="name"/></div>
                                     <small t-if="record.use_alias.value and record.alias_name.value and record.alias_domain.value"><i class="fa fa-envelope-o" title="Domain alias" role="img" aria-label="Domain alias"></i>&amp;nbsp; <t t-esc="record.alias_id.value"/></small>
                                 </div>
-                                <div class="o_kanban_manage_button_section" t-if="!selection_mode" groups="helpdesk.group_helpdesk_manager">
+                                <div class="o_kanban_manage_button_section">
                                     <a class="o_kanban_manage_toggle_button" href="#"><i class="fa fa-ellipsis-v" role="img" aria-label="Manage" title="Manage"/></a>
                                 </div>
                             </div>
-                            <div class="container o_kanban_card_content" t-if="!selection_mode">
+                            <div class="container o_kanban_card_content">
                                 <div class="row">
                                     <div class="col-6 o_kanban_primary_left">
                                         <button class="btn btn-primary" name="%(helpdesk.helpdesk_ticket_action_team)d" type="action">Tickets</button>
@@ -465,10 +377,10 @@
                                         </div>
                                     </div>
                                 </div><!-- Smiley indicator of rating:
-                                <div t-if="record.use_rating.raw_value and record.rating_percentage_satisfaction.raw_value &gt;= 0" class="row text-center">
+                                <div t-if="record.use_rating.raw_value and record.percentage_satisfaction.raw_value &gt;= 0" class="row text-center">
                                     <a name="action_view_all_rating" type="object" title="Percentage of happy people about this team" class="float-right">
-                                        <h5 t-attf-class="badge #{record.rating_percentage_satisfaction.raw_value &gt;= 50 ? 'badge-success' : 'badge-warning'}">
-                                            <i t-attf-class="fa #{record.rating_percentage_satisfaction.raw_value &gt;= 50 ? 'fa-smile-o' : 'fa-frown-o'}" role="img" aria-label="Satisfaction rate" title="Satisfaction rate"/> <t t-raw="record.rating_percentage_satisfaction.raw_value"/> %
+                                        <h5 t-attf-class="badge #{record.percentage_satisfaction.raw_value &gt;= 50 ? 'badge-success' : 'badge-warning'}">
+                                            <i t-attf-class="fa #{record.percentage_satisfaction.raw_value &gt;= 50 ? 'fa-smile-o' : 'fa-frown-o'}" role="img" aria-label="Satisfaction rate" title="Satisfaction rate"/> <t t-raw="record.percentage_satisfaction.raw_value"/> %
                                         </h5>
                                     </a>
                                 </div> -->
@@ -493,6 +405,7 @@
     <record id="helpdesk_team_dashboard_action_main" model="ir.actions.act_window">
         <field name="name">Helpdesk Overview</field>
         <field name="res_model">helpdesk.team</field>
+        <field name="view_type">form</field>
         <field name="view_mode">kanban,form</field>
         <field name="context">{}</field>
         <field name="view_id" ref="helpdesk.helpdesk_team_view_kanban"/>

@@ -1,90 +1,18 @@
 odoo.define('sign.PDFIframe', function (require) {
     'use strict';
 
-    var config = require('web.config');
     var core = require('web.core');
     var Dialog = require('web.Dialog');
     var Widget = require('web.Widget');
 
     var _t = core._t;
 
-    const PinchItemMixin = {
-
-        events: {
-            'touchstart .o_pinch_item': '_onResetPinchCache',
-            'touchmove .o_pinch_item': '_onPinchMove',
-            'touchend .o_pinch_item': '_onResetPinchCache',
-        },
-
-        /**
-         * @param {Object} options
-         * @param {jQuery} options.$target
-         *        Element used as target where the pinch must be applied
-         * @param {function} [options.increaseDistanceHandler]
-         *        Handler called when the distance pinched between the 2 pointer is decreased
-         * @param {function} [options.decreaseDistanceHandler]
-         *        Handler called when the distance pinched between the 2 pointer is increased
-         * }
-         */
-        init(options) {
-            this.prevDiff = null;
-            this.$target = options.$target;
-            this.$target.addClass('o_pinch_item');
-            this.increaseDistanceHandler = options.increaseDistanceHandler ? options.increaseDistanceHandler : () => {};
-            this.decreaseDistanceHandler = options.decreaseDistanceHandler ? options.decreaseDistanceHandler : () => {};
-        },
-
-        //--------------------------------------------------------------------------
-        // Handlers
-        //--------------------------------------------------------------------------
-
-        /**
-         * This function implements a 2-pointer horizontal pinch/zoom gesture.
-         *
-         * If the distance between the two pointers has increased (zoom in),
-         * distance is decreasing (zoom out)
-         *
-         * This function sets the target element's border to "dashed" to visually
-         * indicate the pointer's target received a move event.
-         * @param ev
-         * @private
-         */
-        _onPinchMove(ev) {
-            const touches = ev.touches;
-            // If two pointers are down, check for pinch gestures
-            if (touches.length === 2) {
-                // Calculate the current distance between the 2 fingers
-                const deltaX = touches[0].pageX - touches[1].pageX;
-                const deltaY = touches[0].pageY - touches[1].pageY;
-                const curDiff = Math.hypot(deltaX, deltaY);
-                if (this.prevDiff == null) {
-                    this.prevDiff = curDiff;
-                }
-                const scale = this.prevDiff / curDiff;
-                if (scale < 1) {
-                    this.decreaseDistanceHandler(ev);
-                } else if (scale > 1) {
-                    this.increaseDistanceHandler(ev);
-                }
-            }
-        },
-
-        /**
-         *
-         * @private
-         */
-        _onResetPinchCache() {
-            this.prevDiff = null;
-        },
-    };
-
-    var PDFIframe = Widget.extend(Object.assign({}, PinchItemMixin, {
+    var PDFIframe = Widget.extend({
         init: function(parent, attachmentLocation, editMode, datas, role) {
             this._super(parent);
-            var self = this;
+
             this.attachmentLocation = attachmentLocation;
             this.editMode = editMode;
-            this.requestState = parent.requestState;
             for(var dataName in datas) {
                 this._set_data(dataName, datas[dataName]);
             }
@@ -92,42 +20,9 @@ odoo.define('sign.PDFIframe', function (require) {
             this.role = role || 0;
             this.configuration = {};
 
-            var _res, _rej;
-            this.fullyLoaded = new Promise(function(resolve, reject) {
-                _res = resolve;
-                _rej = reject;
-            }).then(function() {
-                // Init pinch event only after have the pdf loaded
-                PinchItemMixin.init.call(self, {
-                    $target: self.$el.find('#viewerContainer #viewer'),
-                    decreaseDistanceHandler: () => self.$('button#zoomIn').click(),
-                    increaseDistanceHandler: () => self.$('button#zoomOut').click()
-                });
-                return arguments;
-            });
-            this.fullyLoaded.resolve = _res;
-            this.fullyLoaded.reject = _rej;
+            this.fullyLoaded = new $.Deferred();
         },
 
-        //--------------------------------------------------------------------------
-        // Private
-        //--------------------------------------------------------------------------
-        _appendDownloadCompleteButton() {
-            const cloneDownloadButton = $button => $button.clone()
-                .attr('id', $button.attr('id') + '_completed')
-                .prop('title', _t("Download Document"))
-                .on('click', () => window.location = this.attachmentLocation.replace('origin', 'completed'));
-            // inside toolbar
-            const $buttonDownloadPrimary = this.$('button#download');
-            $buttonDownloadPrimary.after(cloneDownloadButton($buttonDownloadPrimary));
-            // inside the more button on the toolbar
-            const $buttonDownloadSecondary = this.$('button#secondaryDownload');
-            const $buttonDownloadSecond = cloneDownloadButton($buttonDownloadSecondary);
-            if ($buttonDownloadSecond.hasClass('secondaryToolbarButton')) {
-                $buttonDownloadSecond.find('span').text(_t("Download Document"));
-            }
-            $buttonDownloadSecondary.after($buttonDownloadSecond);
-        },
         _set_data: function(dataName, data) {
             this[dataName] = {};
             if(data instanceof jQuery) {
@@ -149,14 +44,13 @@ odoo.define('sign.PDFIframe', function (require) {
             this.readonlyFields = this.pdfView || this.editMode;
 
             var viewerURL = "/web/static/lib/pdfjs/web/viewer.html?unique="+ (+new Date()) +"&file=";
-            viewerURL += encodeURIComponent(this.attachmentLocation).replace(/'/g,"%27").replace(/"/g,"%22") + "#page=1";
-            viewerURL += config.device.isMobile ? "&zoom=page-fit" : "&zoom=page-width";
-            this.$iframe.ready(function () {
+            viewerURL += encodeURIComponent(this.attachmentLocation).replace(/'/g,"%27").replace(/"/g,"%22") + "#page=1&zoom=page-width";
+            this.$iframe.load(function() {
                 self.waitForPDF();
             });
             this.$iframe.attr('src', viewerURL);
 
-            return Promise.all([this._super(), this.fullyLoaded]);
+            return $.when(this._super(), this.fullyLoaded);
         },
 
         waitForPDF: function() {
@@ -178,21 +72,13 @@ odoo.define('sign.PDFIframe', function (require) {
 
         doPDFPostLoad: function() {
             var self = this;
-            var signature_keys = Object.keys(this.signatureItems);
-            var is_all_signed = signature_keys.filter(key=>this.signatureItems[key].value).length == signature_keys.length
             this.setElement(this.$iframe.contents().find('html'));
 
             this.$('#openFile, #pageRotateCw, #pageRotateCcw, #pageRotateCcw, #viewBookmark').add(this.$('#lastPage').next()).hide();
             this.$('button#print').prop('title', _t("Print original document"));
             this.$('button#download').prop('title', _t("Download original document"));
-            if (this.readonlyFields && !this.editMode && is_all_signed) {
-                this._appendDownloadCompleteButton();
-            }
-            if (config.device.isMobile) {
-                this.$('button#zoomIn').click();
-            } else {
-                this.$('button#zoomOut').click().click();
-            }
+            this.$('button#zoomOut').click().click();
+
             for(var i = 1 ; i <= this.nbPages ; i++) {
                 this.configuration[i] = [];
             }
@@ -209,6 +95,10 @@ odoo.define('sign.PDFIframe', function (require) {
                 rel: "stylesheet", type: "text/css",
                 href: "/web/static/lib/jquery.ui/jquery-ui.css"
             });
+            var $jqueryScript = $("<script></script>", {
+                type: "text/javascript",
+                src: "/web/static/lib/jquery.ui/jquery-ui.js"
+            });
             var $select2Css = $("<link/>", {
                 rel: "stylesheet", type: "text/css",
                 href: "/web/static/lib/select2/select2.css"
@@ -217,6 +107,7 @@ odoo.define('sign.PDFIframe', function (require) {
             this.$('head')[0].appendChild($cssLink[0]);
             this.$('head')[0].appendChild($faLink[0]);
             this.$('head')[0].appendChild($jqueryLink[0]);
+            this.$('head')[0].appendChild($jqueryScript[0]);
             this.$('head')[0].appendChild($select2Css[0]);
 
             var waitFor = [];
@@ -242,14 +133,14 @@ odoo.define('sign.PDFIframe', function (require) {
                         parseFloat(el.width),
                         parseFloat(el.height),
                         el.value,
-                        el.option_ids,
                         el.name
                     );
                     $signatureItem.data({itemId: el.id, order: i});
+
                     self.configuration[parseInt(el.page)].push($signatureItem);
                 });
 
-            Promise.all(waitFor).then(function() {
+            $.when.apply($, waitFor).then(function() {
                 refresh_interval();
 
                 self.$('.o_sign_sign_item').each(function(i, el) {
@@ -288,52 +179,13 @@ odoo.define('sign.PDFIframe', function (require) {
             this.updateFontSize();
         },
 
-        display_select_options: function ($container, options, selected_options, readonly, active_option) {
-            readonly = (readonly === undefined)? false : readonly;
-            $container.empty();
-
-            selected_options.forEach(function (id, index) {
-                if (index !== 0) {
-                    $container.append($('<span class="o_sign_option_separator">/</span>'));
-                }
-                var $op = $('<span class="o_sign_item_option"/>').text(options[id].value);
-                $op.data('id', id);
-                $container.append($op);
-                if (!readonly) {
-                    $op.on('click', click_handler);
-                }
-            });
-
-            if (active_option) {
-                select_option($container, active_option);
-            }
-            function select_option($container, option_id) {
-                var $selected_op = $container.find(':data(id)').filter(function () { return $(this).data('id') === option_id;});
-                var $other_options = $container.find(':data(id)').filter(function () { return $(this).data('id') !== option_id;});
-                $selected_op.css("color", "black");
-                $other_options.css("color", "black");
-                $selected_op.addClass('o_sign_selected_option');
-                $selected_op.removeClass('o_sign_not_selected_option');
-                $other_options.removeClass('o_sign_selected_option');
-                $other_options.addClass('o_sign_not_selected_option');
-            }
-
-            function click_handler(e) {
-                var id = $(e.target).data('id');
-                $container = $(e.target.parentElement);
-                $container.parent().val(id);
-                $container.parent().trigger('input');
-                select_option($container, id);
-            }
-        },
-
         updateFontSize: function() {
             var self = this;
             var normalSize = this.$('.page').first().innerHeight() * 0.015;
             this.$('.o_sign_sign_item').each(function(i, el) {
                 var $elem = $(el);
                 var size = parseFloat($elem.css('height'));
-                if ($.inArray(self.types[$elem.data('type')].item_type, ['signature', 'initial', 'textarea', 'selection']) > -1) {
+                if($.inArray(self.types[$elem.data('type')].type, ['signature', 'initial', 'textarea']) > -1) {
                     size = normalSize;
                 }
 
@@ -341,29 +193,24 @@ odoo.define('sign.PDFIframe', function (require) {
             });
         },
 
-        createSignItem: function (type, required, responsible, posX, posY, width, height, value, option_ids, name) {
+        createSignItem: function(type, required, responsible, posX, posY, width, height, value, name) {
             // jQuery.data parse 0 as integer, but 0 is not considered falsy for signature item
             if (value === 0) {
                 value = "0";
             }
+            var self = this;
             var readonly = this.readonlyFields || (responsible > 0 && responsible !== this.role) || !!value;
-            var selected_options = option_ids || [];
 
             var $signatureItem = $(core.qweb.render('sign.sign_item', {
                 editMode: this.editMode,
                 readonly: readonly,
-                type: type['item_type'],
+                type: type['type'],
                 value: value || "",
-                options: selected_options,
-                placeholder: (name) ? name : type['placeholder']
+                placeholder: type['placeholder']
             }));
 
-            if (type['item_type'] === 'selection') {
-                var $options_display = $signatureItem.find('.o_sign_select_options_display');
-                this.display_select_options($options_display, this.select_options, selected_options, readonly, value);
-            }
-            return $signatureItem.data({type: type['id'], required: required, responsible: responsible, posx: posX, posy: posY, width: width, height: height, name:name, option_ids: option_ids})
-                                 .data('hasValue', !!value).toggle(!!value || this.requestState != 'signed');
+            return $signatureItem.data({type: type['id'], required: required, responsible: responsible, posx: posX, posy: posY, width: width, height: height, name:name})
+                                 .data('hasValue', !!value);
         },
 
         deleteSignItem: function($item) {
@@ -407,7 +254,7 @@ odoo.define('sign.PDFIframe', function (require) {
             clearTimeout(this.refresh_timer);
             this._super.apply(this, arguments);
         },
-    }));
+    });
 
     return PDFIframe;
 });
@@ -428,19 +275,16 @@ odoo.define('sign.Document', function (require) {
             this.attachmentLocation = this.$('#o_sign_input_attachment_location').val();
             this.requestID = parseInt(this.$('#o_sign_input_sign_request_id').val());
             this.requestToken = this.$('#o_sign_input_sign_request_token').val();
-            this.requestState = this.$('#o_sign_input_sign_request_state').val();
             this.accessToken = this.$('#o_sign_input_access_token').val();
             this.signerName = this.$('#o_sign_signer_name_input_info').val();
             this.signerPhone = this.$('#o_sign_signer_phone_input_info').val();
             this.RedirectURL = this.$('#o_sign_input_optional_redirect_url').val();
-            this.RedirectURLText = this.$('#o_sign_input_optional_redirect_url_text').val();
             this.types = this.$('.o_sign_field_type_input_info');
             this.items = this.$('.o_sign_item_input_info');
-            this.select_options = this.$('.o_sign_select_options_input_info');
 
             this.$validateBanner = this.$('.o_sign_validate_banner').first();
 
-            return Promise.all([this._super.apply(this, arguments), this.initialize_iframe()]);
+            return $.when(this._super.apply(this, arguments), this.initialize_iframe());
         },
 
         get_pdfiframe_class: function () {
@@ -456,12 +300,11 @@ odoo.define('sign.Document', function (require) {
                                                                      {
                                                                          types: this.types,
                                                                          signatureItems: this.items,
-                                                                         select_options: this.select_options,
                                                                      },
                                                                      parseInt(this.$('#o_sign_input_current_role').val()));
                 return this.iframeWidget.attachTo(this.$iframe);
             }
-            return Promise.resolve();
+            return $.when();
         },
     });
 
@@ -476,96 +319,35 @@ odoo.define('sign.utils', function (require) {
 
     var _t = core._t;
 
-    function getSelect2Options(placeholder) {
-        return {
-            placeholder: placeholder,
-            allowClear: false,
-            width: '100%',
-
-            formatResult: function(data, resultElem, searchObj) {
-                if(!data.text) {
-                    $(data.element[0]).data('create_name', searchObj.term);
-                    return $("<div/>", {text: _t("Create: \"") + searchObj.term + "\""});
-                }
-                return $("<div/>", {text: data.text});
-            },
-
-            formatSelection: function(data) {
-                if(!data.text) {
-                    return $("<div/>", {text: $(data.element[0]).data('create_name')}).html();
-                }
-                return $("<div/>", {text: data.text}).html();
-            },
-
-            matcher: function(search, data) {
-                if(!data) {
-                    return (search.length > 0);
-                }
-                return (data.toUpperCase().indexOf(search.toUpperCase()) > -1);
-            }
-        };
-    }
-
-    function getOptionsSelectConfiguration(item_id, select_options, selected) {
-        if(getOptionsSelectConfiguration.configuration === undefined) {
-            var data = [];
-            for (var id in select_options) {
-                data.push({id: parseInt(id), text: select_options[id].value});
-            }
-            var select2Options = {
-                data: data,
-                multiple: true,
-                placeholder: _t("Select available options"),
-                allowClear: true,
-                width: '200px',
-                createSearchChoice:function (term, data) {
-                    if ($(data).filter(function () { return this.text.localeCompare(term)===0; }).length===0) {
-                        return {id:-1, text:term};
-                    }
-                },
-            };
-
-            var selectChangeHandler = function(e) {
-                var $select = $(e.target), option = e.added || e.removed;
-                $select.data('item_options', $select.select2('val'));
-                var option_id = option.id;
-                var value = option.text || option.data('create_name');
-                if (option_id >= 0 || !value) {
-                    return false;
-                }
-                ajax.rpc('/web/dataset/call_kw/sign.template/add_option', {
-                    model: 'sign.template',
-                    method: 'add_option',
-                    args: [value],
-                    kwargs: {}
-                }).then(process_option);
-
-                function process_option(optionId) {
-                    var option = {id: optionId, value: value};
-                    select_options[optionId] = option;
-                    selected = $select.select2('val');
-                    selected.pop(); // remove temp element (with id=-1)
-                    selected.push(optionId.toString());
-                    $select.data('item_options', selected);
-                    resetOptionsSelectConfiguration();
-                    setAsOptionsSelect($select, item_id, selected, select_options);
-                    $select.select2('focus');
-                }
-            };
-
-            getOptionsSelectConfiguration.configuration = {
-                options: select2Options,
-                handler: selectChangeHandler,
-                item_id: item_id,
-            };
-        }
-
-        return getOptionsSelectConfiguration.configuration;
-    }
-
     function getResponsibleSelectConfiguration(parties) {
         if(getResponsibleSelectConfiguration.configuration === undefined) {
-            var select2Options = getSelect2Options(_t("Select the responsible"));
+            var select2Options = {
+                placeholder: _t("Select the responsible"),
+                allowClear: false,
+                width: '100%',
+
+                formatResult: function(data, resultElem, searchObj) {
+                    if(!data.text) {
+                        $(data.element[0]).data('create_name', searchObj.term);
+                        return $("<div/>", {text: _t("Create: \"") + searchObj.term + "\""});
+                    }
+                    return $("<div/>", {text: data.text});
+                },
+
+                formatSelection: function(data) {
+                    if(!data.text) {
+                        return $("<div/>", {text: $(data.element[0]).data('create_name')}).html();
+                    }
+                    return $("<div/>", {text: data.text}).html();
+                },
+
+                matcher: function(search, data) {
+                    if(!data) {
+                        return (search.length > 0);
+                    }
+                    return (data.toUpperCase().indexOf(search.toUpperCase()) > -1);
+                }
+            };
 
             var selectChangeHandler = function(e) {
                 var $select = $(e.target), $option = $(e.added.element[0]);
@@ -614,278 +396,276 @@ odoo.define('sign.utils', function (require) {
         getResponsibleSelectConfiguration.configuration = undefined;
     }
 
-    function resetOptionsSelectConfiguration() {
-        getOptionsSelectConfiguration.configuration = undefined;
-    }
-
     function setAsResponsibleSelect($select, selected, parties) {
         var configuration = getResponsibleSelectConfiguration(parties);
-        setAsSelect(configuration, $select, selected);
-    }
 
-    function setAsOptionsSelect($select, item_id, selected, select_options) {
-        var configuration = getOptionsSelectConfiguration(item_id, select_options, selected);
-        setAsSelect(configuration, $select, selected);
-    }
-
-    function setAsSelect(configuration, $select, selected) {
         $select.select2('destroy');
-        if (configuration.html) {
-            $select.html(configuration.html).addClass('form-control');
+        $select.html(configuration.html).addClass('form-control');
+        if(selected !== undefined) {
+            $select.val(selected);
         }
         $select.select2(configuration.options);
-        if(selected !== undefined) {
-            $select.select2('val', selected);
-        }
-
         $select.off('change').on('change', configuration.handler);
     }
 
     return {
         setAsResponsibleSelect: setAsResponsibleSelect,
         resetResponsibleSelectConfiguration: resetResponsibleSelectConfiguration,
-        setAsOptionsSelect: setAsOptionsSelect,
-        resetOptionsSelectConfiguration: resetOptionsSelectConfiguration,
     };
 });
 
 // Signing part
-odoo.define('sign.document_signing', function (require) {
+odoo.define('sign.document_signing', function(require) {
     'use strict';
 
     var ajax = require('web.ajax');
-    var config = require('web.config');
     var core = require('web.core');
     var Dialog = require('web.Dialog');
-    var Document = require('sign.Document');
-    var NameAndSignature = require('web.name_and_signature').NameAndSignature;
-    var PDFIframe = require('sign.PDFIframe');
-    var session = require('web.session');
     var Widget = require('web.Widget');
+    var Document = require('sign.Document');
+    var PDFIframe = require('sign.PDFIframe');
+    var rpc = require('web.rpc');
+    var session = require('web.session');
 
     var _t = core._t;
 
-    // The goal of this override is to fetch a default signature if one was
-    // already set by the user for this request.
-    var SignNameAndSignature = NameAndSignature.extend({
-
-        //----------------------------------------------------------------------
-        // Public
-        //----------------------------------------------------------------------
-
-        /**
-         * Adds requestID and accessToken.
-         *
-         * @constructor
-         * @param {Widget} parent
-         * @param {Object} options
-         * @param {number} requestID
-         * @param {string} accessToken
-         */
-        init: function (parent, options, requestID, accessToken) {
-            this._super.apply(this, arguments);
-
-            this.requestID = requestID;
-            this.accessToken = accessToken;
-
-            this.defaultSignature = '';
-        },
-        /**
-         * Fetches the existing signature.
-         *
-         * @override
-         */
-        willStart: function () {
-            var self = this;
-            return Promise.all([
-                this._super.apply(this, arguments),
-                self._rpc({
-                    route: '/sign/get_signature/' + self.requestID + '/' + self.accessToken,
-                    params: {
-                        signature_type: self.signatureType,
-                    },
-                }).then(function (signature) {
-                    if (signature) {
-                        signature = 'data:image/png;base64,' + signature;
-                        self.defaultSignature = signature;
-                    }
-                })
-            ]);
-        },
-        /**
-         * Sets the existing signature.
-         *
-         * @override
-         */
-        resetSignature: function () {
-            var self = this;
-            return this._super.apply(this, arguments).then(function () {
-                if (self.defaultSignature && self.defaultSignature !== self.emptySignature) {
-                    var settings = self.$signatureField.jSignature('getSettings');
-                    var decorColor = settings['decor-color'];
-                    self.$signatureField.jSignature('updateSetting', 'decor-color', null);
-                    self.$signatureField.jSignature('reset');
-                    self.$signatureField.jSignature("importData", self.defaultSignature);
-                    settings['decor-color'] = decorColor;
-
-                    return self._waitForSignatureNotEmpty();
-                }
-            });
-        },
-    });
-
-    // The goal of this dialog is to ask the user a signature request.
-    // It uses @see SignNameAndSignature for the name and signature fields.
     var SignatureDialog = Dialog.extend({
         template: 'sign.signature_dialog',
 
-        custom_events: {
-            'signature_changed': '_onChangeSignature',
+        events: {
+            'click a.o_sign_mode': function(e) {
+                e.preventDefault();
+
+                this.$modeButtons.removeClass('active');
+                $(e.target).addClass('active');
+                this.$signatureField.jSignature('reset');
+
+                this.mode = $(e.target).data('mode');
+
+                this.$selectStyleButton.toggle(this.mode === 'auto');
+                this.$clearButton.toggle(this.mode === 'draw');
+                this.$loadButton.toggle(this.mode === 'load');
+
+                if(this.mode === 'load') {
+                    this.$loadButton.click();
+                }
+                this.$signatureField.jSignature((this.mode === 'draw')? "enable" : "disable");
+
+                this.$fontDialog.hide().css('width', 0);
+                this.$signerNameInput.trigger('input');
+            },
+
+            'input .o_sign_signer_name': function(e) {
+                if(this.mode !== 'auto') {
+                    return true;
+                }
+                this.signerName = this.$signerNameInput.val();
+                this.printText(SignatureDialog.fonts[this.currentFont], this.getSignatureText());
+            },
+
+            'click .o_sign_select_style': function(e) {
+                var self = this;
+                var width = Math.min(
+                    self.$fontDialog.find('a').first().height() * self.signatureRatio * 1.25,
+                    this.$signerNameInput.width()
+                );
+
+                e.preventDefault();
+                this.$fontDialog.find('a').empty().append($('<div/>').addClass("o_sign_loading"));
+                this.$fontDialog.show().animate({'width': width}, 500, function() {
+                    self.buildPreviewButtons();
+                });
+            },
+
+            'mouseover .o_sign_font_dialog a': function(e) {
+                this.currentFont = $(e.currentTarget).data('font-nb');
+                this.$signerNameInput.trigger('input');
+            },
+
+            'click .o_sign_font_dialog a, .o_sign_signature': function(e) {
+                this.$fontDialog.hide().css('width', 0);
+            },
+
+            'click .o_sign_clean': function (e) {
+                e.preventDefault();
+
+                this.$signatureField.jSignature('reset');
+            },
+
+            'change .o_sign_load': function(e) {
+                var f = e.target.files[0];
+                if(f.type.substr(0, 5) !== "image") {
+                    return false;
+                }
+
+                var self = this, reader = new FileReader();
+                reader.onload = function(e) {
+                    self.printImage(this.result);
+                };
+                reader.readAsDataURL(f);
+            },
         },
 
-        //----------------------------------------------------------------------
-        // Public
-        //----------------------------------------------------------------------
-
-        /**
-         * Allows options.
-         *
-         * @constructor
-         * @param {Widget} parent
-         * @param {Object} options
-         * @param {string} [options.title='Adopt Your Signature'] - modal title
-         * @param {string} [options.size='medium'] - modal size
-         * @param {Object} [options.nameAndSignatureOptions={}] - options for
-         *  @see NameAndSignature.init()
-         * @param {number} requestID
-         * @param {string} accessToken
-         */
-        init: function (parent, options, requestID, accessToken) {
-            options = options || {};
+        init: function(parent, signerName, options) {
+            options = (options || {});
 
             options.title = options.title || _t("Adopt Your Signature");
             options.size = options.size || 'medium';
             options.technical = false;
-            if (config.device.isMobile) {
-                options.technical = true;
-                options.fullscreen = true;
-            }
 
-            if (!options.buttons) {
+            if(!options.buttons) {
                 options.buttons = [];
-                options.buttons.push({text: _t("Cancel"), close: true});
-                options.buttons.push({text: _t("Adopt and Sign"), classes: "btn-primary", disabled: true, click: function (e) {
-                    this.confirmFunction();
+                options.buttons.push({text: _t("Adopt and Sign"), classes: "btn-primary", click: function(e) {
+                    this.confirmFunction(this.$signerNameInput.val(), this.$signatureField.jSignature("getData"));
                 }});
+                options.buttons.push({text: _t("Cancel"), close: true});
             }
 
             this._super(parent, options);
+            this.options = options || {};
 
-            this.confirmFunction = function () {};
+            this.signerName = signerName;
 
-            this.nameAndSignature = new SignNameAndSignature(this, options.nameAndSignatureOptions, requestID, accessToken);
+            this.signatureRatio = 3.0;
+            this.signatureType = 'signature';
+            this.currentFont = 0;
+            this.mode = 'draw';
+
+            this.confirmFunction = function() {};
         },
-        /**
-         * Start the nameAndSignature widget and wait for it.
-         *
-         * @override
-         */
-            willStart: function () {
-                return Promise.all([
-                    this.nameAndSignature.appendTo($('<div>')),
-                    this._super.apply(this, arguments)
-                ]);
-            },
-        /**
-         * Initialize the name and signature widget when the modal is opened.
-         *
-         * @override
-         */
-        start: function () {
-            var self = this;
-            this.$primaryButton = this.$footer.find('.btn-primary');
-            this.opened().then(function () {
-                self.$('.o_web_sign_name_and_signature').replaceWith(self.nameAndSignature.$el);
-                // initialize the signature area
-                self.nameAndSignature.resetSignature();
-            });
+
+        start: function() {
+            this.$modeButtons = this.$('a.o_sign_mode');
+            this.$signatureField = this.$(".o_sign_signature").first();
+            this.$fontDialog = this.$(".o_sign_font_dialog").first();
+            this.$fontSelection = this.$(".o_sign_font_selection").first();
+            for(var i = 0 ; i < SignatureDialog.fonts.length ; i++) {
+                this.$fontSelection.append($("<a/>").data('fontNb', i).addClass('btn btn-block'));
+            }
+            this.$clearButton = this.$('.o_sign_clean').first();
+            this.$selectStyleButton = this.$('.o_sign_select_style').first();
+            this.$loadButton = this.$('.o_sign_load').first();
+            this.$signerNameInput = this.$(".o_sign_signer_name").first();
+
             return this._super.apply(this, arguments);
         },
 
-        onConfirm: function (fct) {
+        open: function() {
+            var self = this;
+            this.opened(function(e) {
+                var width = self.$signatureField.width();
+                var height = width / self.signatureRatio;
+
+                // necessary because the lib is adding invisible div with margin
+                // signature field too tall without this code
+                self.$signatureField.css({
+                    width: width,
+                    height: height,
+                });
+                self.$signatureField.empty().jSignature({
+                    'decor-color': 'transparent',
+                    'background-color': '#FFF',
+                    'color': '#000',
+                    'lineWidth': 2,
+                    'width': width,
+                    'height': height
+                });
+
+                // TDE FIXME: ugly FP-request RPC to dynamically fetch signature instead of
+                // pre-filled sign.request.item
+                if (self.options.signatureType !== undefined) {
+                    rpc.query({
+                        route: '/sign/get_signature/' + self.getParent().getParent().requestID + '/' + self.getParent().getParent().accessToken,
+                        params: {
+                            signature_type: self.options.signatureType,
+                        }
+                    }).then(function (signature) {
+                        if (signature) {
+                            signature = 'data:image/png;base64,' + signature;
+                            self.$signatureField.jSignature("importData", signature);
+                        }
+                    });
+                }
+                self.emptySignature = self.$signatureField.jSignature("getData");
+
+                self.$modeButtons.filter('.btn.active').click();
+                self.$signerNameInput.focus();
+            });
+
+            return this._super.apply(this, arguments);
+        },
+
+        getSignatureText: function() {
+            var text = this.$signerNameInput.val().replace(/[^[\w\u00E0-\u00FC]-'" ]/g, '');
+            if(this.signatureType === 'initial') {
+                return (text.split(' ').map(function(w) { return w[0]; }).join('.') + '.');
+            }
+            return text;
+        },
+
+        getSVGText: function(font, text) {
+            var canvas = this.$signatureField.find('canvas')[0];
+
+            var $svg = $(core.qweb.render('sign.svg_text', {
+                width: canvas.width,
+                height: canvas.height,
+                font: font,
+                text: text,
+                type: this.signatureType,
+            }));
+            $svg.attr({
+                "xmlns": "http://www.w3.org/2000/svg",
+                "xmlns:xlink": "http://www.w3.org/1999/xlink",
+            });
+
+            return ("data:image/svg+xml," + encodeURI($svg[0].outerHTML));
+        },
+
+        printText: function(font, text) {
+            return this.printImage(this.getSVGText(font, text));
+        },
+
+        printImage: function(imgSrc) {
+            var self = this;
+
+            var image = new Image;
+            image.onload = function() {
+                var width = 0, height = 0;
+                var ratio = image.width/image.height;
+
+                self.$signatureField.jSignature('reset');
+                var $canvas = self.$signatureField.find('canvas'), context = $canvas[0].getContext("2d");
+
+                if(image.width / $canvas[0].width > image.height / $canvas[0].height) {
+                    width = $canvas[0].width;
+                    height = width / ratio;
+                } else {
+                    height = $canvas[0].height;
+                    width = height * ratio;
+                }
+
+                setTimeout(function() {
+                    var ignoredContext = _.pick(context, ['shadowOffsetX', 'shadowOffsetY']);
+                    _.extend(context, {shadowOffsetX: 0, shadowOffsetY: 0});
+                    context.drawImage(image, 0, 0, image.width, image.height, ($canvas[0].width - width)/2, ($canvas[0].height - height)/2, width, height);
+                    _.extend(context, ignoredContext);
+                }, 0);
+            };
+            image.src = imgSrc;
+        },
+
+        buildPreviewButtons: function() {
+            var self = this;
+            this.$fontDialog.find('a').each(function(i, el) {
+                var $img = $('<img/>', {src: self.getSVGText(SignatureDialog.fonts[$(el).data('fontNb')], self.getSignatureText())});
+                $img.addClass('img-fluid');
+                $(el).empty().append($img);
+            });
+        },
+
+        onConfirm: function(fct) {
             this.confirmFunction = fct;
         },
-        /**
-         * Gets the name currently given by the user.
-         *
-         * @see NameAndSignature.getName()
-         * @returns {string} name
-         */
-        getName: function () {
-            return this.nameAndSignature.getName();
-        },
-        /**
-         * Gets the signature currently drawn.
-         *
-         * @see NameAndSignature.getSignatureImage()
-         * @returns {string[]} Array that contains the signature as a bitmap.
-         *  The first element is the mimetype, the second element is the data.
-         */
-        getSignatureImage: function () {
-            return this.nameAndSignature.getSignatureImage();
-        },
-        /**
-         * Gets the signature currently drawn, in a format ready to be used in
-         * an <img/> src attribute.
-         *
-         * @see NameAndSignature.getSignatureImageSrc()
-         * @returns {string} the signature currently drawn, src ready
-         */
-        getSignatureImageSrc: function () {
-            return this.nameAndSignature.getSignatureImageSrc();
-        },
-        /**
-         * Returns whether the drawing area is currently empty.
-         *
-         * @see NameAndSignature.isSignatureEmpty()
-         * @returns {boolean} Whether the drawing area is currently empty.
-         */
-        isSignatureEmpty: function () {
-            return this.nameAndSignature.isSignatureEmpty();
-        },
-        /**
-         * Gets the current name and signature, validates them, and
-         * returns the result. If they are invalid, it also displays the
-         * errors to the user.
-         *
-         * @see NameAndSignature.validateSignature()
-         * @returns {boolean} whether the current name and signature are valid
-         */
-        validateSignature: function () {
-            return this.nameAndSignature.validateSignature();
-        },
-
-        //----------------------------------------------------------------------
-        // Handlers
-        //----------------------------------------------------------------------
-
-        /**
-         * Toggles the submit button depending on the signature state.
-         *
-         * @private
-         */
-        _onChangeSignature: function () {
-            var isEmpty = this.nameAndSignature.isSignatureEmpty();
-            this.$primaryButton.prop('disabled', isEmpty);
-        },
-        /**
-         * @override
-         */
-        renderElement: function () {
-            this._super.apply(this, arguments);
-             // this trigger the adding of a custom css
-             this.$modal.addClass('o_sign_signature_dialog');
-         },
     });
 
     var SignItemNavigator = Widget.extend({
@@ -905,7 +685,7 @@ odoo.define('sign.document_signing', function (require) {
 
         start: function() {
             this.$signatureItemNavLine = $('<div/>').addClass("o_sign_sign_item_navline").insertBefore(this.$el);
-            this.setTip(_t("Click to start"));
+            this.setTip(_t('Click to start'));
             this.$el.focus();
 
             return this._super();
@@ -943,39 +723,8 @@ odoo.define('sign.document_signing', function (require) {
         },
 
         scrollToSignItem: function($item) {
-            var self = this;
             if(!this.started) {
                 return;
-            }
-            this._scrollToSignItemPromise($item).then(function () {
-                const type = self.types[$item.data('type')];
-                if($item.val() === "" && !$item.data('signature')) {
-                    self.setTip(type.tip);
-                }
-
-                self.getParent().refreshSignItems();
-                $item.focus();
-                if (['signature', 'initial'].indexOf(type.item_type) > -1) {
-                    if($item.data("has-focus")) {
-                        $item.click();
-                    } else {
-                        $item.data("has-focus", true);
-                    }
-                }
-                self.isScrolling = false;
-            });
-
-            this.getParent().$('.ui-selected').removeClass('ui-selected');
-            $item.addClass('ui-selected').focus();
-        },
-
-        _scrollToSignItemPromise($item) {
-            if (config.device.isMobile) {
-                return new Promise(resolve => {
-                    this.isScrolling = true;
-                    $item[0].scrollIntoView({behavior: 'smooth', block: 'center', inline: 'center'});
-                    resolve();
-                });
             }
 
             var $container = this.getParent().$('#viewerContainer');
@@ -1000,17 +749,25 @@ odoo.define('sign.document_signing', function (require) {
 
             var self = this;
             this.isScrolling = true;
-            var def1 = new Promise(function (resolve, reject) {
-                $container.animate({'scrollTop': scrollTop}, duration, function() {
-                    resolve();
-                });
+            var def1 = $.Deferred(), def2 = $.Deferred();
+            $container.animate({'scrollTop': scrollTop}, duration, function() {
+                def1.resolve();
             });
-            var def2 = new Promise(function (resolve, reject) {
-                self.$el.add(self.$signatureItemNavLine).animate({'top': scrollOffset}, duration, function() {
-                    resolve();
-                });
+            this.$el.add(this.$signatureItemNavLine).animate({'top': scrollOffset}, duration, function() {
+                def2.resolve();
             });
-            return Promise.all([def1, def2]);
+            $.when(def1, def2).then(function() {
+                if($item.val() === "" && !$item.data('signature')) {
+                    self.setTip(self.types[$item.data('type')].tip);
+                }
+
+                self.getParent().refreshSignItems();
+                $item.focus();
+                self.isScrolling = false;
+            });
+
+            this.getParent().$('.ui-selected').removeClass('ui-selected');
+            $item.addClass('ui-selected').focus();
         },
     });
 
@@ -1024,11 +781,6 @@ odoo.define('sign.document_signing', function (require) {
             options.title = options.title || _t("Final Validation");
             options.size = options.size || "medium";
             options.technical = false;
-
-            if (config.device.isMobile) {
-                options.technical = true;
-                options.fullscreen = true;
-            }
 
             if(!options.buttons) {
                 options.buttons = [];
@@ -1046,7 +798,7 @@ odoo.define('sign.document_signing', function (require) {
                         mail: mail,
                     }).then(function() {
                         self.close();
-                        self.sentResolve();
+                        self.sent.resolve();
                     });
                 }});
                 options.buttons.push({text: _t("Cancel"), close: true});
@@ -1056,10 +808,7 @@ odoo.define('sign.document_signing', function (require) {
 
             this.requestID = requestID;
             this.requestToken = requestToken;
-            this.sentResolve;
-            this.sent = new Promise(function(resolve) {
-                self.sentResolve = resolve;
-            });
+            this.sent = $.Deferred();
         },
 
         open: function(name, mail) {
@@ -1078,33 +827,24 @@ odoo.define('sign.document_signing', function (require) {
 
         events: {
             'click button.o_sign_resend_sms': function(e) {
-                var $btn = self.$('.o_sign_resend_sms');
-                $btn.attr('disabled', true)
                 var route = '/sign/send-sms/' + this.requestID + '/' + this.requestToken + '/' + this.$('#o_sign_phone_number_input').val();
-                session.rpc(route, {}).then(function(success) {
+                session.rpc(route, {}).then(function(success) {
                     if (!success) {
                         Dialog.alert(self, _t("Unable to send the SMS, please contact the sender of the document."), {
                             title: _t("Error"),
+                            confirm_callback: function() {
+                                window.location.reload();
+                            },
                         });
                     }
                     else {
-                        $btn.html("<span><i class='fa fa-check'/> "+_t("SMS Sent")+"</span>");
-                        setTimeout(function() {
-                            $btn.removeAttr('disabled');
-                            $btn.text(_t('Re-send SMS'));
-                        }, 15000);
+                        self.$('.o_sign_resend_sms').html('Send Again');
                     }
-                }).guardedCatch(function (error) {
-                    $btn.removeAttr('disabled');
-                    Dialog.alert(self, _t("Unable to send the SMS, please contact the sender of the document."), {
-                        title: _t("Error"),
-                    });
-                });;
+                });
             }
         },
 
         _onValidateSMS: function () {
-            var $btn = this.$('.o_sign_validate_sms');
             var input = this.$('#o_sign_public_signer_sms_input')
             if(!input.val()) {
                 input.closest('.form-group').toggleClass('o_has_error').find('.form-control, .custom-select').toggleClass('is-invalid');
@@ -1115,16 +855,14 @@ odoo.define('sign.document_signing', function (require) {
                 signature: this.signature
             };
             var self = this;
-            $btn.attr('disabled', true);
             session.rpc(route, params).then(function(response) {
                 if (!response) {
-                    Dialog.alert(self, _t("Your signature was not submitted. Ensure that all required field of the documents are completed and that the SMS validation code is correct."), {
+                    Dialog.alert(self, _t("Sorry, an error occured, please try to fill the document again."), {
                         title: _t("Error"),
                     });
-                    $btn.removeAttr('disabled');
                 }
                 if (response === true) {
-                    (new (self.get_thankyoudialog_class())(self, self.RedirectURL, self.RedirectURLText, self.requestID)).open();
+                    (new (self.get_thankyoudialog_class())(self, self.RedirectURL, self.requestID)).open();
                     self.do_hide();
                 }
                 if (typeof response === 'object') {
@@ -1141,9 +879,6 @@ odoo.define('sign.document_signing', function (require) {
 
         init: function(parent, requestID, requestToken, signature, signerPhone, RedirectURL, options) {
             options = (options || {});
-            if (config.device.isMobile) {
-                options.fullscreen = true;
-            }
             options.title = options.title || _t("Final Validation");
             options.size = options.size || "medium";
             if(!options.buttons) {
@@ -1163,121 +898,24 @@ odoo.define('sign.document_signing', function (require) {
         },
     });
 
-    var EncryptedDialog = Dialog.extend({
-        template: "sign.public_password",
-
-        _onValidatePassword: function () {
-            var input = this.$('#o_sign_public_signer_password_input')
-            if(!input.val()) {
-                input.closest('.form-group').toggleClass('o_has_error').find('.form-control, .custom-select').toggleClass('is-invalid');
-                return false;
-            }
-            var route = '/sign/password/' + this.requestID ;
-            var params = {
-                password: input.val()
-            };
-            var self = this;
-            session.rpc(route, params).then(function(response) {
-                if (!response) {
-                    Dialog.alert(self, _t("Password is incorrect."), {
-                        title: _t("Error"),
-                    });
-                }
-                if (response === true) {
-                    self.close();
-                }
-            });
-        },
-
-        init: function(parent, requestID, options) {
-            options = (options || {});
-            if (config.device.isMobile) {
-                options.fullscreen = true;
-            }
-            options.title = options.title || _t("PDF is encrypted");
-            options.size = options.size || "medium";
-            if(!options.buttons) {
-                options.buttons = [{
-                    text: _t("Generate PDF"),
-                    classes: "btn btn-primary o_sign_validate_encrypted",
-                    click: this._onValidatePassword
-                }]
-            }
-            this._super(parent, options);
-            this.requestID = requestID;
-        },
-
-        /**
-         * @override
-         */
-        renderElement: function () {
-            this._super.apply(this, arguments);
-            this.$modal.find('button.close').addClass('invisible')
-        },
-    });
-
     var ThankYouDialog = Dialog.extend({
         template: "sign.thank_you_dialog",
         events: {
             'click .o_go_to_document': 'on_closed',
         },
 
-        get_passworddialog_class: function () {
-            return EncryptedDialog;
-        },
-
-        init: function(parent, RedirectURL, RedirectURLText, requestID, options) {
-            var self = this;
+        init: function(parent, RedirectURL, requestID, options) {
             options = (options || {});
             options.title = options.title || _t("Thank You !");
             options.subtitle = options.subtitle || _t("Your signature has been saved.");
             options.size = options.size || "medium";
             options.technical = false;
             options.buttons = [];
-            if (RedirectURL) {
-                // check if url contains http:// or https://
-                if (!/^(f|ht)tps?:\/\//i.test(RedirectURL)) {
-                RedirectURL = "http://" + RedirectURL;
-             }
-            options.buttons.push({text: RedirectURLText, classes: 'btn-primary', click: function (e) {
-                window.location.replace(RedirectURL);
-                }});
-            }
-
-            // If sign now: do_action to return to templates
-            // If request sent by mail: reload the document
-            var ButtonName = "";
-            if (! session.uid) {
-                ButtonName = _t("View Signed Document");
-                var NextAction = function() {
-                window.location.reload();
-                };
-                } else {
-                    ButtonName = _t("Return to templates");
-                    var NextAction = function() {
-                        return self.do_action('sign.sign_template_action', {
-                            clear_breadcrumbs: true
-                            });
-                        };
-                }
-
-            options.buttons.push({text: ButtonName, classes: 'btn-primary', close: true, click: function (e) {
-                new NextAction();
-            }});
             this.RedirectURL = RedirectURL;
             this.requestID = requestID;
             this._super(parent, options);
 
             this.on('closed', this, this.on_closed);
-
-            var self = this;
-            this._rpc({
-                route: '/sign/encrypted/' + requestID
-            }).then(function (response) {
-                if (response === true) {
-                    (new (self.get_passworddialog_class())(self, requestID)).open();
-                }
-            });
         },
 
         /**
@@ -1285,82 +923,12 @@ odoo.define('sign.document_signing', function (require) {
          */
         renderElement: function () {
             this._super.apply(this, arguments);
-            // this trigger the adding of a custom css
             this.$modal.addClass('o_sign_thank_you_dialog');
-            this.$modal.find('button.close').addClass('invisible');
             this.$modal.find('.modal-header .o_subtitle').before('<br/>');
         },
 
         on_closed: function () {
             window.location.reload();
-        },
-    });
-
-    var NextDirectSignDialog = Dialog.extend({
-        template: "sign.next_direct_sign_dialog",
-        events: {
-            'click .o_go_to_document': 'on_closed',
-            'click .o_nextdirectsign_link': 'on_click_next',
-        },
-
-        init: function(parent, RedirectURL, requestID, options) {
-            this.token_list = (parent.token_list || {});
-            this.name_list = (parent.name_list || {});
-            this.requestID = parent.requestID;
-            this.create_uid = parent.create_uid;
-            this.state = parent.state;
-
-            options = (options || {});
-            options.title = options.title || _t("Thank You !") + "<br/>";
-            options.subtitle = options.subtitle || _t("Your signature has been saved.") + " " +_.str.sprintf(_t("Next signatory is %s"), this.name_list[0]);
-            options.size = options.size || "medium";
-            options.technical = false;
-            if (config.device.isMobile) {
-                options.technical = true;
-                options.fullscreen = true;
-            }
-            options.buttons = [{text: _.str.sprintf(_t("Next signatory (%s)"), this.name_list[0]), click: this.on_click_next}],
-            this.RedirectURL = "RedirectURL";
-            this.requestID = requestID;
-            this._super(parent, options);
-        },
-
-        /**
-         * @override
-         */
-        renderElement: function () {
-            this._super.apply(this, arguments);
-            this.$modal.addClass('o_sign_next_dialog');
-            this.$modal.find('button.close').addClass('invisible');
-        },
-
-        on_click_next: function () {
-
-            var newCurrentToken = this.token_list[0];
-            var newCurrentName = this.name_list[0];
-            var self = this;
-            this.token_list.shift();
-            this.name_list.shift();
-
-            self.do_action({
-                type: "ir.actions.client",
-                tag: 'sign.SignableDocument',
-                name: _t("Sign"),
-            }, {
-                additional_context: {
-                    id: this.requestID,
-                    create_uid: this.create_uid,
-                    state: this.state,
-                    token: newCurrentToken,
-                    sign_token: newCurrentToken,
-                    token_list: this.token_list,
-                    name_list: this.name_list,
-                    current_signor_name: newCurrentName,
-                },
-                replace_last_action: true,
-            });
-
-            this.destroy();
         },
     });
 
@@ -1370,7 +938,7 @@ odoo.define('sign.document_signing', function (require) {
 
             this.events = _.extend(this.events || {}, {
                 'keydown .page .ui-selected': function(e) {
-                    if((e.keyCode || e.which) !== 13) {
+                    if((e.keyCode || e.which) !== 9) {
                         return true;
                     }
                     e.preventDefault();
@@ -1383,22 +951,23 @@ odoo.define('sign.document_signing', function (require) {
             var self = this;
             this.fullyLoaded.then(function() {
                 self.signatureItemNav = new SignItemNavigator(self, self.types);
-                return self.signatureItemNav.prependTo(self.$('#viewerContainer')).then(function () {
+                var def = self.signatureItemNav.prependTo(self.$('#viewerContainer'));
 
-                    self.checkSignItemsCompletion();
+                self.checkSignItemsCompletion();
 
-                    self.$('#viewerContainer').on('scroll', function(e) {
-                        if(!self.signatureItemNav.isScrolling && self.signatureItemNav.started) {
-                            self.signatureItemNav.setTip(_t('next'));
-                        }
-                    });
+                self.$('#viewerContainer').on('scroll', function(e) {
+                    if(!self.signatureItemNav.isScrolling && self.signatureItemNav.started) {
+                        self.signatureItemNav.setTip(_t('next'));
+                    }
                 });
+
+                return def;
             });
 
             this._super.apply(this, arguments);
         },
 
-        createSignItem: function(type, required, responsible, posX, posY, width, height, value, options, name) {
+        createSignItem: function(type, required, responsible, posX, posY, width, height, value, name) {
             // jQuery.data parse 0 as integer, but 0 is not considered falsy for signature item
             if (value === 0) {
                 value = "0";
@@ -1406,13 +975,9 @@ odoo.define('sign.document_signing', function (require) {
             var self = this;
             var $signatureItem = this._super.apply(this, arguments);
             var readonly = this.readonlyFields || (responsible > 0 && responsible !== this.role) || !!value;
+
             if(!readonly) {
-                // Do not display the placeholder of Text and Multiline Text if the name of the item is the default one.
-                if ( type['name'].includes('Text') && type['placeholder'] === $signatureItem.prop('placeholder')) {
-                    $signatureItem.attr('placeholder', ' ');
-                    $signatureItem.find(".o_placeholder").text(" ");
-                 }
-                if (type['item_type'] === "signature" || type['item_type'] === "initial") {
+                if(type['type'] === "signature" || type['type'] === "initial") {
                     $signatureItem.on('click', function(e) {
                         self.refreshSignItems();
                         var $signedItems = self.$('.o_sign_sign_item').filter(function(i) {
@@ -1427,18 +992,15 @@ odoo.define('sign.document_signing', function (require) {
                             $signatureItem.html('<span class="o_sign_helper"/><img src="' + $signatureItem.data('signature') + '"/>');
                             $signatureItem.trigger('input');
                         } else {
-                            var nameAndSignatureOptions = {
-                                defaultName: self.getParent().signerName || "",
-                                signatureType: type['item_type'],
-                                displaySignatureRatio: parseFloat($signatureItem.css('width')) / parseFloat($signatureItem.css('height')),
-                            };
-                            var signDialog = new SignatureDialog(self, {nameAndSignatureOptions: nameAndSignatureOptions}, self.getParent().requestID, self.getParent().accessToken);
+                            var signDialog = new SignatureDialog(self, self.getParent().signerName || "", {
+                                signatureType: type['type'],
+                            });
+                            signDialog.signatureType = type['type'];
+                            signDialog.signatureRatio = parseFloat($signatureItem.css('width'))/parseFloat($signatureItem.css('height'));
 
-                            signDialog.open().onConfirm(function () {
-                                if (!signDialog.isSignatureEmpty()) {
-                                    var name = signDialog.getName();
-                                    var signature = signDialog.getSignatureImageSrc();
-                                    self.getParent().signerName = name;
+                            signDialog.open().onConfirm(function(name, signature) {
+                                if(signature !== signDialog.emptySignature) {
+                                    self.getParent().signerName = signDialog.signerName;
                                     $signatureItem.data('signature', signature)
                                                   .empty()
                                                   .append($('<span/>').addClass("o_sign_helper"), $('<img/>', {src: $signatureItem.data('signature')}));
@@ -1471,6 +1033,7 @@ odoo.define('sign.document_signing', function (require) {
             } else {
                 $signatureItem.val(value);
             }
+
             return $signatureItem;
         },
 
@@ -1496,16 +1059,7 @@ odoo.define('sign.document_signing', function (require) {
             },
 
             'pdfCompleted .o_sign_pdf_iframe': function(e) {
-                if (this.name_list && this.name_list.length > 0) {
-                    var next_name_signatory = this.name_list[0];
-                    var next_signatory = _.str.sprintf(_t("Validate & the next signatory is %s"), next_name_signatory);
-                    this.$validateBanner.find('.o_validate_button').prop('textContent', next_signatory);
-                }
-                this.$validateBanner.show().animate({'opacity': 1}, 500, () => {
-                    if (config.device.isMobile) {
-                        this.$validateBanner[0].scrollIntoView({behavior: 'smooth', block: 'center', inline: 'center'});
-                    }
-                });
+                this.$validateBanner.show().animate({'opacity': 1}, 500);
             },
 
             'click .o_sign_validate_banner button': 'signItemDocument',
@@ -1513,27 +1067,17 @@ odoo.define('sign.document_signing', function (require) {
         },
 
         custom_events: { // do_notify is not supported in backend so it is simulated with a bootstrap alert inserted in a frontend-only DOM element
-            'notification': function (e) {
+            'notification': function(e) {
                 $('<div/>', {html: e.data.message}).addClass('alert alert-success').insertAfter(self.$('.o_sign_request_reference_title'));
             },
         },
 
-        init: function (parent, options) {
-            this._super(parent, options);
-            if (parent) {
-                this.token_list = (parent.token_list || {});
-                this.name_list = (parent.name_list || {});
-                this.create_uid = parent.create_uid;
-                this.state = parent.state;
-                this.current_name = parent.current_name;
-            }
-
-            if (this.current_name) {
-                parent.$('div.container-fluid .col-lg-6').first().removeClass('col-lg-6').addClass('col-lg-4')
-                parent.$('div.container-fluid .col-lg-4').first().after('<div class="col-lg-4"><div class="o_sign_request_from text-center"><h2>'+this.current_name+'</h2></div></div>')
-                parent.$('div.container-fluid .col-lg-6').first().removeClass('col-lg-6').addClass('col-lg-4')
-            }
+        start: function() {
+            return $.when(this._super.apply(this, arguments), ajax.jsonRpc('/sign/get_fonts', 'call', {}).then(function(data) {
+                SignatureDialog.fonts = data;
+            }));
         },
+
         get_pdfiframe_class: function () {
             return SignablePDFIframe;
         },
@@ -1542,15 +1086,7 @@ odoo.define('sign.document_signing', function (require) {
             return ThankYouDialog;
         },
 
-        get_nextdirectsigndialog_class: function () {
-            return NextDirectSignDialog;
-        },
-
         signItemDocument: function(e) {
-            var $btn = this.$('.o_sign_validate_banner button');
-            var init_btn_text = $btn.text();
-            $btn.prepend('<i class="fa fa-spin fa-spinner" />');
-            $btn.attr('disabled', true);
             var mail = "";
             this.iframeWidget.$('.o_sign_sign_item').each(function(i, el) {
                 var value = $(el).val();
@@ -1580,11 +1116,10 @@ odoo.define('sign.document_signing', function (require) {
                             value = $elem.data('signature');
                         }
                         if($elem[0].type === 'checkbox') {
-                            value = false ;
                             if ($elem[0].checked) {
                                 value = 'on';
                             } else {
-                                if (!$elem.data('required')) value = 'off';
+                                value = 'off';
                             }
                         } else if($elem[0].type === 'textarea') {
                             value = this.textareaApplyLineBreak($elem[0]);
@@ -1607,7 +1142,6 @@ odoo.define('sign.document_signing', function (require) {
                 };
                 var self = this;
                 session.rpc(route, params).then(function(response) {
-                    $btn.text(init_btn_text);
                     if (!response) {
                         Dialog.alert(self, _t("Sorry, an error occured, please try to fill the document again."), {
                             title: _t("Error"),
@@ -1617,17 +1151,10 @@ odoo.define('sign.document_signing', function (require) {
                         });
                     }
                     if (response === true) {
-                        $btn.removeAttr('disabled', true);
                         self.iframeWidget.disableItems();
-                        if (self.name_list && self.name_list.length > 0) {
-                            (new (self.get_nextdirectsigndialog_class())(self, self.RedirectURL, self.requestID)).open();
-                        }
-                        else {
-                            (new (self.get_thankyoudialog_class())(self, self.RedirectURL, self.RedirectURLText, self.requestID)).open();
-                        }
+                        (new (self.get_thankyoudialog_class())(self, self.RedirectURL, self.requestID)).open();
                     }
                     if (typeof response === 'object') {
-                        $btn.removeAttr('disabled', true);
                         if (response.sms) {
                             (new SMSSignerDialog(self, self.requestID, self.accessToken, signatureValues, self.signerPhone, self.RedirectURL))
                                 .open();
@@ -1648,25 +1175,23 @@ odoo.define('sign.document_signing', function (require) {
             }
         },
 
-        signDocument: function (e) {
+        signDocument: function(e) {
             var self = this;
 
-            var nameAndSignatureOptions = {defaultName: this.signerName};
-            var options = {nameAndSignatureOptions: nameAndSignatureOptions};
-            var signDialog = new SignatureDialog(this, options, self.requestID, self.accessToken);
+            var signDialog = (new SignatureDialog(this, this.signerName));
+            signDialog.open().onConfirm(function(name, signature) {
+                var isEmpty = ((signature)? (signDialog.emptySignature === signature) : true);
 
-            signDialog.open().onConfirm(function () {
-                if (!signDialog.validateSignature()) {
+                signDialog.$('.o_sign_signer_info').toggleClass('o_has_error', !name).find('.form-control, .custom-select').toggleClass('is-invalid', !name);
+                signDialog.$('.o_sign_signature_draw').toggleClass('bg-danger text-white', isEmpty);
+                if(isEmpty || !name) {
                     return false;
                 }
-
-                var name = signDialog.getName();
-                var signature = signDialog.getSignatureImage()[1];
 
                 signDialog.$('.modal-footer .btn-primary').prop('disabled', true);
                 signDialog.close();
 
-                if (self.$('#o_sign_is_public_user').length > 0) {
+                if(self.$('#o_sign_is_public_user').length > 0) {
                     (new PublicSignerDialog(self, self.requestID, self.requestToken, this.RedirectURL))
                         .open(name, "").sent.then(_sign);
                 } else {
@@ -1675,7 +1200,7 @@ odoo.define('sign.document_signing', function (require) {
 
                 function _sign() {
                     ajax.jsonRpc('/sign/sign/' + self.requestID + '/' + self.accessToken, 'call', {
-                        signature: signature,
+                        signature: ((signature)? signature.substr(signature.indexOf(",")+1) : false)
                     }).then(function(success) {
                         if(!success) {
                             setTimeout(function() { // To be sure this dialog opens after the thank you dialog below
@@ -1688,7 +1213,7 @@ odoo.define('sign.document_signing', function (require) {
                             }, 500);
                         }
                     });
-                    (new (self.get_thankyoudialog_class())(self, self.RedirectURL, self.RedirectURLText, self.requestID)).open();
+                    (new (self.get_thankyoudialog_class())(self, self.RedirectURL, self.requestID)).open();
                 }
             });
         },
@@ -1730,14 +1255,13 @@ odoo.define('sign.document_signing', function (require) {
         }
     });
 
-    function initDocumentToSign(parent) {
+    function initDocumentToSign() {
         return session.session_bind(session.origin).then(function () {
             // Manually add 'sign' to module list and load the
             // translations.
             session.module_list.push('sign');
-            session.module_list.push('web');
             return session.load_translations().then(function () {
-                var documentPage = new SignableDocument(parent);
+                var documentPage = new SignableDocument(null);
                 return documentPage.attachTo($('body')).then(function() {
                     // Geolocation
                     var askLocation = ($('#o_sign_ask_location_input').length > 0);
@@ -1753,11 +1277,9 @@ odoo.define('sign.document_signing', function (require) {
     }
 
     return {
-        EncryptedDialog: EncryptedDialog,
         ThankYouDialog: ThankYouDialog,
         initDocumentToSign: initDocumentToSign,
         SignableDocument: SignableDocument,
-        SignNameAndSignature: SignNameAndSignature,
-        SMSSignerDialog: SMSSignerDialog,
+        SMSSignerDialog: SMSSignerDialog
     };
 });

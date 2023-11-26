@@ -1,21 +1,18 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_batch_payment
+# * account_batch_payment
 # 
 # Translators:
-# Vasiliy Korobatov <korobatov@gmail.com>, 2019
-# sergeiruzkiicode <sergei.ruzki@icode.by>, 2019
-# Martin Trigaux, 2019
-# Ivan Yelizariev // IEL (ellui) <yelizariev@itpp.dev>, 2019
-# ILMIR <karamov@it-projects.info>, 2021
+# Martin Trigaux, 2018
+# Ivan Yelizariev <yelizariev@it-projects.info>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~12.5+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-23 11:38+0000\n"
-"PO-Revision-Date: 2019-08-26 09:34+0000\n"
-"Last-Translator: ILMIR <karamov@it-projects.info>, 2021\n"
+"POT-Creation-Date: 2019-11-14 07:49+0000\n"
+"PO-Revision-Date: 2018-08-24 11:36+0000\n"
+"Last-Translator: Ivan Yelizariev <yelizariev@it-projects.info>, 2019\n"
 "Language-Team: Russian (https://www.transifex.com/odoo/teams/41243/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -34,13 +31,13 @@ msgid "Account Reconciliation widget"
 msgstr "Виджет согласования счета"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:75
 #, python-format
 msgid "All payments in the batch must belong to the same company."
 msgstr "Все платежи в партии должны принадлежать одной компании."
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:86
 #, python-format
 msgid "All payments in the batch must share the same payment method."
 msgstr "Все платежи в партии должны иметь один и тот же способ оплаты."
@@ -92,13 +89,10 @@ msgid "Batch Payment"
 msgstr "пакетный платеж"
 
 #. module: account_batch_payment
-#. openerp-web
-#: code:addons/account_batch_payment/static/src/xml/account_reconciliation.xml:0
 #: model:ir.actions.act_window,name:account_batch_payment.action_batch_payment_in
 #: model:ir.actions.act_window,name:account_batch_payment.action_batch_payment_out
 #: model:ir.ui.menu,name:account_batch_payment.menu_batch_payment_purchases
 #: model:ir.ui.menu,name:account_batch_payment.menu_batch_payment_sales
-#, python-format
 msgid "Batch Payments"
 msgstr "групповые платежи"
 
@@ -139,7 +133,8 @@ msgid "Code"
 msgstr "Код"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_journal.py:0
+#: code:addons/account_batch_payment/models/account_journal.py:57
+#: model:ir.actions.server,name:account_batch_payment.action_account_create_batch_payment
 #, python-format
 msgid "Create Batch Payment"
 msgstr "Создать групповой платеж"
@@ -153,11 +148,6 @@ msgstr "Создать новый групповой платеж клиента
 #: model_terms:ir.actions.act_window,help:account_batch_payment.action_batch_payment_out
 msgid "Create a new vendor batch payment"
 msgstr "Создать новый групповой платеж поставщика"
-
-#. module: account_batch_payment
-#: model:ir.actions.server,name:account_batch_payment.action_account_create_batch_payment
-msgid "Create batch payment"
-msgstr "Создать пакетный платеж"
 
 #. module: account_batch_payment
 #: model:ir.model.fields,field_description:account_batch_payment.field_account_batch_download_wizard__create_uid
@@ -236,13 +226,6 @@ msgid "File name"
 msgstr "Название файла"
 
 #. module: account_batch_payment
-#. openerp-web
-#: code:addons/account_batch_payment/static/src/xml/account_reconciliation.xml:0
-#, python-format
-msgid "Filter..."
-msgstr "Фильтр..."
-
-#. module: account_batch_payment
 #: model:ir.model.fields,help:account_batch_payment.field_account_batch_download_wizard__export_file
 msgid "Generated XML file"
 msgstr "Сгенерированный файл XML"
@@ -255,7 +238,7 @@ msgstr "Дата создания"
 #. module: account_batch_payment
 #: model_terms:ir.ui.view,arch_db:account_batch_payment.view_batch_payment_search
 msgid "Group By"
-msgstr "Группировать по"
+msgstr "Группировать"
 
 #. module: account_batch_payment
 #: model:ir.model.fields,field_description:account_batch_payment.field_account_batch_download_wizard__id
@@ -265,25 +248,25 @@ msgid "ID"
 msgstr "Номер"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:89
 #, python-format
 msgid "Id: %s"
 msgstr "Id: %s"
 
 #. module: account_batch_payment
-#: model:ir.model.fields.selection,name:account_batch_payment.selection__account_batch_payment__batch_type__inbound
+#: selection:account.batch.payment,batch_type:0
 msgid "Inbound"
 msgstr "Входящие"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_journal.py:0
+#: code:addons/account_batch_payment/models/account_journal.py:37
 #, python-format
 msgid "Inbound Batch Payments Sequence"
 msgstr "Последовательность входных пакетных платежей"
 
 #. module: account_batch_payment
 #. openerp-web
-#: code:addons/account_batch_payment/static/src/js/account_batch_payment_reconciliation.js:0
+#: code:addons/account_batch_payment/static/src/js/account_batch_payment_reconciliation.js:135
 #, python-format
 msgid "Incorrect Operation"
 msgstr "Некорректная Операция"
@@ -315,7 +298,7 @@ msgstr "Последнее обновление"
 #. module: account_batch_payment
 #: model_terms:ir.ui.view,arch_db:account_batch_payment.print_batch_payment
 msgid "Memo"
-msgstr "Заметки"
+msgstr "Памятка"
 
 #. module: account_batch_payment
 #: model:ir.model.fields,help:account_batch_payment.field_account_batch_payment__export_filename
@@ -328,17 +311,17 @@ msgid "Name of the generated XML file"
 msgstr "Название сгенерированного XML-файла"
 
 #. module: account_batch_payment
-#: model:ir.model.fields.selection,name:account_batch_payment.selection__account_batch_payment__state__draft
+#: selection:account.batch.payment,state:0
 msgid "New"
 msgstr "Новый"
 
 #. module: account_batch_payment
-#: model:ir.model.fields.selection,name:account_batch_payment.selection__account_batch_payment__batch_type__outbound
+#: selection:account.batch.payment,batch_type:0
 msgid "Outbound"
 msgstr "Исходящий"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_journal.py:0
+#: code:addons/account_batch_payment/models/account_journal.py:17
 #, python-format
 msgid "Outbound Batch Payments Sequence"
 msgstr "Последовательность выходных групповых платежей"
@@ -346,7 +329,7 @@ msgstr "Последовательность выходных групповых
 #. module: account_batch_payment
 #: model:ir.model.fields,field_description:account_batch_payment.field_account_batch_payment__payment_method_id
 msgid "Payment Method"
-msgstr "Метод оплаты"
+msgstr "Метод Оплаты"
 
 #. module: account_batch_payment
 #: model:ir.model,name:account_batch_payment.model_account_payment
@@ -366,7 +349,12 @@ msgid "Print Batch Payment"
 msgstr "Печатать групповой платеж"
 
 #. module: account_batch_payment
-#: model:ir.model.fields.selection,name:account_batch_payment.selection__account_batch_payment__state__reconciled
+#: model:ir.actions.server,name:account_batch_payment.action_account_print_batch_payment
+msgid "Print Batch Payments"
+msgstr "Печатать групповые платежи"
+
+#. module: account_batch_payment
+#: selection:account.batch.payment,state:0
 msgid "Reconciled"
 msgstr "Сверено"
 
@@ -381,13 +369,20 @@ msgid "Register Payment"
 msgstr "Регистрация Платежа"
 
 #. module: account_batch_payment
-#: model:ir.model.fields.selection,name:account_batch_payment.selection__account_batch_payment__state__sent
+#. openerp-web
+#: code:addons/account_batch_payment/static/src/xml/account_reconciliation.xml:8
+#, python-format
+msgid "Select a Batch Payment"
+msgstr "Выберите групповой платеж"
+
+#. module: account_batch_payment
+#: selection:account.batch.payment,state:0
 msgid "Sent"
 msgstr "Отправлено"
 
 #. module: account_batch_payment
 #. openerp-web
-#: code:addons/account_batch_payment/static/src/js/account_batch_payment_reconciliation.js:0
+#: code:addons/account_batch_payment/static/src/js/account_batch_payment_reconciliation.js:133
 #, python-format
 msgid ""
 "Some journal items from the selected batch payment are already selected in "
@@ -403,7 +398,7 @@ msgid "State"
 msgstr "Регион"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:88
 #, python-format
 msgid ""
 "The batch must have the same payment method as the payments it contains."
@@ -411,14 +406,14 @@ msgstr ""
 "Группа должна иметь тот же способ оплаты, и платежи, которые она содержит."
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:83
 #, python-format
 msgid "The batch must have the same type as the payments it contains."
 msgstr ""
 "Группа должна иметь такой же тип, как и платежи, которые она содержит."
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:78
 #, python-format
 msgid ""
 "The journal of the batch payment and of the payments it contains must be the"
@@ -468,7 +463,7 @@ msgstr ""
 "вместо &quot;Печать&quot; в виде формы."
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:90
 #, python-format
 msgid ""
 "You cannot add payments with zero amount in a Batch Payment.\n"
@@ -479,7 +474,7 @@ msgstr ""
 "Платежи:% s"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_payment.py:0
+#: code:addons/account_batch_payment/models/account_payment.py:38
 #, python-format
 msgid ""
 "You cannot make a batch payment with internal transfers. Internal transfers "
@@ -487,14 +482,6 @@ msgid ""
 msgstr ""
 "Вы не можете выполнить групповой платеж с внутренними переводами. Id "
 "внутренних переводов:% s"
-
-#. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:131
-#, python-format
-msgid ""
-"You cannot validate a batch containing payments that are not in 'posted' "
-"state."
-msgstr ""
 
 #. module: account_batch_payment
 #: model_terms:ir.ui.view,arch_db:account_batch_payment.view_batch_payment_form

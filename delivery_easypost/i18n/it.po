@@ -1,23 +1,27 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* delivery_easypost
+# * delivery_easypost
 # 
 # Translators:
-# Francesco Garganese <francesco.garganese@aeromnia.aero>, 2019
-# Martin Trigaux, 2019
-# Giovanni Perteghella <giovanni@perteghella.org>, 2019
-# Paolo Valier, 2019
+# Francesco Garganese <francesco.garganese@aeromnia.aero>, 2018
+# Martin Trigaux, 2018
+# Giovanni Perteghella <giovanni@perteghella.org>, 2018
+# SebastianoPistore <SebastianoPistore.info@protonmail.ch>, 2018
+# Alberto Vincenzi <alberto.vincenzi@gmail.com>, 2018
+# David Minneci <david@numeko.it>, 2018
+# Niccolò Lubello <nlubello@gmail.com>, 2018
+# Paolo Valier, 2018
+# Stefano Consolaro <stefano.consolaro@mymage.it>, 2018
 # Léonie Bouchat <lbo@odoo.com>, 2019
-# Stefano Consolaro <stefano.consolaro@mymage.it>, 2019
-# Sergio Zanchetta <primes2h@gmail.com>, 2021
+# Sergio Zanchetta <primes2h@gmail.com>, 2020
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~12.5+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-26 08:05+0000\n"
-"PO-Revision-Date: 2019-08-26 09:35+0000\n"
-"Last-Translator: Sergio Zanchetta <primes2h@gmail.com>, 2021\n"
+"POT-Creation-Date: 2019-11-14 07:49+0000\n"
+"PO-Revision-Date: 2018-08-24 11:37+0000\n"
+"Last-Translator: Sergio Zanchetta <primes2h@gmail.com>, 2020\n"
 "Language-Team: Italian (https://www.transifex.com/odoo/teams/41243/it/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -60,6 +64,11 @@ msgid "API keys"
 msgstr "Chiavi API"
 
 #. module: delivery_easypost
+#: selection:delivery.carrier,delivery_type:0
+msgid "Based on Rules"
+msgstr "Basato sulle regole"
+
+#. module: delivery_easypost
 #: model_terms:ir.ui.view,arch_db:delivery_easypost.view_delivery_easypost_carrier_type
 msgid "Cancel"
 msgstr "Annulla"
@@ -80,7 +89,7 @@ msgstr "Prefisso vettore"
 #: model:ir.model.fields,field_description:delivery_easypost.field_delivery_carrier_easypost__carrier_type
 #: model_terms:ir.ui.view,arch_db:delivery_easypost.view_delivery_carrier_form_inherit_delivery_easypost
 msgid "Carrier Type"
-msgstr "Tipologia vettore"
+msgstr "Tipo vettore"
 
 #. module: delivery_easypost
 #: model_terms:ir.ui.view,arch_db:delivery_easypost.view_delivery_carrier_form_inherit_delivery_easypost
@@ -90,7 +99,7 @@ msgstr "Account di vettore"
 #. module: delivery_easypost
 #: model_terms:ir.ui.view,arch_db:delivery_easypost.view_delivery_easypost_carrier_type
 msgid "Carrrier Type"
-msgstr "Tipologia vettore"
+msgstr "Tipo vettore"
 
 #. module: delivery_easypost
 #: model:ir.model.fields,field_description:delivery_easypost.field_delivery_carrier_easypost__create_uid
@@ -105,9 +114,15 @@ msgid "Created on"
 msgstr "Creato il"
 
 #. module: delivery_easypost
+#: selection:delivery.carrier,delivery_type:0
+#: selection:product.packaging,package_carrier_type:0
+msgid "DHL"
+msgstr "DHL"
+
+#. module: delivery_easypost
 #: model_terms:ir.ui.view,arch_db:delivery_easypost.view_delivery_carrier_form_inherit_delivery_easypost
 msgid "Default Package Type"
-msgstr "Tipo imballaggio predefinito"
+msgstr "Tipo di Imballo predefinito"
 
 #. module: delivery_easypost
 #: model:ir.model.fields,field_description:delivery_easypost.field_delivery_carrier__easypost_default_packaging_id
@@ -122,7 +137,12 @@ msgstr "Livello di servizio predefinito"
 #. module: delivery_easypost
 #: model:ir.model.fields,field_description:delivery_easypost.field_delivery_carrier_easypost__delivery_carrier_id
 msgid "Delivery Carrier"
-msgstr "Vettore di consegna"
+msgstr "Trasportatore"
+
+#. module: delivery_easypost
+#: model:ir.model,name:delivery_easypost.model_delivery_carrier
+msgid "Delivery Methods"
+msgstr "Metodi di Spedizione"
 
 #. module: delivery_easypost
 #: model:ir.model.fields,field_description:delivery_easypost.field_delivery_carrier_easypost__display_name
@@ -140,13 +160,13 @@ msgstr ""
 "configurazione valida."
 
 #. module: delivery_easypost
-#: model:ir.model.fields.selection,name:delivery_easypost.selection__delivery_carrier__easypost_label_file_type__epl2
+#: selection:delivery.carrier,easypost_label_file_type:0
 msgid "EPL2"
 msgstr "EPL2"
 
 #. module: delivery_easypost
-#: model:ir.model.fields.selection,name:delivery_easypost.selection__delivery_carrier__delivery_type__easypost
-#: model:ir.model.fields.selection,name:delivery_easypost.selection__product_packaging__package_carrier_type__easypost
+#: selection:delivery.carrier,delivery_type:0
+#: selection:product.packaging,package_carrier_type:0
 msgid "Easypost"
 msgstr "Easypost"
 
@@ -166,6 +186,12 @@ msgid "Easypost Configuration"
 msgstr "Configurazione Easypost"
 
 #. module: delivery_easypost
+#: model_terms:ir.ui.view,arch_db:delivery_easypost.res_config_settings_view_form_sale
+#: model_terms:ir.ui.view,arch_db:delivery_easypost.res_config_settings_view_form_stock
+msgid "Easypost Delivery Methods"
+msgstr "Metodi di consegna Easypost"
+
+#. module: delivery_easypost
 #: model:ir.model.fields,field_description:delivery_easypost.field_delivery_carrier__easypost_label_file_type
 msgid "Easypost Label File Type"
 msgstr "Tipo file di etichetta Easypost"
@@ -181,12 +207,6 @@ msgid "Easypost Service"
 msgstr "Servizio Easypost"
 
 #. module: delivery_easypost
-#: model_terms:ir.ui.view,arch_db:delivery_easypost.res_config_settings_view_form_sale
-#: model_terms:ir.ui.view,arch_db:delivery_easypost.res_config_settings_view_form_stock
-msgid "Easypost Shipping Methods"
-msgstr "Metodi di spedizione Easypost"
-
-#. module: delivery_easypost
 #: model_terms:ir.ui.view,arch_db:delivery_easypost.view_delivery_carrier_form_inherit_delivery_easypost
 msgid "Easypost Tutorial"
 msgstr "Tutorial Easypost"
@@ -197,7 +217,7 @@ msgid "Easypost Website"
 msgstr "Sito web Easypost"
 
 #. module: delivery_easypost
-#: code:addons/delivery_easypost/models/easypost_request.py:0
+#: code:addons/delivery_easypost/models/easypost_request.py:33
 #, python-format
 msgid "Easypost returned an error: "
 msgstr ""
@@ -211,6 +231,17 @@ msgstr "Inserisci la chiave API del tuo account Easypost"
 #: model:ir.model.fields,help:delivery_easypost.field_delivery_carrier__easypost_test_api_key
 msgid "Enter your API test key from Easypost account."
 msgstr "Inserisci la chiave di test API del tuo account Easypost."
+
+#. module: delivery_easypost
+#: selection:delivery.carrier,delivery_type:0
+#: selection:product.packaging,package_carrier_type:0
+msgid "FedEx"
+msgstr "FedEx"
+
+#. module: delivery_easypost
+#: selection:delivery.carrier,delivery_type:0
+msgid "Fixed Price"
+msgstr "Prezzo Fisso"
 
 #. module: delivery_easypost
 #: model_terms:ir.ui.view,arch_db:delivery_easypost.view_delivery_carrier_form_inherit_delivery_easypost
@@ -227,11 +258,11 @@ msgstr "ID"
 #: model:ir.model.fields,help:delivery_easypost.field_delivery_carrier__easypost_default_service_id
 msgid "If not set, the less expensive available service level will be chosen."
 msgstr ""
-"Se non impostato, viene scelto il livello di servizio disponibile meno "
-"costoso."
+"Se questa opzione non è selezionata, verrà scelto il livello di servizio "
+"disponibile meno costoso."
 
 #. module: delivery_easypost
-#: code:addons/delivery_easypost/models/easypost_request.py:0
+#: code:addons/delivery_easypost/models/easypost_request.py:310
 #, python-format
 msgid ""
 "It seems Easypost do not provide shipments for this order.                We"
@@ -269,29 +300,34 @@ msgid "Load your Easypost carrier accounts"
 msgstr "Carica i tuoi account di vettore Easypost"
 
 #. module: delivery_easypost
-#: model:ir.model.fields.selection,name:delivery_easypost.selection__delivery_carrier__easypost_label_file_type__pdf
+#: selection:product.packaging,package_carrier_type:0
+msgid "No carrier integration"
+msgstr "Nessuna integrazione vettore"
+
+#. module: delivery_easypost
+#: selection:delivery.carrier,easypost_label_file_type:0
 msgid "PDF"
 msgstr "PDF"
 
 #. module: delivery_easypost
-#: model:ir.model.fields.selection,name:delivery_easypost.selection__delivery_carrier__easypost_label_file_type__png
+#: selection:delivery.carrier,easypost_label_file_type:0
 msgid "PNG"
 msgstr "PNG"
 
 #. module: delivery_easypost
-#: code:addons/delivery_easypost/models/easypost_request.py:0
-#: code:addons/delivery_easypost/models/easypost_request.py:0
+#: code:addons/delivery_easypost/models/easypost_request.py:78
+#: code:addons/delivery_easypost/models/easypost_request.py:85
 #, python-format
 msgid "Please provide at least one item to ship."
-msgstr "Fornire almeno un articolo da spedire."
+msgstr "Si prega di selezionare almeno un elemento da spedire."
 
 #. module: delivery_easypost
 #: model:ir.model,name:delivery_easypost.model_product_packaging
 msgid "Product Packaging"
-msgstr "Imballaggio prodotto"
+msgstr "Imballaggio prodotti"
 
 #. module: delivery_easypost
-#: code:addons/delivery_easypost/models/easypost_request.py:0
+#: code:addons/delivery_easypost/models/easypost_request.py:215
 #, python-format
 msgid "Product packaging used in pack %s is not configured for easypost."
 msgstr ""
@@ -300,15 +336,15 @@ msgstr ""
 #. module: delivery_easypost
 #: model:ir.model.fields,field_description:delivery_easypost.field_delivery_carrier__easypost_production_api_key
 msgid "Production API Key"
-msgstr "Chiave API produzione"
+msgstr "Chiave API"
 
 #. module: delivery_easypost
 #: model:ir.model.fields,field_description:delivery_easypost.field_delivery_carrier__delivery_type
 msgid "Provider"
-msgstr "Fornitore"
+msgstr "Corriere"
 
 #. module: delivery_easypost
-#: code:addons/delivery_easypost/models/easypost_request.py:0
+#: code:addons/delivery_easypost/models/easypost_request.py:73
 #, python-format
 msgid "Sale Order/Stock Picking is missing."
 msgstr "Ordine di vendita/prelievo di magazzino mancante."
@@ -329,78 +365,73 @@ msgid "Service Level Name"
 msgstr "Nome livello servizio"
 
 #. module: delivery_easypost
-#: code:addons/delivery_easypost/models/delivery_carrier.py:0
+#: code:addons/delivery_easypost/models/delivery_carrier.py:106
 #, python-format
-msgid "Shipment created into Easypost<br/><b>Tracking Numbers:</b> %s<br/>"
-msgstr ""
-"Spedizione creata in Easypost <br/> <b>Codici di tracciabilità:</b>%s<br/>"
-
-#. module: delivery_easypost
-#: model:ir.model,name:delivery_easypost.model_delivery_carrier
-msgid "Shipping Methods"
-msgstr "Metodi di spedizione"
+msgid "Shipping label for packages"
+msgstr "Etichetta di spedizione per i pacchi"
 
 #. module: delivery_easypost
 #: model_terms:ir.ui.view,arch_db:delivery_easypost.view_delivery_carrier_form_inherit_delivery_easypost
 msgid "Sign up"
-msgstr "Registrati"
+msgstr "Registrazione"
 
 #. module: delivery_easypost
 #: model:ir.model.fields,field_description:delivery_easypost.field_delivery_carrier__easypost_test_api_key
 msgid "Test API Key"
-msgstr "Chiave API di test"
+msgstr "Test chiave API"
 
 #. module: delivery_easypost
-#: code:addons/delivery_easypost/models/easypost_request.py:0
+#: code:addons/delivery_easypost/models/easypost_request.py:70
 #, python-format
 msgid ""
 "The %s carrier is missing (Missing field(s) :\n"
 " Default Product Packaging)"
 msgstr ""
-"Vettore %s mancante (Campi mancanti:\n"
+"Il vettore %s è mancante (Campo mancante :\n"
 "Imballaggio prodotto predefinito)"
 
 #. module: delivery_easypost
-#: code:addons/delivery_easypost/models/easypost_request.py:0
+#: code:addons/delivery_easypost/models/easypost_request.py:67
 #, python-format
 msgid ""
 "The %s carrier is missing (Missing field(s) :\n"
 " Delivery Carrier Type)"
 msgstr ""
-"Vettore %s mancante (campi mancanti :\n"
-" Tipo vettore di consegna)"
+"Il vettore %s è mancante (Campo mancante :\n"
+" Tipo vettore di consegna)"
 
 #. module: delivery_easypost
-#: code:addons/delivery_easypost/models/easypost_request.py:0
+#: code:addons/delivery_easypost/models/easypost_request.py:62
 #, python-format
 msgid ""
 "The %s carrier is missing (Missing field(s) :\n"
 " Production API Key)"
 msgstr ""
-"Vettore %s mancante (campi mancanti:\n"
-"Chiave API produzione)"
+"Il vettore %s è mancante (Campo mancante :\n"
+"Chiave API)"
 
 #. module: delivery_easypost
-#: code:addons/delivery_easypost/models/easypost_request.py:0
+#: code:addons/delivery_easypost/models/easypost_request.py:64
 #, python-format
 msgid ""
 "The %s carrier is missing (Missing field(s) :\n"
 " Test API Key)"
 msgstr ""
-"Vettore %s mancante (campi mancanti :\n"
-" Chiave API di test)"
+"Il vettore %s è mancante (Campo mancante :\n"
+" Chiave test API)"
 
 #. module: delivery_easypost
-#: code:addons/delivery_easypost/models/easypost_request.py:0
-#: code:addons/delivery_easypost/models/easypost_request.py:0
+#: code:addons/delivery_easypost/models/easypost_request.py:80
+#: code:addons/delivery_easypost/models/easypost_request.py:87
 #, python-format
 msgid ""
-"The estimated price cannot be computed because the weight of your product %s"
-" is missing."
+"The estimated price cannot be computed because the weight of your product is"
+" missing."
 msgstr ""
+"Impossibile calcolare una stima di prezzo perché manca il peso del prodotto."
 
 #. module: delivery_easypost
-#: code:addons/delivery_easypost/models/easypost_request.py:0
+#: code:addons/delivery_easypost/models/easypost_request.py:321
 #, python-format
 msgid ""
 "There is no rate available for the selected service level for one of your "
@@ -415,13 +446,24 @@ msgid "Transfer"
 msgstr "Trasferisci"
 
 #. module: delivery_easypost
-#: code:addons/delivery_easypost/models/delivery_carrier.py:0
-#, python-format
-msgid "You can't cancel Easypost shipping."
-msgstr "Impossibile annullare la spedizione Easypost."
+#: selection:delivery.carrier,delivery_type:0
+#: selection:product.packaging,package_carrier_type:0
+msgid "UPS"
+msgstr "UPS"
 
 #. module: delivery_easypost
-#: code:addons/delivery_easypost/models/easypost_request.py:0
+#: selection:delivery.carrier,delivery_type:0
+msgid "USPS"
+msgstr "USPS"
+
+#. module: delivery_easypost
+#: code:addons/delivery_easypost/models/delivery_carrier.py:128
+#, python-format
+msgid "You can't cancel Easypost shipping."
+msgstr "Non è possibile annullare la spedizione Easypost."
+
+#. module: delivery_easypost
+#: code:addons/delivery_easypost/models/easypost_request.py:52
 #, python-format
 msgid ""
 "You have no carrier linked to your Easypost Account.                Please "
@@ -431,13 +473,18 @@ msgstr ""
 " Easypost, collegare il tuo account a un vettore e poi riprovare."
 
 #. module: delivery_easypost
-#: model:ir.model.fields.selection,name:delivery_easypost.selection__delivery_carrier__easypost_label_file_type__zpl
+#: selection:delivery.carrier,easypost_label_file_type:0
 msgid "ZPL"
 msgstr "ZPL"
 
 #. module: delivery_easypost
-#: code:addons/delivery_easypost/models/delivery_carrier.py:0
-#: code:addons/delivery_easypost/models/delivery_carrier.py:0
+#: selection:delivery.carrier,delivery_type:0
+#: selection:product.packaging,package_carrier_type:0
+msgid "bpost"
+msgstr "bpost"
+
+#. module: delivery_easypost
+#: code:addons/delivery_easypost/models/delivery_carrier.py:86
 #, python-format
 msgid "error_message"
 msgstr "error_message"

@@ -1,20 +1,20 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* currency_rate_live
+# * currency_rate_live
 # 
 # Translators:
-# Martin Trigaux, 2019
-# Anatolij, 2019
-# Silvija Butko <silvija.butko@gmail.com>, 2019
-# digitouch UAB <digitouchagencyeur@gmail.com>, 2019
+# Martin Trigaux, 2018
+# Anatolij, 2018
+# Silvija Butko <silvija.butko@gmail.com>, 2018
+# digitouch UAB <digitouchagencyeur@gmail.com>, 2018
 # Linas Versada <linaskrisiukenas@gmail.com>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-10-23 12:07+0000\n"
-"PO-Revision-Date: 2019-08-26 09:35+0000\n"
+"POT-Creation-Date: 2019-01-15 15:18+0000\n"
+"PO-Revision-Date: 2018-08-24 11:37+0000\n"
 "Last-Translator: Linas Versada <linaskrisiukenas@gmail.com>, 2019\n"
 "Language-Team: Lithuanian (https://www.transifex.com/odoo/teams/41243/lt/)\n"
 "MIME-Version: 1.0\n"
@@ -31,13 +31,8 @@ msgid ""
 msgstr ""
 
 #. module: currency_rate_live
-#: model:ir.model.fields.selection,name:currency_rate_live.selection__res_company__currency_provider__boc
+#: selection:res.company,currency_provider:0
 msgid "Bank Of Canada"
-msgstr ""
-
-#. module: currency_rate_live
-#: model:ir.model.fields.selection,name:currency_rate_live.selection__res_company__currency_provider__mindicador
-msgid "Chilean mindicador.cl"
 msgstr ""
 
 #. module: currency_rate_live
@@ -58,17 +53,37 @@ msgid "Currency: rate update"
 msgstr "Valiuta: kurso atnaujinimas"
 
 #. module: currency_rate_live
-#: model:ir.model.fields.selection,name:currency_rate_live.selection__res_company__currency_interval_unit__daily
+#: selection:res.company,currency_interval_unit:0
 msgid "Daily"
 msgstr "Kasdien"
 
 #. module: currency_rate_live
-#: model:ir.model.fields.selection,name:currency_rate_live.selection__res_company__currency_provider__ecb
+#: model:res.company,overdue_msg:currency_rate_live.res_company_company_1
+#: model:res.company,overdue_msg:currency_rate_live.res_company_company_2
+msgid ""
+"Dear Sir/Madam,\n"
+"\n"
+"Our records indicate that some payments on your account are still due. Please find details below.\n"
+"If the amount has already been paid, please disregard this notice. Otherwise, please forward us the total amount stated below.\n"
+"If you have any queries regarding your account, Please contact us.\n"
+"\n"
+"Thank you in advance for your cooperation.\n"
+"Best Regards,"
+msgstr ""
+"Mūsų duomenys rodo, kad vėluojate atlikti apmokėjimus. Žemiau pateikta informacija apie neapmokėtas sumas.\n"
+"Jeigu mokėjimai jau atlikti, nepaisykite šiuo pranešimo. Kitu atveju, prašome pervesti mums visą žemiau pateiktą mokėtiną sumą.\n"
+"Jeigu iškilo kokių nors klausimų, prašome kreiptis į mus.\n"
+"\n"
+"Iš anksto dėkojame už bendradarbiavimą.\n"
+"Su pagarba,"
+
+#. module: currency_rate_live
+#: selection:res.company,currency_provider:0
 msgid "European Central Bank"
 msgstr "Europos centrinis bankas"
 
 #. module: currency_rate_live
-#: model:ir.model.fields.selection,name:currency_rate_live.selection__res_company__currency_provider__fta
+#: selection:res.company,currency_provider:0
 msgid "Federal Tax Administration (Switzerland)"
 msgstr "Federalinė mokesčių administracija (Šveicarija)"
 
@@ -84,17 +99,24 @@ msgid "Interval Unit"
 msgstr "Intervalas"
 
 #. module: currency_rate_live
-#: model:ir.model.fields.selection,name:currency_rate_live.selection__res_company__currency_interval_unit__manually
+#: model:ir.model.fields,field_description:currency_rate_live.field_res_company__last_currency_sync_date
+#: model:ir.model.fields,field_description:currency_rate_live.field_res_config_settings__last_currency_sync_date
+#: model_terms:ir.ui.view,arch_db:currency_rate_live.res_config_settings_view_form
+msgid "Last Sync Date"
+msgstr "Paskutinė sinchronizavimo data"
+
+#. module: currency_rate_live
+#: selection:res.company,currency_interval_unit:0
 msgid "Manually"
 msgstr "Rankiniu būdu"
 
 #. module: currency_rate_live
-#: model:ir.model.fields.selection,name:currency_rate_live.selection__res_company__currency_provider__banxico
+#: selection:res.company,currency_provider:0
 msgid "Mexican Bank"
 msgstr "Meksikos bankas"
 
 #. module: currency_rate_live
-#: model:ir.model.fields.selection,name:currency_rate_live.selection__res_company__currency_interval_unit__monthly
+#: selection:res.company,currency_interval_unit:0
 msgid "Monthly"
 msgstr "Kas mėnesį"
 
@@ -121,7 +143,17 @@ msgid "Service Provider"
 msgstr "Paslaugų tiekėjas"
 
 #. module: currency_rate_live
-#: code:addons/currency_rate_live/models/res_config_settings.py:0
+#: code:addons/currency_rate_live/models/res_config_settings.py:387
+#, python-format
+msgid ""
+"The Yahoo currency rate web service has been discontinued. Please select "
+"another currency rate provider."
+msgstr ""
+"Yahoo valiutos keitimo kurso servisas buvo sustabdytas. Prašome pasirinkti "
+"kitą valiutos keitimo kurso tiekėją."
+
+#. module: currency_rate_live
+#: code:addons/currency_rate_live/models/res_config_settings.py:103
 #, python-format
 msgid ""
 "Unable to connect to the online exchange rate platform %s. The web service "
@@ -129,7 +161,7 @@ msgid ""
 msgstr ""
 
 #. module: currency_rate_live
-#: code:addons/currency_rate_live/models/res_config_settings.py:0
+#: code:addons/currency_rate_live/models/res_config_settings.py:390
 #, python-format
 msgid ""
 "Unable to connect to the online exchange rate platform. The web service may "
@@ -139,12 +171,17 @@ msgstr ""
 "Servisas gali būti laikinai išjungtas. Prašome bandyti dar kartą."
 
 #. module: currency_rate_live
-#: model:ir.model.fields.selection,name:currency_rate_live.selection__res_company__currency_interval_unit__weekly
+#: selection:res.company,currency_interval_unit:0
 msgid "Weekly"
 msgstr "Kartą per savaitę"
 
 #. module: currency_rate_live
-#: code:addons/currency_rate_live/models/res_config_settings.py:0
+#: selection:res.company,currency_provider:0
+msgid "Yahoo (DISCONTINUED)"
+msgstr "Yahoo (NUTRAUKTA)"
+
+#. module: currency_rate_live
+#: code:addons/currency_rate_live/models/res_config_settings.py:143
 #, python-format
 msgid ""
 "Your main currency (%s) is not supported by this exchange rate provider. "
@@ -152,6 +189,6 @@ msgid ""
 msgstr ""
 
 #. module: currency_rate_live
-#: model:ir.model.fields.selection,name:currency_rate_live.selection__res_company__currency_provider__xe_com
+#: selection:res.company,currency_provider:0
 msgid "xe.com"
 msgstr ""

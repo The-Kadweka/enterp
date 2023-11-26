@@ -12,5 +12,5 @@ class ResConfigSettings(models.TransientModel):
     sepa_orgid_issr = fields.Char(related='company_id.sepa_orgid_issr', string="Issuer", readonly=False,
         help="Will appear in SEPA payments as the name of the party initiating the payment. Limited to 70 characters.")
     sepa_initiating_party_name = fields.Char(related='company_id.sepa_initiating_party_name', string="Your Company Name", help="Name of the Creditor Reference Party. Usage Rule: Limited to 70 characters in length.", readonly=False)
-    sepa_pain_version = fields.Selection(related='company_id.sepa_pain_version', string="SEPA Pain Version",
+    sepa_pain_version = fields.Selection(related='company_id.sepa_pain_version', string="SEPA Pain Version", readonly=False,
                             help='SEPA may be a generic format, some countries differ from the SEPA recommandations made by the EPC (European Payment Councile) and thus the XML created need some tweakenings.')

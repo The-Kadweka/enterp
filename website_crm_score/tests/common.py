@@ -27,9 +27,13 @@ class TestScoring(common.TransactionCase):
         self.env.cr.execute("""
                 DELETE FROM website_crm_score;
         """)
+        self.env.cr.execute("""
+                DELETE FROM website_crm_pageview;
+        """)
 
         # Usefull models
         self.crm_lead = self.env['crm.lead']
+        self.pageview = self.env['website.crm.pageview']
         self.website_crm_score = self.env['website.crm.score']
         self.team = self.env['crm.team']
         self.res_users = self.env['res.users']
@@ -42,6 +46,8 @@ class TestScoring(common.TransactionCase):
 
         self.stage = self.crm_stage.create({
             'name': 'testing',
+            'probability': '50',
+            'on_change': False,
         }).id
 
         # Lead Data
@@ -90,7 +96,21 @@ class TestScoring(common.TransactionCase):
             'stage_id': self.stage,
         }).id
 
-        self.env.cr.execute("UPDATE crm_lead SET create_date = '2010-01-01 00:00:00' WHERE id != %s", (self.lead5,))
+        self.env.cr.execute("UPDATE crm_lead SET create_date = '2010-01-01 00:00:00' WHERE id != %d" % self.lead5)
+
+        # PageView
+        self.pageview0 = self.pageview.create({
+            'lead_id': self.lead0,
+            'url': 'url0',
+        }).id
+        self.pageview1 = self.pageview.create({
+            'lead_id': self.lead1,
+            'url': 'url1',
+        }).id
+        self.pageview2 = self.pageview.create({
+            'lead_id': self.lead3,
+            'url': 'url1',
+        }).id
 
         # Salesteam
         self.team0 = self.team.create({
@@ -136,6 +156,18 @@ class TestScoring(common.TransactionCase):
         }).id
 
         # Score
+        self.score0 = self.website_crm_score.create({
+            'name': 'score0',
+            'value': 1000,
+            'domain': "[('score_pageview_ids.url', '=', 'url0')]",
+            'rule_type': 'score',
+        }).id
+        self.score1 = self.website_crm_score.create({
+            'name': 'score1',
+            'value': 900,
+            'domain': "[('score_pageview_ids.url', '=', 'url1')]",
+            'rule_type': 'score',
+        }).id
         self.score2 = self.website_crm_score.create({
             'name': 'score2',
             'value': 0,

@@ -9,7 +9,7 @@ var Session = require('web.session');
 var _t = core._t;
 
 var MainMenu = AbstractAction.extend({
-    contentTemplate: 'main_menu',
+    template: 'main_menu',
 
     events: {
         "click .button_operations": function(){
@@ -25,6 +25,7 @@ var MainMenu = AbstractAction.extend({
     },
 
     init: function(parent, action) {
+        // Yet, "_super" must be present in a function for the class mechanism to replace it with the actual parent method.
         this._super.apply(this, arguments);
         this.message_demo_barcodes = action.params.message_demo_barcodes;
     },

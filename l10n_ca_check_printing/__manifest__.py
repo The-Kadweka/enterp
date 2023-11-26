@@ -3,7 +3,7 @@
     'name': 'Canadian Checks Layout',
     'version': '1.0',
     'author': 'Odoo SA, OERP Canada',
-    'category': 'Accounting/Accounting',
+    'category': 'Accounting',
     'summary': 'Print CA Checks',
     'description': """
 This module allows to print your payments on pre-printed checks.

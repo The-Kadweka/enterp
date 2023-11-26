@@ -3,7 +3,6 @@
 
 from . import models
 
-from .models.account_journal import sanitize_communication
 from odoo import api, SUPERUSER_ID
 
 def init_initiating_party_names(cr, registry):
@@ -11,4 +10,4 @@ def init_initiating_party_names(cr, registry):
     party name on all existing companies once the module is installed. """
     env = api.Environment(cr, SUPERUSER_ID, {})
     for company in env['res.company'].search([]):
-        company.sepa_initiating_party_name = sanitize_communication(company.name)
+        company.sepa_initiating_party_name = env['account.batch.payment']._sanitize_communication(company.name)

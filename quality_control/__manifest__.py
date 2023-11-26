@@ -4,7 +4,7 @@
 {
     'name': 'Quality',
     'version': '1.0',
-    'category': 'Manufacturing/Quality',
+    'category': 'Manufacturing',
     'sequence': 50,
     'summary': 'Control the quality of your products',
     'website': 'https://www.odoo.com/page/quality-management-software',

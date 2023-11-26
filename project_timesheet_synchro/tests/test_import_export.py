@@ -40,7 +40,7 @@ class TestImportExport(common.TransactionCase):
 
         user_admin = self.env.ref('base.user_admin')
 
-        AAL = self.env['account.analytic.line'].with_user(user_admin)
+        AAL = self.env['account.analytic.line'].sudo(user_admin)
 
         context = {'lang': "en_US", 'tz': "Europe/Brussels", 'uid': user_admin.id}
 

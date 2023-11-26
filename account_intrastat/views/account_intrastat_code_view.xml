@@ -31,32 +31,6 @@
                 </search>
             </field>
         </record>
-        <record id="view_report_intrastat_code_kanban" model="ir.ui.view">
-            <field name="name">account.intrastat.code.kanban</field>
-            <field name="model">account.intrastat.code</field>
-            <field name="arch" type="xml">
-                <kanban>
-                    <templates>
-                        <t t-name="kanban-box">
-                            <div class="oe_kanban_global_click">
-                                <div class="o_kanban_card_content">
-                                    <div class="row">
-                                        <div class="col-12">
-                                            <strong><field name="name"/></strong>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-12">
-                                            <field name="description"/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </t>
-                    </templates>
-                </kanban>
-            </field>
-        </record>
         <record id="view_intrastat_code_restricted_type_search" model="ir.ui.view">
             <field name="name">account.intrastat.transport.code.search</field>
             <field name="model">account.intrastat.code</field>
@@ -76,15 +50,13 @@
             <field name="model">account.intrastat.code</field>
             <field name="arch" type="xml">
                 <form string="Intrastat Code">
-                    <sheet>
-                        <group>
-                            <field name="name"/>
-                            <field name="code"/>
-                            <field name="type"/>
-                            <field name="country_id" attrs="{'invisible': [('type', '!=', 'region')], 'required': [('type', '=', 'region')]}" options="{'no_create': True}"/>
-                            <field name="description"/>
-                        </group>
-                    </sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="code"/>
+                        <field name="type"/>
+                        <field name="country_id" attrs="{'invisible': [('type', '!=', 'region')], 'required': [('type', '=', 'region')]}" options="{'no_create': True}"/>
+                        <field name="description"/>
+                    </group>
                 </form>
             </field>
         </record>
@@ -109,6 +81,7 @@
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">account.intrastat.code</field>
             <field name="context">{'search_default_group_by_type': 1}</field>
+            <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
         </record>
 

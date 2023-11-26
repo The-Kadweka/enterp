@@ -17,27 +17,19 @@ var HierarchyKanban = FieldOne2Many.extend({
         'add_child_act': '_onAddChild',
     }),
 
-    /**
-     * @override
-     */
-    on_attach_callback: function () {
-        this.renderer.on_attach_callback();
-    },
-
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
+
     /**
      * @private
      * @override
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _render: function () {
         var self = this;
         this._setHierarchyData();
-        var _super = this._super.bind(this);
-        var rendererProm;
         if (!this.renderer) {
             this.renderer = new HierarchyKanbanRenderer(this, this.value, {
                 arch: this.view.arch,
@@ -48,14 +40,13 @@ var HierarchyKanban = FieldOne2Many.extend({
                     read_only_mode: this.isReadonly,
                 },
             });
-            rendererProm = this.renderer.appendTo(this.$el);
+            this.renderer.appendTo(this.$el);
         }
-        return Promise.resolve(rendererProm).then(function () {
+        return this._super.apply(this, arguments).then(function () {
             // Move control_panel at bottom
             if (self.control_panel) {
-                self.control_panel.$el.appendTo(self.$el);
+                return self.control_panel.$el.appendTo(self.$el);
             }
-            return _super();
         });
     },
     /**
@@ -83,34 +74,14 @@ var HierarchyKanban = FieldOne2Many.extend({
      * so we need to make sure that we generated the right command by checking
      * if the record id is in all_data (which is what this.value.data should be)
      *
-     * if we delete a record, we also need to delete every child of this record
      * @override
      * @private
      */
     _setValue: function (value, options) {
         if (value.operation === 'ADD' && _.some(this.allData, {id: value.id})) {
             value.operation = 'UPDATE';
-        } else if(value.operation === 'DELETE') {
-            var removedRecords = this.allData.filter(function (record) {return value.ids.includes(record.id);});
-
-            // we want to delete these records and also each children which derive from the records
-            value.ids = this._getAllSubChildren(removedRecords)
-                .map(function (record) {return record.id;});
         }
         return this._super(value, options);
-    },
-
-    /**
-     * Return the elements and all children which derive from the ``parentRecords``
-     *
-     * @private
-     */
-    _getAllSubChildren: function (parentRecords) {
-        var childrenRecords = [];
-        parentRecords.forEach(function (record) {
-            childrenRecords = childrenRecords.concat(record.children || []);
-        });
-        return childrenRecords.length ? parentRecords.concat(this._getAllSubChildren(childrenRecords)) : parentRecords;
     },
 
     //--------------------------------------------------------------------------
@@ -140,7 +111,6 @@ var HierarchyKanban = FieldOne2Many.extend({
 });
 
 var HierarchyKanbanRenderer = KanbanRenderer.extend({
-
     /**
      * Renders kanban records with its children.
      *
@@ -148,24 +118,17 @@ var HierarchyKanbanRenderer = KanbanRenderer.extend({
      * @override
      */
     _renderUngrouped: function (fragment, records) {
-        this.defs.push(this._renderUngroupedAux(fragment, records));
-    },
-    _renderUngroupedAux: function (fragment, records) {
         var self = this;
-        var recordsDefs = [];
         _.each(records || this.state.data, function (record) {
             var kanbanRecord = new HierarchyKanbanRecord(self, record, self.recordOptions);
             self.widgets.push(kanbanRecord);
-            var def = kanbanRecord.appendTo(fragment).then(function() {
-                if (record.children.length) {
-                    var newFragment = kanbanRecord.$('.o_hierarchy_children');
-                    return self._renderUngroupedAux(newFragment, record.children);
-                }
-            });
-            recordsDefs.push(def);
+            kanbanRecord.appendTo(fragment);
+            if (record.children.length) {
+                var newFragment = kanbanRecord.$('.o_hierarchy_children');
+                self._renderUngrouped(newFragment, record.children);
+            }
         });
-        return Promise.all(recordsDefs);
-    },
+    }
 });
 
 var HierarchyKanbanRecord = KanbanRecord.extend({
@@ -182,7 +145,7 @@ var HierarchyKanbanRecord = KanbanRecord.extend({
      * Renders DomainSelector.
      *
      * @private
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _renderDomainSelector: function () {
         if (!this.domainSelector) {
@@ -194,7 +157,7 @@ var HierarchyKanbanRecord = KanbanRecord.extend({
             });
             return this.domainSelector.prependTo(this.$('.o_ma_card:first > .o_pane_filter'));
         }
-        return Promise.resolve();
+        return $.when();
     },
 
     //--------------------------------------------------------------------------

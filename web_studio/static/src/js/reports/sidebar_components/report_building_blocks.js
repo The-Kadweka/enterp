@@ -1,10 +1,10 @@
 odoo.define('web_studio.reportNewComponents', function (require) {
 "use strict";
 
-var config = require('web.config');
 var core = require('web.core');
+var config = require('web.config');
 var Dialog = require('web.Dialog');
-var weWidgets = require('wysiwyg.widgets');
+var weWidgets = require('web_editor.widget');
 
 var Abstract = require('web_studio.AbstractReportComponent');
 var NewFieldDialog = require('web_studio.NewFieldDialog');
@@ -35,7 +35,7 @@ var AbstractNewBuildingBlock = Abstract.extend({
         if (this.fa) {
             this.$el.append('<i class="fa ' + this.fa + '">');
         }
-        if (config.isDebug() && this.description) {
+        if (config.debug && this.description) {
             this.$el.addClass('o_web_studio_debug');
             this.$el.append($('<div>')
                 .addClass('o_web_studio_component_description')
@@ -85,7 +85,7 @@ var AbstractNewBuildingBlock = Abstract.extend({
      * @param {Object} options
      * @param {Object[]} options.targets
      * @param {Integer} [options.oeIndex]
-     * @returns {Promise<Object>}
+     * @returns {Deferred<Object>}
      */
     add: function (options) {
         this.targets = options.targets;
@@ -93,7 +93,7 @@ var AbstractNewBuildingBlock = Abstract.extend({
         this.index = first.data.oeIndex;
         this.position = first.data.oePosition;
         this.node = first.node;
-        return Promise.resolve({
+        return $.when({
             type: this.type,
             options: {
                 columns: this.dropColumns,
@@ -344,7 +344,7 @@ var BlockText = AbstractNewBuildingBlock.extend({
     add: function () {
         var self = this;
         return this._super.apply(this, arguments).then(function () {
-            return Promise.resolve({
+            return $.when({
                 inheritance: self._createContent({
                     content: '<div class="row"><div class="col"><span>New Text Block</span></div></div>',
                 })
@@ -365,7 +365,7 @@ var InlineText = AbstractNewBuildingBlock.extend({
     add: function () {
         var self = this;
         return this._super.apply(this, arguments).then(function () {
-            return Promise.resolve({
+            return $.when({
                 inheritance: self._createContent({
                     content: '<span>New Text Block</span>',
                 })
@@ -387,7 +387,7 @@ var ColumnHalfText = AbstractNewBuildingBlock.extend({
     add: function () {
         var self = this;
         return this._super.apply(this, arguments).then(function () {
-            return Promise.resolve({
+            return $.when({
                 inheritance: self._createContent({
                     fillStructure: true,
                     contentInStructure: '<span>New Column</span>',
@@ -410,7 +410,7 @@ var ColumnThirdText = AbstractNewBuildingBlock.extend({
     add: function () {
         var self = this;
         return this._super.apply(this, arguments).then(function () {
-            return Promise.resolve({
+            return $.when({
                 inheritance: self._createContent({
                     fillStructure: true,
                     contentInStructure: '<span>New Column</span>',
@@ -431,7 +431,7 @@ var TableCellText = AbstractNewBuildingBlock.extend({
     add: function () {
         var self = this;
         return this._super.apply(this, arguments).then(function () {
-            return Promise.resolve({
+            return $.when({
                 inheritance: self._createContent({
                     content: '<span>New Text Block</span>',
                 })
@@ -451,44 +451,44 @@ var AbstractFieldBlock = AbstractNewBuildingBlock.extend({
     type: 'field',
     add: function () {
         var self = this;
-        return self._super.apply(this, arguments).then(function() {
-            return new Promise(function (resolve, reject) {
-                var field = {
-                    order: 'order',
-                    type: 'related',
-                    filters: { searchable: false },
+        return this._super.apply(this, arguments).then(function () {
+            var def = $.Deferred();
+            var field = {
+                order: 'order',
+                type: 'related',
+                filters: { searchable: false },
                 filter: function (field) {
                     // For single fields (i.e. NOT a table), forbid putting x2many's
                     // Because it just doesn't make sense otherwise
                     return ! _.contains(['one2many', 'many2many'], field.type);
                 }
-                };
+            };
 
-                var target = self.targets[0];
-                if (self._filterTargets) {
-                    target = self._filterTargets() || target;
-                }
+            var target = self.targets[0];
+            if (self._filterTargets) {
+                target = self._filterTargets() || target;
+            }
 
-                var availableKeys = _.filter(self._getContextKeys(target.node), function (field) {
-                    // "docs" is a technical object referring to all records selected to issue the report for
-                    // it shouldn't be manipulated by the user
-                    return !!field.relation && field.name !== 'docs';
-                });
-                var dialog = new NewFieldDialog(self, 'record_fake_model', field, availableKeys).open();
-                dialog.on('field_default_values_saved', self, function (values) {
-                    if (values.related.split('.').length < 2) {
-                        Dialog.alert(self, _t('The record field name is missing'));
-                    } else {
-                        resolve({
-                            inheritance: self._dataInheritance(values),
-                        });
-                        dialog.close();
-                    }
-                });
-                dialog.on('closed', self, function () {
-                    reject();
-                });
+            var availableKeys = _.filter(self._getContextKeys(target.node), function (field) {
+                // "docs" is a technical object referring to all records selected to issue the report for
+                // it shouldn't be manipulated by the user
+                return !!field.relation && field.name !== 'docs';
             });
+            var dialog = new NewFieldDialog(self, 'record_fake_model', field, availableKeys).open();
+            dialog.on('field_default_values_saved', self, function (values) {
+                if (values.related.split('.').length < 2) {
+                    Dialog.alert(self, _t('The record field name is missing'));
+                    return;
+                }
+                def.resolve({
+                    inheritance: self._dataInheritance(values),
+                });
+                dialog.close();
+            });
+            dialog.on('closed', self, function () {
+                def.reject();
+            });
+            return def;
         });
     },
 });
@@ -661,32 +661,31 @@ var Image = AbstractNewBuildingBlock.extend({
     add: function () {
         var self = this;
         return this._super.apply(this, arguments).then(function () {
-            var def = new Promise(function (resolve, reject) {
-                var $image = $("<img/>");
-                var dialog = new weWidgets.MediaDialog(self, {
-                    onlyImages: true,
-                }, $image[0]).open();
-                var value;
-                dialog.on("save", self, function (el) {
-                    // el is a vanilla JS element
-                    // Javascript Element.src returns the full url (including protocol)
-                    // But we want only a relative path
-                    // https://www.w3schools.com/jsref/prop_img_src.asp
-                    // We indeed expect only one image at this point
-                    value = el.attributes.src.value;
-                });
-                dialog.on('closed', self, function () {
-                    if (value) {
-                        resolve({
-                            inheritance: self._createContent({
-                                content: '<img class="img-fluid" src="' + value + '"/>',
-                            })
-                        });
-                    } else {
-                        reject();
-                    }
-                });
+            var def = $.Deferred();
+            var $image = $("<img/>");
+            var dialog = new weWidgets.MediaDialog(self, { onlyImages: true },
+                $image, $image[0]);
+            var value;
+            dialog.on("save", self, function (el) {
+                // el is a vanilla JS element
+                // Javascript Element.src returns the full url (including protocol)
+                // But we want only a relative path
+                // https://www.w3schools.com/jsref/prop_img_src.asp
+                // We indeed expect only one image at this point
+                value = el.attributes.src.value;
             });
+            dialog.on('closed', self, function () {
+                if (value) {
+                    def.resolve({
+                        inheritance: self._createContent({
+                            content: '<img class="img-fluid" src="' + value + '"/>',
+                        })
+                    });
+                } else {
+                    return def.reject();
+                }
+            });
+            dialog.open();
             return def;
         });
     },
@@ -701,7 +700,7 @@ var BlockTitle = AbstractNewBuildingBlock.extend({
     add: function () {
         var self = this;
         return this._super.apply(this, arguments).then(function () {
-            return Promise.resolve({
+            return $.when({
                 inheritance: [{
                     content: '<div class="row"><div class="col h2"><span>New Title</span></div></div>',
                     position: self.position,
@@ -724,43 +723,42 @@ var BlockAddress = AbstractNewBuildingBlock.extend({
     dropColumns: [[0, 5], [2, 5]],
     add: function () {
         var self = this;
-        var callersArguments = arguments;
-        return new Promise(function (resolve, reject) {
-            self._super.apply(self, callersArguments).then(function () {
-                var field = {
-                    order: 'order',
-                    type: 'related',
-                    filters: {},
-                    filter: function (field) {
-                        return field.type === 'many2one';
-                    },
-                    followRelations: function (field) {
-                        return field.type === 'many2one' && field.relation !== 'res.partner';
-                    },
-                };
-                var availableKeys = self._getContextKeys(self.node);
-                // TODO: maybe filter keys to only get many2one fields to res.partner?
-                var dialog = new NewFieldDialog(self, 'record_fake_model', field, availableKeys).open();
-                dialog.on('field_default_values_saved', self, function (values) {
-                    if (!_.contains(values.related, '.')) {
-                        Dialog.alert(self, _t('Please specify a field name for the selected model.'));
-                        return;
-                    }
-                    if (values.relation === 'res.partner') {
-                        resolve({
-                            inheritance: self._createContent({
-                                content: '<div t-field="' + values.related + '" t-options-widget="\'contact\'"/>',
-                            })
-                        });
-                        dialog.close();
-                    } else {
-                        Dialog.alert(self, _t('You can only display a user or a partner'));
-                    }
-                });
-                dialog.on('closed', self, function () {
-                    reject();
-                });
+        return this._super.apply(this, arguments).then(function () {
+            var def = $.Deferred();
+            var field = {
+                order: 'order',
+                type: 'related',
+                filters: {},
+                filter: function (field) {
+                    return field.type === 'many2one';
+                },
+                followRelations: function (field) {
+                    return field.type === 'many2one' && field.relation !== 'res.partner';
+                },
+            };
+            var availableKeys = self._getContextKeys(self.node);
+            // TODO: maybe filter keys to only get many2one fields to res.partner?
+            var dialog = new NewFieldDialog(self, 'record_fake_model', field, availableKeys).open();
+            dialog.on('field_default_values_saved', self, function (values) {
+                if (!_.contains(values.related, '.')) {
+                    Dialog.alert(self, _t('Please specify a field name for the selected model.'));
+                    return;
+                }
+                if (values.relation === 'res.partner') {
+                    def.resolve({
+                        inheritance: self._createContent({
+                            content: '<div t-field="' + values.related + '" t-options-widget="\'contact\'"/>',
+                        })
+                    });
+                    dialog.close();
+                } else {
+                    Dialog.alert(self, _t('You can only display a user or a partner'));
+                }
             });
+            dialog.on('closed', self, function () {
+                def.reject();
+            });
+            return def;
         });
     },
 });
@@ -774,36 +772,35 @@ var BlockTable = AbstractNewBuildingBlock.extend({
     dropIn: '.page',
     add: function () {
         var self = this;
-        var callersArguments = arguments;
-        return new Promise(function (resolve, reject) {
-            self._super.apply(self, callersArguments).then(function () {
-                var field = {
-                    order: 'order',
-                    type: 'related',
-                    filters: {},
-                    filter: function (field) {
-                        return field.type === 'many2one' || field.type === 'one2many' || field.type === 'many2many';
-                    },
-                    followRelations: function (field) {
-                        return field.type === 'many2one';
-                    },
-                };
-                var availableKeys = self._getContextKeys(self.node);
-                var dialog = new NewFieldDialog(self, 'record_fake_model', field, availableKeys).open();
-                dialog.on('field_default_values_saved', self, function (values) {
-                    if (values.type === 'one2many' || values.type === 'many2many') {
-                        resolve({
-                            inheritance: self._dataInheritance(values),
-                        });
-                        dialog.close();
-                    } else {
-                        Dialog.alert(self, _t('You need to use a many2many or one2many field to display a list of items'));
-                    }
-                });
-                dialog.on('closed', self, function () {
-                    reject();
-                });
+        return this._super.apply(this, arguments).then(function () {
+            var def = $.Deferred();
+            var field = {
+                order: 'order',
+                type: 'related',
+                filters: {},
+                filter: function (field) {
+                    return field.type === 'many2one' || field.type === 'one2many' || field.type === 'many2many';
+                },
+                followRelations: function (field) {
+                    return field.type === 'many2one';
+                },
+            };
+            var availableKeys = self._getContextKeys(self.node);
+            var dialog = new NewFieldDialog(self, 'record_fake_model', field, availableKeys).open();
+            dialog.on('field_default_values_saved', self, function (values) {
+                if (values.type === 'one2many' || values.type === 'many2many') {
+                    def.resolve({
+                        inheritance: self._dataInheritance(values),
+                    });
+                    dialog.close();
+                } else {
+                    Dialog.alert(self, _t('You need to use a many2many or one2many field to display a list of items'));
+                }
             });
+            dialog.on('closed', self, function () {
+                def.reject();
+            });
+            return def;
         });
     },
     _dataInheritance: function (values) {
@@ -839,33 +836,32 @@ var TableBlockTotal = AbstractNewBuildingBlock.extend({
     dropColumns: [[0, 5], [2, 5]],
     add: function () {
         var self = this;
-        var callersArguments = arguments;
-        return new Promise(function (resolve, reject) {
-            self._super.apply(self, callersArguments).then(function () {
-                var field = {
-                    order: 'order',
-                    type: 'related',
-                    filters: {},
-                    filter: function (field) {
-                        return field.type === 'many2one';
-                    },
-                    followRelations: function (field) {
-                        return field.type === 'many2one' &&
-                            field.relation !== 'account.move' && field.relation !== 'sale.order' && field.relation !== 'purchase.order';
-                    },
-                };
-                var availableKeys = self._getContextKeys(self.node);
-                var dialog = new NewFieldDialog(self, 'record_fake_model', field, availableKeys).open();
-                dialog.on('field_default_values_saved', self, function (values) {
-                    resolve({
-                        inheritance: self._dataInheritance(values),
-                    });
-                    dialog.close();
+        return this._super.apply(this, arguments).then(function () {
+            var def = $.Deferred();
+            var field = {
+                order: 'order',
+                type: 'related',
+                filters: {},
+                filter: function (field) {
+                    return field.type === 'many2one';
+                },
+                followRelations: function (field) {
+                    return field.type === 'many2one' &&
+                        field.relation !== 'account.invoice' && field.relation !== 'sale.order' && field.relation !== 'purchase.order';
+                },
+            };
+            var availableKeys = self._getContextKeys(self.node);
+            var dialog = new NewFieldDialog(self, 'record_fake_model', field, availableKeys).open();
+            dialog.on('field_default_values_saved', self, function (values) {
+                def.resolve({
+                    inheritance: self._dataInheritance(values),
                 });
-                dialog.on('closed', self, function () {
-                    reject();
-                });
+                dialog.close();
             });
+            dialog.on('closed', self, function () {
+                def.reject();
+            });
+            return def;
         });
     },
     _dataInheritance: function (values) {
@@ -922,20 +918,20 @@ var TableBlockTotal = AbstractNewBuildingBlock.extend({
         });
     },
     _dataInheritanceValues: function (values) {
-        var currency_id = values.related.split('.')[0] + ".env.company.currency_id";
+        var currency_id = values.related.split('.')[0] + ".env['res.currency']";
         var amount_untaxed = '0.0';
         var amount_total = '0.0';
         var amount_by_groups = 'None';
-        if (values.relation === 'account.move' || values.relation === 'purchase.order') {
+        if (values.relation === 'account.invoice' || values.relation === 'purchase.order') {
             currency_id = values.related + '.currency_id';
         }
         if (values.relation === 'sale.order') {
             currency_id = values.related + '.pricelist_id.currency_id';
         }
-        if (values.relation === 'account.move' || values.relation === 'sale.order') {
+        if (values.relation === 'account.invoice' || values.relation === 'sale.order') {
             amount_by_groups = values.related + '.amount_by_group';
         }
-        if (values.relation === 'account.move' || values.relation === 'sale.order' || values.relation === 'purchase.order') {
+        if (values.relation === 'account.invoice' || values.relation === 'sale.order' || values.relation === 'purchase.order') {
             amount_untaxed = values.related + '.amount_untaxed';
             amount_total = values.related + '.amount_total';
         }

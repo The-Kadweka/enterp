@@ -28,6 +28,7 @@ class GithubRepository(models.Model):
     secret = fields.Char("Secret", default=_default_secret)
     url_token = fields.Char("Payload URL", compute="_compute_url_token", help="URL to put as the payload target when configuring GitHub webhook")
 
+    @api.multi
     def _compute_url_token(self):
         db_secret = self.env['ir.config_parameter'].sudo().get_param('database.secret')
         db_uuid = self.env['ir.config_parameter'].sudo().get_param('database.uuid')

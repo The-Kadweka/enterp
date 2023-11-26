@@ -14,6 +14,5 @@ def uninstall_hook(cr, registry):
     icp.set_param('ebay_site', False)
     # remove config parameter to sale_ebay.ebay_sales_team
     team_id = int(icp.get_param('ebay_sales_team'))
-    ebay_team = env.ref('sales_team.ebay_sales_team', False)
-    if team_id and ebay_team and team_id == ebay_team.id:
+    if team_id and team_id == env.ref('sale_ebay.ebay_sales_team', False).id:
         icp.set_param('ebay_sales_team', False)

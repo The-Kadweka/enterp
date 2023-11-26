@@ -8,7 +8,7 @@
                 <t t-else="">Tickets</t>
             </li>
             <li t-if="ticket" class="breadcrumb-item active">
-                <span t-field="ticket.name"/> (#<span t-field="ticket.id"/>)
+                #<span t-field="ticket.id"/>
             </li>
         </xpath>
     </template>
@@ -58,7 +58,7 @@
 
             <t t-set="o_portal_fullwidth_alert" groups="helpdesk.group_helpdesk_user">
                 <t t-call="portal.portal_back_in_edit_mode">
-                    <t t-set="backend_url" t-value="'/web#model=helpdesk.ticket&amp;id=%s&amp;view_type=form' % (ticket.id)"/>
+                    <t t-set="backend_url" t-value="'/web#return_label=Website&amp;model=helpdesk.ticket&amp;id=%s&amp;view_type=form' % (ticket.id)"/>
                 </t>
             </t>
 
@@ -95,7 +95,7 @@
                         <div class="col-lg-10">
                             <div class="row">
                                 <div class="col flex-grow-0 pr-3">
-                                    <img t-if="ticket.partner_id.image_1024" class="rounded-circle o_portal_contact_img" t-attf-src="data:image/png;base64,#{ticket.partner_id.image_1024}" alt="Contact"/>
+                                    <img t-if="ticket.partner_id.image" class="rounded-circle o_portal_contact_img" t-attf-src="data:image/png;base64,#{ticket.partner_id.image}" alt="Contact"/>
                                     <img t-else="" class="rounded-circle o_portal_contact_img" src="/web/static/src/img/user_menu_avatar.png" alt="Contact"/>
                                 </div>
                                 <div class="col pl-sm-0">
@@ -109,7 +109,7 @@
                         <div class="col-lg-10">
                             <div class="row">
                                 <div class="col flex-grow-0 pr-3">
-                                    <img t-if="ticket.user_id.image_1024" class="rounded-circle o_portal_contact_img" t-attf-src="data:image/png;base64,#{ticket.user_id.image_1024}" alt="Contact"/>
+                                    <img t-if="ticket.user_id.image" class="rounded-circle o_portal_contact_img" t-attf-src="data:image/png;base64,#{ticket.user_id.image}" alt="Contact"/>
                                     <img t-else="" class="rounded-circle o_portal_contact_img" src="/web/static/src/img/user_menu_avatar.png" alt="Contact"/>
                                 </div>
                                 <div class="col pl-sm-0">
@@ -127,32 +127,6 @@
                     </div>
                 </t>
             </t>
-
-
-            <div t-if="ticket.team_id.allow_portal_ticket_closing and not ticket.stage_id.is_close and not ticket.closed_by_partner" class="modal" tabindex="-1" role="dialog" id="helpdesk_ticket_close_modal">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Close ticket</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">&amp;times;</button>
-                        </div>
-                        <div class="modal-body">
-                            <p>Are you sure you wish to proceed?</p>
-                        </div>
-                        <div class="modal-footer">
-                            <a role="button" class="btn btn-primary" t-att-href="'/my/ticket/close/%s/%s' % (ticket.id, ticket.access_token)">Close the ticket</a>
-                            <button type="button" class="btn btn-light" data-dismiss="modal">Discard</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div t-if="ticket.team_id.allow_portal_ticket_closing and not ticket.stage_id.is_close and not ticket.closed_by_partner" class="text-center mt-5">
-                <button class="btn btn-primary mb-1 pt-1" data-target="#helpdesk_ticket_close_modal" data-toggle="modal"><small><b>Close this ticket</b></small></button>
-                <p><small>
-                    If the issue has been solved, you can close the request.
-                </small></p>
-            </div>
 
             <div class="o_portal_messages_container mt32">
                 <h4>Message and communication history</h4>
@@ -174,26 +148,30 @@
             <div id="wrap">
                 <div class="oe_structure" id="oe_structure_helpdesk_index_1"/>
                 <div class="container oe_website_rating_team">
-                    <h2 class="mt-2">Teams</h2>
+                    <div class="row text-center">
+                        <h2>Teams</h2>
+                    </div>
                     <div class="oe_structure" id="oe_structure_helpdesk_index_2"/>
                     <div class="row">
                         <t t-foreach="teams" t-as="team">
-                            <div t-if="team.rating_percentage_satisfaction != -1" class="col-md-6 col-4 col-lg-4 col-xl-4">
+                            <div t-if="team.percentage_satisfaction != -1" class="col-md-6 col-4 col-lg-4 col-xl-4">
                                 <div class="card">
                                     <div class="card-body">
                                         <div class="caption">
                                             <h4><t t-esc="team.name"/></h4>
-                                            <div t-if="team.rating_percentage_satisfaction"  class="text-muted">
-                                                <t t-esc="team.rating_percentage_satisfaction"/> % Customer Satisfaction
-                                            </div>
-                                            <div t-if="team.alias_name and team.alias_domain"  class="text-muted">
+                                            <p t-if="team.percentage_satisfaction"  class="text-muted">
+                                                <i/> Customer Satisfaction Ration: <t t-esc="team.percentage_satisfaction"/> %
+                                            </p>
+                                            <p t-if="team.alias_name and team.alias_domain"  class="text-muted">
                                                 <i class="fa fa-envelope"/> Email : <t t-esc="team.alias_name"/>@<t t-esc="team.alias_domain"/>
-                                            </div>
-                                            <div class="text-muted">
-                                                <t t-esc="len(team.ticket_ids)"/> tickets
+                                            </p>
+                                            <div class="row">
+                                                <div class="col-lg-16 text-center">
+                                                    <h2><t t-esc="len(team.ticket_ids)"/></h2>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="caption mt-3">
+                                        <div class="caption">
                                             <p>
                                                 <a t-att-href="'/helpdesk/rating/%s' % team.id" role="button" class="btn btn-primary btn-lg btn-block">
                                                     <i class="fa fa-arrow-circle-right "/> See the feedbacks

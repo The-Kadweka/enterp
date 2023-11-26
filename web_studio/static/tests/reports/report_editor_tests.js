@@ -9,7 +9,7 @@ QUnit.module('ReportEditor', {
     beforeEach: function () {
     },
 }, function () {
-    QUnit.test('basic report rendering', async function (assert) {
+    QUnit.test('basic report rendering', function (assert) {
         assert.expect(2);
 
         var nodesArchs = {
@@ -27,14 +27,14 @@ QUnit.module('ReportEditor', {
             tag: 't',
         };
         var reportHTML = "<html><body><t/></body></html>";
-        var editor = await studioTestUtils.createReportEditor({
+        var editor = studioTestUtils.createReportEditor({
             nodesArchs: nodesArchs,
             reportHTML: reportHTML,
         });
 
-        assert.containsOnce(editor, 'iframe',
+        assert.strictEqual(editor.$('iframe').length, 1,
             "an iframe should be rendered");
-        assert.hasAttrValue(editor.$('iframe'), 'src', "about:blank",
+        assert.strictEqual(editor.$('iframe').attr('src'), "about:blank",
             "the source should be correctly set");
 
         editor.destroy();

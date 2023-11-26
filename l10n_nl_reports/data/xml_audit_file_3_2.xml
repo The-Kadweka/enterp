@@ -30,21 +30,20 @@
                         <!-- XAF XSD has maximum 50 characters for customer/supplier name -->
                         <custSupName t-esc="(p.name or p.commercial_company_name or p.commercial_partner_id.name or ('id: ' + str(p.id)))[:50]"/>
                         <contact t-if="p.is_company and p.child_ids and p.child_ids[0].name" t-esc="p.child_ids[0].name[:50]"/>
-                        <telephone t-if="p.phone" t-esc="p.phone[:30]"/>
+                        <telephone t-esc="p.phone"/>
                         <eMail t-esc="p.email"/>
                         <website t-esc="p.website"/>
                         <taxRegistrationCountry t-if="p.country_id" t-esc="p.country_id.code"/>
                         <taxRegIdent t-esc="p.vat"/>
                         <custSupTp t-esc="cust_sup_tp(p)"/>
-
-                        <custCreditLimit t-if="p.credit_limit" t-esc="p.credit_limit"/>
-                        <supplierLimit t-if="p.credit_limit" t-esc="p.credit_limit"/>
+                        <custCreditLimit t-if="p.customer and p.credit_limit" t-esc="p.credit_limit"/>
+                        <supplierLimit t-if="p.supplier and p.credit_limit" t-esc="p.credit_limit"/>
                         <streetAddress>
                             <streetname t-if="p.street_name" t-esc="p.street_name"/>
-                            <number t-if="p.street_number" t-esc="p.street_number[:15]"/>
-                            <numberExtension t-if="p.street_number2" t-esc="p.street_number2"/>
+                            <number t-if="p.street_number" t-est="p.street_number"/>
+                            <numberExtension t-if="p.street_number2" t-est="p.street_number2"/>
                             <city t-if="p.city" t-esc="p.city"/>
-                            <postalCode t-if="p.zip" t-esc="p.zip[:10]"/>
+                            <postalCode t-if="p.zip" t-esc="p.zip"/>
                             <region t-if="p.state_id" t-esc="p.state_id.name"/>
                             <country t-if="p.country_id" t-esc="p.country_id.code"/>
                         </streetAddress>
@@ -75,8 +74,8 @@
                     <vatCode t-foreach="tax_ids" t-as="t">
                         <vatID t-esc="t.id"/>
                         <vatDesc t-esc="t.name"/>
-                        <vatToPayAccID t-esc="t.refund_repartition_line_ids[:1].account_id.code"/>
-                        <vatToClaimAccID t-esc="t.invoice_repartition_line_ids[:1].account_id.code"/>
+                        <vatToPayAccID t-esc="t.refund_account_id.code"/>
+                        <vatToClaimAccID t-esc="t.account_id.code"/>
                     </vatCode>
                 </vatCodes>
                 <periods>
@@ -113,21 +112,21 @@
                             <desc t-esc="m.name"/>
                             <periodNumber t-esc="compute_period_number(m.date)"/>
                             <trDt t-esc="m.date"/>
-                            <amnt t-esc="round(m.amount_total, 2)"/>
-                            <trLine t-foreach="m.line_ids" t-as="l" t-if="not l.display_type">
+                            <amnt t-esc="round(m.amount, 2)"/>
+                            <trLine t-foreach="m.line_ids" t-as="l">
                                 <nr t-esc="l.id"/>
                                 <accID t-esc="l.account_id.code"/>
-                                <docRef t-esc="l.ref[:999] if l.ref else '/'"/>
+                                <docRef t-esc="l.ref or '/'"/>
                                 <effDate t-esc="l.date"/>
                                 <desc t-esc="l.name"/>
                                 <amnt t-esc="round(l.credit or l.debit, 2)"/>
                                 <amntTp t-esc="amnt_tp(l)"/>
                                 <recRef t-if="l.full_reconcile_id" t-esc="l.full_reconcile_id.name"/>
                                 <custSupID t-if="l.partner_id" t-esc="l.partner_id.id"/>
-                                <invRef t-if="l.move_id.is_invoice(include_receipts=True)" t-esc="l.move_name"/>
-                                <currency t-if="l.currency_id or l.company_currency_id">
-                                    <curCode t-esc="l.currency_id.name if l.currency_id else l.company_currency_id.name"/>
-                                    <curAmnt t-esc="round(l.amount_currency if l.currency_id else l.balance, 2)"/>
+                                <invRef t-if="l.invoice_id" t-esc="l.invoice_id.number"/>
+                                <currency t-if="l.currency_id and round(l.amount_currency, 2)">
+                                    <curCode t-esc="l.currency_id.name"/>
+                                    <curAmnt t-esc="round(l.amount_currency, 2)"/>
                                 </currency>
                             </trLine>
                         </transaction>

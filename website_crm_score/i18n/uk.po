@@ -1,19 +1,18 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_crm_score
+# * website_crm_score
 # 
 # Translators:
-# Martin Trigaux, 2019
-# Bohdan Lisnenko, 2019
-# ТАрас <tratatuta@i.ua>, 2019
+# ТАрас <tratatuta@i.ua>, 2018
+# Martin Trigaux, 2018
 # Alina Lisnenko <alinasemeniuk1@gmail.com>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-05 12:37+0000\n"
-"PO-Revision-Date: 2019-08-26 09:39+0000\n"
+"POT-Creation-Date: 2019-01-15 15:18+0000\n"
+"PO-Revision-Date: 2018-08-24 11:49+0000\n"
 "Last-Translator: Alina Lisnenko <alinasemeniuk1@gmail.com>, 2019\n"
 "Language-Team: Ukrainian (https://www.transifex.com/odoo/teams/41243/uk/)\n"
 "MIME-Version: 1.0\n"
@@ -21,6 +20,11 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Language: uk\n"
 "Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != 11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || (n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
+
+#. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_crm_lead__pageviews_count
+msgid "# Page Views"
+msgstr "# Переглядів"
 
 #. module: website_crm_score
 #: model_terms:ir.ui.view,arch_db:website_crm_score.website_crm_score_view_kanban
@@ -35,24 +39,23 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_needaction
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__message_needaction
 msgid "Action Needed"
-msgstr "Необхідна дія"
+msgstr "Дія необхідна"
 
 #. module: website_crm_score
-#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__active
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__running
 msgid "Active"
 msgstr "Активно"
 
 #. module: website_crm_score
-#: model:ir.model.fields.selection,name:website_crm_score.selection__website_crm_score__rule_type__active
-msgid "Archive"
-msgstr "Архів"
+#: model:ir.model.fields,help:website_crm_score.field_ir_ui_view__track
+#: model:ir.model.fields,help:website_crm_score.field_website_page__track
+msgid "Allow to specify for one page of the website to be trackable or not"
+msgstr "Встановлює дозвіл для відслідковування сторінки сайту"
 
 #. module: website_crm_score
-#: model_terms:ir.ui.view,arch_db:website_crm_score.team_user_view_search
-#: model_terms:ir.ui.view,arch_db:website_crm_score.view_crm_score_form
-#: model_terms:ir.ui.view,arch_db:website_crm_score.website_crm_score_view_search
-msgid "Archived"
-msgstr "Заархівовано"
+#: selection:website.crm.score,rule_type:0
+msgid "Archive"
+msgstr "Архів"
 
 #. module: website_crm_score
 #: model_terms:ir.ui.view,arch_db:website_crm_score.sales_team_form_view_assign
@@ -78,7 +81,7 @@ msgstr "Присвоєні ліди цього місяця"
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_attachment_count
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__message_attachment_count
 msgid "Attachment Count"
-msgstr "Підрахунок прикріплень"
+msgstr "Підрахунок прикріплення"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_crm_lead__assign_date
@@ -103,15 +106,17 @@ msgstr "Створити нового продавця"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__create_uid
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__create_uid
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__create_uid
 msgid "Created by"
 msgstr "Створив"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__create_date
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__create_date
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__create_date
 msgid "Created on"
-msgstr "Створено на"
+msgstr "Створено"
 
 #. module: website_crm_score
 #: model:ir.actions.server,name:website_crm_score.action_score_now
@@ -147,16 +152,17 @@ msgstr ""
 
 #. module: website_crm_score
 #: model_terms:ir.actions.act_window,help:website_crm_score.team_action
-msgid "Define a new sales team"
-msgstr "Визначіть нову команду продажу"
+msgid "Define a new sales channel"
+msgstr "Визначити новий канал продажів"
 
 #. module: website_crm_score
-#: model:ir.model.fields.selection,name:website_crm_score.selection__website_crm_score__rule_type__unlink
+#: selection:website.crm.score,rule_type:0
 msgid "Delete"
 msgstr "Видалити"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__display_name
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__display_name
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__display_name
 msgid "Display Name"
 msgstr "Назва для відображення"
@@ -192,29 +198,32 @@ msgid "Followers (Partners)"
 msgstr "Підписники (Партнери)"
 
 #. module: website_crm_score
-#: model_terms:ir.ui.view,arch_db:website_crm_score.team_user_view_search
-msgid "Group By"
-msgstr "Групувати за"
+#: model:ir.model,name:website_crm_score.model_ir_http
+msgid "HTTP Routing"
+msgstr "Маршрутизація HTTP"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__id
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__id
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__id
 msgid "ID"
 msgstr "ID"
 
 #. module: website_crm_score
-#: model:ir.model.fields,help:website_crm_score.field_team_user__message_needaction
 #: model:ir.model.fields,help:website_crm_score.field_team_user__message_unread
-#: model:ir.model.fields,help:website_crm_score.field_website_crm_score__message_needaction
 #: model:ir.model.fields,help:website_crm_score.field_website_crm_score__message_unread
+msgid "If checked new messages require your attention."
+msgstr "Якщо позначено, то повідомленя потребує вашої уваги"
+
+#. module: website_crm_score
+#: model:ir.model.fields,help:website_crm_score.field_team_user__message_needaction
+#: model:ir.model.fields,help:website_crm_score.field_website_crm_score__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "Якщо позначено, то нові повідомлення будуть потребувати вашої уваги."
+msgstr "Якщо відмічено, то нові повідомлення будуть потребувати вашої уваги."
 
 #. module: website_crm_score
 #: model:ir.model.fields,help:website_crm_score.field_team_user__message_has_error
-#: model:ir.model.fields,help:website_crm_score.field_team_user__message_has_sms_error
 #: model:ir.model.fields,help:website_crm_score.field_website_crm_score__message_has_error
-#: model:ir.model.fields,help:website_crm_score.field_website_crm_score__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr "Якщо позначено, деякі повідомлення мають помилку доставки."
 
@@ -225,19 +234,32 @@ msgid "Is Follower"
 msgstr "Стежить"
 
 #. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_crm_lead__lang_id
+msgid "Language"
+msgstr "Мова"
+
+#. module: website_crm_score
+#: model:ir.model.fields,help:website_crm_score.field_crm_lead__lang_id
+msgid "Language from the website when lead has been created"
+msgstr "Мова з веб-сайту, коли був створений лід"
+
+#. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user____last_update
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview____last_update
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score____last_update
 msgid "Last Modified on"
-msgstr "Останні зміни на"
+msgstr "Остання модифікація"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__write_uid
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__write_uid
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__write_uid
 msgid "Last Updated by"
 msgstr "Востаннє оновив"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__write_date
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__write_date
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__write_date
 msgid "Last Updated on"
 msgstr "Останнє оновлення"
@@ -248,13 +270,23 @@ msgid "Last run"
 msgstr "Останній запуск"
 
 #. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__lead_id
+msgid "Lead"
+msgstr "Лід"
+
+#. module: website_crm_score
+#: model:ir.actions.act_window,name:website_crm_score.website_crm_score_pageviews
+#: model:ir.ui.menu,name:website_crm_score.pageview_menu
+msgid "Lead Page Views"
+msgstr "Перегляди сторінки лідів"
+
+#. module: website_crm_score
 #: model:ir.model,name:website_crm_score.model_crm_lead
 msgid "Lead/Opportunity"
 msgstr "Лід/Нагода"
 
 #. module: website_crm_score
 #: model:ir.actions.act_window,name:website_crm_score.score_leads
-#: model:ir.ui.menu,name:website_crm_score.menu_crm_leads
 #: model_terms:ir.ui.view,arch_db:website_crm_score.view_crm_score_form
 msgid "Leads"
 msgstr "Ліди"
@@ -286,13 +318,24 @@ msgstr ""
 "призначення лідів."
 
 #. module: website_crm_score
+#: model:ir.model.fields,help:website_crm_score.field_crm_lead__score_pageview_ids
+msgid "List of (tracked) pages seen by the owner of this lead"
+msgstr "Список (відстежених) сторінок, переглянутих власником лідів"
+
+#. module: website_crm_score
+#. openerp-web
+#: code:addons/website_crm_score/static/src/xml/track_page.xml:9
+#, python-format
+msgid "Log visits on leads"
+msgstr "Журнал відвідувань на лідах"
+
+#. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_main_attachment_id
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__message_main_attachment_id
 msgid "Main Attachment"
 msgstr "Основне прикріплення"
 
 #. module: website_crm_score
-#: model_terms:ir.ui.view,arch_db:website_crm_score.sales_team_form_view_assign
 #: model_terms:ir.ui.view,arch_db:website_crm_score.view_crm_team_user_form
 msgid "Maximum Leads / 30 days"
 msgstr "Максимум лідів / 30 днів"
@@ -324,7 +367,7 @@ msgstr "Мінімальна оцінка для автоматичного пр
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__name
 #: model_terms:ir.ui.view,arch_db:website_crm_score.view_crm_score_form
 msgid "Name"
-msgstr "Ім'я"
+msgstr "Назва"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_needaction_counter
@@ -335,7 +378,7 @@ msgstr "Кількість дій"
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_has_error_counter
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__message_has_error_counter
-msgid "Number of errors"
+msgid "Number of error"
 msgstr "Кількість помилок"
 
 #. module: website_crm_score
@@ -348,7 +391,7 @@ msgstr "Кількість повідомлень, які потебують д�
 #: model:ir.model.fields,help:website_crm_score.field_team_user__message_has_error_counter
 #: model:ir.model.fields,help:website_crm_score.field_website_crm_score__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr "Кількість повідомлень з помилковою доставкою"
+msgstr "Кількість повідомлень з помилковою дставкою"
 
 #. module: website_crm_score
 #: model:ir.model.fields,help:website_crm_score.field_team_user__message_unread_counter
@@ -357,9 +400,34 @@ msgid "Number of unread messages"
 msgstr "Кількість непрочитаних повідомлень"
 
 #. module: website_crm_score
+#: model:ir.actions.act_window,name:website_crm_score.crm_score_views_action_table
+#: model_terms:ir.ui.view,arch_db:website_crm_score.crm_case_graph_view_leads_sales
+#: model_terms:ir.ui.view,arch_db:website_crm_score.crm_case_table_view_leads_sales
+#: model_terms:ir.ui.view,arch_db:website_crm_score.sales_team_form_view_assign
+msgid "Opportunities"
+msgstr "Нагоди"
+
+#. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_crm_lead__score_pageview_ids
+#: model_terms:ir.ui.view,arch_db:website_crm_score.crm_score_pageview_form
+#: model_terms:ir.ui.view,arch_db:website_crm_score.crm_score_pageview_graph
+msgid "Page Views"
+msgstr "Перегляди сторінки"
+
+#. module: website_crm_score
+#: model_terms:ir.ui.view,arch_db:website_crm_score.lead_score_form
+msgid "Page views"
+msgstr "Перегляди сторінки"
+
+#. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__percentage_leads
 msgid "Percentage leads"
 msgstr "Відсоток лідів"
+
+#. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_crm_lead__phone
+msgid "Phone"
+msgstr "Телефон"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_crm_team__ratio
@@ -372,15 +440,14 @@ msgid "Rule Type"
 msgstr "Тип правила"
 
 #. module: website_crm_score
-#: model:ir.model.fields,field_description:website_crm_score.field_team_user__active
+#: model:ir.model.fields,field_description:website_crm_score.field_team_user__running
 msgid "Running"
 msgstr "Діючий"
 
 #. module: website_crm_score
-#: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_has_sms_error
-#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__message_has_sms_error
-msgid "SMS Delivery error"
-msgstr "Помилка доставки SMS"
+#: model:ir.model.fields,field_description:website_crm_score.field_team_user__team_id
+msgid "SaleTeam"
+msgstr "Команда продажу"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__user_id
@@ -388,27 +455,22 @@ msgid "Saleman"
 msgstr "Продавець"
 
 #. module: website_crm_score
+#: model:ir.actions.act_window,name:website_crm_score.team_action
+#: model:ir.model,name:website_crm_score.model_crm_team
+msgid "Sales Channels"
+msgstr "Канали продажу"
+
+#. module: website_crm_score
+#: model:ir.actions.act_window,name:website_crm_score.team_user_action
 #: model_terms:ir.ui.view,arch_db:website_crm_score.view_crm_team_user_form
 #: model_terms:ir.ui.view,arch_db:website_crm_score.view_crm_team_user_tree
 msgid "Sales Men"
 msgstr "Продавець"
 
 #. module: website_crm_score
-#: model_terms:ir.ui.view,arch_db:website_crm_score.team_user_view_search
-msgid "Sales Person"
-msgstr "Продавець"
-
-#. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_res_users__team_user_ids
 msgid "Sales Records"
 msgstr "Записи продажів"
-
-#. module: website_crm_score
-#: model:ir.model,name:website_crm_score.model_crm_team
-#: model:ir.model.fields,field_description:website_crm_score.field_team_user__team_id
-#: model_terms:ir.ui.view,arch_db:website_crm_score.team_user_view_search
-msgid "Sales Team"
-msgstr "Команда продажу"
 
 #. module: website_crm_score
 #: model:ir.model.fields,help:website_crm_score.field_res_users__sale_team_id
@@ -430,11 +492,6 @@ msgid "Salesperson (Team Member)"
 msgstr "Продавець (Член команди)"
 
 #. module: website_crm_score
-#: model:ir.actions.act_window,name:website_crm_score.team_user_action
-msgid "Salespersons"
-msgstr "Продавці"
-
-#. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_crm_lead__score
 #: model_terms:ir.ui.view,arch_db:website_crm_score.crm_lead_view_dashboard
 #: model_terms:ir.ui.view,arch_db:website_crm_score.crm_opportunity_view_dashboard
@@ -449,8 +506,9 @@ msgid "Scores"
 msgstr "Оцінки"
 
 #. module: website_crm_score
-#: model:ir.model.fields.selection,name:website_crm_score.selection__website_crm_score__rule_type__score
 #: model_terms:ir.ui.view,arch_db:website_crm_score.lead_score_form
+#: model_terms:ir.ui.view,arch_db:website_crm_score.score_opp_form_view
+#: selection:website.crm.score,rule_type:0
 msgid "Scoring"
 msgstr "Оцінювання"
 
@@ -469,22 +527,32 @@ msgid ""
 "\n"
 "Actions are done in sql and bypass the access rights and orm mechanism (create `score`, write `active`, unlink `crm_lead`)"
 msgstr ""
-"Підрахунок результатів додасть оцінку \"значення\" для цього ліда.\n"
+"Підрахунок результатів додасть оцінку \"значення\" для цього ліду.\n"
 "Архів встановить активний = Помилка на ліді (архівований)\n"
 "Видалити остаточно видаляє лід\n"
 "\n"
 "Дії виконуються в sql і обходять права доступу та orm механізму (створіть «рахунок», напишіть «активний», від'єднайте `crm_lead`)"
 
 #. module: website_crm_score
-#: model_terms:ir.ui.view,arch_db:website_crm_score.website_crm_score_view_search
-msgid "Search CRM Score"
-msgstr "Пошук оцінки CRM"
+#: model_terms:ir.ui.view,arch_db:website_crm_score.crm_score_pageview_filter
+msgid "Search PageViews"
+msgstr "Пошук перегляду сторінок"
 
 #. module: website_crm_score
-#: model:ir.actions.act_window,name:website_crm_score.team_action
 #: model:ir.ui.menu,name:website_crm_score.team
 msgid "Teams Assignation"
 msgstr "Призначення команди"
+
+#. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_ir_ui_view__track
+#: model:ir.model.fields,field_description:website_crm_score.field_website_page__track
+msgid "Track"
+msgstr "Відстеження"
+
+#. module: website_crm_score
+#: model:ir.actions.act_window,name:website_crm_score.crm_score_views_action_graph
+msgid "Unassigned leads"
+msgstr "Непризначені ліди"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_unread
@@ -499,18 +567,28 @@ msgid "Unread Messages Counter"
 msgstr "Кількість непрочитаних повідомлень"
 
 #. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__url
+msgid "Url"
+msgstr "URL"
+
+#. module: website_crm_score
 #: model_terms:ir.actions.act_window,help:website_crm_score.team_action
 msgid ""
-"Use sales teams to organize your sales departments.\n"
-"                    Each team will work with a separate pipeline."
+"Use sales channels to organize your sales departments.\n"
+"                    Each channel will work with a separate pipeline."
 msgstr ""
-"Використовуйте команди продажу, щоб організувати ваші відділи продажу.\n"
-"                    Кожна команда буде працювати з окремим конвеєром."
+"Використовуйте канали збуту, щоб організувати свої відділи продажів.\n"
+"                     Кожен канал буде працювати з окремим конвеєром."
+
+#. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__user_id
+msgid "User"
+msgstr "Користувач"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_res_users__sale_team_id
-msgid "User Sales Team"
-msgstr "Користувач команди продажу"
+msgid "User Sales Channel"
+msgstr "Користувач каналу продажів"
 
 #. module: website_crm_score
 #: model:ir.model,name:website_crm_score.model_res_users
@@ -523,6 +601,21 @@ msgid "Value"
 msgstr "Значення"
 
 #. module: website_crm_score
+#: model:ir.model,name:website_crm_score.model_ir_ui_view
+msgid "View"
+msgstr "Перегляд"
+
+#. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__view_date
+msgid "Viewing Date"
+msgstr "Дата перегляду"
+
+#. module: website_crm_score
+#: model:ir.model,name:website_crm_score.model_website_crm_pageview
+msgid "Website CRM Page View"
+msgstr "Перегляд сторінки CRM веб-сайту"
+
+#. module: website_crm_score
 #: model:ir.model,name:website_crm_score.model_website_crm_score
 msgid "Website CRM Score"
 msgstr "Оцінка CRM веб-сайту"
@@ -532,6 +625,11 @@ msgstr "Оцінка CRM веб-сайту"
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__website_message_ids
 msgid "Website Messages"
 msgstr "Повідомлення з веб-сайту"
+
+#. module: website_crm_score
+#: model_terms:ir.ui.view,arch_db:website_crm_score.website_crm_pageview_pivot
+msgid "Website Pages"
+msgstr "Сторінки веб-сайту"
 
 #. module: website_crm_score
 #: model:ir.model.fields,help:website_crm_score.field_team_user__website_message_ids
@@ -551,6 +649,18 @@ msgstr ""
 "для лідів, які вже перевірені раніше. Ця опція має великий штраф за "
 "виконання, тому її слід перевіряти лише на правила, які залежать від "
 "динамічних подій"
+
+#. module: website_crm_score
+#: model_terms:ir.ui.view,arch_db:website_crm_score.sales_team_form_view_assign
+#: model_terms:ir.ui.view,arch_db:website_crm_score.team_user_kanban
+msgid "fa-check"
+msgstr "fa-check"
+
+#. module: website_crm_score
+#: model_terms:ir.ui.view,arch_db:website_crm_score.sales_team_form_view_assign
+#: model_terms:ir.ui.view,arch_db:website_crm_score.team_user_kanban
+msgid "fa-times"
+msgstr "fa-times"
 
 #. module: website_crm_score
 #: model_terms:ir.ui.view,arch_db:website_crm_score.website_crm_score_view_kanban

@@ -13,7 +13,7 @@ class analytic_report(models.AbstractModel):
     # the line with this id will contain analytic accounts without a group
     DUMMY_GROUP_ID = 'group_for_accounts_with_no_group'
 
-    filter_date = {'mode': 'range', 'filter': 'this_month'}
+    filter_date = {'date_from': '', 'date_to': '', 'filter': 'this_month'}
     filter_analytic = True
     filter_hierarchy = False
     filter_unfold_all = False
@@ -29,14 +29,11 @@ class analytic_report(models.AbstractModel):
         return _('Analytic Report')
 
     def open_analytic_entries(self, options, params):
-        date = options.get('date', {})
         action = self.env.ref('analytic.account_analytic_line_action').read()[0]
         action = clean_action(action)
-        active_id = int(params['id'].split('analytic_account_')[1])
         action['context'] = {
-            'active_id': active_id,
+            'active_id': int(params['id'].split('analytic_account_')[1]),
         }
-        action['domain'] = [('account_id','=',active_id),('date', '>=', date.get('date_from')), ('date', '<=', date.get('date_to'))]
         return action
 
     def _get_amount_of_parents(self, group):
@@ -51,10 +48,10 @@ class analytic_report(models.AbstractModel):
             analytic_line_domain_for_group += [('group_id', '=', False)]
 
         currency_obj = self.env['res.currency']
-        company_currency = self.env.company.currency_id
+        company_currency = self.env.user.company_id.currency_id
         analytic_lines = self.env['account.analytic.line'].read_group(analytic_line_domain_for_group, ['amount', 'currency_id'], ['currency_id'])
         balance = sum([currency_obj.browse(row['currency_id'][0])._convert(
-            row['amount'], company_currency, self.env.company, fields.Date.today()) for row in analytic_lines])
+            row['amount'], company_currency, self.env.user.company_id, fields.Date.today()) for row in analytic_lines])
         return balance
 
     def _generate_analytic_group_line(self, group, analytic_line_domain, unfolded=False):
@@ -110,7 +107,7 @@ class analytic_report(models.AbstractModel):
         lines = []
         date_from = options['date']['date_from']
         date_to = options['date']['date_to']
-        company_ids = [self.env.company.id]
+        company_ids = [self.env.user.company_id.id]
 
         # context is set because it's used for the debit, credit and balance computed fields
         AccountAnalyticAccount = self.env['account.analytic.account']\
@@ -126,7 +123,7 @@ class analytic_report(models.AbstractModel):
             analytic_entries_domain += [('account_id', 'in', analytic_account_ids)]
             analytic_account_domain += [('id', 'in', analytic_account_ids)]
 
-        if options.get('analytic_tags'):
+        if options['analytic_tags']:
             analytic_tag_ids = [int(id) for id in options['analytic_tags']]
             analytic_entries_domain += [('tag_ids', 'in', analytic_tag_ids)]
             AccountAnalyticAccount = AccountAnalyticAccount.with_context(tag_ids=analytic_tag_ids)
@@ -208,9 +205,4 @@ class analytic_report(models.AbstractModel):
             else:
                 lines.append(self._generate_analytic_group_line(AccountAnalyticGroup, analytic_entries_domain))
 
-        return lines
-
-    @api.model
-    def _create_hierarchy(self, lines, options):
-        # OVERRIDE because the hierarchy is managed in _get_lines.
         return lines

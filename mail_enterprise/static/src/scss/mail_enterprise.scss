@@ -1,4 +1,4 @@
-.modal {
+.modal .o_form_view {
     @include media-breakpoint-up(xxl, $o-extra-grid-breakpoints) {
         .o_attachment_preview {
             width: 300px;
@@ -6,12 +6,13 @@
     }
 }
 
+.o_form_view {
     @include media-breakpoint-up(xxl, $o-extra-grid-breakpoints) {
         .o_attachment_preview {
             display: block;
             flex: 1 0 auto;
             overflow: hidden;
-            width: $o-chatter-min-width;
+            width: $o-chatter-min-width + 200px;
             border-left: 1px solid gray('400');
 
             > .o_attachment_preview_container {
@@ -65,9 +66,14 @@
         }
         // with the attachment preview, the chatter is put inside of the form
         // sheet instead of next to it
-        .o_form_view > .o_form_sheet_bg > .oe_chatter {
-            padding: 8px $o-horizontal-padding;
-            border-top: 1px solid gray('400');
+        > .o_form_sheet_bg > .oe_chatter {
+            width: 100%;
+            max-width: map-get($container-max-widths, xl);
+            margin: $o-sheet-vpadding * 0.2 auto;
+            background-color: $o-view-background-color;
+            border: 1px solid gray('400');
+            box-shadow: 0 5px 20px -15px black;
+            padding: $o-sheet-vpadding;
         }
     }
     @include media-breakpoint-down(xl, $o-extra-grid-breakpoints) {
@@ -75,3 +81,4 @@
             display: none;
         }
     }
+}

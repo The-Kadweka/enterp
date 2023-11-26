@@ -1,20 +1,19 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_invoice_extract
+# * account_invoice_extract
 # 
 # Translators:
-# Otgonbayar.A <gobi.mn@gmail.com>, 2019
-# nurbakhit nurka <nurbakhit@bumanit.mn>, 2019
+# Otgonbayar.A <gobi.mn@gmail.com>, 2018
+# Martin Trigaux, 2018
 # Baskhuu Lodoikhuu <baskhuujacara@gmail.com>, 2019
-# Martin Trigaux, 2019
 # Батболд Цэнд-Аюуш <batbold.ts@gmail.com>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-05 09:37+0000\n"
-"PO-Revision-Date: 2019-08-26 09:34+0000\n"
+"POT-Creation-Date: 2019-11-14 07:49+0000\n"
+"PO-Revision-Date: 2018-08-24 11:36+0000\n"
 "Last-Translator: Батболд Цэнд-Аюуш <batbold.ts@gmail.com>, 2019\n"
 "Language-Team: Mongolian (https://www.transifex.com/odoo/teams/41243/mn/)\n"
 "MIME-Version: 1.0\n"
@@ -26,60 +25,39 @@ msgstr ""
 #. module: account_invoice_extract
 #: model:ir.model.fields,help:account_invoice_extract.field_account_invoice_extract_words__selected_status
 msgid ""
-"0 for 'not selected', 1 for 'ocr selected with no user selection' and 2 for "
-"'ocr selected with user selection (user may have selected the same box)"
+"0 for 'not selected', 1 for ocr choosed and 2 for ocr selected but not "
+"choosed by user"
 msgstr ""
+"0 бол 'сонгогдоогүй', 1 бол OCR сонгогдсон ба 2 бол OCR сонгогдсон боловч "
+"хэрэглэгчээр сонгуулаагүй"
 
 #. module: account_invoice_extract
-#: model:mail.template,body_html:account_invoice_extract.account_invoice_extract_no_credit
-msgid ""
-"<div style=\"margin: 0px; padding: 0px;\">\n"
-"    <p>Dear,<br/></p>\n"
-"    <p>There are no more credits on your IAP Invoice OCR account.<br/>\n"
-"    You can charge your IAP Invoice OCR account in the Accounting settings page.</p>\n"
-"    <p>Best regards,<br/></p>\n"
-"    <p>Odoo S.A.</p>\n"
-"</div>"
-msgstr ""
+#: selection:account.invoice,extract_state:0
+msgid "An error occured"
+msgstr "Алдаа үүссэн"
 
 #. module: account_invoice_extract
-#: model_terms:ir.ui.view,arch_db:account_invoice_extract.res_config_settings_view_form
-msgid ""
-"<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
-"specific.\"/>"
-msgstr ""
-"<span class=\"fa fa-lg fa-building-o\" title=\"Эдгээр утгууд нь зөвхөн "
-"тухайн компаны хувьд хадгалагдана.\"/>"
+#: model_terms:ir.ui.view,arch_db:account_invoice_extract.invoice_supplier_form_inherit_ocr
+msgid "An error occured during the ocr process."
+msgstr "OCR боловсруулах явцад алдаа үүслээ."
 
 #. module: account_invoice_extract
-#: model:mail.template,subject:account_invoice_extract.account_invoice_extract_no_credit
-msgid "Account Invoice Extract Notification"
-msgstr ""
+#: model:ir.model.fields,field_description:account_invoice_extract.field_res_config_settings__extract_show_ocr_option_selection
+msgid "Automatic Bills Processing"
+msgstr "Нэхэмжлэл автоматаар таньж бүртгэх"
 
 #. module: account_invoice_extract
-#: code:addons/account_invoice_extract/models/account_invoice.py:0
-#: model:ir.model.fields.selection,name:account_invoice_extract.selection__account_move__extract_state__error_status
-#, python-format
-msgid "An error occurred"
-msgstr "Алдаа гарлаа"
-
-#. module: account_invoice_extract
-#: model:ir.model,name:account_invoice_extract.model_ir_attachment
-msgid "Attachment"
-msgstr "Хавсралт"
-
-#. module: account_invoice_extract
-#: model_terms:ir.ui.view,arch_db:account_invoice_extract.view_move_form_inherit_ocr
+#: model_terms:ir.ui.view,arch_db:account_invoice_extract.invoice_supplier_form_inherit_ocr
 msgid "Buy credits"
 msgstr "Credit худалдан авах"
 
 #. module: account_invoice_extract
-#: model:ir.model.fields,field_description:account_invoice_extract.field_account_move__extract_can_show_resend_button
+#: model:ir.model.fields,field_description:account_invoice_extract.field_account_invoice__extract_can_show_resend_button
 msgid "Can show the ocr resend button"
 msgstr "OCR дахин илгээх товч харагдуулах"
 
 #. module: account_invoice_extract
-#: model:ir.model.fields,field_description:account_invoice_extract.field_account_move__extract_can_show_send_button
+#: model:ir.model.fields,field_description:account_invoice_extract.field_account_invoice__extract_can_show_send_button
 msgid "Can show the ocr send button"
 msgstr "OCR илгээх товч харагдуулах"
 
@@ -89,19 +67,19 @@ msgid "Companies"
 msgstr "Компаниуд"
 
 #. module: account_invoice_extract
-#: model:ir.model.fields.selection,name:account_invoice_extract.selection__account_move__extract_state__done
+#: selection:account.invoice,extract_state:0
 msgid "Completed flow"
 msgstr "Гүйцэлдсэн урсгал"
 
 #. module: account_invoice_extract
 #: model:ir.model,name:account_invoice_extract.model_res_config_settings
 msgid "Config Settings"
-msgstr "Тохиргооны тохируулга"
+msgstr "Тохируулга"
 
 #. module: account_invoice_extract
 #: model:ir.model.fields,field_description:account_invoice_extract.field_account_invoice_extract_words__create_uid
 msgid "Created by"
-msgstr "Үүсгэсэн этгээд"
+msgstr "Үүсгэгч"
 
 #. module: account_invoice_extract
 #: model:ir.model.fields,field_description:account_invoice_extract.field_account_invoice_extract_words__create_date
@@ -109,47 +87,22 @@ msgid "Created on"
 msgstr "Үүсгэсэн огноо"
 
 #. module: account_invoice_extract
-#: model:ir.model.fields.selection,name:account_invoice_extract.selection__res_company__extract_show_ocr_option_selection__auto_send
-msgid "Digitalize all bills automatically"
-msgstr ""
-
-#. module: account_invoice_extract
-#: model:ir.model.fields.selection,name:account_invoice_extract.selection__res_company__extract_show_ocr_option_selection__manual_send
-msgid "Digitalize bills on demand only"
-msgstr ""
-
-#. module: account_invoice_extract
 #: model:ir.model.fields,field_description:account_invoice_extract.field_account_invoice_extract_words__display_name
 msgid "Display Name"
 msgstr "Дэлгэрэнгүй нэр"
 
 #. module: account_invoice_extract
-#: model:ir.model.fields.selection,name:account_invoice_extract.selection__res_company__extract_show_ocr_option_selection__no_send
-msgid "Do not digitalize bills"
-msgstr ""
+#: selection:res.company,extract_show_ocr_option_selection:0
+msgid "Do not process bills"
+msgstr "Нэхэмжлэл боловсруулахгүй"
 
 #. module: account_invoice_extract
-#: model:ir.model.fields,field_description:account_invoice_extract.field_account_move__duplicated_vendor_ref
-msgid "Duplicated vendor reference"
-msgstr ""
-
-#. module: account_invoice_extract
-#: model_terms:ir.ui.view,arch_db:account_invoice_extract.res_config_settings_view_form
-msgid "Enable to get only one invoice line per tax"
-msgstr ""
-
-#. module: account_invoice_extract
-#: model:ir.model.fields,field_description:account_invoice_extract.field_account_move__extract_error_message
-msgid "Error message"
-msgstr "Алдааны мэссэж"
-
-#. module: account_invoice_extract
-#: model:ir.model.fields,field_description:account_invoice_extract.field_account_move__extract_word_ids
+#: model:ir.model.fields,field_description:account_invoice_extract.field_account_invoice__extract_word_ids
 msgid "Extract Word"
 msgstr "Үгийг задлах"
 
 #. module: account_invoice_extract
-#: model:ir.model.fields,field_description:account_invoice_extract.field_account_move__extract_state
+#: model:ir.model.fields,field_description:account_invoice_extract.field_account_invoice__extract_state
 msgid "Extract state"
 msgstr "Төлөв задлах"
 
@@ -157,11 +110,6 @@ msgstr "Төлөв задлах"
 #: model:ir.model,name:account_invoice_extract.model_account_invoice_extract_words
 msgid "Extracted words from invoice scan"
 msgstr "Нэхэмжлэл scan хийж задалж уншсан үгүүд"
-
-#. module: account_invoice_extract
-#: model_terms:ir.ui.view,arch_db:account_invoice_extract.view_move_form_inherit_ocr
-msgid "Extraction Information"
-msgstr ""
 
 #. module: account_invoice_extract
 #: model:ir.model.fields,field_description:account_invoice_extract.field_account_invoice_extract_words__field
@@ -174,11 +122,12 @@ msgid "ID"
 msgstr "ID"
 
 #. module: account_invoice_extract
-#: model:ir.model.fields,field_description:account_invoice_extract.field_account_move__extract_remote_id
+#: model:ir.model.fields,field_description:account_invoice_extract.field_account_invoice__extract_remoteid
 msgid "Id of the request to IAP-OCR"
 msgstr "IAP-OCR хүсэлтийн ID"
 
 #. module: account_invoice_extract
+#: model:ir.model,name:account_invoice_extract.model_account_invoice
 #: model:ir.model.fields,field_description:account_invoice_extract.field_account_invoice_extract_words__invoice_id
 msgid "Invoice"
 msgstr "Нэхэмжлэл"
@@ -191,7 +140,7 @@ msgid "Invoice OCR: Update All Status"
 msgstr "OCR нэхэмжлэх: Бүх төлөвийг шинэчлэх"
 
 #. module: account_invoice_extract
-#: model:ir.model.fields,help:account_invoice_extract.field_account_move__extract_remote_id
+#: model:ir.model.fields,help:account_invoice_extract.field_account_invoice__extract_remoteid
 msgid "Invoice extract id"
 msgstr "Нэхэмжлэл задлалтын ID"
 
@@ -204,11 +153,6 @@ msgstr "Нэхэмжлэл задалж уншсан төлөв"
 #: model:ir.model.fields,help:account_invoice_extract.field_account_invoice_extract_words__invoice_id
 msgid "Invoice id"
 msgstr "Нэхэмжлэл id"
-
-#. module: account_invoice_extract
-#: model:ir.model,name:account_invoice_extract.model_account_move
-msgid "Journal Entries"
-msgstr "Ажил гүйлгээ"
 
 #. module: account_invoice_extract
 #: model:ir.model.fields,field_description:account_invoice_extract.field_account_invoice_extract_words____last_update
@@ -226,41 +170,34 @@ msgid "Last Updated on"
 msgstr "Сүүлд зассан огноо"
 
 #. module: account_invoice_extract
-#: code:addons/account_invoice_extract/models/account_invoice.py:0
-#, python-format
-msgid "No document name provided"
-msgstr ""
-
-#. module: account_invoice_extract
-#: model:ir.model.fields.selection,name:account_invoice_extract.selection__account_move__extract_state__no_extract_requested
+#: selection:account.invoice,extract_state:0
 msgid "No extract requested"
 msgstr "Задлах хүсэлт байхгүй"
 
 #. module: account_invoice_extract
-#: model:ir.model.fields.selection,name:account_invoice_extract.selection__account_move__extract_state__not_enough_credit
+#: selection:account.invoice,extract_state:0
 msgid "Not enough credit"
 msgstr "Credit хүрэлцэхгүй байна"
 
 #. module: account_invoice_extract
-#: model:ir.model.fields,field_description:account_invoice_extract.field_res_company__extract_single_line_per_tax
-#: model:ir.model.fields,field_description:account_invoice_extract.field_res_config_settings__extract_single_line_per_tax
-msgid "OCR Single Invoice Line Per Tax"
-msgstr ""
+#: selection:res.company,extract_show_ocr_option_selection:0
+msgid "Process all bills automatically"
+msgstr "Бүх нэхэмжлэлийг автоматаар задалж унших"
 
 #. module: account_invoice_extract
-#: model:ir.model.fields,field_description:account_invoice_extract.field_res_config_settings__extract_show_ocr_option_selection
-msgid "Processing Option"
-msgstr ""
+#: selection:res.company,extract_show_ocr_option_selection:0
+msgid "Process bills on demand only"
+msgstr "Нэхэмжлэлийг гараар задалж бүртгэх"
 
 #. module: account_invoice_extract
-#: model_terms:ir.ui.view,arch_db:account_invoice_extract.view_move_form_inherit_ocr
-msgid "Resend For Digitalization"
-msgstr ""
+#: model_terms:ir.ui.view,arch_db:account_invoice_extract.invoice_supplier_form_inherit_ocr
+msgid "Resend File through OCR"
+msgstr "OCR файлыг дахин илгээх"
 
 #. module: account_invoice_extract
-#: model_terms:ir.ui.view,arch_db:account_invoice_extract.view_move_form_inherit_ocr
-msgid "Send For Digitalization"
-msgstr ""
+#: model_terms:ir.ui.view,arch_db:account_invoice_extract.invoice_supplier_form_inherit_ocr
+msgid "Send File through OCR"
+msgstr "OCR файлыг илгээх"
 
 #. module: account_invoice_extract
 #: model:ir.model.fields,field_description:account_invoice_extract.field_res_company__extract_show_ocr_option_selection
@@ -268,32 +205,7 @@ msgid "Send mode on invoices attachments"
 msgstr "Нэхэмжлэл илгээх хавсралтын төрөл"
 
 #. module: account_invoice_extract
-#: code:addons/account_invoice_extract/models/account_invoice.py:0
-#, python-format
-msgid "Server is currently under maintenance. Please retry later"
-msgstr ""
-
-#. module: account_invoice_extract
-#: code:addons/account_invoice_extract/models/account_invoice.py:0
-#, python-format
-msgid "Server not available. Please retry later"
-msgstr ""
-
-#. module: account_invoice_extract
-#: model:ir.model.fields,field_description:account_invoice_extract.field_account_move__extract_status_code
-msgid "Status code"
-msgstr ""
-
-#. module: account_invoice_extract
-#: code:addons/account_invoice_extract/models/account_invoice.py:0
-#, python-format
-msgid ""
-"The OCR module is not able to generate the invoice lines because the default"
-" accounts are not correctly set on the %s journal."
-msgstr ""
-
-#. module: account_invoice_extract
-#: model_terms:ir.ui.view,arch_db:account_invoice_extract.view_move_form_inherit_ocr
+#: model_terms:ir.ui.view,arch_db:account_invoice_extract.invoice_supplier_form_inherit_ocr
 msgid ""
 "The data extraction is not finished yet. The extraction usually takes "
 "between 5 and 60 seconds."
@@ -302,26 +214,15 @@ msgstr ""
 "5-аас 60 секундэнд үргэлжилдэг."
 
 #. module: account_invoice_extract
-#: code:addons/account_invoice_extract/models/account_invoice.py:0
-#, python-format
-msgid "The document could not be found"
-msgstr ""
-
-#. module: account_invoice_extract
-#: model_terms:ir.ui.view,arch_db:account_invoice_extract.view_move_form_inherit_ocr
+#: model_terms:ir.ui.view,arch_db:account_invoice_extract.invoice_supplier_form_inherit_ocr
 msgid ""
-"The file has been sent and is being processed. It usually takes between 5 "
-"and 60 seconds."
+"The data extraction started. It takes usually between 5 and 60 seconds."
 msgstr ""
+"Өгөгдөл задлалт эхэлж байна. Задлан унших ажиллагаа ихэвчлэн 5-аас 60 "
+"секундэнд үргэлжилдэг."
 
 #. module: account_invoice_extract
-#: code:addons/account_invoice_extract/models/account_invoice.py:0
-#, python-format
-msgid "Unsupported image format"
-msgstr ""
-
-#. module: account_invoice_extract
-#: model_terms:ir.ui.view,arch_db:account_invoice_extract.view_move_form_inherit_ocr
+#: model_terms:ir.ui.view,arch_db:account_invoice_extract.invoice_supplier_form_inherit_ocr
 msgid "Update status"
 msgstr "Төлөв шинэчлэх"
 
@@ -331,20 +232,14 @@ msgid "User Selected"
 msgstr "Хэрэглэгч сонгосон"
 
 #. module: account_invoice_extract
-#: model:ir.model.fields.selection,name:account_invoice_extract.selection__account_move__extract_state__waiting_extraction
+#: selection:account.invoice,extract_state:0
 msgid "Waiting extraction"
 msgstr "Задлалт хүлээж буй"
 
 #. module: account_invoice_extract
-#: model:ir.model.fields.selection,name:account_invoice_extract.selection__account_move__extract_state__waiting_validation
+#: selection:account.invoice,extract_state:0
 msgid "Waiting validation"
 msgstr "Баталгаажуулалт хүлээж буй"
-
-#. module: account_invoice_extract
-#: code:addons/account_invoice_extract/models/account_invoice.py:0
-#, python-format
-msgid "Warning: there is already a vendor bill with this reference (%s)"
-msgstr ""
 
 #. module: account_invoice_extract
 #: model:ir.model.fields,field_description:account_invoice_extract.field_account_invoice_extract_words__word_box_angle
@@ -382,32 +277,15 @@ msgid "Word Text"
 msgstr "Үгэн текст"
 
 #. module: account_invoice_extract
-#: model_terms:ir.ui.view,arch_db:account_invoice_extract.view_move_form_inherit_ocr
-msgid "You don't have enough credit to extract data from your invoice."
-msgstr ""
-
-#. module: account_invoice_extract
-#: code:addons/account_invoice_extract/models/account_invoice.py:0
-#, python-format
-msgid "You must send the same quantity of documents and file names"
-msgstr ""
-
-#. module: account_invoice_extract
-#: code:addons/account_invoice_extract/models/account_invoice.py:0
-#, python-format
+#: model_terms:ir.ui.view,arch_db:account_invoice_extract.invoice_supplier_form_inherit_ocr
 msgid ""
-"Your PDF file is protected by a password. The OCR can't extract data from it"
+"You don't have enough credit to extract datas from your invoice. You can buy"
+" new credits here:"
 msgstr ""
+"Танд нэхэмжлэл задлан уншихад шаардагдах credit хүрэлцэхгүй байна. Та эндээс"
+" шинэ credit худалдан авч болно:"
 
 #. module: account_invoice_extract
-#: code:addons/account_invoice_extract/models/account_invoice.py:0
-#, python-format
-msgid ""
-"Your invoice is too heavy to be processed by the OCR. Try to reduce the "
-"number of pages and avoid pages with too many text"
-msgstr ""
-
-#. module: account_invoice_extract
-#: model:ir.model.fields.selection,name:account_invoice_extract.selection__account_move__extract_state__extract_not_ready
+#: selection:account.invoice,extract_state:0
 msgid "waiting extraction, but it is not ready"
 msgstr "задлах ажиллагаа хүлээж буй, гэвч бэлэн биш"

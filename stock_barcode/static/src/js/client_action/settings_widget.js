@@ -10,8 +10,6 @@ var SettingsWidget = Widget.extend({
         'click .o_cancel': '_onClickCancel',
         'click .o_print_picking': '_onClickPrintPicking',
         'click .o_print_delivery_slip': '_onClickPrintDeliverySlip',
-        'click .o_print_barcodes_zpl': '_onClickPrintBarcodesZpl',
-        'click .o_print_barcodes_pdf': '_onClickPrintBarcodesPdf',
         'click .o_print_inventory': '_onClickPrintInventory',
         'click .o_scrap': '_onClickScrap',
     },
@@ -72,30 +70,6 @@ var SettingsWidget = Widget.extend({
      _onClickPrintDeliverySlip: function (ev) {
         ev.stopPropagation();
         this.trigger_up('picking_print_delivery_slip');
-    },
-
-    /**
-     * Handles the click on the `print barcodes zpl` button. This is specific to the
-     * `stock.picking` model.
-     *
-     * @private
-     * @param {MouseEvent} ev
-     */
-     _onClickPrintBarcodesZpl: function (ev) {
-        ev.stopPropagation();
-        this.trigger_up('picking_print_barcodes_zpl');
-    },
-
-    /**
-     * Handles the click on the `print barcodes pdf` button. This is specific to the
-     * `stock.picking` model.
-     *
-     * @private
-     * @param {MouseEvent} ev
-     */
-     _onClickPrintBarcodesPdf: function (ev) {
-        ev.stopPropagation();
-        this.trigger_up('picking_print_barcodes_pdf');
     },
 
     /**

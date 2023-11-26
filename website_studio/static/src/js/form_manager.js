@@ -16,7 +16,7 @@ var framework = require('web.framework');
 var _t = core._t;
 
 var FormManager = AbstractAction.extend({
-    contentTemplate: 'website_studio.FormManager',
+    template: 'website_studio.FormManager',
 
     events: {
         'click .o_web_studio_thumbnail': '_onClickThumbnail',
@@ -34,7 +34,7 @@ var FormManager = AbstractAction.extend({
      *                           - clear_breadcrumbs: a boolean
      *                              to reset the breadcrumbs
      */
-    init: function (parent, action, options) {
+    init: function (parent, context, options) {
         this._super.apply(this, arguments);
         this.action = options.action;
         this._onClickThumbnail = _.debounce(this._onClickThumbnail, 300, true);
@@ -44,12 +44,12 @@ var FormManager = AbstractAction.extend({
      * before the widget rendering. This method will make a rpc call to
      * gather the website forms information.
      *
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     willStart: function () {
         var self = this;
         if (!this.action) {
-            return Promise.reject();
+            return $.Deferred().reject();
         }
         this.res_model = this.action.res_model;
         return this._super.apply(this, arguments).then(function () {

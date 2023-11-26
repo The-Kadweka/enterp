@@ -4,7 +4,7 @@
 {
     'name': 'Switzerland - Accounting Reports',
     'version': '1.1',
-    'category': 'Accounting/Accounting',
+    'category': 'Accounting',
     'description': """
         Accounting reports for Switzerland
     """,
@@ -12,6 +12,8 @@
         'l10n_ch', 'account_reports'
     ],
     'data': [
+        'data/account_tax_data.xml',
+        'data/account_vat2011_data.xml',
         'data/account_financial_html_report_data.xml',
     ],
     'installable': True,

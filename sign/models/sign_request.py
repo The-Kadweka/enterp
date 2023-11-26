@@ -4,7 +4,6 @@
 import base64
 import io
 import os
-import time
 import uuid
 
 from PyPDF2 import PdfFileReader, PdfFileWriter
@@ -13,17 +12,13 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.rl_config import TTFSearchPath
 from reportlab.pdfgen import canvas
-from reportlab.platypus import Paragraph
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.pdfbase.pdfmetrics import stringWidth
 from werkzeug.urls import url_join
 from random import randint
 
-from odoo import api, fields, models, _
-from odoo.tools import DEFAULT_SERVER_DATE_FORMAT, formataddr, config, get_lang
-from odoo.exceptions import UserError, ValidationError
+from odoo import api, fields, models, exceptions, _
+from odoo.tools import DEFAULT_SERVER_DATE_FORMAT, formataddr
 
-TTFSearchPath.append(os.path.join(config["root_path"], "..", "addons", "web", "static", "src", "fonts", "sign"))
+TTFSearchPath.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "static", "font"))
 
 
 def _fix_image_transparency(image):
@@ -49,93 +44,79 @@ class SignRequest(models.Model):
     _rec_name = 'reference'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
+    @api.multi
     def _default_access_token(self):
         return str(uuid.uuid4())
 
+    @api.model
     def _expand_states(self, states, domain, order):
         return [key for key, val in type(self).state.selection]
 
     template_id = fields.Many2one('sign.template', string="Template", required=True)
-    reference = fields.Char(required=True, string="Document Name", help="This is how the document will be named in the mail")
+    reference = fields.Char(required=True, string="Filename")
 
     access_token = fields.Char('Security Token', required=True, default=_default_access_token, readonly=True)
 
     request_item_ids = fields.One2many('sign.request.item', 'sign_request_id', string="Signers")
     state = fields.Selection([
-        ("sent", "Sent"),
+        ("sent", "Signatures in Progress"),
         ("signed", "Fully Signed"),
         ("canceled", "Canceled")
-    ], default='sent', tracking=True, group_expand='_expand_states')
+    ], default='sent', track_visibility='onchange', group_expand='_expand_states')
 
     completed_document = fields.Binary(readonly=True, string="Completed Document", attachment=True)
 
     nb_wait = fields.Integer(string="Sent Requests", compute="_compute_count", store=True)
     nb_closed = fields.Integer(string="Completed Signatures", compute="_compute_count", store=True)
     nb_total = fields.Integer(string="Requested Signatures", compute="_compute_count", store=True)
-    progress = fields.Char(string="Progress", compute="_compute_count", compute_sudo=True)
-    start_sign = fields.Boolean(string="Signature Started", help="At least one signer has signed the document.", compute="_compute_count", compute_sudo=True)
-    integrity = fields.Boolean(string="Integrity of the Sign request", compute='_compute_hashes', compute_sudo=True)
+    progress = fields.Integer(string="Progress", compute="_compute_count")
 
-    active = fields.Boolean(default=True, string="Active")
+    active = fields.Boolean(default=True, string="Active", oldname='archived')
     favorited_ids = fields.Many2many('res.users', string="Favorite of")
 
     color = fields.Integer()
     request_item_infos = fields.Binary(compute="_compute_request_item_infos")
     last_action_date = fields.Datetime(related="message_ids.create_date", readonly=True, string="Last Action Date")
-    completion_date = fields.Date(string="Completion Date", compute="_compute_count", compute_sudo=True)
 
-    sign_log_ids = fields.One2many('sign.log', 'sign_request_id', string="Logs", help="Activity logs linked to this request")
-
+    @api.one
     @api.depends('request_item_ids.state')
     def _compute_count(self):
-        for rec in self:
-            wait, closed = 0, 0
-            for s in rec.request_item_ids:
-                if s.state == "sent":
-                    wait += 1
-                if s.state == "completed":
-                    closed += 1
-            rec.nb_wait = wait
-            rec.nb_closed = closed
-            rec.nb_total = wait + closed
-            rec.start_sign = bool(closed)
-            rec.progress = "{} / {}".format(closed, wait + closed)
-            if closed:
-                rec.start_sign = True
-            signed_requests = rec.request_item_ids.filtered('signing_date')
-            if wait == 0 and closed and signed_requests:
-                last_completed_request = signed_requests.sorted(key=lambda i: i.signing_date, reverse=True)[0]
-                rec.completion_date = last_completed_request.signing_date
-            else:
-                rec.completion_date = None
+        wait, closed = 0, 0
+        for s in self.request_item_ids:
+            if s.state == "sent":
+                wait += 1
+            if s.state == "completed":
+                closed += 1
+        self.nb_wait = wait
+        self.nb_closed = closed
+        self.nb_total = wait + closed
 
+        if self.nb_wait + self.nb_closed <= 0:
+            self.progress = 0
+        else:
+            self.progress = self.nb_closed*100 / (self.nb_total)
+
+    @api.one
     @api.depends('request_item_ids.state', 'request_item_ids.partner_id.name')
     def _compute_request_item_infos(self):
-        for rec in self:
-            infos = []
-            for item in rec.request_item_ids:
-                infos.append({
-                    'partner_name': item.partner_id.sudo().name if item.partner_id else 'Public User',
-                    'state': item.state,
-                })
-            rec.request_item_infos = infos
+        infos = []
+        for item in self.request_item_ids:
+            infos.append({
+                'partner_name': item.partner_id.sudo().name if item.partner_id else 'Public User',
+                'state': item.state,
+            })
+        self.request_item_infos = infos
 
+    @api.one
     def _check_after_compute(self):
-        for rec in self:
-            if rec.state == 'sent' and rec.nb_closed == len(rec.request_item_ids) and len(rec.request_item_ids) > 0: # All signed
-                rec.action_signed()
+        if self.state == 'sent' and self.nb_closed == len(self.request_item_ids) and len(self.request_item_ids) > 0: # All signed
+            self.action_signed()
 
-    def _get_final_recipients(self):
-        self.ensure_one()
-        all_recipients = set(self.request_item_ids.mapped('signer_email'))
-        all_recipients |= set(self.mapped('message_follower_ids.partner_id.email'))
-        # Remove False from all_recipients to avoid crashing later
-        all_recipients.discard(False)
-        return all_recipients
-
+    @api.multi
     def button_send(self):
         self.action_sent()
 
+    @api.multi
     def go_to_document(self):
         self.ensure_one()
         request_item = self.request_item_ids.filtered(lambda r: r.partner_id and r.partner_id.id == self.env.user.partner_id.id)[:1]
@@ -152,7 +133,7 @@ class SignRequest(models.Model):
             },
         }
 
-    def open_request(self):
+    def open_sign_request(self):
         self.ensure_one()
         return {
             "type": "ir.actions.act_window",
@@ -161,6 +142,7 @@ class SignRequest(models.Model):
             "res_id": self.id,
         }
 
+    @api.multi
     def get_completed_document(self):
         self.ensure_one()
         if not self.completed_document:
@@ -172,49 +154,23 @@ class SignRequest(models.Model):
             'url': '/sign/download/%(request_id)s/%(access_token)s/completed' % {'request_id': self.id, 'access_token': self.access_token},
         }
 
-    def open_logs(self):
-        self.ensure_one()
-        return {
-            "name": _("Access History"),
-            "type": "ir.actions.act_window",
-            "res_model": "sign.log",
-            'view_mode': 'tree,form',
-            'domain': [('sign_request_id', '=', self.id)],
-        }
-
-    @api.onchange("progress", "start_sign")
-    def _compute_hashes(self):
-        for document in self:
-            try:
-                document.integrity = self.sign_log_ids._check_document_integrity()
-            except Exception:
-                document.integrity = False
-
+    @api.multi
     def toggle_favorited(self):
         self.ensure_one()
         self.write({'favorited_ids': [(3 if self.env.user in self[0].favorited_ids else 4, self.env.user.id)]})
 
+    @api.multi
     def action_resend(self):
         self.action_draft()
         subject = _("Signature Request - %s") % (self.template_id.attachment_id.name)
         self.action_sent(subject=subject)
 
+    @api.multi
     def action_draft(self):
         self.write({'completed_document': None, 'access_token': self._default_access_token()})
 
-    def action_sent_without_mail(self):
-        self.write({'state': 'sent'})
-        for sign_request in self:
-            for sign_request_item in sign_request.request_item_ids:
-                sign_request_item.write({'state':'sent'})
-                Log = self.env['sign.log'].sudo()
-                vals = Log._prepare_vals_from_request(sign_request)
-                vals['action'] = 'create'
-                vals = Log._update_vals_with_http_request(vals)
-                Log.create(vals)
-
+    @api.multi
     def action_sent(self, subject=None, message=None):
-        # Send accesses by email
         self.write({'state': 'sent'})
         for sign_request in self:
             ignored_partners = []
@@ -224,11 +180,6 @@ class SignRequest(models.Model):
             included_request_items = sign_request.request_item_ids.filtered(lambda r: not r.partner_id or r.partner_id.id not in ignored_partners)
 
             if sign_request.send_signature_accesses(subject, message, ignored_partners=ignored_partners):
-                Log = self.env['sign.log'].sudo()
-                vals = Log._prepare_vals_from_request(sign_request)
-                vals['action'] = 'create'
-                vals = Log._update_vals_with_http_request(vals)
-                Log.create(vals)
                 followers = sign_request.message_follower_ids.mapped('partner_id')
                 followers -= sign_request.create_uid.partner_id
                 followers -= sign_request.request_item_ids.mapped('partner_id')
@@ -238,48 +189,41 @@ class SignRequest(models.Model):
             else:
                 sign_request.action_draft()
 
+    @api.multi
     def action_signed(self):
         self.write({'state': 'signed'})
         self.env.cr.commit()
-        if not self.check_is_encrypted():
-            # if the file is encrypted, we must wait that the document is decrypted
-            self.send_completed_document()
+        self.send_completed_document()
 
-    def check_is_encrypted(self):
-        self.ensure_one()
-        if not self.template_id.sign_item_ids:
-            return False
-
-        old_pdf = PdfFileReader(io.BytesIO(base64.b64decode(self.template_id.attachment_id.datas)), strict=False, overwriteWarnings=False)
-        return old_pdf.isEncrypted
-
+    @api.multi
     def action_canceled(self):
         self.write({'completed_document': None, 'access_token': self._default_access_token(), 'state': 'canceled'})
         for request_item in self.mapped('request_item_ids'):
             request_item.action_draft()
 
+    @api.one
     def set_signers(self, signers):
+        self.request_item_ids.filtered(lambda r: not r.partner_id or not r.role_id).unlink()
+
+        ids_to_remove = []
+        for request_item in self.request_item_ids:
+            for i in range(0, len(signers)):
+                if signers[i]['partner_id'] == request_item.partner_id.id and signers[i]['role'] == request_item.role_id.id:
+                    signers.pop(i)
+                    break
+            else:
+                ids_to_remove.append(request_item.id)
+
         SignRequestItem = self.env['sign.request.item']
+        SignRequestItem.browse(ids_to_remove).unlink()
+        for signer in signers:
+            SignRequestItem.create({
+                'partner_id': signer['partner_id'],
+                'sign_request_id': self.id,
+                'role_id': signer['role'],
+            })
 
-        for rec in self:
-            rec.request_item_ids.filtered(lambda r: not r.partner_id or not r.role_id).unlink()
-            ids_to_remove = []
-            for request_item in rec.request_item_ids:
-                for i in range(0, len(signers)):
-                    if signers[i]['partner_id'] == request_item.partner_id.id and signers[i]['role'] == request_item.role_id.id:
-                        signers.pop(i)
-                        break
-                else:
-                    ids_to_remove.append(request_item.id)
-
-            SignRequestItem.browse(ids_to_remove).unlink()
-            for signer in signers:
-                SignRequestItem.create({
-                    'partner_id': signer['partner_id'],
-                    'sign_request_id': rec.id,
-                    'role_id': signer['role'],
-                })
-
+    @api.multi
     def send_signature_accesses(self, subject=None, message=None, ignored_partners=[]):
         self.ensure_one()
         if len(self.request_item_ids) <= 0 or (set(self.request_item_ids.mapped('role_id')) != set(self.template_id.sign_item_ids.mapped('responsible_id'))):
@@ -288,16 +232,15 @@ class SignRequest(models.Model):
         self.request_item_ids.filtered(lambda r: not r.partner_id or r.partner_id.id not in ignored_partners).send_signature_accesses(subject, message)
         return True
 
+    @api.one
     def send_follower_accesses(self, followers, subject=None, message=None):
-        self.ensure_one()
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         tpl = self.env.ref('sign.sign_template_mail_follower')
         for follower in followers:
             if not follower.email:
                 continue
-            if not self.create_uid.email:
-                raise UserError(_("Please configure the sender's email address"))
-            tpl_follower = tpl.with_context(lang=get_lang(self.env, lang_code=follower.lang).code)
+            lang_follower = self.env['res.lang']._lang_get(follower.lang or self.env.lang or 'en_US')
+            tpl_follower = tpl.with_context(lang=lang_follower.code)
             body = tpl_follower.render({
                 'record': self,
                 'link': url_join(base_url, 'sign/document/%s/%s' % (self.id, self.access_token)),
@@ -309,13 +252,13 @@ class SignRequest(models.Model):
                 {'record_name': self.reference},
                 {'model_description': 'signature', 'company': self.create_uid.company_id},
                 {'email_from': formataddr((self.create_uid.name, self.create_uid.email)),
-                 'author_id': self.create_uid.partner_id.id,
                  'email_to': formataddr((follower.name, follower.email)),
                  'subject': subject or _('%s : Signature request') % self.reference},
-                lang=follower.lang,
+                 lang=lang_follower.code,
             )
             self.message_subscribe(partner_ids=follower.ids)
 
+    @api.multi
     def send_completed_document(self):
         self.ensure_one()
         if len(self.request_item_ids) <= 0 or self.state != 'signed':
@@ -325,71 +268,48 @@ class SignRequest(models.Model):
             self.generate_completed_document()
 
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
-        attachment = self.env['ir.attachment'].create({
-            'name': "%s.pdf" % self.reference if self.reference.split('.')[-1] != 'pdf' else self.reference,
-            'datas': self.completed_document,
-            'type': 'binary',
-            'res_model': self._name,
-            'res_id': self.id,
-        })
-        report_action = self.env.ref('sign.action_sign_request_print_logs')
-        # print the report with the public user in a sudoed env
-        # public user because we don't want groups to pollute the result
-        # (e.g. if the current user has the group Sign Manager,
-        # some private information will be sent to *all* signers)
-        # sudoed env because we have checked access higher up the stack
-        public_user = self.env.ref('base.public_user', raise_if_not_found=False)
-        if not public_user:
-            # public user was deleted, fallback to avoid crash (info may leak)
-            public_user = self.env.user
-        pdf_content, __ = report_action.with_user(public_user).sudo().render_qweb_pdf(self.id)
-        attachment_log = self.env['ir.attachment'].create({
-            'name': "Activity Logs - %s.pdf" % time.strftime('%Y-%m-%d - %H:%M:%S'),
-            'datas': base64.b64encode(pdf_content),
-            'type': 'binary',
-            'res_model': self._name,
-            'res_id': self.id,
-        })
         tpl = self.env.ref('sign.sign_template_mail_completed')
         for signer in self.request_item_ids:
-            if not signer.signer_email:
+            if not signer.partner_id or not signer.partner_id.email:
                 continue
-            signer_lang = get_lang(self.env, lang_code=signer.partner_id.lang).code
-            tpl = tpl.with_context(lang=signer_lang)
-            body = tpl.render({
+
+            lang_signer = self.env['res.lang']._lang_get(signer.partner_id.lang or self.env.lang or 'en_US')
+            tpl_signer = tpl.with_context(lang=lang_signer.code)
+            body = tpl_signer.render({
                 'record': self,
                 'link': url_join(base_url, 'sign/document/%s/%s' % (self.id, signer.access_token)),
                 'subject': '%s signed' % self.reference,
                 'body': False,
             }, engine='ir.qweb', minimal_qcontext=True)
 
-            if not self.create_uid.email:
-                raise UserError(_("Please configure the sender's email address"))
-            if not signer.signer_email:
-                raise UserError(_("Please configure the signer's email address"))
+            attachment = self.env['ir.attachment'].create({
+                'name': self.reference,
+                'datas_fname': "%s.pdf" % self.reference,
+                'datas': self.completed_document,
+                'type': 'binary',
+                'res_model': self._name,
+                'res_id': self.id,
+            })
 
             self.env['sign.request']._message_send_mail(
                 body, 'mail.mail_notification_light',
                 {'record_name': self.reference},
                 {'model_description': 'signature', 'company': self.create_uid.company_id},
                 {'email_from': formataddr((self.create_uid.name, self.create_uid.email)),
-                 'author_id': self.create_uid.partner_id.id,
-                 'email_to': formataddr((signer.partner_id.name, signer.signer_email)),
+                 'email_to': formataddr((signer.partner_id.name, signer.partner_id.email)),
                  'subject': _('%s has been signed') % self.reference,
-                 'attachment_ids': [(4, attachment.id), (4, attachment_log.id)]},
-                force_send=True,
-                lang=signer_lang,
+                 'attachment_ids': [(4, attachment.id)]},
+                 lang=lang_signer.code,
             )
 
         tpl = self.env.ref('sign.sign_template_mail_completed')
+
         for follower in self.mapped('message_follower_ids.partner_id') - self.request_item_ids.mapped('partner_id'):
             if not follower.email:
                 continue
-            if not self.create_uid.email:
-                raise UserError(_("Please configure the sender's email address"))
-
-            tpl_follower = tpl.with_context(lang=get_lang(self.env, lang_code=follower.lang).code)
-            body = tpl.render({
+            lang_follower = self.env['res.lang']._lang_get(follower.lang or self.env.lang or 'en_US')
+            tpl_follower = tpl.with_context(lang=lang_follower.code)
+            body = tpl_follower.render({
                 'record': self,
                 'link': url_join(base_url, 'sign/document/%s/%s' % (self.id, self.access_token)),
                 'subject': '%s signed' % self.reference,
@@ -400,10 +320,9 @@ class SignRequest(models.Model):
                 {'record_name': self.reference},
                 {'model_description': 'signature', 'company': self.create_uid.company_id},
                 {'email_from': formataddr((self.create_uid.name, self.create_uid.email)),
-                 'author_id': self.create_uid.partner_id.id,
                  'email_to': formataddr((follower.name, follower.email)),
                  'subject': _('%s has been signed') % self.reference},
-                lang=follower.lang,
+                 lang=lang_follower.code
             )
 
         return True
@@ -419,9 +338,9 @@ class SignRequest(models.Model):
     def _get_normal_font_size(self):
         return 0.015
 
-    def generate_completed_document(self, password=""):
-        self.ensure_one()
-        if not self.template_id.sign_item_ids:
+    @api.one
+    def generate_completed_document(self):
+        if len(self.template_id.sign_item_ids) <= 0:
             self.completed_document = self.template_id.attachment_id.datas
             return
 
@@ -429,12 +348,7 @@ class SignRequest(models.Model):
             old_pdf = PdfFileReader(io.BytesIO(base64.b64decode(self.template_id.attachment_id.datas)), strict=False, overwriteWarnings=False)
             old_pdf.getNumPages()
         except Exception as e:
-            raise ValidationError(_("ERROR: Invalid PDF file!"))
-
-        isEncrypted = old_pdf.isEncrypted
-        if isEncrypted and not old_pdf.decrypt(password):
-            # password is not correct
-            return
+            raise exceptions.ValidationError(_("ERROR: Invalid PDF file!"))
 
         font = self._get_font()
         normalFontSize = self._get_normal_font_size()
@@ -442,7 +356,7 @@ class SignRequest(models.Model):
         packet = io.BytesIO()
         can = canvas.Canvas(packet)
         itemsByPage = self.template_id.sign_item_ids.getByPage()
-        SignItemValue = self.env['sign.request.item.value']
+        SignItemValue = self.env['sign.item.value']
         for p in range(0, old_pdf.getNumPages()):
             page = old_pdf.getPage(p)
             # Absolute values are taken as it depends on the MediaBox template PDF metadata, they may be negative
@@ -472,28 +386,11 @@ class SignRequest(models.Model):
 
                 value = value.value
 
-                if item.type_id.item_type == "text":
+                if item.type_id.type == "text":
                     can.setFont(font, height*item.height*0.8)
                     can.drawString(width*item.posX, height*(1-item.posY-item.height*0.9), value)
 
-                elif item.type_id.item_type == "selection":
-                    content = []
-                    for option in item.option_ids:
-                        if option.id != int(value):
-                            content.append("<strike>%s</strike>" % (option.value))
-                        else:
-                            content.append(option.value)
-                    font_size = height * normalFontSize * 0.8
-                    can.setFont(font, font_size)
-                    text = " / ".join(content)
-                    string_width = stringWidth(text.replace("<strike>", "").replace("</strike>", ""), font, font_size)
-                    p = Paragraph(text, getSampleStyleSheet()["Normal"])
-                    w, h = p.wrap(width, height)
-                    posX = width * (item.posX + item.width * 0.5) - string_width // 2
-                    posY = height * (1 - item.posY - item.height * 0.5) - h // 2
-                    p.drawOn(can, posX, posY)
-
-                elif item.type_id.item_type == "textarea":
+                elif item.type_id.type == "textarea":
                     can.setFont(font, height*normalFontSize*0.8)
                     lines = value.split('\n')
                     y = (1-item.posY)
@@ -502,12 +399,12 @@ class SignRequest(models.Model):
                         can.drawString(width*item.posX, height*y, line)
                         y -= normalFontSize*0.1
 
-                elif item.type_id.item_type == "checkbox":
+                elif item.type_id.type == "checkbox":
                     can.setFont(font, height*item.height*0.8)
                     value = 'X' if value == 'on' else ''
                     can.drawString(width*item.posX, height*(1-item.posY-item.height*0.9), value)
 
-                elif item.type_id.item_type == "signature" or item.type_id.item_type == "initial":
+                elif item.type_id.type == "signature" or item.type_id.type == "initial":
                     image_reader = ImageReader(io.BytesIO(base64.b64decode(value[value.find(',')+1:])))
                     _fix_image_transparency(image_reader._image)
                     can.drawImage(image_reader, width*item.posX, height*(1-item.posY-item.height), width*item.width, height*item.height, 'auto', True)
@@ -524,45 +421,31 @@ class SignRequest(models.Model):
             page.mergePage(item_pdf.getPage(p))
             new_pdf.addPage(page)
 
-        if isEncrypted:
-            new_pdf.encrypt(password)
-
         output = io.BytesIO()
         new_pdf.write(output)
         self.completed_document = base64.b64encode(output.getvalue())
         output.close()
 
     @api.model
-    def _message_send_mail(self, body, notif_template_xmlid, message_values, notif_values, mail_values, force_send=False, **kwargs):
+    def _message_send_mail(self, body, notif_template_xmlid, message_values, notif_values, mail_values, **kwargs):
         """ Shortcut to send an email. """
-        default_lang = get_lang(self.env, lang_code=kwargs.get('lang')).code
-        lang = kwargs.get('lang', default_lang)
+        lang = self.env['res.lang']._lang_get(kwargs.get('lang') or self.env.lang or 'en_US').code
         sign_request = self.with_context(lang=lang)
-
-        # the notif layout wrapping expects a mail.message record, but we don't want
-        # to actually create the record
-        # See @tde-banana-odoo for details
         msg = sign_request.env['mail.message'].sudo().new(dict(body=body, **message_values))
+
         notif_layout = sign_request.env.ref(notif_template_xmlid)
         body_html = notif_layout.render(dict(message=msg, **notif_values), engine='ir.qweb', minimal_qcontext=True)
         body_html = sign_request.env['mail.thread']._replace_local_links(body_html)
 
-        mail = sign_request.env['mail.mail'].create(dict(body_html=body_html, state='outgoing', **mail_values))
-        if force_send:
-            mail.send()
-        return mail
+        return sign_request.env['mail.mail'].create(dict(body_html=body_html, state='outgoing', **mail_values))
 
     @api.model
-    def initialize_new(self, id, signers, followers, reference, subject, message, send=True, without_mail=False):
-        sign_users = self.env['res.users'].search([('partner_id', 'in', [signer['partner_id'] for signer in signers])]).filtered(lambda u: u.has_group('sign.group_sign_user'))
-        sign_request = self.create({'template_id': id, 'reference': reference, 'favorited_ids': [(4, item) for item in (sign_users | self.env.user).ids]})
+    def initialize_new(self, id, signers, followers, reference, subject, message, send=True):
+        sign_request = self.create({'template_id': id, 'reference': reference, 'favorited_ids': [(4, self.env.user.id)]})
         sign_request.message_subscribe(partner_ids=followers)
-        sign_request.activity_update(sign_users)
         sign_request.set_signers(signers)
         if send:
             sign_request.action_sent(subject, message)
-        if without_mail:
-            sign_request.action_sent_without_mail()
         return {
             'id': sign_request.id,
             'token': sign_request.access_token,
@@ -579,31 +462,22 @@ class SignRequest(models.Model):
             sign_request.send_follower_accesses(self.env['res.partner'].browse(followers))
         return sign_request.id
 
-    @api.model
-    def activity_update(self, sign_users):
-        for user in sign_users:
-            self.with_context(mail_activity_quick_update=True).activity_schedule(
-                activity_type_id=self.env.ref('mail.mail_activity_data_todo').id,
-                user_id=user.id
-            )
-
 
 class SignRequestItem(models.Model):
     _name = "sign.request.item"
     _description = "Signature Request Item"
     _rec_name = 'partner_id'
 
+    @api.multi
     def _default_access_token(self):
         return str(uuid.uuid4())
 
-    partner_id = fields.Many2one('res.partner', string="Contact", ondelete='cascade')
+    partner_id = fields.Many2one('res.partner', string="Partner", ondelete='cascade')
     sign_request_id = fields.Many2one('sign.request', string="Signature Request", ondelete='cascade', required=True)
-    sign_item_value_ids = fields.One2many('sign.request.item.value', 'sign_request_item_id', string="Value")
 
     access_token = fields.Char('Security Token', required=True, default=_default_access_token, readonly=True)
-    access_via_link = fields.Boolean('Accessed Through Token')
     role_id = fields.Many2one('sign.item.role', string="Role")
-    sms_number = fields.Char(related='partner_id.mobile', readonly=False, depends=(['partner_id']), store=True)
+    sms_number = fields.Char(related='partner_id.mobile', readonly=False)
     sms_token = fields.Char('SMS Token', readonly=True)
 
     signature = fields.Binary(attachment=True)
@@ -614,11 +488,12 @@ class SignRequestItem(models.Model):
         ("completed", "Completed")
     ], readonly=True, default="draft")
 
-    signer_email = fields.Char(related='partner_id.email', readonly=False, depends=(['partner_id']), store=True)
+    signer_email = fields.Char(related='partner_id.email', readonly=False)
 
     latitude = fields.Float(digits=(10, 7))
     longitude = fields.Float(digits=(10, 7))
 
+    @api.multi
     def action_draft(self):
         self.write({
             'signature': None,
@@ -628,18 +503,21 @@ class SignRequestItem(models.Model):
         })
         for request_item in self:
             itemsToClean = request_item.sign_request_id.template_id.sign_item_ids.filtered(lambda r: r.responsible_id == request_item.role_id or not r.responsible_id)
-            self.env['sign.request.item.value'].search([('sign_item_id', 'in', itemsToClean.mapped('id')), ('sign_request_id', '=', request_item.sign_request_id.id)]).unlink()
+            self.env['sign.item.value'].search([('sign_item_id', 'in', itemsToClean.mapped('id')), ('sign_request_id', '=', request_item.sign_request_id.id)]).unlink()
         self.mapped('sign_request_id')._check_after_compute()
 
+    @api.multi
     def action_sent(self):
         self.write({'state': 'sent'})
         self.mapped('sign_request_id')._check_after_compute()
 
+    @api.multi
     def action_completed(self):
         date = fields.Date.context_today(self).strftime(DEFAULT_SERVER_DATE_FORMAT)
         self.write({'signing_date': date, 'state': 'completed'})
         self.mapped('sign_request_id')._check_after_compute()
 
+    @api.multi
     def send_signature_accesses(self, subject=None, message=None):
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         tpl = self.env.ref('sign.sign_template_mail_request')
@@ -648,35 +526,32 @@ class SignRequestItem(models.Model):
                 continue
             if not signer.create_uid.email:
                 continue
-            signer_lang = get_lang(self.env, lang_code=signer.partner_id.lang).code
-            tpl = tpl.with_context(lang=signer_lang)
-            body = tpl.render({
+            lang_signer = self.env['res.lang']._lang_get(signer.partner_id.lang or self.env.lang or 'en_US')
+            tpl_signer = tpl.with_context(lang=lang_signer.code)
+            body = tpl_signer.render({
                 'record': signer,
-                'link': url_join(base_url, "sign/document/mail/%(request_id)s/%(access_token)s" % {'request_id': signer.sign_request_id.id, 'access_token': signer.access_token}),
+                'link': url_join(base_url, "sign/document/%(request_id)s/%(access_token)s" % {'request_id': signer.sign_request_id.id, 'access_token': signer.access_token}),
                 'subject': subject,
                 'body': message if message != '<p><br></p>' else False,
             }, engine='ir.qweb', minimal_qcontext=True)
 
-            if not signer.signer_email:
-                raise UserError(_("Please configure the signer's email address"))
             self.env['sign.request']._message_send_mail(
                 body, 'mail.mail_notification_light',
                 {'record_name': signer.sign_request_id.reference},
                 {'model_description': 'signature', 'company': signer.create_uid.company_id},
                 {'email_from': formataddr((signer.create_uid.name, signer.create_uid.email)),
-                 'author_id': signer.create_uid.partner_id.id,
                  'email_to': formataddr((signer.partner_id.name, signer.partner_id.email)),
                  'subject': subject},
-                force_send=True,
-                lang=signer_lang,
+                 lang=lang_signer.code,
             )
 
+    @api.multi
     def sign(self, signature):
         self.ensure_one()
         if not isinstance(signature, dict):
             self.signature = signature
         else:
-            SignItemValue = self.env['sign.request.item.value']
+            SignItemValue = self.env['sign.item.value']
             request = self.sign_request_id
 
             signerItems = request.template_id.sign_item_ids.filtered(lambda r: not r.responsible_id or r.responsible_id.id == self.role_id.id)
@@ -691,13 +566,12 @@ class SignRequestItem(models.Model):
             for itemId in signature:
                 item_value = SignItemValue.search([('sign_item_id', '=', int(itemId)), ('sign_request_id', '=', request.id)])
                 if not item_value:
-                    item_value = SignItemValue.create({'sign_item_id': int(itemId), 'sign_request_id': request.id,
-                                                       'value': signature[itemId], 'sign_request_item_id': self.id})
-                    if item_value.sign_item_id.type_id.item_type == 'signature':
+                    item_value = SignItemValue.create({'sign_item_id': int(itemId), 'sign_request_id': request.id, 'value': signature[itemId]})
+                    if item_value.sign_item_id.type_id.type == 'signature':
                         self.signature = signature[itemId][signature[itemId].find(',')+1:]
                         if user:
                             user.sign_signature = self.signature
-                    if item_value.sign_item_id.type_id.item_type == 'initial' and user:
+                    if item_value.sign_item_id.type_id.type == 'initial' and user:
                         user.sign_initials = signature[itemId][signature[itemId].find(',')+1:]
 
         return True
@@ -708,24 +582,13 @@ class SignRequestItem(models.Model):
         subject = _("Signature Request - %s") % (sign_request_item.sign_request_id.template_id.attachment_id.name)
         self.browse(id).send_signature_accesses(subject=subject)
 
+    @api.multi
     def _reset_sms_token(self):
         for record in self:
             record.sms_token = randint(100000, 999999)
 
+    @api.one
     def _send_sms(self):
-        for rec in self:
-            rec._reset_sms_token()
-            self.env['sms.api']._send_sms([rec.sms_number], _('Your confirmation code is %s') % rec.sms_token)
-
-
-class SignRequestItemValue(models.Model):
-    _name = "sign.request.item.value"
-    _description = "Signature Item Value"
-    _rec_name = 'sign_request_id'
-
-    sign_request_item_id = fields.Many2one('sign.request.item', string="Signature Request item", required=True,
-                                           ondelete='cascade')
-    sign_item_id = fields.Many2one('sign.item', string="Signature Item", required=True, ondelete='cascade')
-    sign_request_id = fields.Many2one(string="Signature Request", required=True, ondelete='cascade', related='sign_request_item_id.sign_request_id')
-
-    value = fields.Text()
+        self.ensure_one()
+        self._reset_sms_token()
+        self.env['sms.api']._send_sms([self.sms_number], _('Your confirmation code is %s') % self.sms_token)

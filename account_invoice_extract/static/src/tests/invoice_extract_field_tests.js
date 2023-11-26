@@ -39,7 +39,7 @@ QUnit.module('Field', {}, function () {
         parent.destroy();
     });
 
-    QUnit.test('render button', async function (assert) {
+    QUnit.test('render button', function (assert) {
         assert.expect(3);
         var parent = testUtils.createParent({});
         var field = new InvoiceExtractField(parent, {
@@ -47,7 +47,7 @@ QUnit.module('Field', {}, function () {
             text: 'myField',
         });
 
-        await field.renderButton({$container: $('#qunit-fixture')});
+        field.renderButton({$container: $('#qunit-fixture')});
         assert.strictEqual($('.o_invoice_extract_button').length, 1,
             "should display a button");
         assert.strictEqual($('.o_invoice_extract_button').text().trim(), "myField",
@@ -58,7 +58,7 @@ QUnit.module('Field', {}, function () {
         parent.destroy();
     });
 
-    QUnit.test('set (in)active with button', async function (assert) {
+    QUnit.test('set (in)active with button', function (assert) {
         assert.expect(4);
         var parent = testUtils.createParent({});
         var field = new InvoiceExtractField(parent, {
@@ -66,7 +66,7 @@ QUnit.module('Field', {}, function () {
             text: 'myField',
         });
 
-        await field.renderButton({$container: $('#qunit-fixture')});
+        field.renderButton({$container: $('#qunit-fixture')});
         assert.strictEqual($('.o_invoice_extract_button').length, 1,
             "should display a button");
         assert.doesNotHaveClass($('.o_invoice_extract_button'), 'active',
@@ -83,7 +83,7 @@ QUnit.module('Field', {}, function () {
         parent.destroy();
     });
 
-    QUnit.test('click on button', async function (assert) {
+    QUnit.test('click on button', function (assert) {
         assert.expect(4);
 
         var field;
@@ -106,11 +106,11 @@ QUnit.module('Field', {}, function () {
             text: 'myField',
         });
 
-        await field.renderButton({$container: $('#qunit-fixture')});
+        field.renderButton({$container: $('#qunit-fixture')});
         assert.strictEqual($('.o_invoice_extract_button').length, 1,
             "should display a button");
 
-        await testUtils.dom.click($('.o_invoice_extract_button'));
+        testUtils.dom.click($('.o_invoice_extract_button'));
 
         assert.verifySteps(['set active field']);
 

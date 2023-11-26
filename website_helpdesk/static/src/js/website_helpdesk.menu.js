@@ -1,23 +1,13 @@
 odoo.define("website_helpdesk.menu", function (require) {
-"use strict";
+    "use strict";
 
-var publicWidget = require('web.public.widget');
+    require("web.dom_ready");
 
-publicWidget.registry.HelpdeskMenu = publicWidget.Widget.extend({
-    selector: '.team_menu',
+    var pathname = $(window.location).attr("pathname");
+    var $link = $(".team_menu li a");
+    if (pathname !== "/helpdesk/") {
+        $link = $link.filter("[href$='" + pathname + "']");
+    }
+    $link.first().closest("li").addClass("active");
 
-    /**
-     * @override
-     */
-    start: function () {
-        var pathname = $(window.location).attr("pathname");
-        var $links = this.$('li a');
-        if (pathname !== "/helpdesk/") {
-            $links = $links.filter("[href$='" + pathname + "']");
-        }
-        $links.first().closest("li").addClass("active");
-
-        return this._super.apply(this, arguments);
-    },
-});
 });

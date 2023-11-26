@@ -1,26 +1,26 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_batch_payment
+# * account_batch_payment
 # 
 # Translators:
-# Martin Trigaux, 2019
-# Hans Henrik Gabelgaard <hhg@gabelgaard.org>, 2019
-# Morten Schou <ms@msteknik.dk>, 2019
-# Jesper Carstensen <jc@danodoo.dk>, 2019
-# Jesper Carstensen <info@danodoo.dk>, 2019
-# Pernille Kristensen <pernillekristensen1994@gmail.com>, 2019
+# Martin Trigaux, 2018
+# Hans Henrik Gabelgaard <hhg@gabelgaard.org>, 2018
+# Morten Schou <ms@msteknik.dk>, 2018
+# Jesper Carstensen <jc@danodoo.dk>, 2018
+# Jesper Carstensen <info@danodoo.dk>, 2018
+# lhmflexerp <lhm@flexerp.dk>, 2018
 # Ejner Sønniksen <ejner@vkdata.dk>, 2019
-# lhmflexerp <lhm@flexerp.dk>, 2019
 # Sanne Kristensen <sanne@vkdata.dk>, 2020
 # Mads Søndergaard, 2020
+# Mads Søndergaard <mads@vkdata.dk>, 2020
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~12.5+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-23 11:38+0000\n"
-"PO-Revision-Date: 2019-08-26 09:34+0000\n"
-"Last-Translator: Mads Søndergaard, 2020\n"
+"POT-Creation-Date: 2019-11-14 07:49+0000\n"
+"PO-Revision-Date: 2018-08-24 11:36+0000\n"
+"Last-Translator: Mads Søndergaard <mads@vkdata.dk>, 2020\n"
 "Language-Team: Danish (https://www.transifex.com/odoo/teams/41243/da/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -39,13 +39,13 @@ msgid "Account Reconciliation widget"
 msgstr "Kontoudlignings widget"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:75
 #, python-format
 msgid "All payments in the batch must belong to the same company."
 msgstr "Alle betalinger i partiet skal tilhøre den samme virksomhed."
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:86
 #, python-format
 msgid "All payments in the batch must share the same payment method."
 msgstr "Alle betalinger i partiet skal dele den samme betalingsmetode."
@@ -97,13 +97,10 @@ msgid "Batch Payment"
 msgstr "Parti betaling"
 
 #. module: account_batch_payment
-#. openerp-web
-#: code:addons/account_batch_payment/static/src/xml/account_reconciliation.xml:0
 #: model:ir.actions.act_window,name:account_batch_payment.action_batch_payment_in
 #: model:ir.actions.act_window,name:account_batch_payment.action_batch_payment_out
 #: model:ir.ui.menu,name:account_batch_payment.menu_batch_payment_purchases
 #: model:ir.ui.menu,name:account_batch_payment.menu_batch_payment_sales
-#, python-format
 msgid "Batch Payments"
 msgstr "Batch betalinger"
 
@@ -145,7 +142,8 @@ msgid "Code"
 msgstr "Kode"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_journal.py:0
+#: code:addons/account_batch_payment/models/account_journal.py:57
+#: model:ir.actions.server,name:account_batch_payment.action_account_create_batch_payment
 #, python-format
 msgid "Create Batch Payment"
 msgstr "Opret parti betaling"
@@ -158,12 +156,7 @@ msgstr "Opret en ny kunde parti betaling"
 #. module: account_batch_payment
 #: model_terms:ir.actions.act_window,help:account_batch_payment.action_batch_payment_out
 msgid "Create a new vendor batch payment"
-msgstr "Opret en ny forhandler parti betaling"
-
-#. module: account_batch_payment
-#: model:ir.actions.server,name:account_batch_payment.action_account_create_batch_payment
-msgid "Create batch payment"
-msgstr "Opret parti betaling"
+msgstr "Opret en ny sælger parti betaling"
 
 #. module: account_batch_payment
 #: model:ir.model.fields,field_description:account_batch_payment.field_account_batch_download_wizard__create_uid
@@ -242,13 +235,6 @@ msgid "File name"
 msgstr "Filnavn"
 
 #. module: account_batch_payment
-#. openerp-web
-#: code:addons/account_batch_payment/static/src/xml/account_reconciliation.xml:0
-#, python-format
-msgid "Filter..."
-msgstr "Filter..."
-
-#. module: account_batch_payment
 #: model:ir.model.fields,help:account_batch_payment.field_account_batch_download_wizard__export_file
 msgid "Generated XML file"
 msgstr "Genereret XML fil"
@@ -271,25 +257,25 @@ msgid "ID"
 msgstr "ID"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:89
 #, python-format
 msgid "Id: %s"
 msgstr "ID: %s"
 
 #. module: account_batch_payment
-#: model:ir.model.fields.selection,name:account_batch_payment.selection__account_batch_payment__batch_type__inbound
+#: selection:account.batch.payment,batch_type:0
 msgid "Inbound"
 msgstr "Indkommende"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_journal.py:0
+#: code:addons/account_batch_payment/models/account_journal.py:37
 #, python-format
 msgid "Inbound Batch Payments Sequence"
 msgstr "Indgående parti betalingers sekvens"
 
 #. module: account_batch_payment
 #. openerp-web
-#: code:addons/account_batch_payment/static/src/js/account_batch_payment_reconciliation.js:0
+#: code:addons/account_batch_payment/static/src/js/account_batch_payment_reconciliation.js:135
 #, python-format
 msgid "Incorrect Operation"
 msgstr "Forkert handling"
@@ -334,17 +320,17 @@ msgid "Name of the generated XML file"
 msgstr "Navn på den genererede XML fil"
 
 #. module: account_batch_payment
-#: model:ir.model.fields.selection,name:account_batch_payment.selection__account_batch_payment__state__draft
+#: selection:account.batch.payment,state:0
 msgid "New"
 msgstr "Ny"
 
 #. module: account_batch_payment
-#: model:ir.model.fields.selection,name:account_batch_payment.selection__account_batch_payment__batch_type__outbound
+#: selection:account.batch.payment,batch_type:0
 msgid "Outbound"
 msgstr "Udgående"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_journal.py:0
+#: code:addons/account_batch_payment/models/account_journal.py:17
 #, python-format
 msgid "Outbound Batch Payments Sequence"
 msgstr "Udgående parti betalings sekvens"
@@ -372,7 +358,12 @@ msgid "Print Batch Payment"
 msgstr "Print parti betaling"
 
 #. module: account_batch_payment
-#: model:ir.model.fields.selection,name:account_batch_payment.selection__account_batch_payment__state__reconciled
+#: model:ir.actions.server,name:account_batch_payment.action_account_print_batch_payment
+msgid "Print Batch Payments"
+msgstr "Udskrif Parti Betalinger"
+
+#. module: account_batch_payment
+#: selection:account.batch.payment,state:0
 msgid "Reconciled"
 msgstr "Udlignet"
 
@@ -387,29 +378,36 @@ msgid "Register Payment"
 msgstr "Registrer betaling"
 
 #. module: account_batch_payment
-#: model:ir.model.fields.selection,name:account_batch_payment.selection__account_batch_payment__state__sent
+#. openerp-web
+#: code:addons/account_batch_payment/static/src/xml/account_reconciliation.xml:8
+#, python-format
+msgid "Select a Batch Payment"
+msgstr "Vælg en Parti Betaling"
+
+#. module: account_batch_payment
+#: selection:account.batch.payment,state:0
 msgid "Sent"
 msgstr "Sendt"
 
 #. module: account_batch_payment
 #. openerp-web
-#: code:addons/account_batch_payment/static/src/js/account_batch_payment_reconciliation.js:0
+#: code:addons/account_batch_payment/static/src/js/account_batch_payment_reconciliation.js:133
 #, python-format
 msgid ""
 "Some journal items from the selected batch payment are already selected in "
 "another reconciliation : "
 msgstr ""
 "Visse journal aktiver fra den valgte parti betaling er allerede valgt i en "
-"anden afstemning :"
+"anden afstemmelse :"
 
 #. module: account_batch_payment
 #: model:ir.model.fields,field_description:account_batch_payment.field_account_batch_payment__state
 #: model_terms:ir.ui.view,arch_db:account_batch_payment.view_batch_payment_search
 msgid "State"
-msgstr "Stat"
+msgstr "Status"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:88
 #, python-format
 msgid ""
 "The batch must have the same payment method as the payments it contains."
@@ -417,13 +415,13 @@ msgstr ""
 "Partiet skal have samme betalingsmetode som betalingerne den indeholder"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:83
 #, python-format
 msgid "The batch must have the same type as the payments it contains."
 msgstr "Partiet skal have samme type som betalingerne den indeholder."
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:78
 #, python-format
 msgid ""
 "The journal of the batch payment and of the payments it contains must be the"
@@ -455,7 +453,7 @@ msgstr "Validér"
 #. module: account_batch_payment
 #: model:ir.model.fields,field_description:account_batch_payment.field_account_batch_download_wizard__warning_message
 msgid "Warning"
-msgstr "Advarsel"
+msgstr "Advarsel!"
 
 #. module: account_batch_payment
 #: model:ir.model.fields,help:account_batch_payment.field_account_batch_download_wizard__warning_message
@@ -472,7 +470,7 @@ msgstr ""
 "formular visningen eller ej."
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:90
 #, python-format
 msgid ""
 "You cannot add payments with zero amount in a Batch Payment.\n"
@@ -484,7 +482,7 @@ msgstr ""
 "%s"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_payment.py:0
+#: code:addons/account_batch_payment/models/account_payment.py:38
 #, python-format
 msgid ""
 "You cannot make a batch payment with internal transfers. Internal transfers "
@@ -492,14 +490,6 @@ msgid ""
 msgstr ""
 "Du kan ikke udføre en parti betaling med interne overførsler.\n"
 "Interne overførsels ID'er: %s"
-
-#. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:131
-#, python-format
-msgid ""
-"You cannot validate a batch containing payments that are not in 'posted' "
-"state."
-msgstr ""
 
 #. module: account_batch_payment
 #: model_terms:ir.ui.view,arch_db:account_batch_payment.view_batch_payment_form

@@ -3,7 +3,7 @@
 
 {
     'name': 'Import QIF Bank Statement',
-    'category': 'Accounting/Accounting',
+    'category': 'Accounting',
     'version': '1.0',
     'description': '''
 Module to import QIF bank statements.

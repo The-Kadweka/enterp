@@ -3,7 +3,7 @@
 
 {
     'name': 'Vendor Bill: Release to Pay',
-    'category': 'Operations/Purchase',
+    'category': 'Purchase Management',
     'description': """
 Manage 3-way matching on vendor bills
 =====================================

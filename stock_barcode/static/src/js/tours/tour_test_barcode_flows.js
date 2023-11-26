@@ -51,25 +51,25 @@ function assertPageSummary (expected) {
 
 function assertPreviousVisible (expected) {
     var $previousButton = $('.o_previous_page');
-    var current = (!$previousButton.length && !expected) || $previousButton.hasClass('o_hidden');
+    var current = $previousButton.hasClass('o_hidden');
     assert(!current, expected, 'Previous visible');
 }
 
 function assertPreviousEnabled (expected) {
     var $previousButton = $('.o_previous_page');
-    var current = (!$previousButton.length && !expected) || $previousButton.prop('disabled');
+    var current = $previousButton.prop('disabled');
     assert(!current, expected, 'Previous button enabled');
 }
 
 function assertNextVisible (expected) {
     var $nextButton = $('.o_next_page');
-    var current = (!$nextButton.length && !expected) || $nextButton.hasClass('o_hidden');
+    var current = $nextButton.hasClass('o_hidden');
     assert(!current, expected, 'Next visible');
 }
 
 function assertNextEnabled (expected) {
     var $nextButton = $('.o_next_page');
-    var current = (!$nextButton.length && !expected) || $nextButton.prop('disabled');
+    var current = $nextButton.prop('disabled');
     assert(!current, expected, 'Next button enabled');
 }
 
@@ -81,13 +81,13 @@ function assertNextIsHighlighted (expected) {
 
 function assertValidateVisible (expected) {
     var $validate = $('.o_validate_page');
-    var current = (!$validate.length && !expected) || $validate.hasClass('o_hidden');
+    var current = $validate.hasClass('o_hidden');
     assert(!current, expected, 'Validate visible');
 }
 
 function assertValidateEnabled (expected) {
     var $validate = $('.o_validate_page');
-    var current = (!$validate.length && !expected) || $validate.prop('disabled');
+    var current = $validate.prop('disabled');
     assert(!current, expected, 'Validate enabled');
 }
 
@@ -1113,85 +1113,6 @@ tour.register('test_receipt_reserved_1', {test: true}, [
     },
 ]);
 
-tour.register('test_delivery_lot_with_package', {test: true}, [
-    {
-        trigger: '.o_barcode_client_action',
-        run: function() {
-            assertLinesCount(2);
-            assertScanMessage('scan_products');
-            var $line1 = $('.o_barcode_line').eq(0);
-            var $line2 = $('.o_barcode_line').eq(1);
-            assert($line1.find('.o_line_lot_id').text(), 'sn1');
-            assert($line1.find('.fa-truck').parent().text().trim(), "pack_sn_1  pack_sn_1");
-            assert($line2.find('.o_line_lot_id').text(), 'sn2');
-            assert($line2.find('.fa-truck').parent().text().trim(), "pack_sn_1  pack_sn_1");
-        }
-    },
-
-    {
-        trigger: '.o_barcode_client_action',
-        run: 'scan productserial1'
-    },
-    {
-        trigger: '.o_barcode_client_action',
-        run: 'scan sn3'
-    },
-    {
-        trigger: '.o_barcode_client_action',
-        run: 'scan sn4'
-    },
-
-    {
-        trigger: '.o_barcode_client_action:contains("sn4")',
-        run: function() {
-            assertLinesCount(4);
-            assertScanMessage('scan_products');
-            var $line1 = $('.o_barcode_line').eq(0);
-            var $line2 = $('.o_barcode_line').eq(1);
-            var $line3 = $('.o_barcode_line').eq(2);
-            var $line4 = $('.o_barcode_line').eq(3);
-            assert($line1.find('.o_line_lot_name').text(), 'sn4');
-            assert($line1.find('.fa-user-o').parent().text().trim(), "Particulier");
-            assert($line1.find('.fa-truck').parent().text().trim(), "pack_sn_2");
-            assert($line2.find('.o_line_lot_name').text(), 'sn3');
-            assert($line2.find('.fa-user-o').parent().text().trim(), "");
-            assert($line2.find('.fa-truck').parent().text().trim(), "pack_sn_2");
-            assert($line3.find('.o_line_lot_id').text(), 'sn1');
-            assert($line3.find('.fa-user-o').parent().text().trim(), "");
-            assert($line3.find('.fa-truck').parent().text().trim(), "pack_sn_1  pack_sn_1");
-            assert($line4.find('.o_line_lot_id').text(), 'sn2');
-            assert($line4.find('.fa-user-o').parent().text().trim(), "");
-            assert($line4.find('.fa-truck').parent().text().trim(), "pack_sn_1  pack_sn_1");
-        }
-    },
-
-    // Open the form view to trigger a save
-    {
-        trigger: '.o_barcode_line:eq(0) .fa-pencil',
-    },
-    {
-        trigger: '.o_form_label:contains("Product")',
-        run: function() {
-            assert($('input[name="qty_done"]').val(), "1");
-            assert($('div[name="package_id"] input').val(), "pack_sn_2");
-            assert($('div[name="result_package_id"] input').val(), "");
-            assert($('div[name="owner_id"] input').val(), "Particulier");
-            assert($('div[name="lot_id"] input').val(), "sn4");
-        },
-    },
-    {
-        trigger: '.o_discard',
-    },
-
-    {
-        trigger: '.o_barcode_client_action',
-        run: 'scan O-BTN.validate',
-    },
-    {
-        trigger: '.o_notification_title:contains("Success")'
-    },
-]);
-
 tour.register('test_delivery_reserved_1', {test: true}, [
     {
         trigger: '.o_barcode_client_action',
@@ -1281,17 +1202,18 @@ tour.register('test_delivery_reserved_2', {test: true}, [
     {
         trigger: '.o_barcode_client_action',
         run: function() {
-            assertPageSummary('');
+            assertPageSummary(false);
             assertPreviousVisible(true);
             assertPreviousEnabled(false);
             assertNextVisible(false);
             assertNextEnabled(false);
             assertNextIsHighlighted(false);
             assertLinesCount(2);
-            assertScanMessage('scan_products');
+            assertScanMessage('scan_src');
             assertLocationHighlight(false);
             // not relevant in delivery mode
             // assertDestinationLocationHighlight(false);
+            assertPager('1/1');
             assertValidateVisible(true);
             assertValidateIsHighlighted(false);
             assertValidateEnabled(true);
@@ -1316,7 +1238,7 @@ tour.register('test_delivery_reserved_2', {test: true}, [
     {
         trigger: '.o_barcode_line_title:contains("product2")',
         run: function() {
-            assertPageSummary('');
+            assertPageSummary(false);
             assertPreviousVisible(true);
             assertPreviousEnabled(true);
             assertNextVisible(false);
@@ -1324,11 +1246,13 @@ tour.register('test_delivery_reserved_2', {test: true}, [
             assertNextIsHighlighted(false);
             assertLinesCount(3);
             assertScanMessage('scan_products');
+            assertLocationHighlight(true);
             // not relevant in delivery mode
             // assertDestinationLocationHighlight(false);
+            assertPager('1/1');
             assertValidateVisible(true);
             assertValidateIsHighlighted(false);
-            assertValidateEnabled(true);
+            assertValidateEnabled(false);
         }
     },
 
@@ -1345,7 +1269,7 @@ tour.register('test_delivery_reserved_2', {test: true}, [
     {
         trigger: '.o_barcode_line_title:contains("product2")',
         run: function() {
-            assertPageSummary('');
+            assertPageSummary(false);
             assertPreviousVisible(true);
             assertPreviousEnabled(true);
             assertNextVisible(false);
@@ -1353,15 +1277,17 @@ tour.register('test_delivery_reserved_2', {test: true}, [
             assertNextIsHighlighted(false);
             assertLinesCount(3);
             assertScanMessage('scan_products');
+            assertLocationHighlight(true);
             // not relevant in delivery mode
             // assertDestinationLocationHighlight(false);
+            assertPager('1/1');
             assertValidateVisible(true);
-            assertValidateIsHighlighted(true);
-            assertValidateEnabled(true);
-            var $lines = getLine({barcode: 'product1'});
-            for (var i = 0; i < $lines.length; i++) {
-                assertLineQty($($lines[i]), "2");
-            }
+            assertValidateIsHighlighted(false);
+            assertValidateEnabled(false);
+             var $lines = getLine({barcode: 'product1'});
+             for (i = 0; i < $lines.length; i++) {
+                 assertLineQty($lines[i], "2");
+             }
 
         }
     },
@@ -1374,7 +1300,7 @@ tour.register('test_delivery_reserved_2', {test: true}, [
     {
         trigger: '.o_barcode_client_action',
         run: function () {
-            assertPageSummary('');
+            assertPageSummary(false);
             assertPreviousVisible(true);
             assertPreviousEnabled(true);
             assertNextVisible(false);
@@ -1382,11 +1308,13 @@ tour.register('test_delivery_reserved_2', {test: true}, [
             assertNextIsHighlighted(false);
             assertLinesCount(4);
             assertScanMessage('scan_products');
+            assertLocationHighlight(true);
             // not relevant in delivery mode
             // assertDestinationLocationHighlight(false);
+            assertPager('1/1');
             assertValidateVisible(true);
-            assertValidateIsHighlighted(true);
-            assertValidateEnabled(true);
+            assertValidateIsHighlighted(false);
+            assertValidateEnabled(false);
         }
     },
 ]);
@@ -1396,17 +1324,18 @@ tour.register('test_delivery_reserved_3', {test: true}, [
     {
         trigger: '.o_barcode_client_action',
         run: function() {
-            assertPageSummary('');
+            assertPageSummary(false);
             assertPreviousVisible(true);
             assertPreviousEnabled(false);
             assertNextVisible(false);
             assertNextEnabled(false);
             assertNextIsHighlighted(false);
             assertLinesCount(1);
-            assertScanMessage('scan_products');
+            assertScanMessage('scan_src');
             assertLocationHighlight(false);
             // not relevant in delivery mode
             // assertDestinationLocationHighlight(false);
+            assertPager('1/1');
             assertValidateVisible(true);
             assertValidateIsHighlighted(false);
             assertValidateEnabled(true);
@@ -1426,7 +1355,7 @@ tour.register('test_delivery_reserved_3', {test: true}, [
     {
         trigger: '.o_barcode_client_action',
         run: function() {
-            assertPageSummary('');
+            assertPageSummary(false);
             assertPreviousVisible(true);
             assertPreviousEnabled(true);
             assertNextVisible(false);
@@ -1434,12 +1363,14 @@ tour.register('test_delivery_reserved_3', {test: true}, [
             assertNextIsHighlighted(false);
             assertLinesCount(1);
             assertScanMessage('scan_products');
+            assertLocationHighlight(true);
             // not relevant in delivery mode
             // assertDestinationLocationHighlight(false);
+            assertPager('1/1');
             assertValidateVisible(true);
-            assertValidateIsHighlighted(true);
-            assertValidateEnabled(true);
-            var $line = getLine({barcode: 'product1'});
+            assertValidateIsHighlighted(false);
+            assertValidateEnabled(false);
+             var $line = getLine({barcode: 'product1'});
             assertLineIsHighlighted($line, true);
             assertLineQty($line, "1");
         }
@@ -1556,101 +1487,6 @@ tour.register('test_receipt_from_scratch_with_lots_2', {test: true}, [
         }
     },
 ]);
-
-tour.register('test_receipt_from_scratch_with_lots_3', {test: true}, [
-    {
-        trigger: '.o_barcode_client_action',
-        run: function() {
-            assertPageSummary('To WH/Stock');
-        }
-    },
-
-    {
-        trigger: '.o_barcode_client_action',
-        run: 'scan product1'
-    },
-
-    {
-        trigger: '.o_barcode_line',
-        run: function() {
-            assertLinesCount(1);
-            const $line = getLine({barcode: 'product1'});
-            assertLineIsHighlighted($line, true);
-            assertLineQty($line, "1");
-        }
-    },
-
-    {
-        trigger: '.o_barcode_client_action',
-        run: 'scan productlot1'
-    },
-
-    {
-        trigger: '.o_barcode_line:nth-child(2)',
-        run: function() {
-            assertLinesCount(2);
-            const $line1 = getLine({barcode: 'product1'});
-            const $line2 = getLine({barcode: 'productlot1'});
-            assertLineIsHighlighted($line1, false);
-            assertLineQty($line1, "1");
-            assertLineIsHighlighted($line2, true);
-            assertLineQty($line2, "0");
-        }
-    },
-
-    {
-        trigger: '.o_barcode_client_action',
-        run: 'scan lot1',
-    },
-
-    {
-        trigger: '.o_barcode_client_action',
-        run: 'scan lot1',
-    },
-
-    {
-        trigger: '.qty-done:contains(2)',
-        run: function() {
-            assertLinesCount(2);
-            const $line1 = getLine({barcode: 'product1'});
-            const $line2 = getLine({barcode: 'productlot1'});
-            assertLineIsHighlighted($line1, false);
-            assertLineQty($line1, "1");
-            assertLineIsHighlighted($line2, true);
-            assertLineQty($line2, "2");
-        }
-    },
-
-    {
-        trigger: '.o_barcode_client_action',
-        run: 'scan O-BTN.validate'
-    },
-]);
-
-tour.register('test_receipt_from_scratch_with_lots_4', {test: true}, [
-    {
-        trigger: '.o_barcode_client_action',
-        run: 'scan productserial1',
-    },
-    {
-        trigger: '.o_barcode_client_action',
-        run: 'scan productserial1',
-    },
-    {
-        trigger: '.o_barcode_client_action',
-        run: 'scan productserial1',
-    },
-    {
-        trigger: '.o_add_line',
-    },
-
-    {
-        trigger: '.o_form_label:contains("Product")',
-    },
-
-]);
-
-
 
 tour.register('test_delivery_from_scratch_with_lots_1', {test: true}, [
 
@@ -2407,38 +2243,11 @@ tour.register('test_inventory_adjustment_tracked_product', {test: true}, [
         run: 'scan serial3',
     },
 
-    // Edit a line to trigger a save.
     {
         trigger: '.o_add_line',
     },
     {
         trigger: '.o_form_label:contains("Product")',
-    },
-    {
-        trigger: '.o_discard',
-    },
-
-    // Scan tracked by lots product, then scan new lots.
-    {
-        extra_trigger: '.o_barcode_message',
-        trigger: '.o_barcode_client_action',
-        run: 'scan productlot1',
-    },
-    {
-        trigger: '.o_barcode_client_action',
-        run: 'scan lot2',
-    },
-    {
-        trigger: '.o_barcode_client_action',
-        run: 'scan lot3',
-    },
-
-    // Must have 6 lines (lot1, serial1, serial2, serial3, lot2, lot3).
-    {
-        trigger: '.o_barcode_line:nth-child(6)',
-        run: function () {
-            assertLinesCount(6);
-        }
     },
 ]);
 
@@ -2721,32 +2530,6 @@ tour.register('test_pack_multiple_location', {test: true}, [
         run: function () {
             assertErrorMessage('The transfer has been validated');
         },
-    },
-]);
-
-tour.register('test_pack_multiple_location_02', {test: true}, [
-    {
-        trigger: '.o_barcode_client_action',
-        run: 'scan LOC-01-01-00'
-    },
-
-    {
-        trigger: '.o_barcode_summary_location_src:contains("WH/Stock/Shelf 1")',
-        run: 'scan PACK0002020',
-    },
-
-    {
-        trigger: '.o_barcode_client_action',
-        run: 'scan LOC-01-02-00',
-    },
-
-    {
-        trigger: '.o_barcode_summary_location_dest:contains("WH/Stock/Shelf 2")',
-        run: 'scan O-BTN.validate',
-    },
-
-    {
-        trigger: '.o_notification_title:contains("Success")'
     },
 ]);
 

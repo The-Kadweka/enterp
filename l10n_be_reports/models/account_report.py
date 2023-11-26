@@ -18,7 +18,7 @@ class AccountReport(models.AbstractModel):
         :return: The string containing the complete <Representative> node or an empty string,
                  in case no representative has been configured.
         """
-        representative_id = int(self.env['ir.config_parameter'].sudo().get_param('l10n_be_reports.xml_export_representative_%s' % self.env.company.id))
+        representative_id = int(self.env['ir.config_parameter'].sudo().get_param('l10n_be_reports.xml_export_representative_%s' % self.env.user.company_id.id))
         if representative_id:
             representative = self.env['res.partner'].browse(representative_id)
             representative_country_code = representative.country_id.code.upper()

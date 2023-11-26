@@ -6,24 +6,25 @@ var Widget = require('web.Widget');
 var ActionEditorSidebar = require('web_studio.ActionEditorSidebar');
 var ActionEditorView = require('web_studio.ActionEditorView');
 
+var VIEW_TYPES = [
+    'form',
+    'search',
+    'list',
+    'kanban',
+    'grid',
+    'graph',
+    'pivot',
+    'calendar',
+    'gantt',
+    'dashboard',
+    'cohort',
+];
+
 var ActionEditor = Widget.extend({
     template: 'web_studio.ActionEditor',
     custom_events: {
         'parameters_clicked': '_onActionParameters',
     },
-    VIEW_TYPES: [
-        'form',
-        'search',
-        'activity',
-        'list',
-        'kanban',
-        'graph',
-        'pivot',
-        'calendar',
-        'gantt',
-        'dashboard',
-        'cohort',
-    ],
 
     /**
      * @constructor
@@ -46,7 +47,7 @@ var ActionEditor = Widget.extend({
 
         // order view_types: put active ones at the begining
         var ordered_view_types = this.active_view_types.slice();
-        _.each(this.VIEW_TYPES, function (el) {
+        _.each(VIEW_TYPES, function (el) {
             if (! _.contains(ordered_view_types, el)) {
                 ordered_view_types.push(el);
             }
@@ -61,6 +62,7 @@ var ActionEditor = Widget.extend({
                 default_view: is_default_view,
                 can_default: !_.contains(['form', 'search'], view_type),
                 view_type: view_type,
+                can_set_another: true,
                 can_be_disabled: view_type !== 'search',
             });
 
@@ -73,10 +75,10 @@ var ActionEditor = Widget.extend({
         });
 
         this.sidebar = new ActionEditorSidebar(this, this.action);
-        return Promise.all([
+        return $.when(
             this._super.apply(this, arguments),
             this.sidebar.prependTo(this.$el)
-        ]);
+        );
     },
 
     //--------------------------------------------------------------------------
@@ -108,13 +110,13 @@ var ActionEditor = Widget.extend({
             case 'search':
                 category = 'general';
                 break;
-            case 'activity':
-                category = 'general';
-                break;
             case 'list':
                 category = 'multiple';
                 break;
             case 'kanban':
+                category = 'multiple';
+                break;
+            case 'grid':
                 category = 'multiple';
                 break;
             case 'graph':

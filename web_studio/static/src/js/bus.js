@@ -26,7 +26,8 @@ var bus = new Bus();
  *
  * `toggle_snack_bar`
  *     a temporary message needs to be displayed.
- *     @param type either 'saved' or 'saving'
+ *     @param message
+ *     @param [autoRemove]
  *
  * `(un,re)do_clicked`
  *      during the view edition, the button (un,re)do has been clicked.

@@ -36,7 +36,7 @@ class AccountBatchPayment(models.Model):
 
             return {
                 'filename': 'ABA-' + self.journal_id.code + '-' + fields.Datetime.context_timestamp(self, datetime.now()).strftime("%Y%m%d%H%M") + '.aba',
-                'file': base64.encodebytes(self._create_aba_document().encode()),
+                'file': base64.encodestring(self._create_aba_document().encode()),
             }
         return super(AccountBatchPayment, self)._generate_export_file()
 

@@ -15,7 +15,6 @@ class AccountIntrastatCode(models.Model):
     _name = 'account.intrastat.code'
     _description = 'Intrastat Code'
     _translate = False
-    _order = "code"
 
     name = fields.Char(string='Name')
     code = fields.Char(string='Code', required=True)
@@ -31,6 +30,7 @@ class AccountIntrastatCode(models.Model):
             * region: A sub-part of the country.
         ''')
 
+    @api.multi
     def name_get(self):
         result = []
         for r in self:
@@ -39,14 +39,13 @@ class AccountIntrastatCode(models.Model):
         return result
 
     @api.model
-    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None):
+    def _name_search(self, name='', args=None, operator='ilike', limit=100):
         args = args or []
         if operator == 'ilike' and not (name or '').strip():
             domain = []
         else:
             domain = ['|', '|', ('code', operator, name), ('name', operator, name), ('description', operator, name)]
-        record_ids = self._search(expression.AND([args, domain]), limit=limit, access_rights_uid=name_get_uid)
-        return models.lazy_name_get(self.browse(record_ids).with_user(name_get_uid))
+        return super(AccountIntrastatCode, self).search(expression.AND([args, domain]), limit=limit).name_get()
 
     _sql_constraints = [
         ('intrastat_region_code_unique', 'UNIQUE (code, type, country_id)', 'Triplet code/type/country_id must be unique.'),

@@ -3,13 +3,10 @@
     <data>
 
         <record id="view_account_financial_report_export" model="ir.ui.view">
-            <field name="name">l10n_be_reports.periodic.vat.xml.export.form</field>
-            <field name="model">l10n_be_reports.periodic.vat.xml.export</field>
+            <field name="name">account.financial.html.report.export.form</field>
+            <field name="model">account.financial.html.report.export</field>
             <field name="arch" type="xml">
                 <form string="Export Options">
-                    <div class="alert alert-warning" role="alert" attrs="{'invisible': [('control_value', '=', False)]}">
-                        Some controls failed
-                    </div>
                     <div>
                         Choose option(s) before exporting XML
                     </div>
@@ -21,7 +18,6 @@
                              <field name="grid91"/>
                          </group>
                     </group>
-                    <field name="control_value"/>
                     <footer>
                         <button string='Export XML' name="print_xml" type="object" class="btn-primary"/>
                         <button string="Cancel" class="btn-secondary" special="cancel"/>
@@ -29,6 +25,16 @@
                </form>
             </field>
         </record>
+
+        <record id="action_account_financial_report_export" model="ir.actions.act_window">
+            <field name="name">XML Export Options</field>
+            <field name="res_model">account.financial.html.report.export</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+           <field name="view_id" ref="view_account_financial_report_export"/>
+           <field name="target">new</field>
+        </record>
+
 
     </data>
 </odoo>

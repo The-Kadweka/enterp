@@ -6,10 +6,9 @@ from . import wizard
 
 from odoo import api, SUPERUSER_ID
 
-
 def uninstall_hook(cr, registry):
-    # remove reference to mailing.mailing use_in_marketing_automation field
+    # remove reference to mail.mass_mailing use_in_marketing_automation field
     env = api.Environment(cr, SUPERUSER_ID, {})
-    act_window = env.ref('mass_mailing.mailing_mailing_action_mail', False)
+    act_window = env.ref('mass_mailing.action_view_mass_mailings', False)
     if act_window and act_window.domain and 'use_in_marketing_automation' in act_window.domain:
-        act_window.domain = [('mailing_type', '=', 'mail')]
+        act_window.domain = None

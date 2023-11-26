@@ -41,7 +41,7 @@ class OdooFinAuth(requests.auth.AuthBase):
             json.dumps(werkzeug.urls.url_decode(parsed_url.query), sort_keys=True),  # url query params sorted by key
             json.dumps(body, sort_keys=True))  # http request body
 
-        h = hmac.new(base64.b64decode(self.refresh_token), message.encode('utf-8'), digestmod=hashlib.sha256)
+        h = hmac.new(base64.b64decode(self.refresh_token, validate=True), message.encode('utf-8'), digestmod=hashlib.sha256)
 
         request.headers.update({
             'odoofin-client-id': self.client_id,

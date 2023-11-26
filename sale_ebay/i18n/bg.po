@@ -1,24 +1,23 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* sale_ebay
+# * sale_ebay
 # 
 # Translators:
-# kalatchev, 2020
-# Martin Trigaux, 2020
-# Георги Пехливанов <sonaris@gmail.com>, 2020
-# Rosen Vladimirov <vladimirov.rosen@gmail.com>, 2020
-# aleksandar ivanov, 2020
-# Albena Mincheva <albena_vicheva@abv.bg>, 2020
-# Boyan Rabchev <boyan.rabchev@plana.solutions>, 2020
-# Maria Boyadjieva <marabo2000@gmail.com>, 2020
+# Martin Trigaux, 2019
+# Rosen Vladimirov <vladimirov.rosen@gmail.com>, 2019
+# aleksandar ivanov, 2019
+# Albena Mincheva <albena_vicheva@abv.bg>, 2019
+# Boyan Rabchev <boyan.rabchev@plana.solutions>, 2019
+# Maria Boyadjieva <marabo2000@gmail.com>, 2019
+# Boris Stefanov <borkata@gmail.com>, 2019
 # Igor Sheludko <igor.sheludko@gmail.com>, 2020
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~12.5+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-23 11:39+0000\n"
-"PO-Revision-Date: 2019-08-26 09:38+0000\n"
+"POT-Creation-Date: 2019-11-14 07:50+0000\n"
+"PO-Revision-Date: 2018-08-24 11:48+0000\n"
 "Last-Translator: Igor Sheludko <igor.sheludko@gmail.com>, 2020\n"
 "Language-Team: Bulgarian (https://www.transifex.com/odoo/teams/41243/bg/)\n"
 "MIME-Version: 1.0\n"
@@ -28,7 +27,22 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
+#: model:mail.template,body_html:sale_ebay.ebay_desciption_default
+msgid ""
+"\n"
+"                  \n"
+"          ${object.ebay_description | safe}\n"
+"        \n"
+"      "
+msgstr ""
+"\n"
+"                  \n"
+"          ${object.ebay_description | safe}\n"
+"        \n"
+"      "
+
+#. module: sale_ebay
+#: code:addons/sale_ebay/models/product.py:383
 #, python-format
 msgid ""
 " If you want to set quantity to 0, the Out Of Stock option should be enabled"
@@ -39,7 +53,7 @@ msgstr ""
 "настроена на 'Добър до отмяна'"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
+#: code:addons/sale_ebay/models/product.py:386
 #, python-format
 msgid ""
 " You need to have at least 2 variations selected for a multi-variations listing.\n"
@@ -49,33 +63,33 @@ msgstr ""
 " Или ако се опитате да изтриете вариант, не можете да го направите, като го премахнете. Настройване количеството на 0 се явява най-безопасният метод за премахване на варианта."
 
 #. module: sale_ebay
-#: model:ir.model.fields.selection,name:sale_ebay.selection__product_template__ebay_listing_duration__days_10
+#: selection:product.template,ebay_listing_duration:0
 msgid "10 Days"
 msgstr "10 дни"
 
 #. module: sale_ebay
-#: model:ir.model.fields.selection,name:sale_ebay.selection__product_template__ebay_listing_duration__days_3
+#: selection:product.template,ebay_listing_duration:0
 msgid "3 Days"
 msgstr "3 дни"
 
 #. module: sale_ebay
-#: model:ir.model.fields.selection,name:sale_ebay.selection__product_template__ebay_listing_duration__days_30
+#: selection:product.template,ebay_listing_duration:0
 msgid "30 Days (only for fixed price)"
 msgstr "30 дни (само за фиксирани цени)"
 
 #. module: sale_ebay
-#: model:ir.model.fields.selection,name:sale_ebay.selection__product_template__ebay_listing_duration__days_5
+#: selection:product.template,ebay_listing_duration:0
 msgid "5 Days"
 msgstr "5 дни"
 
 #. module: sale_ebay
-#: model:ir.model.fields.selection,name:sale_ebay.selection__product_template__ebay_listing_duration__days_7
+#: selection:product.template,ebay_listing_duration:0
 msgid "7 Days"
 msgstr "7 дни"
 
 #. module: sale_ebay
 #: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
-msgid "<span class=\"o_form_label\">Sales Team</span>"
+msgid "<span class=\"o_form_label\">Sales Channel</span>"
 msgstr ""
 
 #. module: sale_ebay
@@ -99,17 +113,7 @@ msgid "<span class=\"o_form_label\">eBay Options</span>"
 msgstr ""
 
 #. module: sale_ebay
-#: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
-msgid "Activate Other Currencies"
-msgstr "Активирайте други валути"
-
-#. module: sale_ebay
-#: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
-msgid "Add other countries"
-msgstr ""
-
-#. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
+#: code:addons/sale_ebay/models/product.py:259
 #, python-format
 msgid ""
 "All the quantities must be greater than 0 or you need to enable the Out Of "
@@ -125,9 +129,15 @@ msgid "Allow Best Offer"
 msgstr "Позволете най-добрата оферта"
 
 #. module: sale_ebay
-#: model:ir.model.fields.selection,name:sale_ebay.selection__product_template__ebay_listing_type__chinese
+#: selection:product.template,ebay_listing_type:0
 msgid "Auction"
 msgstr "Търг"
+
+#. module: sale_ebay
+#: model:ir.model.fields,field_description:sale_ebay.field_res_country__ebay_available
+#: model:ir.model.fields,field_description:sale_ebay.field_res_currency__ebay_available
+msgid "Availability To Use For eBay API"
+msgstr "Наличност, която да се използва за eBay API"
 
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_product_product__ebay_buy_it_now_price
@@ -178,7 +188,7 @@ msgid "Config Settings"
 msgstr "Конфиг Настройки"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
+#: code:addons/sale_ebay/models/product.py:352
 #, python-format
 msgid "Configure The eBay Integrator Now"
 msgstr "Конфигурирайте интегратора на eBay сега"
@@ -187,11 +197,6 @@ msgstr "Конфигурирайте интегратора на eBay сега"
 #: model:ir.model,name:sale_ebay.model_res_partner
 msgid "Contact"
 msgstr "Контакт"
-
-#. module: sale_ebay
-#: model:ir.actions.act_window,name:sale_ebay.action_country_all_form
-msgid "Countries"
-msgstr "Държави"
 
 #. module: sale_ebay
 #: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
@@ -229,7 +234,7 @@ msgid "Currency"
 msgstr "Валута"
 
 #. module: sale_ebay
-#: model:ir.model.fields.selection,name:sale_ebay.selection__ebay_category__category_type__store
+#: selection:ebay.category,category_type:0
 msgid "Custom Store Category"
 msgstr "Категория на персонализирано хранилище"
 
@@ -265,7 +270,7 @@ msgid "Duration"
 msgstr "Продължителност"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/sale_order.py:0
+#: code:addons/sale_ebay/models/sale_order.py:305
 #, python-format
 msgid ""
 "Ebay Synchronisation could not confirm because of the following error:\n"
@@ -273,11 +278,36 @@ msgid ""
 msgstr ""
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/sale_order.py:0
+#: code:addons/sale_ebay/models/sale_order.py:26
 #, python-format
 msgid ""
 "Ebay could not synchronize order:\n"
 "%s"
+msgstr ""
+
+#. module: sale_ebay
+#: model:ir.actions.server,name:sale_ebay.action_end_items_listings
+msgid "Ebay: End Product Templates Listings on eBay"
+msgstr ""
+
+#. module: sale_ebay
+#: model:ir.actions.server,name:sale_ebay.action_list_items
+msgid "Ebay: List Product Templates on eBay"
+msgstr ""
+
+#. module: sale_ebay
+#: model:ir.actions.server,name:sale_ebay.action_relist_items
+msgid "Ebay: Relist Product Templates on eBay"
+msgstr ""
+
+#. module: sale_ebay
+#: model:ir.actions.server,name:sale_ebay.action_revise_items
+msgid "Ebay: Revise Product Templates on eBay"
+msgstr ""
+
+#. module: sale_ebay
+#: model:ir.actions.server,name:sale_ebay.action_unlink_items_listings
+msgid "Ebay: Unlink eBay Product Templates Listings"
 msgstr ""
 
 #. module: sale_ebay
@@ -322,7 +352,7 @@ msgid "End Item's Listing"
 msgstr "Списък на последния артикул"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
+#: code:addons/sale_ebay/models/product.py:245
 #, python-format
 msgid ""
 "Error Encountered.\n"
@@ -332,7 +362,7 @@ msgstr ""
 " Няма вариант, настроен да бъде регистриран в eBay."
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
+#: code:addons/sale_ebay/models/product.py:389
 #, python-format
 msgid ""
 "Error Encountered.\n"
@@ -347,7 +377,7 @@ msgid "Fixed Price"
 msgstr "Фиксирана цена"
 
 #. module: sale_ebay
-#: model:ir.model.fields.selection,name:sale_ebay.selection__product_template__ebay_listing_type__fixedpriceitem
+#: selection:product.template,ebay_listing_type:0
 msgid "Fixed price"
 msgstr "Фиксирана цена"
 
@@ -362,7 +392,7 @@ msgid "Gallery Plus"
 msgstr ""
 
 #. module: sale_ebay
-#: model:ir.model.fields.selection,name:sale_ebay.selection__product_template__ebay_listing_duration__gtc
+#: selection:product.template,ebay_listing_duration:0
 msgid "Good 'Til Cancelled (only for fixed price)"
 msgstr "Добър 'До отмяна' (само за фиксирана цена)"
 
@@ -376,18 +406,12 @@ msgid "ID"
 msgstr "ИН"
 
 #. module: sale_ebay
-#: model:ir.model.fields,help:sale_ebay.field_res_country__ebay_available
-#: model:ir.model.fields,help:sale_ebay.field_res_currency__ebay_available
-msgid "If activated, can be used for eBay."
-msgstr ""
-
-#. module: sale_ebay
 #: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
 msgid "Import eBay config data and sync transactions"
 msgstr ""
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
+#: code:addons/sale_ebay/models/product.py:381
 #, python-format
 msgid ""
 "Impossible to revise a listing into a multi-variations listing.\n"
@@ -495,24 +519,24 @@ msgid "Name"
 msgstr "Name"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/sale_ebay.py:0
+#: code:addons/sale_ebay/models/sale_ebay.py:199
 #, python-format
 msgid "No Business Policies"
 msgstr "Няма бизнес политики"
 
 #. module: sale_ebay
-#: model:ir.model.fields.selection,name:sale_ebay.selection__ebay_category__category_type__ebay
+#: selection:ebay.category,category_type:0
 msgid "Official eBay Category"
 msgstr "Официална eBay категория"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
+#: code:addons/sale_ebay/models/product.py:351
 #, python-format
 msgid "One parameter is missing."
 msgstr "Един параметър липсва."
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
+#: code:addons/sale_ebay/models/product.py:377
 #, python-format
 msgid "Or the condition is not compatible with the category."
 msgstr "Или условието не съответства на категорията"
@@ -527,6 +551,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:sale_ebay.field_product_template__ebay_seller_payment_policy_id
 msgid "Payment Policy"
 msgstr "Политика по плащане"
+
+#. module: sale_ebay
+#: selection:crm.team,team_type:0
+msgid "Point of Sale"
+msgstr "Център за продажби"
 
 #. module: sale_ebay
 #: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
@@ -560,13 +589,13 @@ msgid "Product Template"
 msgstr "Шаблон за продукт "
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/sale_order.py:0
+#: code:addons/sale_ebay/models/sale_order.py:214
 #, python-format
 msgid "Product created from eBay transaction %s"
 msgstr ""
 
 #. module: sale_ebay
-#: model:ir.model.fields.selection,name:sale_ebay.selection__res_config_settings__ebay_domain__prod
+#: selection:res.config.settings,ebay_domain:0
 msgid "Production"
 msgstr "Продукция"
 
@@ -625,21 +654,31 @@ msgstr "Ревизирайте артикул"
 
 #. module: sale_ebay
 #: model:ir.model,name:sale_ebay.model_sale_order
-msgid "Sales Order"
-msgstr "Поръчка за продажби"
+msgid "Sale Order"
+msgstr "Поръчка"
+
+#. module: sale_ebay
+#: selection:crm.team,team_type:0
+msgid "Sales"
+msgstr "Продажби"
 
 #. module: sale_ebay
 #: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
-msgid "Sales Team"
-msgstr "Търговски отдел"
+msgid "Sales Channel"
+msgstr "Канал за продажби"
+
+#. module: sale_ebay
+#: model:ir.model,name:sale_ebay.model_crm_team
+msgid "Sales Channels"
+msgstr "Канал за продажби"
 
 #. module: sale_ebay
 #: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
-msgid "Sales Team to manage eBay sales"
+msgid "Sales channel to manage eBay sales"
 msgstr ""
 
 #. module: sale_ebay
-#: model:ir.model.fields.selection,name:sale_ebay.selection__res_config_settings__ebay_domain__sand
+#: selection:res.config.settings,ebay_domain:0
 msgid "Sandbox"
 msgstr "Sandbox"
 
@@ -715,16 +754,19 @@ msgid "Sync now"
 msgstr ""
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
-#: code:addons/sale_ebay/models/sale_order.py:0
+#: model:ir.model.fields,field_description:sale_ebay.field_crm_team__team_type
+msgid "Team Type"
+msgstr ""
+
+#. module: sale_ebay
+#: code:addons/sale_ebay/models/product.py:719
 #, python-format
 msgid "The Buyer Chose The Following Delivery Method :\n"
 msgstr "Купувачът избра следния метод за доставка:\n"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
-#: code:addons/sale_ebay/models/product.py:0
-#: code:addons/sale_ebay/models/sale_order.py:0
+#: code:addons/sale_ebay/models/product.py:715
+#: code:addons/sale_ebay/models/product.py:716
 #, python-format
 msgid "The Buyer Posted :\n"
 msgstr "Купувачът публикува:\n"
@@ -746,6 +788,12 @@ msgid "The title is restricted to 80 characters"
 msgstr "Заглавието е ограничено до 80 знака"
 
 #. module: sale_ebay
+#: model:ir.model.fields,help:sale_ebay.field_crm_team__team_type
+msgid ""
+"The type of this channel, it will define the resources this channel uses."
+msgstr ""
+
+#. module: sale_ebay
 #: model:ir.model.fields,help:sale_ebay.field_product_product__ebay_category_2_id
 #: model:ir.model.fields,help:sale_ebay.field_product_template__ebay_category_2_id
 msgid ""
@@ -756,7 +804,7 @@ msgstr ""
 " тази функция таксите могат да бъдат предявени по eBay. "
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
+#: code:addons/sale_ebay/models/product.py:668
 #, python-format
 msgid ""
 "There is no last synchronization date in your System Parameters. Create a "
@@ -788,6 +836,11 @@ msgid "Type"
 msgstr "Вид"
 
 #. module: sale_ebay
+#: model:ir.actions.server,name:sale_ebay.action_ebay_update_carrier
+msgid "Update eBay Carrier Information"
+msgstr "Актуализирайте информацията за eBay превозвача"
+
+#. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_product_product__ebay_sync_stock
 #: model:ir.model.fields,field_description:sale_ebay.field_product_template__ebay_sync_stock
 msgid "Use Stock Quantity"
@@ -799,15 +852,14 @@ msgid "Use eBay"
 msgstr "Използвайте eBay"
 
 #. module: sale_ebay
-#: model:ir.model.fields,field_description:sale_ebay.field_res_country__ebay_available
-#: model:ir.model.fields,field_description:sale_ebay.field_res_currency__ebay_available
-msgid "Use on eBay"
-msgstr ""
-
-#. module: sale_ebay
 #: model_terms:ir.ui.view,arch_db:sale_ebay.product_template_sale_ebay_form_view
 msgid "Variants"
 msgstr "Варианти"
+
+#. module: sale_ebay
+#: selection:crm.team,team_type:0
+msgid "Website"
+msgstr "Уебсайт"
 
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_res_config_settings__ebay_zip_code
@@ -815,6 +867,8 @@ msgid "Zip"
 msgstr "Пощенски код"
 
 #. module: sale_ebay
+#: model:crm.team,name:sale_ebay.ebay_sales_team
+#: selection:crm.team,team_type:0
 #: model_terms:ir.ui.view,arch_db:sale_ebay.product_template_sale_ebay_form_view
 #: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
 msgid "eBay"
@@ -824,6 +878,11 @@ msgstr ""
 #: model:ir.model,name:sale_ebay.model_ebay_category
 msgid "eBay Category"
 msgstr ""
+
+#. module: sale_ebay
+#: model:product.category,name:sale_ebay.product_category_ebay
+msgid "eBay Delivery Services"
+msgstr "eBay доставни услуги"
 
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_product_product__ebay_description
@@ -897,7 +956,7 @@ msgid "eBay Website"
 msgstr ""
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/sale_ebay.py:0
+#: code:addons/sale_ebay/models/sale_ebay.py:54
 #, python-format
 msgid ""
 "eBay error: Impossible to synchronize the categories. \n"
@@ -907,8 +966,8 @@ msgstr ""
 "'%s'"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
-#: code:addons/sale_ebay/models/product.py:0
+#: code:addons/sale_ebay/models/product.py:483
+#: code:addons/sale_ebay/models/product.py:556
 #, python-format
 msgid ""
 "eBay error: Impossible to synchronize the products. \n"
@@ -918,7 +977,7 @@ msgstr ""
 "'%s'"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
+#: code:addons/sale_ebay/models/product.py:379
 #, python-format
 msgid "eBay is unreachable. Please try again later."
 msgstr "eBay не може да бъде достигнат. Моля, опитайте по-късно."
@@ -935,41 +994,11 @@ msgid "eBay url"
 msgstr "eBay URL"
 
 #. module: sale_ebay
-#: model:ir.actions.server,name:sale_ebay.action_end_items_listings
-msgid "eBay: End product listings"
-msgstr ""
-
-#. module: sale_ebay
-#: model:ir.actions.server,name:sale_ebay.action_list_items
-msgid "eBay: List products"
-msgstr ""
-
-#. module: sale_ebay
-#: model:ir.actions.server,name:sale_ebay.action_relist_items
-msgid "eBay: Relist products"
-msgstr ""
-
-#. module: sale_ebay
-#: model:ir.actions.server,name:sale_ebay.action_revise_items
-msgid "eBay: Revise products"
-msgstr ""
-
-#. module: sale_ebay
-#: model:ir.actions.server,name:sale_ebay.action_unlink_items_listings
-msgid "eBay: Unlink product listings"
-msgstr ""
-
-#. module: sale_ebay
-#: model:ir.actions.server,name:sale_ebay.action_ebay_update_carrier
-msgid "eBay: Update carrier information"
-msgstr ""
-
-#. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_res_config_settings__ebay_currency
 msgid "ebay Currency"
 msgstr ""
 
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_res_config_settings__ebay_sales_team
-msgid "ebay Sales Team"
+msgid "ebay Sales Channel"
 msgstr ""

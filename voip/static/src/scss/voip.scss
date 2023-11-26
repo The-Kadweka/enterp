@@ -1,3 +1,4 @@
+
 .o_dial {
     $o-mid-gray: darken(gray('200'), 30%);
 
@@ -8,6 +9,7 @@
     direction: ltr;
     display: flex;
     flex-flow: column nowrap;
+    box-shadow: 4px 0 17px -2px rgba(0,0,0,0.42);
     position: fixed;
     width: $o-dial-panel-width;
     max-width: 100%;
@@ -15,10 +17,7 @@
     max-height: 100%;
     font-size: 12px;
     background-color: $o-dial-panel-bg;
-    border-radius: 6px 6px 0 0;
-    z-index: $zindex-modal + 1;
-    box-shadow: 4px 0 17px -2px rgba(0, 0, 0, 0.42);
-
+    z-index: 3;
 
     @include media-breakpoint-down(sm) {
         width: 100%;
@@ -44,42 +43,20 @@
         cursor: pointer;
         background-color: $o-brand-odoo;
         color: #fff;
-        border-radius: 3px 3px 0 0;
+        padding-right: 10px;
+        height: 30px;
         position: relative;
         flex: 0 0 auto;
 
         .o_dial_unfold {
             display: none;
-            margin-right: 2%;
-            margin-left: auto;
         }
-
-        .fa {
-            margin-top: 1%;
-        }
-
-        .fa_mt {
-            margin-top: -1%;
-        }
-
-        .o_dial_window_title {
-            font-size: 12px;
-            display: inline-flex;
-            color: white;
-            margin-left: 5px;
-            margin-top: 5px;
-            width: 97%;
-
-            .o_dial_text {
-                font-size: 12px;
-            }
-        }
-
         .o_dial_window_close {
             color: white;
-            margin-right: 1%;
-            margin-left: auto;
-            display: flex;
+            padding: 3px;
+            margin-left: 5px;
+            margin-top: 5px;
+
             &:hover {
                 background-color: darken($o-brand-odoo, 10%);
             }
@@ -105,6 +82,7 @@
             font-weight: 200;
             border: none;
             width: 85%;
+            float: left;
         }
         .fa {
             cursor: pointer;
@@ -118,32 +96,28 @@
         flex: 1 1 auto;
         display: flex;
         flex-flow: column nowrap;
-        height: auto;
-        padding-bottom: 19%;
+        min-height: 0;
     }
     .o_dial_panel{
-        .o_notebook_headers {
+        ul.nav.nav-tabs {
             margin-left: 0;
             margin-right: 0;
-            
-            ul.nav.nav-tabs {
-                padding-left: 0;
-                > li {
-                    padding: 0;
-                    > a {
-                        color: $o-mid-gray;
-                        padding: 5px 0;
-                        background: transparent;
-                        margin-right: 0;
-                        padding: 10px 0;
-                    }
+            padding-left: 0;
+            > li {
+                padding: 0;
+                > a {
+                    color: $o-mid-gray;
+                    padding: 5px 0;
+                    background: transparent;
+                    margin-right: 0;
+                    padding: 10px 0;
                 }
             }
         }
         .tab-content {
             flex: 1 1 auto;
+            overflow-y: scroll;
             overflow-x: hidden;
-            overflow-y: auto;
             position: relative;
         }
         .o_dial_phonecall {
@@ -171,10 +145,6 @@
         .o_phonecall_in_call {
             display: none;
         }
-        .o_voip_row_header {
-            border-bottom: 1px solid gray('200');
-            color: $o-mid-gray;
-        }
         .o_dial_keypad_button_container {
             position: absolute;
             bottom: 0;
@@ -194,8 +164,6 @@
                 display: flex;
                 flex: 1 1 auto;
                 justify-content: space-around;
-                margin-bottom: 10px;
-                margin-top: 10px;
 
                 .o_dial_keypad_button_small {
                     padding: 0;
@@ -204,6 +172,9 @@
                         @include o-text-overflow;
                         width: auto;
                         font-size: 10px;
+                    }
+                    .o_dial_unmute_button {
+                        display: none;
                     }
                 }
             }
@@ -234,6 +205,7 @@
             @include o-text-overflow;
         }
         .o_phonecall_widget {
+            position: relative;
             padding: 0 10px;
 
             .o_form_group_cell, .o_dial_phonecall_partner {
@@ -265,11 +237,8 @@
         flex: 0 0 auto;
         display: flex;
         flex-flow: row wrap;
-        position: fixed;
-        bottom: 0;
-        width: inherit;
     }
-    .o_dial_keypad_buttons, .o_dial_main_buttons, .o_dial_incoming_buttons {
+    .o_dial_keypad_buttons, .o_dial_main_buttons {
         button {
             border: none;
             background: transparent;
@@ -279,10 +248,9 @@
         flex: 2 1 auto;
 
         .o_dial_keypad_button {
-            display: inline-flex;
-            justify-content: center;
+            float: left;
             margin: 1px;
-            width: 31%;
+            width: 32%;
             font-weight: 100;
             line-height: 1;
             padding: 15px;
@@ -294,40 +262,19 @@
         border-top: 1px solid $o-mid-gray;
         display: flex;
 
-        .fa {
+        .o_dial_keypad_button .fa {
             font-size: xx-large;
-            color: $o-mid-gray;
-        }
-        .o_dial_postpone_button {
-            visibility: hidden;
-        }
-        .o_dial_buttons .fa {
-            font-size: 50px;
         }
         .o_dial_call_button .fa {
+            font-size: 50px;
             color: $o-brand-primary;
+        }
+        .o_dial_keypad_button:first-child .fa, .o_dial_keypad_button:last-child .fa {
+            color: $o-mid-gray;
         }
         .o_dial_hangup_button .fa{
             color: LightCoral;
-        }
-    }
-    .o_dial_incoming_buttons {
-        background-color: gray('200');
-        border-top: 1px solid $o-mid-gray;
-        display: flex;
-        position: fixed;
-        bottom: 0;
-        width: inherit;
-
-        .fa {
-            font-size: xx-large;
-            color: $o-mid-gray;
-        }
-        .o_dial_accept_button .fa {
-            color: $o-brand-primary;
-        }
-        .o_dial_reject_button .fa{
-            color: LightCoral;
+            font-size: 50px;
         }
     }
 }

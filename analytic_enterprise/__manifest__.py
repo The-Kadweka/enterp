@@ -5,7 +5,7 @@
     'name': "Analytic Accounting Enterprise",
     'version': '0.1',
     'website': "https://www.odoo.com/page/accounting",
-    'category': 'Accounting/Accounting',
+    'category': 'Hidden/Dependency',
     'depends': ['web_grid', 'analytic', 'account'],
     'description': """
 Module for defining analytic accounting object.

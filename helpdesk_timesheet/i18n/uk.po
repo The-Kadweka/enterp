@@ -1,18 +1,18 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* helpdesk_timesheet
+# * helpdesk_timesheet
 # 
 # Translators:
+# Alina Lisnenko <alinasemeniuk1@gmail.com>, 2018
 # Martin Trigaux, 2019
-# Alina Lisnenko <alinasemeniuk1@gmail.com>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~12.5+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-26 08:05+0000\n"
-"PO-Revision-Date: 2019-08-26 09:36+0000\n"
-"Last-Translator: Alina Lisnenko <alinasemeniuk1@gmail.com>, 2019\n"
+"POT-Creation-Date: 2019-11-14 07:50+0000\n"
+"PO-Revision-Date: 2018-08-24 11:38+0000\n"
+"Last-Translator: Martin Trigaux, 2019\n"
 "Language-Team: Ukrainian (https://www.transifex.com/odoo/teams/41243/uk/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -26,14 +26,14 @@ msgid "# Tickets"
 msgstr "Кількість заявок"
 
 #. module: helpdesk_timesheet
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
+#: code:addons/helpdesk_timesheet/models/helpdesk.py:71
 #, python-format
 msgid ""
 "All timesheet hours will be assigned to the selected task on save. Discard "
 "to avoid the change."
 msgstr ""
-"Всі години табелю будуть призначатися для вибраного завдання на збереженні. "
-"Відхиліть, щоб уникнути змін."
+"Всі тимчасові години будуть призначатися для вибраного завдання на сторінці "
+"збереження. Відхиліть, щоб уникнути змін."
 
 #. module: helpdesk_timesheet
 #: model:ir.model,name:helpdesk_timesheet.model_account_analytic_line
@@ -41,8 +41,8 @@ msgid "Analytic Line"
 msgstr "Рядок аналітики"
 
 #. module: helpdesk_timesheet
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
+#: code:addons/helpdesk_timesheet/models/helpdesk.py:19
+#: code:addons/helpdesk_timesheet/models/helpdesk.py:34
 #, python-format
 msgid "Closed"
 msgstr "Завершено"
@@ -76,11 +76,11 @@ msgstr "Команда служби підтримки"
 #: model:ir.model,name:helpdesk_timesheet.model_helpdesk_ticket
 #: model:ir.model.fields,field_description:helpdesk_timesheet.field_account_analytic_line__helpdesk_ticket_id
 msgid "Helpdesk Ticket"
-msgstr "Заявки служби підтримки"
+msgstr "Заявка служби підтримки"
 
 #. module: helpdesk_timesheet
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
+#: code:addons/helpdesk_timesheet/models/helpdesk.py:18
+#: code:addons/helpdesk_timesheet/models/helpdesk.py:33
 #, python-format
 msgid "In Progress"
 msgstr "В процесі"
@@ -88,12 +88,17 @@ msgstr "В процесі"
 #. module: helpdesk_timesheet
 #: model:ir.model.fields,field_description:helpdesk_timesheet.field_helpdesk_ticket__is_closed
 msgid "Is Closed"
-msgstr "Закрито"
+msgstr "Закрите"
 
 #. module: helpdesk_timesheet
 #: model:ir.model.fields,field_description:helpdesk_timesheet.field_helpdesk_ticket__is_task_active
 msgid "Is Task Active"
 msgstr "Є активним завданням"
+
+#. module: helpdesk_timesheet
+#: model:ir.model.fields,field_description:helpdesk_timesheet.field_project_task_type__is_closed
+msgid "Is a close stage"
+msgstr "Закритий етап"
 
 #. module: helpdesk_timesheet
 #: model:ir.model,name:helpdesk_timesheet.model_project_project
@@ -108,32 +113,20 @@ msgid "Project Tickets"
 msgstr "Заявки проекту"
 
 #. module: helpdesk_timesheet
-#: model:ir.model.fields,help:helpdesk_timesheet.field_helpdesk_team__project_id
-msgid ""
-"Project to which the tickets (and the timesheets) will be linked by default."
-msgstr "Проект, до якого будуть належати заявки (та табелі) за замовчуванням."
-
-#. module: helpdesk_timesheet
 #: model:ir.model.fields,field_description:helpdesk_timesheet.field_helpdesk_ticket__task_id
 msgid "Task"
 msgstr "Завдання"
 
 #. module: helpdesk_timesheet
+#: model:ir.model,name:helpdesk_timesheet.model_project_task_type
+msgid "Task Stage"
+msgstr "Стадія завдання"
+
+#. module: helpdesk_timesheet
 #: model:ir.model.fields,help:helpdesk_timesheet.field_helpdesk_ticket__is_closed
+#: model:ir.model.fields,help:helpdesk_timesheet.field_project_task_type__is_closed
 msgid "Tasks in this stage are considered as closed."
 msgstr "Завдання на цьому етапі вважаються закритими."
-
-#. module: helpdesk_timesheet
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
-#, python-format
-msgid "The project is required to track time on ticket."
-msgstr "Проект необхідний для відстеження часу на заявці."
-
-#. module: helpdesk_timesheet
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
-#, python-format
-msgid "The task must be in ticket's project."
-msgstr "Завдання повинне бути у проекті заявки."
 
 #. module: helpdesk_timesheet
 #: model:ir.model.fields,help:helpdesk_timesheet.field_helpdesk_ticket__task_id
@@ -150,7 +143,7 @@ msgstr "Для цього потрібно встановити модуль п�
 #: model_terms:ir.ui.view,arch_db:helpdesk_timesheet.project_project_view_form_inherit_helpdesk_timesheet
 #: model_terms:ir.ui.view,arch_db:helpdesk_timesheet.project_project_view_project_tickets_kanban_inherited
 msgid "Tickets"
-msgstr "Квитки"
+msgstr "Заявки"
 
 #. module: helpdesk_timesheet
 #: model_terms:ir.ui.view,arch_db:helpdesk_timesheet.helpdesk_ticket_view_form_inherit_helpdesk_timesheet
@@ -163,13 +156,14 @@ msgid "Timesheet activated on Team"
 msgstr "Табель активовано в команді"
 
 #. module: helpdesk_timesheet
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
+#: code:addons/helpdesk_timesheet/models/helpdesk.py:73
 #, python-format
 msgid ""
 "Timesheet hours will not be assigned to a customer task. Set a task to "
 "charge a customer."
 msgstr ""
-"Табель не буде призначено для завдання клієнта. Встановіть завдання клієнта."
+"Години табелю не буде призначено для завдання клієнта. Встановіть завдання "
+"клієнта."
 
 #. module: helpdesk_timesheet
 #: model:ir.model.fields,field_description:helpdesk_timesheet.field_helpdesk_ticket__timesheet_ids
@@ -188,7 +182,7 @@ msgid "View task."
 msgstr "Переглянути завдання."
 
 #. module: helpdesk_timesheet
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
+#: code:addons/helpdesk_timesheet/models/helpdesk.py:76
 #, python-format
 msgid "Warning"
-msgstr "Сповіщення"
+msgstr "Попередження"

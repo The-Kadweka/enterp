@@ -22,13 +22,13 @@ class ProviderUSPS(models.Model):
                                             ('REGULAR', 'Regular')],
                                            default='REGULAR', store=True, compute='_compute_size_container')
 
+    @api.one
     @api.depends('usps_container')
     def _compute_size_container(self):
-        for rec in self:
-            if rec.usps_container == 'VARIABLE':
-                rec.usps_size_container = 'REGULAR'
-            else:
-                rec.usps_size_container = 'LARGE'
+        if self.usps_container == 'VARIABLE':
+            self.usps_size_container = 'REGULAR'
+        else:
+            self.usps_size_container = 'LARGE'
 
     usps_label_file_type = fields.Selection([('PDF', 'PDF'),
                                              ('TIF', 'TIF')],
@@ -86,19 +86,10 @@ class ProviderUSPS(models.Model):
     usps_redirect_partner_id = fields.Many2one('res.partner', string="Redirect Partner")
     usps_machinable = fields.Boolean(string="Machinable", help="Please check on USPS website to ensure that your package is machinable.")
 
-    def _compute_can_generate_return(self):
-        super(ProviderUSPS, self)._compute_can_generate_return()
-        for carrier in self:
-            if carrier.delivery_type == 'usps':
-                if carrier.usps_delivery_nature == 'international':
-                    carrier.can_generate_return = False
-                else:
-                    carrier.can_generate_return = True
-
     def usps_rate_shipment(self, order):
         srm = USPSRequest(self.prod_environment, self.log_xml)
 
-        check_result = srm.check_required_value(order.partner_shipping_id, self.usps_delivery_nature, order.warehouse_id.partner_id, order=order)
+        check_result = srm.check_required_value(order.partner_shipping_id, order.carrier_id.usps_delivery_nature, order.warehouse_id.partner_id, order=order)
         if check_result:
             return {'success': False,
                     'price': 0.0,
@@ -134,13 +125,13 @@ class ProviderUSPS(models.Model):
             if check_result:
                 raise UserError(check_result)
 
-            booking = srm.usps_request(picking, self.usps_delivery_nature, self.usps_service, is_return=False)
+            booking = srm.usps_request(picking, self.usps_delivery_nature, self.usps_service)
 
             if booking.get('error_message'):
                 raise UserError(booking['error_message'])
 
             order = picking.sale_id
-            company = order.company_id or picking.company_id or self.env.company
+            company = order.company_id or picking.company_id or self.env.user.company_id
             currency_order = picking.sale_id.currency_id
             if not currency_order:
                 currency_order = picking.company_id.currency_id
@@ -161,26 +152,7 @@ class ProviderUSPS(models.Model):
             shipping_data = {'exact_price': price,
                              'tracking_number': carrier_tracking_ref}
             res = res + [shipping_data]
-            if self.return_label_on_delivery:
-                self.get_return_label(picking)
         return res
-
-    def usps_get_return_label(self, picking, tracking_number=None, origin_date=None):
-        res = []
-        srm = USPSRequest(self.prod_environment, self.log_xml)
-        check_result = srm.check_required_value(picking.partner_id, self.usps_delivery_nature, picking.picking_type_id.warehouse_id.partner_id, picking=picking)
-        if check_result:
-            raise UserError(check_result)
-
-        booking = srm.usps_request(picking, self.usps_delivery_nature, self.usps_service, is_return=True)
-
-        if booking.get('error_message'):
-            raise UserError(booking['error_message'])
-
-        carrier_tracking_ref = booking['tracking_number']
-        logmessage = (_("Shipment created into USPS <br/> <b>Tracking Number : </b>%s") % (carrier_tracking_ref))
-        picking.message_post(body=logmessage, attachments=[('%s-%s-%s.%s' % (self.get_return_label_prefix(), carrier_tracking_ref, 1, self.usps_label_file_type), booking['label'])])
-
 
     def usps_get_tracking_link(self, picking):
         return 'https://tools.usps.com/go/TrackConfirmAction_input?qtc_tLabels1=%s' % picking.carrier_tracking_ref
@@ -203,7 +175,4 @@ class ProviderUSPS(models.Model):
         weight_in_pounds = weight_uom_id._compute_quantity(weight, self.env.ref('uom.product_uom_lb'))
         pounds = int(math.floor(weight_in_pounds))
         ounces = round((weight_in_pounds - pounds) * 16, 3)
-        # ounces should be at least 1 for the api request not to fail.
-        if pounds == 0 and int(ounces) == 0:
-            ounces = 1
         return {'pound': pounds, 'ounce': ounces}

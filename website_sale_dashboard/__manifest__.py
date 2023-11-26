@@ -1,6 +1,6 @@
 {
     'name': 'Website Sales Dashboard',
-    'category': 'Hidden',
+    'category': 'Technical Settings',
     'sequence': 55,
     'summary': 'Get a new dashboard view in the Website App',
     'version': '1.0',
@@ -16,6 +16,6 @@ It also provides new tools to analyse your data.
         'views/res_config_settings_views.xml'
     ],
     'qweb': ['static/src/xml/*.xml'],
-    'auto_install': ['website_sale'],
+    'auto_install': True,
     'license': 'OEEL-1',
 }

@@ -35,25 +35,24 @@ cp $odoo_path/addons/web/static/src/js/core/time.js extension/web/static/src/js/
 cp $odoo_path/addons/web/static/src/js/core/translation.js extension/web/static/src/js/core
 cp $odoo_path/addons/web/static/src/js/core/utils.js extension/web/static/src/js/core
 cp $odoo_path/addons/web/static/src/js/core/widget.js extension/web/static/src/js/core
-cp $odoo_path/addons/web/static/src/js/core/service_mixins.js extension/web/static/src/js/core
-cp $odoo_path/addons/web/static/src/js/core/ram_storage.js extension/web/static/src/js/core
 
 [ -d extension/web/static/src/js/libs ] || mkdir extension/web/static/src/js/libs
 cp $odoo_path/addons/web/static/src/js/libs/content-disposition.js extension/web/static/src/js/libs
 cp $odoo_path/addons/web/static/src/js/libs/download.js extension/web/static/src/js/libs
+cp $odoo_path/addons/web/static/src/js/libs/nvd3.js extension/web/static/src/js/libs
 
 [ -d extension/web/static/src/js/services ] || mkdir extension/web/static/src/js/services
 cp $odoo_path/addons/web/static/src/js/services/ajax_service.js extension/web/static/src/js/services
 cp $odoo_path/addons/web/static/src/js/services/config.js extension/web/static/src/js/services
 cp $odoo_path/addons/web/static/src/js/services/core.js extension/web/static/src/js/services
 cp $odoo_path/addons/web/static/src/js/services/session.js extension/web/static/src/js/services
-cp $odoo_path/addons/web/static/src/js/services/config.js extension/web/static/src/js/services
 
 [ -d extension/web/static/lib ] || mkdir extension/web/static/lib
 cp -r $odoo_path/addons/web/static/lib/fontawesome extension/web/static/lib
 cp -r $odoo_path/addons/web/static/lib/jquery extension/web/static/lib
 cp -r $odoo_path/addons/web/static/lib/jquery.ba-bbq extension/web/static/lib
 cp -r $odoo_path/addons/web/static/lib/moment extension/web/static/lib
+cp -r $odoo_path/addons/web/static/lib/nvd3 extension/web/static/lib
 cp -r $odoo_path/addons/web/static/lib/py.js extension/web/static/lib
 cp -r $odoo_path/addons/web/static/lib/qweb extension/web/static/lib
 cp -r $odoo_path/addons/web/static/lib/underscore extension/web/static/lib

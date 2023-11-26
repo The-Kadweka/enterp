@@ -8,12 +8,12 @@ var testUtils = require('web.test_utils');
 QUnit.module('account_invoice_extract', {}, function () {
 QUnit.module('Fields', {}, function () {
 
-    QUnit.test('render buttons', async function (assert) {
+    QUnit.test('render buttons', function (assert) {
         assert.expect(6);
         var parent = testUtils.createParent({});
         var fields = new InvoiceExtractFields(parent);
 
-        await fields.renderButtons({ $container: $('#qunit-fixture') });
+        fields.renderButtons({ $container: $('#qunit-fixture') });
 
         var $buttons = $('.o_invoice_extract_button');
         assert.strictEqual($buttons.length, 5,
@@ -38,12 +38,12 @@ QUnit.module('Fields', {}, function () {
         parent.destroy();
     });
 
-    QUnit.test('get button', async function (assert) {
+    QUnit.test('get button', function (assert) {
         assert.expect(5);
         var parent = testUtils.createParent({});
         var fields = new InvoiceExtractFields(parent);
 
-        await fields.renderButtons({ $container: $('#qunit-fixture') });
+        fields.renderButtons({ $container: $('#qunit-fixture') });
 
         var $buttons = $('.o_invoice_extract_button');
         assert.hasClass($buttons.eq(0),'active', "1st button should be active by default");
@@ -55,12 +55,12 @@ QUnit.module('Fields', {}, function () {
         parent.destroy();
     });
 
-    QUnit.test('get active field', async function (assert) {
+    QUnit.test('get active field', function (assert) {
         assert.expect(1);
         var parent = testUtils.createParent({});
         var fields = new InvoiceExtractFields(parent);
 
-        await fields.renderButtons({ $container: $('#qunit-fixture') });
+        fields.renderButtons({ $container: $('#qunit-fixture') });
 
         var activeField = fields.getActiveField();
         assert.strictEqual(activeField.getName(), 'VAT_Number',
@@ -69,12 +69,12 @@ QUnit.module('Fields', {}, function () {
         parent.destroy();
     });
 
-    QUnit.test('get field (provided name)', async function (assert) {
+    QUnit.test('get field (provided name)', function (assert) {
         assert.expect(1);
         var parent = testUtils.createParent({});
         var fields = new InvoiceExtractFields(parent);
 
-        await fields.renderButtons({ $container: $('#qunit-fixture') });
+        fields.renderButtons({ $container: $('#qunit-fixture') });
 
         var field = fields.getField({ name: 'VAT_Number' });
         assert.strictEqual(field.getName(), 'VAT_Number',
@@ -83,19 +83,19 @@ QUnit.module('Fields', {}, function () {
         parent.destroy();
     });
 
-    QUnit.test('get field (no provide name)', async function (assert) {
+    QUnit.test('get field (no provide name)', function (assert) {
         assert.expect(1);
         var parent = testUtils.createParent({});
         var fields = new InvoiceExtractFields(parent);
 
-        await fields.renderButtons({ $container: $('#qunit-fixture') });
+        fields.renderButtons({ $container: $('#qunit-fixture') });
         assert.strictEqual(fields.getField(), fields.getActiveField(),
             "should get the active field when no field name is provided");
 
         parent.destroy();
     });
 
-    QUnit.test('click field button', async function (assert) {
+    QUnit.test('click field button', function (assert) {
         assert.expect(10);
         var parent = testUtils.createParent({
             intercepts: {
@@ -107,7 +107,7 @@ QUnit.module('Fields', {}, function () {
         });
         var fields = new InvoiceExtractFields(parent);
 
-        await fields.renderButtons({ $container: $('#qunit-fixture') });
+        fields.renderButtons({ $container: $('#qunit-fixture') });
 
         var vatField = fields.getField({ name: 'VAT_Number' });
         var invoiceIdField = fields.getField({ name: 'invoice_id' });
@@ -141,7 +141,7 @@ QUnit.module('Fields', {}, function () {
         parent.destroy();
     });
 
-    QUnit.test('reset active', async function (assert) {
+    QUnit.test('reset active', function (assert) {
         assert.expect(6);
         var parent = testUtils.createParent({
             intercepts: {
@@ -152,7 +152,7 @@ QUnit.module('Fields', {}, function () {
         });
         var fields = new InvoiceExtractFields(parent);
 
-        await fields.renderButtons({ $container: $('#qunit-fixture') });
+        fields.renderButtons({ $container: $('#qunit-fixture') });
 
         var $vatButton = $('.o_invoice_extract_button[data-field-name="VAT_Number"]');
         var $invoiceIdButton = $('.o_invoice_extract_button[data-field-name="invoice_id"]');

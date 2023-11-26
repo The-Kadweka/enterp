@@ -1,44 +1,6 @@
 <?xml version="1.0"?>
 <odoo>
 
-    <record id="calendar_appointment_type_view_kanban" model="ir.ui.view">
-        <field name="name">calendar.appointment.type.kanban</field>
-        <field name="model">calendar.appointment.type</field>
-        <field name="arch" type="xml">
-            <kanban class="o_kanban_dashboard">
-                <field name="id" invisible="1" />
-                <templates>
-                    <t t-name="kanban-box">
-                        <div>
-                            <div class="o_kanban_manage_button_section">
-                                <t t-if="widget.editable"><a class="o_kanban_manage_toggle_button" href="#"><i class="fa fa-ellipsis-v" role="img" aria-label="Manage" title="Manage"/></a></t>
-                            </div>
-                            <div t-attf-class="o_kanban_card_header">
-                                <div class="o_kanban_card_header_title">
-                                    <div class="o_primary"><field name="name" /></div>
-                                    <div class="o_secondary">
-                                        <field name="location" /><br/>
-                                        <field name="appointment_tz" />
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="container o_kanban_card_content">
-                            <div class="col-12">
-                                <div class="row">
-                                    <button class="btn btn-primary" name="action_calendar_meetings" type="object"><field name="appointment_count"/> SCHEDULED</button>
-                                </div>
-                                </div>
-                            </div>
-                            <div class="o_kanban_card_manage_pane dropdown-menu" role="menu">
-                                <a role="menuitem" type="edit" class="dropdown-item">Edit</a>
-                            </div>
-                        </div>
-                    </t>
-                </templates>
-            </kanban>
-        </field>
-    </record>
-
     <record id="calendar_appointment_type_view_tree" model="ir.ui.view">
         <field name="name">calendar.appointment.type.tree</field>
         <field name="model">calendar.appointment.type</field>
@@ -46,9 +8,8 @@
             <tree string="Appointment Type">
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
-                <field name="location"/>
                 <field name="appointment_tz"/>
-                <field name="employee_ids" widget="many2many_tags"/>
+                <field name="employee_ids"/>
             </tree>
         </field>
     </record>
@@ -67,7 +28,10 @@
                                 icon="fa-calendar">
                                 <field string="Appointments" name="appointment_count" widget="statinfo"/>
                             </button>
-                            <field name="is_published" widget="website_redirect_button"/>
+                            <button class="oe_stat_button" name="website_publish_button"
+                                type="object" icon="fa-globe">
+                                <field name="website_published" widget="website_button"/>
+                            </button>
                         </div>
                     </div>
                     <div class="oe_title">
@@ -75,9 +39,9 @@
                         <h1><field name="name" placeholder="e.g. Schedule a demo"/></h1>
                     </div>
                     <notebook>
-                        <page string="Scheduling &amp; Availability" name="schedule_availability">
+                        <page string="Scheduling &amp; Availability">
                             <group>
-                                <group name="left_details">
+                                <group>
                                     <label for="appointment_duration"/>
                                     <div>
                                           <field name="appointment_duration" class="oe_inline" widget="float_time"/><span> hours</span>
@@ -98,12 +62,12 @@
                                         </div>
                                     </div>
                                 </group>
-                                <group name="right_details">
+                                <group>
                                     <field name="appointment_tz"/>
-                                    <field name="reminder_ids" widget="many2many_tags"/>
+                                    <field name="reminder_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
                                     <field name="location"/>
                                     <field name="assignation_method"/>
-                                    <field name="country_ids" widget="many2many_tags" groups="base.group_no_one"/>
+                                    <field name="country_ids" widget="many2many_tags" options="{'color_field': 'color'}" groups="base.group_no_one"/>
                                 </group>
                             </group>
                             <separator string="Available Employees"/>
@@ -115,7 +79,7 @@
                                 </tree>
                             </field>
                         </page>
-                        <page string="Slots" name="slots">
+                        <page string="Slots">
                             <field name="slot_ids">
                                 <tree editable="bottom">
                                     <field name="weekday"/>
@@ -123,7 +87,7 @@
                                 </tree>
                             </field>
                         </page>
-                        <page string="Questions" name="questions">
+                        <page string="Questions">
                             <field name="question_ids">
                                 <tree>
                                     <field name="sequence" widget="handle"/>
@@ -131,14 +95,14 @@
                                     <field name="question_type"/>
                                     <field name="question_required"/>
                                 </tree>
-                                <form string="Questions" name="question_form">
+                                <form string="Questions">
                                     <group>
-                                        <group name="question_form_left">
+                                        <group>
                                             <field name="name"/>
                                             <field name="question_type" widget="radio"/>
                                         </group>
-                                        <group name="question_form_right">
-                                            <field name="answer_ids" widget="many2many_tags" options="{'no_create_edit': True}"
+                                        <group>
+                                            <field name="answer_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"
                                                    attrs="{'invisible': [('question_type','in',('char','text'))], 'required':[('question_type','in',('select','radio','checkbox'))]}"/>
                                             <field name="placeholder" attrs="{'invisible': [('question_type','in',('select','radio','checkbox'))]}"/>
                                             <field name="question_required"/>
@@ -147,7 +111,7 @@
                                 </form>
                             </field>
                         </page>
-                        <page string="Messages" name="messages">
+                        <page string="Messages">
                             <separator string="Appointment Introduction"/>
                             <field name="message_intro"/>
                             <separator string="Appointment Confirmation"/>
@@ -179,7 +143,8 @@
         <field name="name">Online Appointments</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">calendar.appointment.type</field>
-        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create a new appointment type

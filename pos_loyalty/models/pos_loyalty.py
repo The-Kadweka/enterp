@@ -24,7 +24,7 @@ class LoyaltyRule(models.Model):
 
     name = fields.Char(index=True, required=True, help="An internal identification for this loyalty program rule")
     loyalty_program_id = fields.Many2one('loyalty.program', string='Loyalty Program', help='The Loyalty Program this exception belongs to')
-    rule_type = fields.Selection([('product', 'Product'), ('category', 'Category')], old_name='type', required=True, default='product', help='Does this rule affects products, or a category of products ?')
+    rule_type = fields.Selection((('product', 'Product'), ('category', 'Category')), old_name='type', required=True, default='product', help='Does this rule affects products, or a category of products ?')
     product_id = fields.Many2one('product.product', string='Target Product', help='The product affected by the rule')
     category_id = fields.Many2one('pos.category', string='Target Category', help='The category affected by the rule')
     cumulative = fields.Boolean(help='The points won from this rule will be won in addition to other rules')
@@ -39,23 +39,26 @@ class LoyaltyReward(models.Model):
     name = fields.Char(index=True, required=True, help='An internal identification for this loyalty reward')
     loyalty_program_id = fields.Many2one('loyalty.program', string='Loyalty Program', help='The Loyalty Program this reward belongs to')
     minimum_points = fields.Float(help='The minimum amount of points the customer must have to qualify for this reward')
-    reward_type = fields.Selection([('gift', 'Gift'), ('discount', 'Discount (in %)'), ('resale', 'Discount (in value)')], old_name='type', required=True, help='The type of the reward')
+    reward_type = fields.Selection((('gift', 'Gift'), ('discount', 'Discount'), ('resale', 'Resale')), old_name='type', required=True, help='The type of the reward')
     gift_product_id = fields.Many2one('product.product', string='Gift Product', help='The product given as a reward')
-    point_cost = fields.Float(string='Reward Cost', help="If the reward is a gift, that's the cost of the gift in points. If the reward type is a discount that's the cost in point per currency (e.g. 1 point per $)")
+    point_cost = fields.Float(help='The cost of the reward')
     discount_product_id = fields.Many2one('product.product', string='Discount Product', help='The product used to apply discounts')
     discount = fields.Float(help='The discount percentage')
     point_product_id = fields.Many2one('product.product', string='Point Product', help='The product that represents a point that is sold by the customer')
 
+    @api.multi
     @api.constrains('reward_type', 'gift_product_id')
     def _check_gift_product(self):
         if self.filtered(lambda reward: reward.reward_type == 'gift' and not reward.gift_product_id):
             raise ValidationError(_('The gift product field is mandatory for gift rewards'))
 
+    @api.multi
     @api.constrains('reward_type', 'discount_product_id')
     def _check_discount_product(self):
         if self.filtered(lambda reward: reward.reward_type == 'discount' and not reward.discount_product_id):
             raise ValidationError(_('The discount product field is mandatory for discount rewards'))
 
+    @api.multi
     @api.constrains('reward_type', 'discount_product_id')
     def _check_point_product(self):
         if self.filtered(lambda reward: reward.reward_type == 'resale' and not reward.point_product_id):

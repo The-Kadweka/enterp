@@ -1,25 +1,14 @@
 odoo.define('sale_subscription.portal_subscription', function (require) {
-'use strict';
+    'use strict';
 
-var publicWidget = require('web.public.widget');
+    require('web.dom_ready');
+    if(!$('.oe_website_contract').length) {
+        return $.Deferred().reject("DOM doesn't contain '.js_surveyresult'");
+    }
 
-publicWidget.registry.ContractSubmit = publicWidget.Widget.extend({
-    selector: '.contract-submit',
-    events: {
-        'click': '_onClick',
-    },
-
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     */
-    _onClick: function () {
-        this.$el.attr('disabled', true);
-        this.$el.prepend('<i class="fa fa-refresh fa-spin"></i> ');
-        this.$el.closest('form').submit();
-    },
-});
+    $('.contract-submit').off('click').on('click', function () {
+        $(this).attr('disabled', true);
+        $(this).prepend('<i class="fa fa-refresh fa-spin"></i> ');
+        $(this).closest('form').submit();
+    });
 });

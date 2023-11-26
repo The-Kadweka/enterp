@@ -22,8 +22,6 @@ web_datepicker.DateWidget.include({
             return this._super.apply(this, arguments);
         }
         this.$input = this.$('input.o_datepicker_input');
-        // forcefully removes the library's classname to "disable" library's event listeners
-        this.$input.removeClass('datetimepicker-input')
         this._setupMobilePicker();
     },
 
@@ -88,19 +86,6 @@ web_datepicker.DateWidget.include({
                 self.changeDatetime();
             });
         });
-    },
-
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
-
-    /**
-     * @override
-     */
-    _onInputClicked: function () {
-        if (!mobile.methods.requestDateTimePicker) {
-            return this._super.apply(this, arguments);
-        }
     },
 });
 

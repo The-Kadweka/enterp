@@ -1,20 +1,20 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* currency_rate_live
+# * currency_rate_live
 # 
 # Translators:
-# Martin Trigaux, 2019
-# Nancy Momoland <thanhnguyen.icsc@gmail.com>, 2019
+# Nancy Momoland <thanhnguyen.icsc@gmail.com>, 2018
+# Martin Trigaux, 2018
+# Duy BQ <duybq86@gmail.com>, 2018
 # Dao Nguyen <trucdao.uel@gmail.com>, 2019
-# Duy BQ <duybq86@gmail.com>, 2022
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-10-23 12:07+0000\n"
-"PO-Revision-Date: 2019-08-26 09:35+0000\n"
-"Last-Translator: Duy BQ <duybq86@gmail.com>, 2022\n"
+"POT-Creation-Date: 2019-01-15 15:18+0000\n"
+"PO-Revision-Date: 2018-08-24 11:37+0000\n"
+"Last-Translator: Dao Nguyen <trucdao.uel@gmail.com>, 2019\n"
 "Language-Team: Vietnamese (https://www.transifex.com/odoo/teams/41243/vi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -32,14 +32,9 @@ msgstr ""
 "fa-fw fa-refresh\"/>"
 
 #. module: currency_rate_live
-#: model:ir.model.fields.selection,name:currency_rate_live.selection__res_company__currency_provider__boc
+#: selection:res.company,currency_provider:0
 msgid "Bank Of Canada"
 msgstr "Ngân hàng ở Canada"
-
-#. module: currency_rate_live
-#: model:ir.model.fields.selection,name:currency_rate_live.selection__res_company__currency_provider__mindicador
-msgid "Chilean mindicador.cl"
-msgstr "Chilean mindicador.cl"
 
 #. module: currency_rate_live
 #: model:ir.model,name:currency_rate_live.model_res_company
@@ -59,17 +54,39 @@ msgid "Currency: rate update"
 msgstr "Tiền tệ: cập nhật tỷ giá"
 
 #. module: currency_rate_live
-#: model:ir.model.fields.selection,name:currency_rate_live.selection__res_company__currency_interval_unit__daily
+#: selection:res.company,currency_interval_unit:0
 msgid "Daily"
 msgstr "Hàng ngày"
 
 #. module: currency_rate_live
-#: model:ir.model.fields.selection,name:currency_rate_live.selection__res_company__currency_provider__ecb
+#: model:res.company,overdue_msg:currency_rate_live.res_company_company_1
+#: model:res.company,overdue_msg:currency_rate_live.res_company_company_2
+msgid ""
+"Dear Sir/Madam,\n"
+"\n"
+"Our records indicate that some payments on your account are still due. Please find details below.\n"
+"If the amount has already been paid, please disregard this notice. Otherwise, please forward us the total amount stated below.\n"
+"If you have any queries regarding your account, Please contact us.\n"
+"\n"
+"Thank you in advance for your cooperation.\n"
+"Best Regards,"
+msgstr ""
+"Xin chào anh/chị,\n"
+"\n"
+"Hồ sơ của chúng tôi cho thấy một số khoản thanh toán trong tài khoản của bạn đã đến hạn thanh toán. Anh/chị có thể xem chi tiết phía dưới\n"
+"Nếu số tiền đã được thanh toán, vui lòng bỏ qua thông báo này. Nếu không, vui lòng thanh toán số tiền bên dưới.\n"
+"Nếu bạn có bất kỳ câu hỏi nào liên quan đến tài khoản của mình, hãy liên hệ với chúng tôi.\n"
+"\n"
+"Cảm ơn sự hỗ trợ của anh/chị.\n"
+"Trân trọng,"
+
+#. module: currency_rate_live
+#: selection:res.company,currency_provider:0
 msgid "European Central Bank"
 msgstr "Ngân hàng trung ương châu Âu"
 
 #. module: currency_rate_live
-#: model:ir.model.fields.selection,name:currency_rate_live.selection__res_company__currency_provider__fta
+#: selection:res.company,currency_provider:0
 msgid "Federal Tax Administration (Switzerland)"
 msgstr "Cục thuế liên bang (Thụy Sĩ)"
 
@@ -85,17 +102,24 @@ msgid "Interval Unit"
 msgstr "Đơn vị nội bộ"
 
 #. module: currency_rate_live
-#: model:ir.model.fields.selection,name:currency_rate_live.selection__res_company__currency_interval_unit__manually
+#: model:ir.model.fields,field_description:currency_rate_live.field_res_company__last_currency_sync_date
+#: model:ir.model.fields,field_description:currency_rate_live.field_res_config_settings__last_currency_sync_date
+#: model_terms:ir.ui.view,arch_db:currency_rate_live.res_config_settings_view_form
+msgid "Last Sync Date"
+msgstr "Ngày đồng bộ hóa cuối cùng"
+
+#. module: currency_rate_live
+#: selection:res.company,currency_interval_unit:0
 msgid "Manually"
 msgstr "Thủ công"
 
 #. module: currency_rate_live
-#: model:ir.model.fields.selection,name:currency_rate_live.selection__res_company__currency_provider__banxico
+#: selection:res.company,currency_provider:0
 msgid "Mexican Bank"
 msgstr "Ngân hàng Mexico"
 
 #. module: currency_rate_live
-#: model:ir.model.fields.selection,name:currency_rate_live.selection__res_company__currency_interval_unit__monthly
+#: selection:res.company,currency_interval_unit:0
 msgid "Monthly"
 msgstr "Hàng tháng"
 
@@ -122,7 +146,17 @@ msgid "Service Provider"
 msgstr "Nhà cung cấp dịch vụ"
 
 #. module: currency_rate_live
-#: code:addons/currency_rate_live/models/res_config_settings.py:0
+#: code:addons/currency_rate_live/models/res_config_settings.py:387
+#, python-format
+msgid ""
+"The Yahoo currency rate web service has been discontinued. Please select "
+"another currency rate provider."
+msgstr ""
+"Dịch vụ web tỷ giá tiền tệ của Yahoo đã bị ngừng. Vui lòng chọn một nhà cung"
+" cấp tỷ giá tiền tệ khác."
+
+#. module: currency_rate_live
+#: code:addons/currency_rate_live/models/res_config_settings.py:103
 #, python-format
 msgid ""
 "Unable to connect to the online exchange rate platform %s. The web service "
@@ -132,7 +166,7 @@ msgstr ""
 " thể đang tạm ngừng hoạt động."
 
 #. module: currency_rate_live
-#: code:addons/currency_rate_live/models/res_config_settings.py:0
+#: code:addons/currency_rate_live/models/res_config_settings.py:390
 #, python-format
 msgid ""
 "Unable to connect to the online exchange rate platform. The web service may "
@@ -142,12 +176,17 @@ msgstr ""
 "có thể đang tạm ngừng hoạt động. Vui lòng thử lại sau giây lát."
 
 #. module: currency_rate_live
-#: model:ir.model.fields.selection,name:currency_rate_live.selection__res_company__currency_interval_unit__weekly
+#: selection:res.company,currency_interval_unit:0
 msgid "Weekly"
 msgstr "Hàng tuần"
 
 #. module: currency_rate_live
-#: code:addons/currency_rate_live/models/res_config_settings.py:0
+#: selection:res.company,currency_provider:0
+msgid "Yahoo (DISCONTINUED)"
+msgstr "Yahoo (NGỪNG HOẠT ĐỘNG) "
+
+#. module: currency_rate_live
+#: code:addons/currency_rate_live/models/res_config_settings.py:143
 #, python-format
 msgid ""
 "Your main currency (%s) is not supported by this exchange rate provider. "
@@ -157,6 +196,6 @@ msgstr ""
 "trợ. Vui lòng chọn tiền tệ khác."
 
 #. module: currency_rate_live
-#: model:ir.model.fields.selection,name:currency_rate_live.selection__res_company__currency_provider__xe_com
+#: selection:res.company,currency_provider:0
 msgid "xe.com"
 msgstr "xe.com"

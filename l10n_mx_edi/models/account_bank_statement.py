@@ -16,8 +16,8 @@ class AccountBankStatementLine(models.Model):
                                payment_aml_rec=None, new_aml_dicts=None):
         invoice_ids = []
         for aml_dict in counterpart_aml_dicts or []:
-            if aml_dict['move_line'].move_id:
-                invoice_ids.append(aml_dict['move_line'].move_id.id)
+            if aml_dict['move_line'].invoice_id:
+                invoice_ids.append(aml_dict['move_line'].invoice_id.id)
         res = super(AccountBankStatementLine, self.with_context(
             l10n_mx_edi_manual_reconciliation=False)).process_reconciliation(
                 counterpart_aml_dicts=counterpart_aml_dicts,
@@ -35,6 +35,7 @@ class AccountBankStatementLine(models.Model):
         payments._l10n_mx_edi_retry()
         return res
 
+    @api.multi
     def l10n_mx_edi_is_required(self):
         self.ensure_one()
         # TODO remove this crappy hack and make a bridge module for l10n_mx_edi and point_of_sale
@@ -50,12 +51,5 @@ class AccountBankStatementLine(models.Model):
         result = {
             'l10n_mx_edi_payment_method_id': payment_method,
             'invoice_ids': [(4, inv) for inv in invoice_ids],
-            'l10n_mx_edi_partner_bank_id': self.bank_account_id.id,
         }
         return result
-
-    @api.onchange('partner_id')
-    def _l10n_mx_onchange_partner_bank_id(self):
-        self.bank_account_id = False
-        if len(self.partner_id.bank_ids) == 1:
-            self.bank_account_id = self.partner_id.bank_ids

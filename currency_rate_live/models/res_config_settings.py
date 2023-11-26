@@ -30,20 +30,20 @@ class ResCompany(models.Model):
         default='manually', string='Interval Unit')
     currency_next_execution_date = fields.Date(string="Next Execution Date")
     currency_provider = fields.Selection([
+        ('yahoo', 'Yahoo (DISCONTINUED)'),
         ('ecb', 'European Central Bank'),
         ('fta', 'Federal Tax Administration (Switzerland)'),
         ('banxico', 'Mexican Bank'),
         ('boc', 'Bank Of Canada'),
         ('xe_com', 'xe.com'),
-        ('mindicador', 'Chilean mindicador.cl'),
-        ('bcrp', 'Bank of Peru'),
     ], default='ecb', string='Service Provider')
+    last_currency_sync_date = fields.Date(string="Last Sync Date", readonly=True)
 
     @api.model
     def create(self, vals):
         ''' Change the default provider depending on the company data.'''
         if vals.get('country_id') and 'currency_provider' not in vals:
-            code_providers = {'CH': 'fta', 'MX': 'banxico', 'CA': 'boc', 'PE': 'bcrp'}
+            code_providers = {'CH' : 'fta', 'MX': 'banxico', 'CA' : 'boc'}
             cc = self.env['res.country'].browse(vals['country_id']).code.upper()
             if cc in code_providers:
                 vals['currency_provider'] = code_providers[cc]
@@ -51,17 +51,22 @@ class ResCompany(models.Model):
 
     @api.model
     def set_special_defaults_on_install(self):
-        ''' At module installation, set the default provider depending on the company country.'''
+        ''' At module isntallation, set the default provider depending on the company country.'''
         all_companies = self.env['res.company'].search([])
-        currency_providers = {
-            'CH': 'fta',  # Sets FTA as the default provider for every swiss company that was already installed
-            'MX': 'banxico',  # Sets Banxico as the default provider for every mexican company already installed
-            'CA': 'boc',  # Bank of Canada
-            'CL': 'mindicador',
-        }
         for company in all_companies:
-            company.currency_provider = currency_providers.get(company.country_id.code, 'ecb')
+            if company.country_id.code == 'CH':
+                # Sets FTA as the default provider for every swiss company that was already installed
+                company.currency_provider = 'fta'
+            elif company.country_id.code == 'MX':
+                # Sets Banxico as the default provider for every mexican company that was already installed
+                company.currency_provider = 'banxico'
+            elif company.country_id.code == 'CA':
+                # Bank of Canada
+                company.currency_provider = 'boc'
+            else:
+                company.currency_provider = 'ecb'
 
+    @api.multi
     def update_currency_rates(self):
         ''' This method is used to update all currencies given by the provider.
         It calls the parse_function of the selected exchange rates provider automatically.
@@ -85,16 +90,22 @@ class ResCompany(models.Model):
         active_currencies = self.env['res.currency'].search([])
         for (currency_provider, companies) in self._group_by_provider().items():
             parse_results = None
-            parse_function = getattr(companies, '_parse_' + currency_provider + '_data')
-            parse_results = parse_function(active_currencies)
+            if currency_provider != 'yahoo':
+                parse_function = getattr(companies, '_parse_' + currency_provider + '_data')
+                parse_results = parse_function(active_currencies)
 
             if parse_results == False:
                 # We check == False, and don't use bool conversion, as an empty
                 # dict can be returned, if none of the available currencies is supported by the provider
-                _logger.warning(_('Unable to connect to the online exchange rate platform %s. The web service may be temporary down.') % currency_provider)
+                if currency_provider == 'yahoo':
+                    _logger.warning("Call to the discontinued Yahoo currency rate web service.")
+                else:
+                    _logger.warning(_('Unable to connect to the online exchange rate platform %s. The web service may be temporary down.') % currency_provider)
+
                 rslt = False
             else:
                 companies._generate_currency_rates(parse_results)
+                companies.write({'last_currency_sync_date': fields.Date.today()})
 
         return rslt
 
@@ -332,108 +343,6 @@ class ResCompany(models.Model):
 
         return rslt
 
-    def _parse_bcrp_data(self, available_currencies):
-        """Bank of Peru (bcrp)
-        API Doc: https://estadisticas.bcrp.gob.pe/estadisticas/series/ayuda/api
-            - https://estadisticas.bcrp.gob.pe/estadisticas/series/api/[códigos de series]/[formato de salida]/[periodo inicial]/[periodo final]/[idioma]
-        Source: https://estadisticas.bcrp.gob.pe/estadisticas/series/diarias/tipo-de-cambio
-            PD04640PD	TC Sistema bancario SBS (S/ por US$) - Venta
-            PD04648PD	TC Euro (S/ por Euro) - Venta
-        """
-
-        bcrp_date_format_url = '%Y-%m-%d'
-        bcrp_date_format_res = '%d.%b.%y'
-        result = {}
-        available_currency_names = available_currencies.mapped('name')
-        if 'PEN' not in available_currency_names:
-            return result
-        result['PEN'] = (1.0, fields.Date.context_today(self.with_context(tz='America/Lima')))
-        url_format = "https://estadisticas.bcrp.gob.pe/estadisticas/series/api/%(currency_code)s/json/%(date_start)s/%(date_end)s/ing"
-        foreigns = {
-            # currency code from webservices
-            'USD': 'PD04640PD',
-            'EUR': 'PD04648PD',
-        }
-        date_pe = self.mapped('currency_next_execution_date')[0] or datetime.datetime.now(timezone('America/Lima'))
-        # In case the desired date does not have an exchange rate, it means that we must use the previous day until we
-        # find a change. It is left 7 since in tests we have found cases of up to 5 days without update but no more
-        # than that. That is not to say that that cannot change in the future, so we leave a little margin.
-        first_pe_str = (date_pe - datetime.timedelta(days=7)).strftime(bcrp_date_format_url)
-        second_pe_str = date_pe.strftime(bcrp_date_format_url)
-        data = {
-            'date_start': first_pe_str,
-            'date_end': second_pe_str,
-        }
-        for currency_odoo_code, currency_pe_code in foreigns.items():
-            if currency_odoo_code not in available_currency_names:
-                continue
-            data.update({'currency_code': currency_pe_code})
-            url = url_format % data
-            try:
-                res = requests.get(url, timeout=10)
-                res.raise_for_status()
-                series = res.json()
-            except Exception as e:
-                _logger.error(e)
-                continue
-            date_rate_str = series['periods'][-1]['name']
-            rate = 1.0 / float(series['periods'][-1]['values'][0])
-            # This replace is done because the service is returning Set for September instead of Sep the value
-            # commonly accepted for September,
-            normalized_date = date_rate_str.replace('Set', 'Sep')
-            date_rate = datetime.datetime.strptime(normalized_date, bcrp_date_format_res).strftime(DEFAULT_SERVER_DATE_FORMAT)
-            result[currency_odoo_code] = (rate, date_rate)
-        return result
-
-    def _parse_mindicador_data(self, available_currencies):
-        """Parse function for mindicador.cl provider for Chile
-        * Regarding needs of rates in Chile there will be one rate per day, except for UTM index (one per month)
-        * The value of the rate is the "official" rate
-        * The base currency is always CLP but with the inverse 1/rate.
-        * The webservice returns the following currency rates:
-            - EUR
-            - USD (Dolar Observado)
-            - UF (Unidad de Fomento)
-            - UTM (Unidad Tributaria Mensual)
-        """
-        icp = self.env['ir.config_parameter'].sudo()
-        server_url = icp.get_param('mindicador_api_url', False)
-        if not server_url:
-            server_url = 'https://mindicador.cl/api'
-            icp.set_param('mindicador_api_url', server_url)
-        foreigns = {
-            "USD": ["dolar", "Dolares"],
-            "EUR": ["euro", "Euros"],
-            "UF": ["uf", "UFs"],
-            "UTM": ["utm", "UTMs"],
-        }
-        available_currency_names = available_currencies.mapped('name')
-        _logger.debug('mindicador: available currency names: %s' % available_currency_names)
-        today_date = fields.Date.context_today(self.with_context(tz='America/Santiago'))
-        rslt = {
-            'CLP': (1.0, today_date.strftime(DEFAULT_SERVER_DATE_FORMAT)),
-        }
-        request_date = today_date.strftime('%d-%m-%Y')
-        for index, currency in foreigns.items():
-            if index not in available_currency_names:
-                _logger.debug('Index %s not in available currency name' % index)
-                continue
-            url = server_url + '/%s/%s' % (currency[0], request_date)
-            try:
-                res = requests.get(url)
-                res.raise_for_status()
-            except Exception as e:
-                return False
-            if 'html' in res.text:
-                return False
-            data_json = res.json()
-            if len(data_json['serie']) == 0:
-                continue
-            date = data_json['serie'][0]['fecha'][:10]
-            rate = data_json['serie'][0]['valor']
-            rslt[index] = (1.0 / rate,  date)
-        return rslt
-
     @api.model
     def run_update_currency(self):
         """ This method is called from a cron job to update currency rates.
@@ -462,6 +371,7 @@ class ResConfigSettings(models.TransientModel):
     currency_interval_unit = fields.Selection(related="company_id.currency_interval_unit", readonly=False)
     currency_provider = fields.Selection(related="company_id.currency_provider", readonly=False)
     currency_next_execution_date = fields.Date(related="company_id.currency_next_execution_date", readonly=False)
+    last_currency_sync_date = fields.Date(related="company_id.last_currency_sync_date", readonly=False)
 
     @api.onchange('currency_interval_unit')
     def onchange_currency_interval_unit(self):
@@ -482,6 +392,8 @@ class ResConfigSettings(models.TransientModel):
 
     def update_currency_rates_manually(self):
         self.ensure_one()
+        if self.company_id.currency_provider == 'yahoo':
+            raise UserError(_("The Yahoo currency rate web service has been discontinued. Please select another currency rate provider."))
 
         if not (self.company_id.update_currency_rates()):
             raise UserError(_('Unable to connect to the online exchange rate platform. The web service may be temporary down. Please try again in a moment.'))

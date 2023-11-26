@@ -5,16 +5,16 @@ from .taxcloud_request import TaxCloudRequest
 from odoo import api, models
 
 
-class AccountMove(models.Model):
-    _inherit = 'account.move'
+class AccountInvoice(models.Model):
+    _inherit = 'account.invoice'
 
     @api.model
     def _get_TaxCloudRequest(self, api_id, api_key):
         return TaxCloudRequest(api_id, api_key)
 
 
-class AccountMoveLine(models.Model):
-    _inherit = 'account.move.line'
+class AccountInvoiceLine(models.Model):
+    _inherit = 'account.invoice.line'
 
     def _is_delivery(self):
         """Part of the common interface between order lines and invoice lines.

@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import datetime
 from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-import re
-import logging
 
-_logger = logging.getLogger(__name__)
 
 class SaleOrder(models.Model):
     _name = "sale.order"
@@ -43,23 +41,16 @@ class SaleOrder(models.Model):
             action['res_id'] = subscriptions.ids[0]
         else:
             action = {'type': 'ir.actions.act_window_close'}
-        action['context'] = dict(self._context, create=False)
         return action
 
     def action_draft(self):
-        if any([order.state == 'cancel' and any([line.subscription_id for line in order.order_line]) for order in self]):
+        if any([order.state == 'cancel' and any([line.subscription_id and line.subscription_id.in_progress == False for line in order.order_line]) for order in self]):
             raise UserError(_('You cannot set to draft a canceled quotation linked to subscriptions. Please create a new quotation.'))
         return super(SaleOrder, self).action_draft()
 
     def _prepare_subscription_data(self, template):
         """Prepare a dictionnary of values to create a subscription from a template."""
         self.ensure_one()
-        date_today = fields.Date.context_today(self)
-        recurring_invoice_day = date_today.day
-        recurring_next_date = self.env['sale.subscription']._get_recurring_next_date(
-            template.recurring_rule_type, template.recurring_interval,
-            date_today, recurring_invoice_day
-        )
         values = {
             'name': template.name,
             'template_id': template.id,
@@ -71,13 +62,17 @@ class SaleOrder(models.Model):
             'pricelist_id': self.pricelist_id.id,
             'company_id': self.company_id.id,
             'analytic_account_id': self.analytic_account_id.id,
-            'recurring_next_date': recurring_next_date,
-            'recurring_invoice_day': recurring_invoice_day,
             'payment_token_id': self.transaction_ids.get_last_transaction().payment_token_id.id if template.payment_mode in ['validate_send_payment', 'success_payment'] else False
         }
         default_stage = self.env['sale.subscription.stage'].search([('in_progress', '=', True)], limit=1)
         if default_stage:
             values['stage_id'] = default_stage.id
+        # compute the next date
+        today = datetime.date.today()
+        periods = {'daily': 'days', 'weekly': 'weeks', 'monthly': 'months', 'yearly': 'years'}
+        invoicing_period = relativedelta(**{periods[template.recurring_rule_type]: template.recurring_interval})
+        recurring_next_date = today + invoicing_period
+        values['recurring_next_date'] = fields.Date.to_string(recurring_next_date)
         return values
 
     def update_existing_subscriptions(self):
@@ -116,7 +111,7 @@ class SaleOrder(models.Model):
         """
         res = []
         for order in self:
-            to_create = order._split_subscription_lines()
+            to_create = self._split_subscription_lines()
             # create a subscription for each template with all the necessary lines
             for template in to_create:
                 values = order._prepare_subscription_data(template)
@@ -138,10 +133,11 @@ class SaleOrder(models.Model):
         new_sub_lines = self.order_line.filtered(lambda l: not l.subscription_id and l.product_id.subscription_template_id and l.product_id.recurring_invoice)
         templates = new_sub_lines.mapped('product_id').mapped('subscription_template_id')
         for template in templates:
-            lines = self.order_line.filtered(lambda l: l.product_id.subscription_template_id == template and l.product_id.recurring_invoice)
+            lines = self.order_line.filtered(lambda l: l.product_id.subscription_template_id == template)
             res[template] = lines
         return res
 
+    @api.multi
     def _action_confirm(self):
         """Update and/or create subscriptions on order confirmation."""
         res = super(SaleOrder, self)._action_confirm()
@@ -149,74 +145,41 @@ class SaleOrder(models.Model):
         self.create_subscriptions()
         return res
 
-    def _get_payment_type(self, tokenize=False):
-        contains_subscription = any(line.product_id.recurring_invoice for line in self.sudo().order_line)
-        return super()._get_payment_type(tokenize=contains_subscription or tokenize)
+    def _get_payment_type(self):
+        if any(line.product_id.recurring_invoice for line in self.sudo().order_line):
+            return 'form_save'
+        return super(SaleOrder, self)._get_payment_type()
 
 
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
 
-    subscription_id = fields.Many2one('sale.subscription', 'Subscription', copy=False, check_company=True)
+    subscription_id = fields.Many2one('sale.subscription', 'Subscription', copy=False)
 
-    def _prepare_invoice_line(self):
+    def _prepare_invoice_line(self, qty):
         """
         Override to add subscription-specific behaviours.
 
         Display the invoicing period in the invoice line description, link the invoice line to the
-        correct subscription and to the subscription's analytic account if present, add revenue dates.
+        correct subscription and to the subscription's analytic account if present.
         """
-        res = super(SaleOrderLine, self)._prepare_invoice_line()  # <-- ensure_one()
+        res = super(SaleOrderLine, self)._prepare_invoice_line(qty)
         if self.subscription_id:
             res.update(subscription_id=self.subscription_id.id)
-            periods = {'daily': 'days', 'weekly': 'weeks', 'monthly': 'months', 'yearly': 'years'}
-            next_date = self.subscription_id.recurring_next_date or fields.Date.context_today(self)
-            previous_date = next_date - relativedelta(**{periods[self.subscription_id.recurring_rule_type]: self.subscription_id.recurring_interval})
-            is_already_period_msg = False
-            if self.order_id.subscription_management != 'upsell':  # renewal or creation: one entire period
-                date_start = previous_date
-                date_start_display = previous_date
-                date_end = next_date - relativedelta(days=1)  # the period does not include the next renewal date
-            else:  # upsell: pro-rated period
-                date_start, date_start_display, date_end = None, None, None
-                try:
-                    regexp = r"\[(\d{4}-\d{2}-\d{2}) -> (\d{4}-\d{2}-\d{2})\]"
-                    match = re.search(regexp, self.name)
-                    date_start = fields.Date.from_string(match.group(1))
-                    date_start_display = date_start
-                    date_end = fields.Date.from_string(match.group(2))
-                except Exception:
-                    _logger.error('_prepare_invoice_line: unable to compute invoicing period for %r - "%s"', self, self.name)
-                    # Fallback on discount
-                if not date_start or not date_start_display or not date_end:
-                    # here we have a slight problem: the date used to compute the pro-rated discount
-                    # (that is, the date_from in the upsell wizard) is not stored on the line,
-                    # preventing an exact computation of start and end revenue dates
-                    # witness me as I try to retroengineer the ~correct dates 🙆‍
-                    # (based on `partial_recurring_invoice_ratio` from the sale.subscription model)
-                    total_days = (next_date - previous_date).days
-                    days = round((1 - self.discount / 100.0) * total_days)
-                    date_start = next_date - relativedelta(days=days+1)
-                    date_start_display = next_date - relativedelta(days=days)
-                    date_end = next_date - relativedelta(days=1)
-                else:
-                    is_already_period_msg = True
-            if not is_already_period_msg:
+            if self.order_id.subscription_management != 'upsell':
+                next_date = fields.Date.from_string(self.subscription_id.recurring_next_date) or datetime.date.today()
+                periods = {'daily': 'days', 'weekly': 'weeks', 'monthly': 'months', 'yearly': 'years'}
+                previous_date = next_date - relativedelta(**{periods[self.subscription_id.recurring_rule_type]: self.subscription_id.recurring_interval})
                 lang = self.order_id.partner_invoice_id.lang
                 format_date = self.env['ir.qweb.field.date'].with_context(lang=lang).value_to_html
+
                 # Ugly workaround to display the description in the correct language
                 if lang:
                     self = self.with_context(lang=lang)
-                period_msg = _("Invoicing period") + ": [%s -> %s]" % (fields.Date.to_string(date_start_display), fields.Date.to_string(date_end))
-                res.update({
-                    'name': res['name'] + '\n' + period_msg,
-                })
-            res.update({
-                'subscription_start_date': date_start,
-                'subscription_end_date': date_end,
-            })
+                period_msg = _("Invoicing period: %s - %s") % (format_date(fields.Date.to_string(previous_date), {}), format_date(fields.Date.to_string(next_date - relativedelta(days=1)), {}))
+                res.update(name=res['name'] + '\n' + period_msg)
             if self.subscription_id.analytic_account_id:
-                res['analytic_account_id'] = self.subscription_id.analytic_account_id.id
+                res['account_analytic_id'] = self.subscription_id.analytic_account_id.id
         return res
 
     @api.model

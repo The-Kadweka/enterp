@@ -29,7 +29,7 @@ odoo.define('website.home_menu', function (require) {
             }
             $button.removeClass('fa fa-th').append($('<span/>', {'class': 'fa fa-spin fa-spinner'}));
             var url = '/web#home';
-            window.location.href = url;
+            window.location.href = session.debug ? $.param.querystring(url, {debug: session.debug}) : url;
         },
     });
 });

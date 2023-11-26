@@ -64,13 +64,12 @@ var OnlineSyncAccountInstitutionSelector = AbstractAction.extend({
         self._rpc({
             model: 'account.online.provider',
             method: 'get_login_form',
-            args: [[], instId, provider, beta],
-            context: self.context,
+            args: [[], instId, provider, beta, self.context],
         })
         .then(function(result) {
             self.do_action(result);
         })
-        .guardedCatch(function () {
+        .fail(function () {
             self.willDisappear = false;
         });
     },
@@ -101,7 +100,7 @@ var OnlineSyncAccountInstitutionSelector = AbstractAction.extend({
         return self._rpc({
             model: 'account.online.provider',
             method: 'get_manual_configuration_form',
-            context: self.context,
+            args: [self.context]
         })
         .then(function(action) {
             self.do_action(action, {
@@ -205,7 +204,7 @@ var OnlineSyncAccountInstitutionSelector = AbstractAction.extend({
                     self.results = results.match || [];
                     self.displayState();
                     self.search_allowed = true;
-                }).guardedCatch(function(){
+                }).fail(function(){
                     framework.unblockUI();
                     // If RPC call failed (might be due to error because search string is less than 3 char), unblock search
                     self.search_allowed = true;

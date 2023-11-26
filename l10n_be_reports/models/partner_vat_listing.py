@@ -12,7 +12,7 @@ class ReportL10nBePartnerVatListing(models.AbstractModel):
     _description = "Partner VAT Listing"
     _inherit = 'account.report'
 
-    filter_date = {'mode': 'range', 'filter': 'this_month'}
+    filter_date = {'date_from': '', 'date_to': '', 'filter': 'this_month'}
 
     @api.model
     def _get_lines(self, options, line_id=None):
@@ -24,54 +24,59 @@ class ReportL10nBePartnerVatListing(models.AbstractModel):
         if not partner_ids:
             return lines
 
-        tag_ids = [self.env['ir.model.data'].xmlid_to_res_id(k) for k in ['l10n_be.tax_report_line_00', 'l10n_be.tax_report_line_01', 'l10n_be.tax_report_line_02', 'l10n_be.tax_report_line_03', 'l10n_be.tax_report_line_45', 'l10n_be.tax_report_line_49']]
-        tag_ids_2 = [self.env['ir.model.data'].xmlid_to_res_id(k) for k in ['l10n_be.tax_report_line_54', 'l10n_be.tax_report_line_64']]
+        tag_ids = [self.env['ir.model.data'].xmlid_to_res_id(k) for k in ['l10n_be.tax_tag_00', 'l10n_be.tax_tag_01', 'l10n_be.tax_tag_02', 'l10n_be.tax_tag_03', 'l10n_be.tax_tag_45', 'l10n_be.tax_tag_49']]
+        tag_ids_2 = [self.env['ir.model.data'].xmlid_to_res_id(k) for k in ['l10n_be.tax_tag_54', 'l10n_be.tax_tag_64']]
         query = """
             SELECT turnover_sub.partner_id, turnover_sub.name, turnover_sub.vat, turnover_sub.turnover, refund_vat_sub.refund_base, refund_base_sub.vat_amount, refund_base_sub.refund_vat_amount
               FROM (SELECT l.partner_id, p.name, p.vat, SUM(l.credit - l.debit) as turnover
                   FROM account_move_line l
-                  LEFT JOIN res_partner p ON l.partner_id = p.id
-                  JOIN account_account_tag_account_move_line_rel aml_tag ON l.id = aml_tag.account_move_line_id
-                  JOIN account_tax_report_line_tags_rel tag_rep_ln ON tag_rep_ln.account_account_tag_id = aml_tag.account_account_tag_id
-                  LEFT JOIN account_move inv ON l.move_id = inv.id
+                  LEFT JOIN res_partner p ON l.partner_id = p.id AND p.customer = true
+                  RIGHT JOIN (
+                      SELECT DISTINCT amlt.account_move_line_id
+                      FROM account_move_line_account_tax_rel amlt
+                      LEFT JOIN account_tax_account_tag tt on amlt.account_tax_id = tt.account_tax_id
+                      WHERE tt.account_account_tag_id IN %(tags)s
+                  ) AS x ON x.account_move_line_id = l.id
+                          LEFT JOIN account_invoice inv ON l.invoice_id = inv.id
                   WHERE p.vat IS NOT NULL
-				  AND tag_rep_ln.account_tax_report_line_id IN %(tags)s
                   AND l.partner_id IN %(partner_ids)s
                   AND l.date >= %(date_from)s
                   AND l.date <= %(date_to)s
                   AND l.company_id IN %(company_ids)s
-                  AND ((l.move_id IS NULL AND l.credit > 0)
-                    OR (inv.type IN ('out_refund', 'out_invoice') AND inv.state = 'posted'))
+                  AND ((l.invoice_id IS NULL AND l.credit > 0)
+                    OR (inv.type IN ('out_refund', 'out_invoice') AND inv.state IN ('open', 'in_payment', 'paid')))
                   GROUP BY l.partner_id, p.name, p.vat) AS turnover_sub
                     FULL JOIN (SELECT l.partner_id, SUM(l.debit-l.credit) AS refund_base
                         FROM account_move_line l
-                        JOIN res_partner p ON l.partner_id = p.id
-                        JOIN account_account_tag_account_move_line_rel aml_tag ON l.id = aml_tag.account_move_line_id
-                        JOIN account_tax_report_line_tags_rel tag_rep_ln ON tag_rep_ln.account_account_tag_id = aml_tag.account_account_tag_id
-                        LEFT JOIN account_move inv ON l.move_id = inv.id
-                        WHERE p.vat IS NOT NULL
-                        AND tag_rep_ln.account_tax_report_line_id IN %(tags)s
-                        AND l.partner_id IN %(partner_ids)s
-                        AND l.date >= %(date_from)s
-                        AND l.date <= %(date_to)s
-                        AND l.company_id IN %(company_ids)s
-                        AND ((l.move_id IS NULL AND l.credit > 0)
-                          OR (inv.type = 'out_refund' AND inv.state = 'posted'))
-                        GROUP BY l.partner_id, p.name, p.vat) AS refund_vat_sub
+                        LEFT JOIN res_partner p ON l.partner_id = p.id AND p.customer = true
+                         RIGHT JOIN (
+                              SELECT DISTINCT amlt.account_move_line_id
+                              FROM account_move_line_account_tax_rel amlt
+                              LEFT JOIN account_tax_account_tag tt on amlt.account_tax_id = tt.account_tax_id
+                              WHERE tt.account_account_tag_id IN %(tags)s
+                          ) AS x ON x.account_move_line_id = l.id
+                          LEFT JOIN account_invoice inv ON l.invoice_id = inv.id
+                          WHERE p.vat IS NOT NULL
+                          AND l.partner_id IN %(partner_ids)s
+                          AND l.date >= %(date_from)s
+                          AND l.date <= %(date_to)s
+                          AND l.company_id IN %(company_ids)s
+                          AND ((l.invoice_id IS NULL AND l.credit > 0)
+                            OR (inv.type = 'out_refund' AND inv.state IN ('open', 'in_payment', 'paid')))
+                          GROUP BY l.partner_id, p.name, p.vat) AS refund_vat_sub
                     ON turnover_sub.partner_id = refund_vat_sub.partner_id
-            LEFT JOIN (SELECT COALESCE(l2.partner_id, inv.partner_id) as partner_id, SUM(l2.credit - l2.debit) as vat_amount, SUM(l2.debit) AS refund_vat_amount
+            LEFT JOIN (SELECT l2.partner_id, SUM(l2.credit - l2.debit) as vat_amount, SUM(l2.debit) AS refund_vat_amount
                   FROM account_move_line l2
-                  JOIN account_account_tag_account_move_line_rel aml_tag2 ON l2.id = aml_tag2.account_move_line_id
-                  JOIN account_tax_report_line_tags_rel tag_rep_ln_2 ON tag_rep_ln_2.account_account_tag_id = aml_tag2.account_account_tag_id
-                  LEFT JOIN account_move inv ON l2.move_id = inv.id
-                  WHERE tag_rep_ln_2.account_tax_report_line_id IN %(tags2)s
-                  AND COALESCE(l2.partner_id, inv.partner_id) IN %(partner_ids)s
+                  LEFT JOIN account_tax tax2 on l2.tax_line_id = tax2.id
+                          LEFT JOIN account_invoice inv ON l2.invoice_id = inv.id
+                  WHERE tax2.id IN (SELECT DISTINCT(account_tax_id) from account_tax_account_tag WHERE account_account_tag_id IN %(tags2)s)
+                  AND l2.partner_id IN %(partner_ids)s
                   AND l2.date >= %(date_from)s
                   AND l2.date <= %(date_to)s
                   AND l2.company_id IN %(company_ids)s
-                  AND ((l2.move_id IS NULL AND l2.credit > 0)
-                   OR (inv.type IN ('out_refund', 'out_invoice') AND inv.state = 'posted'))
-                GROUP BY COALESCE(l2.partner_id, inv.partner_id)) AS refund_base_sub
+                  AND ((l2.invoice_id IS NULL AND l2.credit > 0)
+                   OR (inv.type IN ('out_refund', 'out_invoice') AND inv.state IN ('open', 'in_payment', 'paid')))
+                GROUP BY l2.partner_id) AS refund_base_sub
               ON turnover_sub.partner_id = refund_base_sub.partner_id
            WHERE turnover > 250 OR refund_base > 0 OR refund_vat_amount > 0
         """
@@ -86,7 +91,7 @@ class ReportL10nBePartnerVatListing(models.AbstractModel):
         self.env.cr.execute(query, params)
 
         for record in self.env.cr.dictfetchall():
-            currency_id = self.env.company.currency_id
+            currency_id = self.env.user.company_id.currency_id
             columns = [record['vat'].replace(' ', '').upper(), record['turnover'], record['vat_amount']]
             if not context.get('no_format', False):
                 columns[1] = formatLang(self.env, columns[1] or 0.0, currency_obj=currency_id)
@@ -112,12 +117,12 @@ class ReportL10nBePartnerVatListing(models.AbstractModel):
 
     def _get_reports_buttons(self):
         buttons = super(ReportL10nBePartnerVatListing, self)._get_reports_buttons()
-        buttons += [{'name': _('Export (XML)'), 'sequence': 3, 'action': 'print_xml', 'file_export_type': _('XML')}]
+        buttons += [{'name': _('Export (XML)'), 'action': 'print_xml'}]
         return buttons
 
     def get_xml(self, options):
         # Precheck
-        company = self.env.company
+        company = self.env.user.company_id
         company_vat = company.partner_id.vat
         if not company_vat:
             raise UserError(_('No VAT number associated with your company.'))
@@ -231,4 +236,4 @@ class ReportL10nBePartnerVatListing(models.AbstractModel):
   </ns2:ClientListingConsignment>
   """ % annual_listing_data
 
-        return (data_file + data_begin + data_comp + data_client_info + data_end).encode('ISO-8859-1', 'ignore')
+        return data_file + data_begin + data_comp + data_client_info + data_end

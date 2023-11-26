@@ -1,23 +1,23 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_taxcloud
+# * account_taxcloud
 # 
 # Translators:
-# Martin Trigaux, 2019
-# Morten Schou <ms@msteknik.dk>, 2019
-# Jesper Carstensen <jc@danodoo.dk>, 2019
-# Ejner Sønniksen <ejner@vkdata.dk>, 2019
-# lhmflexerp <lhm@flexerp.dk>, 2019
-# Sanne Kristensen <sanne@vkdata.dk>, 2020
+# Martin Trigaux, 2018
+# Morten Schou <ms@msteknik.dk>, 2018
+# Jesper Carstensen <jc@danodoo.dk>, 2018
+# lhmflexerp <lhm@flexerp.dk>, 2018
+# Sanne Kristensen <sanne@vkdata.dk>, 2018
 # Mads Søndergaard, 2020
+# Mads Søndergaard <mads@vkdata.dk>, 2020
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-27 09:32+0000\n"
-"PO-Revision-Date: 2019-08-26 09:34+0000\n"
-"Last-Translator: Mads Søndergaard, 2020\n"
+"POT-Creation-Date: 2018-12-19 09:12+0000\n"
+"PO-Revision-Date: 2018-08-24 11:37+0000\n"
+"Last-Translator: Mads Søndergaard <mads@vkdata.dk>, 2020\n"
 "Language-Team: Danish (https://www.transifex.com/odoo/teams/41243/da/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -83,18 +83,33 @@ msgid "Default TIC Code"
 msgstr "Standard TIC kode"
 
 #. module: account_taxcloud
+#: model:ir.model.fields,help:account_taxcloud.field_res_company__tic_category_id
+#: model:ir.model.fields,help:account_taxcloud.field_res_config_settings__tic_category_id
+msgid ""
+"Default TICs(Taxability information codes) code to get sales tax from "
+"TaxCloud by product category."
+msgstr ""
+"Standard TIC (Taxability Information Codes) kode til at indhente moms fra "
+"TaxCloud per produktkategori."
+
+#. module: account_taxcloud
 #: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category__display_name
 msgid "Display Name"
 msgstr "Vis navn"
 
 #. module: account_taxcloud
-#: model_terms:ir.ui.view,arch_db:account_taxcloud.account_position_taxcloud_inherit_from_view
+#: model:ir.model.fields,help:account_taxcloud.field_product_product__tic_category_id
+#: model:ir.model.fields,help:account_taxcloud.field_product_template__tic_category_id
 msgid ""
-"Enable <b>Detect Automatically</b> to automatically use TaxCloud when "
-"selling to American customers."
+"Each product falls into a category which has specific taxes predermined by "
+"the government.The system will use the Tax Cloud category set on the "
+"internal category of the product. If thereisn't any, the one on the product "
+"itself will be used. Only used in United States."
 msgstr ""
-"Aktiver <b>Opdag automatisk</b> for automatisk at bruge TaxCloud ved salg "
-"til Amerikanske kunder."
+"Hvert produkt tilhører en kategori som har specifikke afgifter forudbestemt "
+"af regeringen. Systemet vil bruge Tax Cloud kategorien angivet på produktets"
+" interne kategori. Hvis der ikke er nogen, vil den angivet på produktet selv"
+" blive brugt. Bruges kun i USA."
 
 #. module: account_taxcloud
 #: model:ir.model,name:account_taxcloud.model_account_fiscal_position
@@ -102,32 +117,14 @@ msgid "Fiscal Position"
 msgstr "Bogføringsgruppe"
 
 #. module: account_taxcloud
-#: model_terms:ir.ui.view,arch_db:account_taxcloud.account_position_taxcloud_inherit_from_view
-#: model_terms:ir.ui.view,arch_db:account_taxcloud.invoice_form_inherit
-msgid "Go to Settings."
-msgstr "Gå til Indstillinger."
-
-#. module: account_taxcloud
 #: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category__id
 msgid "ID"
 msgstr "ID"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_account_fiscal_position__is_taxcloud_configured
-#: model:ir.model.fields,field_description:account_taxcloud.field_account_move__is_taxcloud_configured
-#: model:ir.model.fields,field_description:account_taxcloud.field_res_company__is_taxcloud_configured
-msgid "Is Taxcloud Configured"
-msgstr "Er Taxcloud konfigureret"
-
-#. module: account_taxcloud
-#: model:ir.model,name:account_taxcloud.model_account_move
-msgid "Journal Entries"
-msgstr "Journalposter"
-
-#. module: account_taxcloud
-#: model:ir.model,name:account_taxcloud.model_account_move_line
-msgid "Journal Item"
-msgstr "Journalpost"
+#: model:ir.model,name:account_taxcloud.model_account_invoice
+msgid "Invoice"
+msgstr "Faktura"
 
 #. module: account_taxcloud
 #: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category____last_update
@@ -145,18 +142,9 @@ msgid "Last Updated on"
 msgstr "Sidst opdateret den"
 
 #. module: account_taxcloud
-#: model_terms:ir.ui.view,arch_db:account_taxcloud.account_position_taxcloud_inherit_from_view
-#: model_terms:ir.ui.view,arch_db:account_taxcloud.invoice_form_inherit
-msgid ""
-"Please enter your Taxcloud credentials to compute tax rates automatically."
-msgstr ""
-"Angiv venligst dine Taxcloud legitimationsoplysninger for at udregne "
-"momsrater automatisk."
-
-#. module: account_taxcloud
 #: model:ir.model,name:account_taxcloud.model_product_category
 msgid "Product Category"
-msgstr "Produktkategori"
+msgstr "Produkt kategori"
 
 #. module: account_taxcloud
 #: model_terms:ir.ui.view,arch_db:account_taxcloud.account_taxcloud_tic_category_search
@@ -172,22 +160,6 @@ msgstr "Produkt TIC kategori"
 #: model:ir.model,name:account_taxcloud.model_product_template
 msgid "Product Template"
 msgstr "Produktskabelon"
-
-#. module: account_taxcloud
-#: model:ir.model.fields,help:account_taxcloud.field_res_company__tic_category_id
-#: model:ir.model.fields,help:account_taxcloud.field_res_config_settings__tic_category_id
-msgid ""
-"TIC (Taxability Information Codes) allow to get specific tax rates for each "
-"product type. This default value applies if no product is used in the "
-"order/invoice, or if no TIC is set on the product or its product category. "
-"By default, TaxCloud relies on the TIC *[0] Uncategorized* default referring"
-" to general goods and services."
-msgstr ""
-"TIC (Momspålæggelse information koder) gør det muligt at specificere "
-"momrater for hver produkttype. Standard værdien anvendes hvis intet produkt "
-"bruges i ordren/fakturaen, eller hvis ingen TIC er angivet for produktet "
-"eller dets produkt kategori. Per standard gør TaxCloud brug af TIC *[0] "
-"Ukategoriseret*, som referere til almene varer og tjenester."
 
 #. module: account_taxcloud
 #: model_terms:ir.ui.view,arch_db:account_taxcloud.account_taxcloud_tic_category_tree
@@ -216,13 +188,11 @@ msgid "TaxCloud"
 msgstr "TaxCloud"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_res_company__taxcloud_api_id
 #: model:ir.model.fields,field_description:account_taxcloud.field_res_config_settings__taxcloud_api_id
 msgid "TaxCloud API ID"
 msgstr "TaxCloud API ID"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_res_company__taxcloud_api_key
 #: model:ir.model.fields,field_description:account_taxcloud.field_res_config_settings__taxcloud_api_key
 msgid "TaxCloud API KEY"
 msgstr "TaxCloud API KEY"
@@ -242,10 +212,24 @@ msgid "TaxCloud Category"
 msgstr "TaxCloud Kategori"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,help:account_taxcloud.field_account_move__is_taxcloud
-msgid "Technical field to determine whether to hide taxes in views or not."
+#: model:ir.model.fields,help:account_taxcloud.field_product_category__tic_category_id
+msgid ""
+"TaxCloud uses Taxability Information Codes (TIC) to make sure each item in "
+"your catalog is taxed at the right rate (or, for tax-exempt items, not taxed"
+" at all), so it's important to make sure that each item is assigned a TIC. "
+"If you can't find the right tax category for an item in your catalog, you "
+"can assign it to the 'General Goods and Services' TIC, 00000. TaxCloud "
+"automatically assigns products to this TIC as a default, so unless you've "
+"changed an item's TIC in the past, it should already be set to 00000."
 msgstr ""
-"Teknisk felt til at afgøre hvorvidt moms skal skjules i visninger eller ej."
+"TaxCloud anvender Taxability Information Codes (TIC) til at forsikre at hver"
+" varer i dit katalog er takseret til den korrekte sats (eller, for momsfri "
+"varer, ikke takseret overhovedet), så det er vigtigt at forsikre at hver "
+"vare er tildelt et TIC. Hvis du ikke kan finde den korrekte momskategori for"
+" en vare i dit katalog, kan du tildele den 'Generelle Varer og Ydelser' "
+"TIC'en 00000. TaxCloud tildeler automatisk produkter dette TIC per standard,"
+" så medmindre du har ændret en vares TIC før, bør den være angivet til "
+"00000."
 
 #. module: account_taxcloud
 #: model:ir.model,name:account_taxcloud.model_account_fiscal_position_template
@@ -253,8 +237,15 @@ msgid "Template for Fiscal Position"
 msgstr "Skabelon for bogføringsgruppe"
 
 #. module: account_taxcloud
-#: code:addons/account_taxcloud/models/account_invoice.py:0
-#: code:addons/account_taxcloud/models/account_invoice.py:0
+#: code:addons/account_taxcloud/models/account_invoice.py:43
+#: code:addons/account_taxcloud/models/res_config_settings.py:23
+#, python-format
+msgid "The configuration of TaxCloud is in the Accounting app, Settings menu."
+msgstr ""
+"Konfigurationen af TaxCloud i Regnskab applikationen, Indstillinger menu."
+
+#. module: account_taxcloud
+#: code:addons/account_taxcloud/models/account_invoice.py:115
 #, python-format
 msgid ""
 "The source document on the refund is not valid and thus the refunded cart "
@@ -264,7 +255,7 @@ msgstr ""
 "vil derfor ikke blive registreret på din taxcloud konto"
 
 #. module: account_taxcloud
-#: code:addons/account_taxcloud/models/account_invoice.py:0
+#: code:addons/account_taxcloud/models/account_invoice.py:85
 #, python-format
 msgid ""
 "The tax rates have been updated, you may want to check it before validation"
@@ -273,57 +264,25 @@ msgstr ""
 "godkendelse"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,help:account_taxcloud.field_product_product__tic_category_id
-#: model:ir.model.fields,help:account_taxcloud.field_product_template__tic_category_id
-msgid ""
-"This refers to TIC (Taxability Information Codes), these are used by "
-"TaxCloud to compute specific tax rates for each product type. The value set "
-"here prevails over the one set on the product category."
-msgstr ""
-"Dette referere til TIC (Momspålæggelse information koder), dette bruges af "
-"TaxCloud til at udregne specifikke momsrater for hver produkt type. Værdien "
-"angivet her tager præcedens over den angivet for produkt kategorien."
-
-#. module: account_taxcloud
-#: model:ir.model.fields,help:account_taxcloud.field_product_category__tic_category_id
-msgid ""
-"This refers to TIC (Taxability Information Codes), these are used by "
-"TaxCloud to compute specific tax rates for each product type. This value is "
-"used when no TIC is set on the product. If no value is set here, the default"
-" value set in Invoicing settings is used."
-msgstr ""
-"Dette referere til TIC (Momspålæggelses information koder), dette bruges af "
-"TaxCloud til at udregne specifikke momsrater for hver produkt type. Denne "
-"værdi bruges når TIC ikke er angivet for produktet. Hvis ingen værdi er "
-"angivet, vil standard værdien angivet i fakturerings indstillinger blive "
-"brugt."
-
-#. module: account_taxcloud
-#: code:addons/account_taxcloud/models/account_invoice.py:0
-#: code:addons/account_taxcloud/models/res_config_settings.py:0
+#: code:addons/account_taxcloud/models/account_invoice.py:43
+#: code:addons/account_taxcloud/models/res_config_settings.py:23
 #, python-format
 msgid "Unable to retrieve taxes from TaxCloud: "
 msgstr "Kunne ikke indhente moms fra TaxCloud:"
 
 #. module: account_taxcloud
+#: model:ir.actions.server,name:account_taxcloud.action_account_invoice_update_taxes
+msgid "Update taxes with Taxcloud"
+msgstr "Opdatér moms med Taxcloud"
+
+#. module: account_taxcloud
 #: model:ir.model.fields,field_description:account_taxcloud.field_account_fiscal_position__is_taxcloud
 #: model:ir.model.fields,field_description:account_taxcloud.field_account_fiscal_position_template__is_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_account_move__is_taxcloud
 msgid "Use TaxCloud API"
 msgstr "Anvend TaxCloud API"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,help:account_taxcloud.field_account_fiscal_position__is_taxcloud_configured
-#: model:ir.model.fields,help:account_taxcloud.field_account_move__is_taxcloud_configured
-#: model:ir.model.fields,help:account_taxcloud.field_res_company__is_taxcloud_configured
-msgid ""
-"Used to determine whether or not to warn the user to configure TaxCloud."
-msgstr ""
-"Brugt til at afgøre hvorvidt brugeren skal advares om at konfigurere "
-"TaxCloud eller ej."
-
-#. module: account_taxcloud
-#: code:addons/account_taxcloud/models/account_invoice.py:0
+#: code:addons/account_taxcloud/models/account_invoice.py:24
 #, python-format
 msgid ""
 "You cannot cancel an invoice sent to TaxCloud.\n"
@@ -335,7 +294,7 @@ msgstr ""
 "På denne måde vil moms registreringer blive annulleret i TaxCloud."
 
 #. module: account_taxcloud
-#: code:addons/account_taxcloud/models/product.py:0
+#: code:addons/account_taxcloud/models/product.py:28
 #, python-format
 msgid "[%s] %s"
 msgstr "[%s] %s"

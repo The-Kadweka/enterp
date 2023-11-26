@@ -8,7 +8,6 @@ var field_utils = require('web.field_utils');
 var qweb = core.qweb;
 
 var CohortRenderer = AbstractRenderer.extend({
-    className: 'o_cohort_view',
     events: _.extend({}, AbstractRenderer.prototype.events, {
         'click .o_cohort_row_clickable': '_onClickRow',
     }),
@@ -59,27 +58,12 @@ var CohortRenderer = AbstractRenderer.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * Used to determine whether or not to display the no content helper.
-     *
-     * @private
-     * @returns {boolean}
-     */
-    _hasContent: function () {
-        return this.state.report.rows.length ||
-               (this.state.comparisonReport && this.state.comparisonReport.rows.length);
-    },
-    /**
      * @override
      * @private
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _render: function () {
         var self = this;
-        if (!this._hasContent()) {
-           // display the nocontent helper
-            this.$el.empty().append(qweb.render('View.NoContentHelper'));
-            return this._super.apply(this, arguments);
-        }
         this.$el.empty().append(qweb.render('CohortView', {
             report: this.state.report,
             comparisonReport: this.state.comparisonReport,
@@ -114,7 +98,7 @@ var CohortRenderer = AbstractRenderer.extend({
     _format_float: function (value) {
         return field_utils.format.float(value, null, {
             digits: [42, 1],
-        });
+        })
     },
     /**
      * @private
@@ -124,7 +108,7 @@ var CohortRenderer = AbstractRenderer.extend({
     _format_percentage: function (value) {
         return field_utils.format.percentage(value, null, {
             digits: [42, 1],
-        });
+        })
     },
 
     //--------------------------------------------------------------------------

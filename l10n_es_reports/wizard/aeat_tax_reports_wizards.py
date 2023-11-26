@@ -8,7 +8,7 @@ class AEATTaxReportWizard(models.TransientModel):
     _description = "AEAT Tax Report Wizard"
     _modelo = None # To be defined in subclasses as 'xxx', where xxx is the modelo number of the implemented AEAT tax report
 
-    currency_id = fields.Many2one(string='Currency', comodel_name='res.currency', default=lambda x: x.env.company.currency_id)
+    currency_id = fields.Many2one(string='Currency', comodel_name='res.currency', default=lambda x: x.env['res.company']._company_default_get().currency_id)
 
     def close_and_show_report(self):
         report = self.env.ref('l10n_es_reports.mod_' + self._modelo)
@@ -27,7 +27,6 @@ class AEATTaxReportWizard(models.TransientModel):
 
 class Mod111Wizard(models.TransientModel):
     _name = 'l10n_es_reports.mod111.wizard'
-    _description = "Spain Tax Report Wizard for (mod111)"
     _inherit = 'l10n_es_reports.aeat.report.wizard'
     _modelo = '111'
 
@@ -54,7 +53,6 @@ class Mod111Wizard(models.TransientModel):
 
 class Mod115Wizard(models.TransientModel):
     _name = 'l10n_es_reports.mod115.wizard'
-    _description = "Spain Tax Report Wizard for (mod115)"
     _inherit = 'l10n_es_reports.aeat.report.wizard'
     _modelo = '115'
 
@@ -63,7 +61,6 @@ class Mod115Wizard(models.TransientModel):
 
 class Mod303Wizard(models.TransientModel):
     _name = 'l10n_es_reports.mod303.wizard'
-    _description = "Spain Tax Report Wizard for (mod303)"
     _inherit = 'l10n_es_reports.aeat.report.wizard'
     _modelo = '303'
 

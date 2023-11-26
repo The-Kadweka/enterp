@@ -5,15 +5,15 @@
 # Translators:
 # Martin Trigaux, 2018
 # Birgir Steinarsson <biggboss83@gmail.com>, 2018
-# Bjorn Ingvarsson <boi@exigo.is>, 2018
+# Björn Ingvarsson <boi@exigo.is>, 2018
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~11.5+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-02 10:31+0000\n"
+"POT-Creation-Date: 2019-01-15 15:18+0000\n"
 "PO-Revision-Date: 2018-08-24 11:38+0000\n"
-"Last-Translator: Bjorn Ingvarsson <boi@exigo.is>, 2018\n"
+"Last-Translator: Björn Ingvarsson <boi@exigo.is>, 2018\n"
 "Language-Team: Icelandic (https://www.transifex.com/odoo/teams/41243/is/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -139,7 +139,7 @@ msgid ""
 "<div>\n"
 "    Dear ${object.sudo().partner_id.name or 'Madam/Sir'},<br/><br/>\n"
 "    Your request\n"
-"    % if object.access_token:\n"
+"    % if object.get_portal_url():\n"
 "    <a href=\"/helpdesk/ticket/${object.id}/${object.access_token}\">${object.name}</a>\n"
 "    % endif\n"
 "    has been received and is being reviewed by our ${object.team_id.name or ''} team.\n"
@@ -181,6 +181,16 @@ msgid "<i class=\"fa fa-arrow-right\"/> View documentation"
 msgstr ""
 
 #. module: helpdesk
+#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_kanban
+msgid "<i class=\"fa fa-comments\" role=\"img\" aria-label=\"Messages\"/>"
+msgstr ""
+
+#. module: helpdesk
+#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
+msgid "<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" title=\"Manage\"/>"
+msgstr ""
+
+#. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.index
 msgid "<i class=\"fa fa-envelope\"/> Email :"
 msgstr ""
@@ -190,6 +200,13 @@ msgstr ""
 msgid ""
 "<i class=\"fa fa-envelope-o\" title=\"Domain alias\" role=\"img\" aria-"
 "label=\"Domain alias\"/>&amp;nbsp;"
+msgstr ""
+
+#. module: helpdesk
+#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
+msgid ""
+"<i class=\"fa fa-fw fa-arrow-right\" role=\"img\" aria-label=\"Rating URL\" "
+"title=\"Rating URL\"/>"
 msgstr ""
 
 #. module: helpdesk
@@ -205,6 +222,13 @@ msgstr ""
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
 msgid "<small class=\"text-right\">Status:</small>"
+msgstr ""
+
+#. module: helpdesk
+#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_kanban
+msgid ""
+"<span class=\"fa fa-clock-o\" title=\"Deadline\" role=\"img\" aria-"
+"label=\"Deadline\"/>"
 msgstr ""
 
 #. module: helpdesk
@@ -1712,6 +1736,12 @@ msgid "Search <span class=\"nolabel\"> (in Content)</span>"
 msgstr ""
 
 #. module: helpdesk
+#: code:addons/helpdesk/controllers/portal.py:36
+#, python-format
+msgid "Search ID"
+msgstr ""
+
+#. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_view_search
 msgid "Search SLA Policies"
 msgstr ""
@@ -2079,12 +2109,6 @@ msgid "This required to have project module installed."
 msgstr ""
 
 #. module: helpdesk
-#: code:addons/helpdesk/models/helpdesk.py:340
-#, python-format
-msgid "This target does not exist."
-msgstr "This target does not exist."
-
-#. module: helpdesk
 #. openerp-web
 #: code:addons/helpdesk/static/src/xml/helpdesk_team_templates.xml:30
 #, python-format
@@ -2163,6 +2187,7 @@ msgstr ""
 #: model:ir.actions.act_window,name:helpdesk.helpdesk_ticket_action_urgent
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__ticket_ids
 #: model:ir.model.fields,field_description:helpdesk.field_res_partner__ticket_count
+#: model:ir.model.fields,field_description:helpdesk.field_res_users__ticket_count
 #: model:ir.ui.menu,name:helpdesk.helpdesk_ticket_report_menu
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_tree

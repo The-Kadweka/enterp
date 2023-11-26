@@ -1,22 +1,21 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_taxcloud
+# * account_taxcloud
 # 
 # Translators:
-# Levent Karakaş <levent@mektup.at>, 2019
-# Murat Kaplan <muratk@projetgrup.com>, 2019
+# Levent Karakaş <levent@mektup.at>, 2018
+# Murat Kaplan <muratk@projetgrup.com>, 2018
+# Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2018
+# Buket Şeker <buket_skr@hotmail.com>, 2018
 # Umur Akın <umura@projetgrup.com>, 2019
-# Buket Şeker <buket_skr@hotmail.com>, 2019
-# Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2020
-# abc Def <hdogan1974@gmail.com>, 2021
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-27 09:32+0000\n"
-"PO-Revision-Date: 2019-08-26 09:34+0000\n"
-"Last-Translator: abc Def <hdogan1974@gmail.com>, 2021\n"
+"POT-Creation-Date: 2018-12-19 09:12+0000\n"
+"PO-Revision-Date: 2018-08-24 11:37+0000\n"
+"Last-Translator: Umur Akın <umura@projetgrup.com>, 2019\n"
 "Language-Team: Turkish (https://www.transifex.com/odoo/teams/41243/tr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -80,16 +79,33 @@ msgid "Default TIC Code"
 msgstr "Varsayılan TIC Kodu"
 
 #. module: account_taxcloud
+#: model:ir.model.fields,help:account_taxcloud.field_res_company__tic_category_id
+#: model:ir.model.fields,help:account_taxcloud.field_res_config_settings__tic_category_id
+msgid ""
+"Default TICs(Taxability information codes) code to get sales tax from "
+"TaxCloud by product category."
+msgstr ""
+"Ürün kategorisine göre TaxCloud'dan satış vergisi almak için varsayılan "
+"kodlama, TIC's  (Vergilendirilebilir bilgi kodları) "
+
+#. module: account_taxcloud
 #: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category__display_name
 msgid "Display Name"
 msgstr "Görünüm Adı"
 
 #. module: account_taxcloud
-#: model_terms:ir.ui.view,arch_db:account_taxcloud.account_position_taxcloud_inherit_from_view
+#: model:ir.model.fields,help:account_taxcloud.field_product_product__tic_category_id
+#: model:ir.model.fields,help:account_taxcloud.field_product_template__tic_category_id
 msgid ""
-"Enable <b>Detect Automatically</b> to automatically use TaxCloud when "
-"selling to American customers."
+"Each product falls into a category which has specific taxes predermined by "
+"the government.The system will use the Tax Cloud category set on the "
+"internal category of the product. If thereisn't any, the one on the product "
+"itself will be used. Only used in United States."
 msgstr ""
+"Her ürün, hükümetin belirlediği belirli vergileri olan bir kategoriye girer."
+" Sistem, ürünün iç kategorisinde ayarlanan Tax Cloud kategorisini "
+"kullanacaktır. Eğer yoksa, ürünün kendisinde olan kullanılacaktır. Sadece "
+"Amerika Birleşik Devletleri'nde kullanılır."
 
 #. module: account_taxcloud
 #: model:ir.model,name:account_taxcloud.model_account_fiscal_position
@@ -97,37 +113,19 @@ msgid "Fiscal Position"
 msgstr "Mali Koşul"
 
 #. module: account_taxcloud
-#: model_terms:ir.ui.view,arch_db:account_taxcloud.account_position_taxcloud_inherit_from_view
-#: model_terms:ir.ui.view,arch_db:account_taxcloud.invoice_form_inherit
-msgid "Go to Settings."
-msgstr "Ayarlara Gidin."
-
-#. module: account_taxcloud
 #: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category__id
 msgid "ID"
 msgstr "ID"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_account_fiscal_position__is_taxcloud_configured
-#: model:ir.model.fields,field_description:account_taxcloud.field_account_move__is_taxcloud_configured
-#: model:ir.model.fields,field_description:account_taxcloud.field_res_company__is_taxcloud_configured
-msgid "Is Taxcloud Configured"
-msgstr ""
-
-#. module: account_taxcloud
-#: model:ir.model,name:account_taxcloud.model_account_move
-msgid "Journal Entries"
-msgstr "Yevmiye Kayıtları"
-
-#. module: account_taxcloud
-#: model:ir.model,name:account_taxcloud.model_account_move_line
-msgid "Journal Item"
-msgstr "Yevmiye Kalemi"
+#: model:ir.model,name:account_taxcloud.model_account_invoice
+msgid "Invoice"
+msgstr "Fatura"
 
 #. module: account_taxcloud
 #: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category____last_update
 msgid "Last Modified on"
-msgstr "Son Düzenleme"
+msgstr "Son Güncelleme"
 
 #. module: account_taxcloud
 #: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category__write_uid
@@ -138,13 +136,6 @@ msgstr "Son Güncelleyen"
 #: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category__write_date
 msgid "Last Updated on"
 msgstr "Son Güncelleme"
-
-#. module: account_taxcloud
-#: model_terms:ir.ui.view,arch_db:account_taxcloud.account_position_taxcloud_inherit_from_view
-#: model_terms:ir.ui.view,arch_db:account_taxcloud.invoice_form_inherit
-msgid ""
-"Please enter your Taxcloud credentials to compute tax rates automatically."
-msgstr ""
 
 #. module: account_taxcloud
 #: model:ir.model,name:account_taxcloud.model_product_category
@@ -165,17 +156,6 @@ msgstr "Ürün TIC Kategorisi"
 #: model:ir.model,name:account_taxcloud.model_product_template
 msgid "Product Template"
 msgstr "Ürün Şablonu"
-
-#. module: account_taxcloud
-#: model:ir.model.fields,help:account_taxcloud.field_res_company__tic_category_id
-#: model:ir.model.fields,help:account_taxcloud.field_res_config_settings__tic_category_id
-msgid ""
-"TIC (Taxability Information Codes) allow to get specific tax rates for each "
-"product type. This default value applies if no product is used in the "
-"order/invoice, or if no TIC is set on the product or its product category. "
-"By default, TaxCloud relies on the TIC *[0] Uncategorized* default referring"
-" to general goods and services."
-msgstr ""
 
 #. module: account_taxcloud
 #: model_terms:ir.ui.view,arch_db:account_taxcloud.account_taxcloud_tic_category_tree
@@ -204,13 +184,11 @@ msgid "TaxCloud"
 msgstr "TaxCloud"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_res_company__taxcloud_api_id
 #: model:ir.model.fields,field_description:account_taxcloud.field_res_config_settings__taxcloud_api_id
 msgid "TaxCloud API ID"
 msgstr "TaxCloud API Kimliği"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_res_company__taxcloud_api_key
 #: model:ir.model.fields,field_description:account_taxcloud.field_res_config_settings__taxcloud_api_key
 msgid "TaxCloud API KEY"
 msgstr "TaxCloud API Anahtarı"
@@ -230,9 +208,25 @@ msgid "TaxCloud Category"
 msgstr "TaxCloud Kategori"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,help:account_taxcloud.field_account_move__is_taxcloud
-msgid "Technical field to determine whether to hide taxes in views or not."
+#: model:ir.model.fields,help:account_taxcloud.field_product_category__tic_category_id
+msgid ""
+"TaxCloud uses Taxability Information Codes (TIC) to make sure each item in "
+"your catalog is taxed at the right rate (or, for tax-exempt items, not taxed"
+" at all), so it's important to make sure that each item is assigned a TIC. "
+"If you can't find the right tax category for an item in your catalog, you "
+"can assign it to the 'General Goods and Services' TIC, 00000. TaxCloud "
+"automatically assigns products to this TIC as a default, so unless you've "
+"changed an item's TIC in the past, it should already be set to 00000."
 msgstr ""
+"TaxCloud, katalogunuzdaki her bir maddenin doğru oranda "
+"vergilendirilmesinden (veya vergiden muaf madde için hiç "
+"vergilendirilmediğinden) emin olmak için Vergilendirilebilirlik Bilgi "
+"Kodları'nı (TIC) kullanır; bu nedenle her kalem için bir TIC atanmış "
+"olduğundan emin olunması önemlidir. . Kataloğunuzdaki bir öğe için doğru "
+"vergi kategorisini bulamazsanız, bunu 'Genel Mallar ve Hizmetler' TIC, "
+"00000'e atayabilirsiniz. TaxCloud, bu TIC'ye varsayılan olarak otomatik "
+"olarak ürünler atar; bu nedenle değiştirmediyseniz Bir öğenin TIC geçmişte, "
+"zaten 00000 olarak ayarlanmış olmalıdır."
 
 #. module: account_taxcloud
 #: model:ir.model,name:account_taxcloud.model_account_fiscal_position_template
@@ -240,8 +234,15 @@ msgid "Template for Fiscal Position"
 msgstr "Mali Koşul Şablonu"
 
 #. module: account_taxcloud
-#: code:addons/account_taxcloud/models/account_invoice.py:0
-#: code:addons/account_taxcloud/models/account_invoice.py:0
+#: code:addons/account_taxcloud/models/account_invoice.py:43
+#: code:addons/account_taxcloud/models/res_config_settings.py:23
+#, python-format
+msgid "The configuration of TaxCloud is in the Accounting app, Settings menu."
+msgstr ""
+"TaxCloud konfigürasyonu Muhasebe uygulamasının içinde, Ayarlar menüsünde."
+
+#. module: account_taxcloud
+#: code:addons/account_taxcloud/models/account_invoice.py:115
 #, python-format
 msgid ""
 "The source document on the refund is not valid and thus the refunded cart "
@@ -251,7 +252,7 @@ msgstr ""
 "TaxCloud vergi hesabınızda oturum açmayacak."
 
 #. module: account_taxcloud
-#: code:addons/account_taxcloud/models/account_invoice.py:0
+#: code:addons/account_taxcloud/models/account_invoice.py:85
 #, python-format
 msgid ""
 "The tax rates have been updated, you may want to check it before validation"
@@ -259,47 +260,25 @@ msgstr ""
 "Vergi oranları güncellendi, onaylamadan önce kontrol etmek isteyebilirsiniz"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,help:account_taxcloud.field_product_product__tic_category_id
-#: model:ir.model.fields,help:account_taxcloud.field_product_template__tic_category_id
-msgid ""
-"This refers to TIC (Taxability Information Codes), these are used by "
-"TaxCloud to compute specific tax rates for each product type. The value set "
-"here prevails over the one set on the product category."
-msgstr ""
-
-#. module: account_taxcloud
-#: model:ir.model.fields,help:account_taxcloud.field_product_category__tic_category_id
-msgid ""
-"This refers to TIC (Taxability Information Codes), these are used by "
-"TaxCloud to compute specific tax rates for each product type. This value is "
-"used when no TIC is set on the product. If no value is set here, the default"
-" value set in Invoicing settings is used."
-msgstr ""
-
-#. module: account_taxcloud
-#: code:addons/account_taxcloud/models/account_invoice.py:0
-#: code:addons/account_taxcloud/models/res_config_settings.py:0
+#: code:addons/account_taxcloud/models/account_invoice.py:43
+#: code:addons/account_taxcloud/models/res_config_settings.py:23
 #, python-format
 msgid "Unable to retrieve taxes from TaxCloud: "
 msgstr "TaxCloud'dan vergi alınamıyor:"
 
 #. module: account_taxcloud
+#: model:ir.actions.server,name:account_taxcloud.action_account_invoice_update_taxes
+msgid "Update taxes with Taxcloud"
+msgstr "Taxcloud ile vergileri güncelleme"
+
+#. module: account_taxcloud
 #: model:ir.model.fields,field_description:account_taxcloud.field_account_fiscal_position__is_taxcloud
 #: model:ir.model.fields,field_description:account_taxcloud.field_account_fiscal_position_template__is_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_account_move__is_taxcloud
 msgid "Use TaxCloud API"
 msgstr "TaxCloud API Kullan"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,help:account_taxcloud.field_account_fiscal_position__is_taxcloud_configured
-#: model:ir.model.fields,help:account_taxcloud.field_account_move__is_taxcloud_configured
-#: model:ir.model.fields,help:account_taxcloud.field_res_company__is_taxcloud_configured
-msgid ""
-"Used to determine whether or not to warn the user to configure TaxCloud."
-msgstr ""
-
-#. module: account_taxcloud
-#: code:addons/account_taxcloud/models/account_invoice.py:0
+#: code:addons/account_taxcloud/models/account_invoice.py:24
 #, python-format
 msgid ""
 "You cannot cancel an invoice sent to TaxCloud.\n"
@@ -308,7 +287,7 @@ msgid ""
 msgstr ""
 
 #. module: account_taxcloud
-#: code:addons/account_taxcloud/models/product.py:0
+#: code:addons/account_taxcloud/models/product.py:28
 #, python-format
 msgid "[%s] %s"
 msgstr "[%s] %s"

@@ -7,24 +7,22 @@ odoo.define('web_enterprise.MenuMobile', function (require) {
  */
 
 var config = require('web.config');
-if (!config.device.isMobile) {
-    return;
-}
-
 var core = require('web.core');
 var session = require('web.session');
 var Menu = require('web_enterprise.Menu');
-const { SwitchCompanyMenuMobile } = require('web_enterprise.SwitchCompanyMenu');
 
 var QWeb = core.qweb;
 
+if (!config.device.isMobile) {
+    return;
+}
 
 Menu.include({
     events: _.extend({}, Menu.prototype.events, {
         'click .o_mobile_menu_toggle': '_onOpenBurgerMenu',
     }),
     menusTemplate: 'Menu.sections.mobile',
-    animationDuration: 200,
+
     /**
      * @override
      */
@@ -40,21 +38,6 @@ Menu.include({
     },
 
     //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
-    /**
-     * @override
-     */
-    do_action() {
-        return this._super(...arguments)
-            .then(resp => {
-                this._closeBurgerMenu();
-                return resp;
-            });
-    },
-
-    //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
@@ -63,7 +46,7 @@ Menu.include({
      */
     _closeBurgerMenu: function () {
         var self = this;
-        this.$burgerMenu.animate({left: '100%'}, this.animationDuration, function () {
+        this.$burgerMenu.animate({left: '100%'}, 200, function () {
             self.$burgerMenu.addClass("o_hidden");
         });
     },
@@ -78,14 +61,11 @@ Menu.include({
         this.$('.o_user_menu_mobile').appendTo(this.$burgerMenu.find('.o_burger_menu_user'));
         this.$section_placeholder.appendTo(this.$burgerMenu.find('.o_burger_menu_app'));
 
-        const companySwitcher = new SwitchCompanyMenuMobile();
-        companySwitcher.appendTo('.o_burger_menu_companies');
-
         this.$burgerMenu.on('click', '.o_burger_menu_close', this._onCloseBurgerMenu.bind(this));
+        this.$burgerMenu.on('click', '.o_burger_menu_company', this._onCompanyClicked.bind(this));
         this.$burgerMenu.on('click', '.o_burger_menu_topbar.o_toggler', this._onTopbarClicked.bind(this));
         this.$burgerMenu.on('click', '.o_burger_menu_section', this._onBurgerMenuSectionClick.bind(this));
 
-        core.bus.on('close_o_burger_menu', null, this._closeBurgerMenu.bind(this));
         $('body').append(this.$burgerMenu);
     },
 
@@ -115,6 +95,22 @@ Menu.include({
         this._closeBurgerMenu();
     },
     /**
+     * Switches company
+     *
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onCompanyClicked: function (ev) {
+        ev.preventDefault();
+        this._rpc({
+            model: 'res.users',
+            method: 'write',
+            args: [[session.uid], {company_id: $(ev.currentTarget).data('id')}],
+        }).then(function () {
+            window.location.reload();
+        });
+    },
+    /**
      * Opens burger menu in mobile
      *
      * @private
@@ -138,7 +134,7 @@ Menu.include({
 
         // display the burger menu
         this.$burgerMenu.css({left: '100%'});
-        this.$burgerMenu.animate({left: '0%'}, this.animationDuration).removeClass('o_hidden');
+        this.$burgerMenu.animate({left: '0%'}, 200).removeClass('o_hidden');
     },
     /**
      * @override

@@ -13,10 +13,6 @@ class TestCaseDocuments(TransactionCase):
     """ """
     def setUp(self):
         super(TestCaseDocuments, self).setUp()
-        self.doc_user = self.env['res.users'].create({
-            'name': 'Test user documents',
-            'login': 'documents@example.com',
-        })
         self.folder_a = self.env['documents.folder'].create({
             'name': 'folder A',
         })
@@ -51,20 +47,22 @@ class TestCaseDocuments(TransactionCase):
             'facet_id': self.tag_category_a.id,
             'name': "tag_a",
         })
-        self.document_gif = self.env['documents.document'].create({
+        self.attachment_gif = self.env['ir.attachment'].create({
             'datas': GIF,
-            'name': 'file.gif',
+            'name': 'Test mimetype gif',
+            'datas_fname': 'file.gif',
             'mimetype': 'image/gif',
             'folder_id': self.folder_b.id,
         })
-        self.document_txt = self.env['documents.document'].create({
+        self.attachment_txt = self.env['ir.attachment'].create({
             'datas': TEXT,
-            'name': 'file.txt',
+            'name': 'Test mimetype txt',
+            'datas_fname': 'file.txt',
             'mimetype': 'text/plain',
             'folder_id': self.folder_b.id,
         })
         self.share_link_ids = self.env['documents.share'].create({
-            'document_ids': [(4, self.document_txt.id, 0)],
+            'attachment_ids': [(4, self.attachment_txt.id, 0)],
             'type': 'ids',
             'name': 'share_link_ids',
             'folder_id': self.folder_a_a.id,
@@ -92,65 +90,18 @@ class TestCaseDocuments(TransactionCase):
             'activity_note': 'activity test note',
         })
 
-    def test_documents_create_from_attachment(self):
-        """
-        Tests a documents.document create method when created from an already existing ir.attachment.
-        """
-        attachment = self.env['ir.attachment'].create({
-            'datas': GIF,
-            'name': 'attachmentGif.gif',
-            'res_model': 'documents.document',
-            'res_id': 0,
-        })
-        document_a = self.env['documents.document'].create({
-            'folder_id': self.folder_b.id,
-            'name': 'new name',
-            'attachment_id': attachment.id,
-        })
-        self.assertEqual(document_a.attachment_id.id, attachment.id,
-                         'the attachment should be the attachment given in the create values')
-        self.assertEqual(document_a.name, 'new name',
-                         'the name should be taken from the ir attachment')
-        self.assertEqual(document_a.res_model, 'documents.document',
-                         'the res_model should be set as document by default')
-        self.assertEqual(document_a.res_id, document_a.id,
-                         'the res_id should be set as its own id by default to allow access right inheritance')
-
-    def test_documents_create_write(self):
-        """
-        Tests a documents.document create and write method,
-        documents should automatically create a new ir.attachments in relevant cases.
-        """
-        document_a = self.env['documents.document'].create({
-            'name': 'Test mimetype gif',
-            'datas': GIF,
-            'folder_id': self.folder_b.id,
-        })
-        self.assertEqual(document_a.res_model, 'documents.document',
-                         'the res_model should be set as document by default')
-        self.assertEqual(document_a.res_id, document_a.id,
-                         'the res_id should be set as its own id by default to allow access right inheritance')
-        self.assertEqual(document_a.attachment_id.datas, GIF, 'the document should have a GIF data')
-        document_no_attachment = self.env['documents.document'].create({
-            'name': 'Test mimetype gif',
-            'folder_id': self.folder_b.id,
-        })
-        self.assertFalse(document_no_attachment.attachment_id, 'the new document shouldnt have any attachment_id')
-        document_no_attachment.write({'datas': TEXT})
-        self.assertEqual(document_no_attachment.attachment_id.datas, TEXT, 'the document should have an attachment')
-
     def test_documents_rules(self):
         """
         Tests a documents.workflow.rule
         """
-        self.worflow_rule.apply_actions([self.document_gif.id, self.document_txt.id])
-        self.assertTrue(self.tag_b.id in self.document_gif.tag_ids.ids, "failed at workflow rule add tag id")
-        self.assertTrue(self.tag_b.id in self.document_txt.tag_ids.ids, "failed at workflow rule add tag id txt")
-        self.assertEqual(len(self.document_gif.tag_ids.ids), 1, "failed at workflow rule add tag len")
+        self.worflow_rule.apply_actions([self.attachment_gif.id, self.attachment_txt.id])
+        self.assertTrue(self.tag_b.id in self.attachment_gif.tag_ids.ids, "failed at workflow rule add tag id")
+        self.assertTrue(self.tag_b.id in self.attachment_txt.tag_ids.ids, "failed at workflow rule add tag id 2")
+        self.assertEqual(len(self.attachment_gif.tag_ids.ids), 1, "failed at workflow rule add tag len")
 
         activity_gif = self.env['mail.activity'].search(['&',
-                                                         ('res_id', '=', self.document_gif.id),
-                                                         ('res_model', '=', 'documents.document')])
+                                                         ('res_id', '=', self.attachment_gif.id),
+                                                         ('res_model', '=', 'ir.attachment')])
 
         self.assertEqual(len(activity_gif), 1, "failed at workflow rule activity len")
         self.assertTrue(activity_gif.exists(), "failed at workflow rule activity exists")
@@ -162,63 +113,78 @@ class TestCaseDocuments(TransactionCase):
                          self.env.ref('documents.mail_documents_activity_data_Inbox').id,
                          "failed at activity data note from workflow create activity")
 
-        self.assertEqual(self.document_gif.folder_id.id, self.folder_b.id, "failed at workflow rule set folder gif")
-        self.assertEqual(self.document_txt.folder_id.id, self.folder_b.id, "failed at workflow rule set folder txt")
+        self.assertEqual(self.attachment_gif.folder_id.id, self.folder_b.id, "failed at workflow rule set folder gif")
+        self.assertEqual(self.attachment_txt.folder_id.id, self.folder_b.id, "failed at workflow rule set folder txt")
 
     def test_documents_rule_display(self):
         """
         tests criteria of rules
         """
+        self.tag_criteria_b = self.env['documents.workflow.tag.criteria'].create({
+            'operator': 'contains',
+            'facet_id': self.tag_category_b.id,
+            'tag_id': self.tag_b.id,
+        })
+
+        self.tag_criteria_not_a_a = self.env['documents.workflow.tag.criteria'].create({
+            'operator': 'notcontains',
+            'facet_id': self.tag_category_a_a.id,
+            'tag_id': self.tag_a_a.id,
+        })
 
         self.workflow_rule_criteria = self.env['documents.workflow.rule'].create({
             'domain_folder_id': self.folder_a.id,
             'name': 'workflow rule on f_a & criteria',
             'condition_type': 'criteria',
-            'required_tag_ids': [(6, 0, [self.tag_b.id])],
-            'excluded_tag_ids': [(6, 0, [self.tag_a_a.id])]
+            'criteria_tag_ids': [(6, 0, [self.tag_criteria_b.id, self.tag_criteria_not_a_a.id])]
         })
 
-        self.assertFalse(self.workflow_rule_criteria.limited_to_single_record,
-                         "this rule should not be limited to a single record")
-
-        self.document_txt_criteria_a = self.env['documents.document'].create({
+        self.attachment_txt_criteria_a = self.env['ir.attachment'].create({
+            'datas': TEXT,
             'name': 'Test criteria a',
+            'datas_fname': 'file.txt',
             'mimetype': 'text/plain',
             'folder_id': self.folder_a.id,
             'tag_ids': [(6, 0, [self.tag_a_a.id, self.tag_b.id])]
         })
 
-        self.assertTrue(self.workflow_rule_criteria.id not in self.document_txt_criteria_a.available_rule_ids.ids,
+        self.assertTrue(self.workflow_rule_criteria.id not in self.attachment_txt_criteria_a.available_rule_ids.ids,
                         "failed at documents_workflow_rule unavailable rule")
 
-        self.document_txt_criteria_b = self.env['documents.document'].create({
+        self.attachment_txt_criteria_b = self.env['ir.attachment'].create({
+            'datas': TEXT,
             'name': 'Test criteria b',
+            'datas_fname': 'file.txt',
             'mimetype': 'text/plain',
             'folder_id': self.folder_a.id,
             'tag_ids': [(6, 0, [self.tag_a.id])]
         })
 
-        self.assertTrue(self.workflow_rule_criteria.id not in self.document_txt_criteria_b.available_rule_ids.ids,
+        self.assertTrue(self.workflow_rule_criteria.id not in self.attachment_txt_criteria_b.available_rule_ids.ids,
                         "failed at documents_workflow_rule unavailable rule")
-        self.document_txt_criteria_c = self.env['documents.document'].create({
+
+        self.attachment_txt_criteria_c = self.env['ir.attachment'].create({
             'datas': TEXT,
-            'name': 'file.txt',
+            'name': 'Test criteria c',
+            'datas_fname': 'file.txt',
             'mimetype': 'text/plain',
             'folder_id': self.folder_a.id,
             'tag_ids': [(6, 0, [self.tag_b.id])]
         })
 
-        self.assertTrue(self.workflow_rule_criteria.id in self.document_txt_criteria_c.available_rule_ids.ids,
+        self.assertTrue(self.workflow_rule_criteria.id in self.attachment_txt_criteria_c.available_rule_ids.ids,
                         "failed at documents_workflow_rule available rule")
 
-        self.document_txt_criteria_d = self.env['documents.document'].create({
+        self.attachment_txt_criteria_d = self.env['ir.attachment'].create({
+            'datas': TEXT,
             'name': 'Test criteria d',
+            'datas_fname': 'file.txt',
             'mimetype': 'text/plain',
             'folder_id': self.folder_b.id,
             'tag_ids': [(6, 0, [self.tag_b.id])]
         })
 
-        self.assertTrue(self.workflow_rule_criteria.id not in self.document_txt_criteria_d.available_rule_ids.ids,
+        self.assertTrue(self.workflow_rule_criteria.id not in self.attachment_txt_criteria_d.available_rule_ids.ids,
                         "failed at documents_workflow_rule unavailable rule")
 
     def test_documents_share_links(self):
@@ -258,158 +224,18 @@ class TestCaseDocuments(TransactionCase):
         share_folder_with_upload = self.env['documents.share'].browse(action_folder_with_upload['res_id'])
         self.assertTrue(share_folder_with_upload.exists(), 'failed at upload folder creation')
         self.assertEqual(share_folder_with_upload.activity_type_id.name, 'To validate',
-                         'failed at activity type for upload documents')
+                         'failed at activity type for upload attachments')
         self.assertEqual(share_folder_with_upload.state, 'live', "failed at share_link live")
 
-        # by documents
+        # by Attachments
         vals = {
-            'document_ids': [(6, 0, [self.document_gif.id, self.document_txt.id])],
+            'attachment_ids': [(6, 0, [self.attachment_gif.id, self.attachment_txt.id])],
             'folder_id': self.folder_b.id,
             'date_deadline': '2001-11-05',
             'type': 'ids',
         }
-        action_documents = self.env['documents.share'].create_share(vals)
-        result_share_documents_act = self.env['documents.share'].browse(action_documents['res_id'])
+        action_attachments = self.env['documents.share'].create_share(vals)
+        result_share_attachments_act = self.env['documents.share'].browse(action_attachments['res_id'])
 
         # Expiration date
-        self.assertEqual(result_share_documents_act.state, 'expired', "failed at share_link expired")
-
-    def test_request_activity(self):
-        """
-        Makes sure the document request activities are working properly
-        """
-        activity_type = self.env['mail.activity.type'].create({
-            'name': 'test_activity_type',
-            'category': 'upload_file',
-            'folder_id': self.folder_a.id,
-        })
-        activity = self.env['mail.activity'].create({
-            'activity_type_id': activity_type.id,
-            'user_id': self.doc_user.id,
-            'res_id': self.env['res.partner'].search([('name', 'ilike', 'Deco Addict')], limit=1).id,
-            'res_model_id': self.env['ir.model'].search([('model', '=', 'res.partner')], limit=1).id,
-            'summary': 'test_summary',
-        })
-
-        activity_2 = self.env['mail.activity'].create({
-            'activity_type_id': activity_type.id,
-            'user_id': self.doc_user.id,
-            'res_id': self.env['res.partner'].search([('name', 'ilike', 'Deco Addict')], limit=1).id,
-            'res_model_id': self.env['ir.model'].search([('model', '=', 'res.partner')], limit=1).id,
-            'summary': 'test_summary_2',
-        })
-
-        attachment = self.env['ir.attachment'].create({
-            'datas': GIF,
-            'name': 'Test activity 1',
-        })
-
-        attachment_2 = self.env['ir.attachment'].create({
-            'datas': TEXT,
-            'name': 'Test activity 2',
-        })
-        document_1 = self.env['documents.document'].search([('request_activity_id', '=', activity.id)], limit=1)
-        document_2 = self.env['documents.document'].search([('request_activity_id', '=', activity_2.id)], limit=1)
-
-        self.assertEqual(document_1.name, 'test_summary', 'the activity document should have the right name')
-        self.assertEqual(document_1.folder_id.id, self.folder_a.id, 'the document 1 should have the right folder')
-        self.assertEqual(document_2.folder_id.id, self.folder_a.id, 'the document 2 should have the right folder')
-        activity._action_done(attachment_ids=[attachment.id])
-        document_2.write({'datas': TEXT, 'name': 'new filename'})
-        self.assertEqual(document_1.attachment_id.id, attachment.id,
-                         'the document should have the newly added attachment')
-        self.assertFalse(activity.exists(), 'the activity should be done')
-        self.assertFalse(activity_2.exists(), 'the activity_2 should be done')
-
-    def test_default_res_id_model(self):
-        """
-        Test default res_id and res_model from context are used for linking attachment to document.
-        """
-        document = self.env['documents.document'].create({'folder_id': self.folder_b.id})
-        attachment = self.env['ir.attachment'].with_context(
-            default_res_id=document.id,
-            default_res_model=document._name,
-        ).create({
-            'name': 'attachmentGif.gif',
-            'datas': GIF,
-        })
-        self.assertEqual(attachment.res_id, document.id, "It should be linked to the default res_id")
-        self.assertEqual(attachment.res_model, document._name, "It should be linked to the default res_model")
-        self.assertEqual(document.attachment_id, attachment, "Document should be linked to the created attachment")
-
-    def test_write_mimetype(self):
-        """
-        Tests the consistency of documents' mimetypes
-        """
-        document = self.env['documents.document'].create({'datas': GIF, 'folder_id': self.folder_b.id})
-        document.with_user(self.doc_user.id).write({'datas': TEXT, 'mimetype': 'text/plain'})
-        self.assertEqual(document.mimetype, 'text/plain', "the new mimetype should be the one given on write")
-        document.with_user(self.doc_user.id).write({'datas': TEXT, 'mimetype': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'})
-        self.assertEqual(document.mimetype, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', "should preserve office mime type")
-
-    def test_neuter_mimetype(self):
-        """
-        Tests that potentially harmful mimetypes (XML mimetypes that can lead to XSS attacks) are converted to text
-
-        In fact this logic is implemented in the base `IrAttachment` model but was originally duplicated.  
-        The test stays duplicated here to ensure the de-duplicated logic still catches our use cases.
-        """
-        document = self.env['documents.document'].create({'datas': GIF, 'folder_id': self.folder_b.id})
-
-        document.with_user(self.doc_user.id).write({'datas': TEXT, 'mimetype': 'text/xml'})
-        self.assertEqual(document.mimetype, 'text/plain', "XML mimetype should be forced to text")
-        document.with_user(self.doc_user.id).write({'datas': TEXT, 'mimetype': 'image/svg+xml'})
-        self.assertEqual(document.mimetype, 'text/plain', "SVG mimetype should be forced to text")
-        document.with_user(self.doc_user.id).write({'datas': TEXT, 'mimetype': 'text/html'})
-        self.assertEqual(document.mimetype, 'text/plain', "HTML mimetype should be forced to text")
-        document.with_user(self.doc_user.id).write({'datas': TEXT, 'mimetype': 'application/xhtml+xml'})
-        self.assertEqual(document.mimetype, 'text/plain', "XHTML mimetype should be forced to text")
-
-    def test_create_from_message(self):
-        """
-        When we create the document from a message, we need to apply the defaults set on the share.
-        """
-        attachment = self.env['ir.attachment'].create({
-            'datas': GIF,
-            'name': 'attachmentGif.gif',
-            'res_model': 'documents.document',
-            'res_id': 0,
-        })
-        partner = self.env['res.partner'].create({
-            'name': 'Luke Skywalker'
-        })
-        share = self.env['documents.share'].create({
-            'owner_id': self.doc_user.id,
-            'partner_id': partner.id,
-            'tag_ids': [(6, 0, [self.tag_b.id])],
-            'folder_id': self.folder_a.id,
-        })
-        message = self.env['documents.document'].message_new({
-            'subject': 'test message'
-        }, {
-            # this create_share_id value, is normally passed from the alias default created by the share
-            'create_share_id': share.id,
-            'folder_id': self.folder_a.id,
-        })
-        message._message_post_after_hook({ }, {
-            'attachment_ids': [(4, attachment.id)]
-        })
-        self.assertEqual(message.active, False, 'Document created for the message should be inactive')
-        self.assertNotEqual(attachment.res_id, 0, 'Should link document to attachment')
-        attachment_document = self.env['documents.document'].browse(attachment.res_id)
-        self.assertNotEqual(attachment_document, None, 'Should have created document')
-        self.assertEqual(attachment_document.owner_id.id, self.doc_user.id, 'Should assign owner from share')
-        self.assertEqual(attachment_document.partner_id.id, partner.id, 'Should assign partner from share')
-        self.assertEqual(attachment_document.tag_ids.ids, [self.tag_b.id], 'Should assign tags from share')
-
-    def test_create_from_message_invalid_tags(self):
-        """
-        Create a new document from message with a deleted tag, it should keep only existing tags.
-        """
-        message = self.env['documents.document'].message_new({
-            'subject': 'Test',
-        }, {
-            'tag_ids': [(6, 0, [self.tag_b.id, -1])],
-            'folder_id': self.folder_a.id,
-        })
-        self.assertEqual(message.tag_ids.ids, [self.tag_b.id], "Should only keep the existing tag")
+        self.assertEqual(result_share_attachments_act.state, 'expired', "failed at share_link expired")

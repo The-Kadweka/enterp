@@ -31,10 +31,9 @@ var ReportEditorSidebar = Widget.extend(StandaloneFieldManagerMixin, {
      * @constructor
      * @param {Widget} parent
      * @param {Object} params
-     * @param {Object} [params.models]
-     * @param {Object} [params.paperFormat]
      * @param {Object} [params.previousState]
      * @param {Object} [params.report] only mandatory if state.mode = 'report'
+     * @param {Object} [params.models]
      * @param {Object} [params.state]
      * @param {Object} [params.widgetsOptions]
      */
@@ -42,10 +41,9 @@ var ReportEditorSidebar = Widget.extend(StandaloneFieldManagerMixin, {
         this._super.apply(this, arguments);
         StandaloneFieldManagerMixin.init.call(this);
 
-        this.debug = config.isDebug();
+        this.debug = config.debug;
         this.report = params.report;
         this.state = params.state || {};
-        this.paperFormat = params.paperFormat || {};
         this.previousState = params.previousState || {};
         this.models = params.models;
         this.widgetsOptions = params.widgetsOptions;
@@ -86,7 +84,7 @@ var ReportEditorSidebar = Widget.extend(StandaloneFieldManagerMixin, {
             defs.push(defReport);
             defs.push(defPaperFormat);
         }
-        return Promise.all(defs);
+        return $.when.apply($, defs);
     },
     /**
      * @override
@@ -104,7 +102,7 @@ var ReportEditorSidebar = Widget.extend(StandaloneFieldManagerMixin, {
                 def = this._startModeProperties();
                 break;
         }
-        return Promise.all([this._super.apply(this, arguments), def]);
+        return $.when(this._super.apply(this, arguments), def);
     },
 
     //--------------------------------------------------------------------------
@@ -335,7 +333,7 @@ var ReportEditorSidebar = Widget.extend(StandaloneFieldManagerMixin, {
     },
     /**
      * @private
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _startModeNew: function () {
         var self = this;
@@ -355,32 +353,21 @@ var ReportEditorSidebar = Widget.extend(StandaloneFieldManagerMixin, {
             $sidebarContent.append($componentsContainer);
         });
 
-        return Promise.all(defs);
+        return $.when.apply($, defs);
     },
     /**
      * A node has been clicked on the report, build the content of the sidebar so this node can be edited
      *
      * @private
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _startModeProperties: function () {
         var self = this;
-        var componentsAppendedPromise;
+        var defs = [];
         var $accordion = this.$('.o_web_studio_sidebar_content .o_web_studio_accordion');
 
         var blacklists = [];
         this.nodes = [];
-
-        if (!this.debug) {
-            // hide all nodes after .page, they are too technical
-            var pageNodeIndex = _.findIndex(this.state.nodes, function (node) {
-                return node.node.tag === 'div' && _.str.include(node.node.attrs.class, 'page');
-            });
-            if (pageNodeIndex !== -1) {
-                this.state.nodes.splice(pageNodeIndex + 1, this.state.nodes.length - (pageNodeIndex + 1));
-            }
-        }
-
         for (var index = this.state.nodes.length - 1; index >= 0; index--) {
             // copy to not modifying in place the node
             var node = _.extend({}, this.state.nodes[index]);
@@ -390,7 +377,7 @@ var ReportEditorSidebar = Widget.extend(StandaloneFieldManagerMixin, {
                 }
             }
             var components = this._getNodeEditableComponents(node.node);
-            node.components = components;
+            node.componentsObject = this._getComponentsObject(components);
             var blacklist = this._getComponentsBlacklist(components);
             if (blacklist.length) {
                 blacklists.push(blacklist);
@@ -401,7 +388,7 @@ var ReportEditorSidebar = Widget.extend(StandaloneFieldManagerMixin, {
         // TODO: do not reverse but put nodes in correct order directly
         this.nodes.reverse();
 
-        this.nodes.forEach(function (node) {
+        _.each(this.nodes, function (node) {
             var $accordionSection = $(qweb.render('web_studio.AccordionSection', {
                 id: 'id_' + studioUtils.randomString(6),
                 header: 'header_' + studioUtils.randomString(6),
@@ -410,7 +397,7 @@ var ReportEditorSidebar = Widget.extend(StandaloneFieldManagerMixin, {
                 nodeIcon: self._getNodeDisplayName(node.node).icon,
                 node: node.node,
             }));
-            var renderingProms = self._getComponentsObject(node.components).map(function (Component) {
+            _.each(node.componentsObject, function (Component) {
                 if (!Component) {
                     self.do_warn("Missing component", self.state.directive);
                     return;
@@ -423,33 +410,18 @@ var ReportEditorSidebar = Widget.extend(StandaloneFieldManagerMixin, {
                     context: node.context,
                     state: previousWidgetState,
                     models: self.models,
-                    componentsList: node.components,
                 });
-                node.widgets.push(directiveWidget);
-                var fragment = document.createDocumentFragment();
-                return directiveWidget.appendTo(fragment);
-            });
-            componentsAppendedPromise = Promise.all(renderingProms).then(function () {
-                for (var i = 0; i < node.widgets.length; i++) {
-                    var widget = node.widgets[i];
-                    var selector = '.collapse' + (i > 0 ? '>div:last()' : '');
-                    widget.$el.appendTo($accordionSection.find(selector));
+                var selector = '.collapse';
+                if (Component.prototype.insertAsLastChildOfPrevious) {
+                    selector += '>div:last()';
                 }
-                var $removeButton = $(qweb.render('web_studio.Sidebar.Remove'));
-                $removeButton.data('node', node.node); // see @_onRemove
-                $accordionSection.find('.collapse')
-                    .append($('<hr>'))
-                    .append($removeButton);
+                node.widgets.push(directiveWidget);
+                defs.push(directiveWidget.appendTo($accordionSection.find(selector)));
             });
             $accordionSection.appendTo($accordion);
             $accordionSection
                 .on('mouseenter', function () {
                     self.trigger_up('hover_editor', {
-                        node: node.node,
-                    });
-                })
-                .on('click', function () {
-                    self.trigger_up('node_expanded', {
                         node: node.node,
                     });
                 })
@@ -461,6 +433,12 @@ var ReportEditorSidebar = Widget.extend(StandaloneFieldManagerMixin, {
                 .find('.collapse').on('show.bs.collapse hide.bs.collapse', function (ev) {
                     $(this).parent('.card').toggleClass('o_web_studio_active', ev.type === 'show');
                 });
+            var $removeButton = $(qweb.render('web_studio.Sidebar.Remove'));
+            $removeButton.data('node', node.node);  // see @_onRemove
+            var $removeSection = $('<div>', {
+                class: 'card-body',
+            }).append($removeButton);
+            $removeSection.appendTo($accordionSection.find('.collapse'));
         });
 
         // open the last section
@@ -469,20 +447,21 @@ var ReportEditorSidebar = Widget.extend(StandaloneFieldManagerMixin, {
         $lastCard.addClass('o_web_studio_active');
         $lastCard.find('.collapse').addClass('show');
 
-        return componentsAppendedPromise;
+        return $.when.apply($, defs);
     },
     /**
      * @private
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _startModeReport: function () {
         var defs = [];
         var paperFormatRecord = this.model.get(this.paperformatHandle);
         var many2one = new Many2One(this, 'paperformat_id', paperFormatRecord, {
-            attrs: {
-                placeholder: _t('By default: ') + this.paperFormat.display_name,
-            },
             mode: 'edit',
+            attrs: {
+                can_create: false,
+                can_write: false,
+            },
         });
         this._registerWidget(this.paperformatHandle, 'paperformat_id', many2one);
         defs.push(many2one.appendTo(this.$('.o_web_studio_paperformat_id')));
@@ -495,7 +474,7 @@ var ReportEditorSidebar = Widget.extend(StandaloneFieldManagerMixin, {
         });
         this._registerWidget(this.groupsHandle, 'groups_id', many2many);
         defs.push(many2many.appendTo(this.$('.o_groups')));
-        return Promise.all(defs);
+        return $.when.apply($, defs);
     },
 
     //--------------------------------------------------------------------------
@@ -525,23 +504,22 @@ var ReportEditorSidebar = Widget.extend(StandaloneFieldManagerMixin, {
      * @param {OdooEvent} ev
      */
     _onFieldChanged: function (ev) {
-        var self = this;
-        StandaloneFieldManagerMixin._onFieldChanged.apply(this, arguments).then(function () {
-            if (self.state.mode !== 'report') {
-                return;
-            }
-            var newAttrs = {};
-            var fieldName = ev.target.name;
-            var record;
-            if (fieldName === 'groups_id') {
-                record = self.model.get(self.groupsHandle);
-                newAttrs[fieldName] = record.data.groups_id.res_ids;
-            } else if (fieldName === 'paperformat_id') {
-                record = self.model.get(self.paperformatHandle);
-                newAttrs[fieldName] = record.data.paperformat_id && record.data.paperformat_id.res_id;
-            }
-            self.trigger_up('studio_edit_report', newAttrs);
-        });
+        StandaloneFieldManagerMixin._onFieldChanged.apply(this, arguments);
+
+        if (this.state.mode !== 'report') {
+            return;
+        }
+        var newAttrs = {};
+        var fieldName = ev.target.name;
+        var record;
+        if (fieldName === 'groups_id') {
+            record = this.model.get(this.groupsHandle);
+            newAttrs[fieldName] = record.data.groups_id.res_ids;
+        } else if (fieldName === 'paperformat_id') {
+            record = this.model.get(this.paperformatHandle);
+            newAttrs[fieldName] = record.data.paperformat_id && record.data.paperformat_id.res_id;
+        }
+        this.trigger_up('studio_edit_report', newAttrs);
     },
     /**
      * @private

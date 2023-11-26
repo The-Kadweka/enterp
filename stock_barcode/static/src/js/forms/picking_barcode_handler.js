@@ -42,7 +42,7 @@ FormController.include({
      * @param {Object} record
      * @param {string} barcode
      * @param {Object} activeBarcode
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _barcodeSelectedCandidate: function (candidate, record, barcode, activeBarcode) {
         if (activeBarcode.widget === 'picking_barcode_handler' && candidate.data.lots_visible) {
@@ -50,12 +50,11 @@ FormController.include({
             // the product is tracked by lot -> open the split lot wizard
             // save the record for the server to be aware of the operation
             return this.saveRecord(this.handle, {stayInEdit: true, reload: false}).then(function () {
-                var rpcProm = self._rpc({
+                return self._rpc({
                     model: 'stock.picking',
                     method: 'get_po_to_split_from_barcode',
                     args: [[record.data.id], barcode],
-                });
-                rpcProm.then(function (action) {
+                }).done(function (action) {
                     // the function returns an action (wizard)
                     self._barcodeStopListening();
                     self.do_action(action, {
@@ -65,7 +64,6 @@ FormController.include({
                         }
                     });
                 });
-                return rpcProm;
             });
         }
         return this._super.apply(this, arguments);
@@ -77,17 +75,17 @@ FormController.include({
      * @private
      * @param {string} barcode
      * @param {Object} activeBarcode
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _barcodePickingAddRecordId: function (barcode, activeBarcode) {
         if (!activeBarcode.handle) {
-            return Promise.reject();
+            return $.Deferred().reject();
         }
         var record = this.model.get(activeBarcode.handle);
         if (record.data.state === 'cancel' || record.data.state === 'done') {
             this.do_warn(_.str.sprintf(_t("Picking %s"), record.data.state),
                 _.str.sprintf(_t("The picking is %s and cannot be edited."), record.data.state));
-            return Promise.reject();
+            return $.Deferred().reject();
         }
         return this._barcodeAddX2MQuantity(barcode, activeBarcode);
     }
@@ -98,14 +96,10 @@ var PickingBarcodeHandler = AbstractField.extend({
     init: function() {
         this._super.apply(this, arguments);
 
-        this.data = this.record.data
-        var fieldName = 'move_line_ids_without_package';
-        if (this.data.show_reserved == false || this.data.show_operations == false)
-            fieldName = 'move_line_nosuggest_ids';
         this.trigger_up('activeBarcode', {
             name: this.name,
             notifyChange: false,
-            fieldName: fieldName,
+            fieldName: 'move_line_ids_without_package',
             quantity: 'qty_done',
             setQuantityWithKeypress: true,
             commands: {

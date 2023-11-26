@@ -5,15 +5,15 @@
 # Translators:
 # Martin Trigaux, 2018
 # Birgir Steinarsson <biggboss83@gmail.com>, 2018
-# Bjorn Ingvarsson <boi@exigo.is>, 2018
+# Björn Ingvarsson <boi@exigo.is>, 2018
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~11.5+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-09-27 08:43+0000\n"
+"POT-Creation-Date: 2019-11-14 07:50+0000\n"
 "PO-Revision-Date: 2018-08-24 11:48+0000\n"
-"Last-Translator: Bjorn Ingvarsson <boi@exigo.is>, 2018\n"
+"Last-Translator: Björn Ingvarsson <boi@exigo.is>, 2018\n"
 "Language-Team: Icelandic (https://www.transifex.com/odoo/teams/41243/is/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -34,7 +34,7 @@ msgid "%s : Signature request"
 msgstr ""
 
 #. module: sign
-#: code:addons/sign/controllers/main.py:183
+#: code:addons/sign/controllers/main.py:200
 #, python-format
 msgid "%s couldn't sign the document due to an insufficient credit error."
 msgstr ""
@@ -250,6 +250,7 @@ msgstr ""
 
 #. module: sign
 #: model:sign.item.type,name:sign.sign_item_type_checkbox
+#: model:sign.item.type,placeholder:sign.sign_item_type_checkbox
 #: selection:sign.item.type,type:0
 msgid "Checkbox"
 msgstr ""
@@ -379,6 +380,7 @@ msgstr ""
 
 #. module: sign
 #: model:sign.item.type,name:sign.sign_item_type_date
+#: model:sign.item.type,placeholder:sign.sign_item_type_date
 msgid "Date"
 msgstr "Dags."
 
@@ -717,6 +719,7 @@ msgstr ""
 
 #. module: sign
 #: model:sign.item.type,name:sign.sign_item_type_initial
+#: model:sign.item.type,placeholder:sign.sign_item_type_initial
 msgid "Initials"
 msgstr ""
 
@@ -1392,6 +1395,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:sign.field_sign_request_item__signature
 #: model_terms:ir.ui.view,arch_db:sign._doc_sign
 #: model:sign.item.type,name:sign.sign_item_type_signature
+#: model:sign.item.type,placeholder:sign.sign_item_type_signature
 #: selection:sign.item.type,type:0
 #, python-format
 msgid "Signature"
@@ -1632,6 +1636,12 @@ msgid ""
 msgstr ""
 
 #. module: sign
+#: code:addons/sign/models/sign_template.py:79
+#, python-format
+msgid "This file cannot be read. Is it a valid PDF?"
+msgstr ""
+
+#. module: sign
 #: model_terms:ir.ui.view,arch_db:sign.sign_request_view_form
 msgid ""
 "This will delete all the already completed documents of this request and "
@@ -1828,30 +1838,50 @@ msgid ""
 msgstr ""
 
 #. module: sign
-#: code:addons/sign/models/sign_request.py:574
+#: code:addons/sign/models/sign_template.py:84
+#, python-format
+msgid ""
+"Your PDF file shouldn't be encrypted with a password in order to be used as "
+"a signature template"
+msgstr ""
+
+#. module: sign
+#: model:sign.item.type,placeholder:sign.sign_item_type_company
+msgid "Your company"
+msgstr ""
+
+#. module: sign
+#: code:addons/sign/models/sign_request.py:564
 #, python-format
 msgid "Your confirmation code is %s"
 msgstr ""
 
 #. module: sign
 #. openerp-web
-#: code:addons/sign/static/src/xml/sign_common.xml:76
-#: code:addons/sign/static/src/xml/sign_common.xml:78
+#: code:addons/sign/static/src/xml/sign_common.xml:77
+#: code:addons/sign/static/src/xml/sign_common.xml:79
+#: model:sign.item.type,placeholder:sign.sign_item_type_email
 #, python-format
 msgid "Your email"
 msgstr ""
 
 #. module: sign
 #. openerp-web
-#: code:addons/sign/static/src/xml/sign_common.xml:70
-#: code:addons/sign/static/src/xml/sign_common.xml:72
+#: code:addons/sign/static/src/xml/sign_common.xml:71
+#: code:addons/sign/static/src/xml/sign_common.xml:73
+#: model:sign.item.type,placeholder:sign.sign_item_type_name
 #, python-format
 msgid "Your name"
 msgstr ""
 
 #. module: sign
+#: model:sign.item.type,placeholder:sign.sign_item_type_phone
+msgid "Your phone"
+msgstr ""
+
+#. module: sign
 #. openerp-web
-#: code:addons/sign/static/src/js/sign_common.js:870
+#: code:addons/sign/static/src/js/sign_common.js:906
 #, python-format
 msgid "Your signature has been saved."
 msgstr ""
@@ -1881,6 +1911,14 @@ msgstr ""
 #. module: sign
 #: model:sign.item.type,tip:sign.sign_item_type_initial
 msgid "mark it"
+msgstr ""
+
+#. module: sign
+#. openerp-web
+#: code:addons/sign/static/src/js/sign_common.js:956
+#: code:addons/sign/static/src/js/sign_common.js:1023
+#, python-format
+msgid "next"
 msgstr ""
 
 #. module: sign

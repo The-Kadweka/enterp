@@ -2,7 +2,7 @@
 <odoo>
         <menuitem id="menu_product_product_categories"
         action="product.product_category_action_form"
-        parent="account.account_account_menu" sequence="3"/>
+        parent="account.account_management_menu" sequence="3"/>
 
         <menuitem id="account_tag_menu" parent="account.account_account_menu" action="account.account_tag_action" groups="base.group_no_one"/>
         <menuitem id="menu_account_group" parent="account.account_account_menu" action="account.action_account_group_tree" groups="base.group_no_one"/>
@@ -46,6 +46,34 @@
             <field name="inherit_id" ref="account.view_account_payment_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//button[@name='button_journal_entries']" position="attributes">
+                    <attribute name="groups">account.group_account_manager</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="account_invoice_view_form_supplier" model="ir.ui.view">
+            <field name="name">account.invoice.form.supplier</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_supplier_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='other_info']//field[@name='account_id']" position="attributes">
+                    <attribute name="groups">account.group_account_manager</attribute>
+                </xpath>
+                <xpath expr="//page[@name='other_info']//field[@name='move_id']" position="attributes">
+                    <attribute name="groups">account.group_account_manager</attribute>
+                </xpath>
+                <xpath expr="//field[@name='tax_line_ids']//tree//field[@name='account_id']" position="attributes">
+                    <attribute name="groups">account.group_account_invoice</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="account_invoice_view_form_customer" model="ir.ui.view">
+            <field name="name">account.invoice.form.customer</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='other_info']//field[@name='move_id']" position="attributes">
                     <attribute name="groups">account.group_account_manager</attribute>
                 </xpath>
             </field>

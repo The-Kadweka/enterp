@@ -3,19 +3,18 @@
 
 {
     'name': 'Helpdesk Timesheet',
-    'category': 'Operations/Helpdesk',
+    'category': 'Helpdesk',
     'summary': 'Project, Tasks, Timesheet',
-    'depends': ['helpdesk', 'hr_timesheet', 'project_enterprise'],
+    'depends': ['helpdesk', 'hr_timesheet'],
     'description': """
         - Allow to set project for Helpdesk team
-        - Track timesheet for a task from a ticket
+        - Track timesheet for task from ticket
     """,
     'data': [
         'security/ir.model.access.csv',
         'security/helpdesk_timesheet_security.xml',
         'views/helpdesk_views.xml',
-        'views/project_views.xml',
-        'data/helpdesk_timesheet_data.xml',
+        'views/project_views.xml'
     ],
     'license': 'OEEL-1',
 }

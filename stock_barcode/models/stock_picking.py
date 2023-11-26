@@ -16,7 +16,7 @@ class StockMoveLine(models.Model):
     dummy_id = fields.Char(compute='_compute_dummy_id', inverse='_inverse_dummy_id')
 
     def _compute_dummy_id(self):
-        self.dummy_id = ''
+        pass
 
     def _inverse_dummy_id(self):
         pass
@@ -81,10 +81,8 @@ class StockPicking(models.Model):
             picking['use_existing_lots'] = self.env['stock.picking.type'].browse(picking['picking_type_id'][0]).use_existing_lots
             picking['show_entire_packs'] = self.env['stock.picking.type'].browse(picking['picking_type_id'][0]).show_entire_packs
             picking['actionReportDeliverySlipId'] = self.env.ref('stock.action_report_delivery').id
-            picking['actionReportBarcodesZplId'] = self.env.ref('stock.action_label_transfer_template_zpl').id
-            picking['actionReportBarcodesPdfId'] = self.env.ref('stock.action_label_transfer_template_pdf').id
-            if self.env.company.nomenclature_id:
-                picking['nomenclature_id'] = [self.env.company.nomenclature_id.id]
+            if self.env.user.company_id.nomenclature_id:
+                picking['nomenclature_id'] = [self.env.user.company_id.nomenclature_id.id]
         return pickings
 
     def _get_picking_fields_to_read(self):
@@ -98,9 +96,9 @@ class StockPicking(models.Model):
             'name',
             'state',
             'picking_type_code',
-            'company_id',
         ]
 
+    @api.multi
     def get_po_to_split_from_barcode(self, barcode):
         """ Returns the lot wizard's action for the move line matching
         the barcode. This method is intended to be called by the
@@ -124,6 +122,7 @@ class StockPicking(models.Model):
         return {
             'name': _('Lot/Serial Number Details'),
             'type': 'ir.actions.act_window',
+            'view_type': 'form',
             'view_mode': 'form',
             'res_model': 'stock_barcode.lot',
             'views': [(view_id, 'form')],
@@ -149,11 +148,8 @@ class StockPicking(models.Model):
         # arbitrary the first one. Filter out the ones processed by
         # `_check_location` and the ones already having a # destination
         # package.
-        picking_move_lines = self.move_line_ids_without_package
-        if not self.show_reserved:
-            picking_move_lines = self.move_line_nosuggest_ids
-
-        corresponding_ml = picking_move_lines.filtered(lambda ml: ml.product_id.id == product.id and not ml.result_package_id and not ml.location_processed and not ml.lots_visible)[:1]
+        corresponding_ml = self.move_line_ids.filtered(lambda ml: ml.product_id.id == product.id and not ml.result_package_id and not ml.location_processed and not ml.lots_visible)
+        corresponding_ml = corresponding_ml[0] if corresponding_ml else False
 
         if corresponding_ml:
             corresponding_ml.qty_done += qty
@@ -163,7 +159,7 @@ class StockPicking(models.Model):
             # set a `qty_done`: a next scan of this product will open the
             # lots wizard.
             picking_type_lots = (self.picking_type_id.use_create_lots or self.picking_type_id.use_existing_lots)
-            new_move_line = self.move_line_ids.new({
+            self.move_line_ids_without_package += self.move_line_ids.new({
                 'product_id': product.id,
                 'product_uom_id': product.uom_id.id,
                 'location_id': self.location_id.id,
@@ -172,10 +168,6 @@ class StockPicking(models.Model):
                 'product_uom_qty': 0.0,
                 'date': fields.datetime.now(),
             })
-            if self.show_reserved:
-                self.move_line_ids_without_package += new_move_line
-            else:
-                self.move_line_nosuggest_ids += new_move_line
         return True
 
     def _check_source_package(self, package):
@@ -254,7 +246,7 @@ class StockPicking(models.Model):
         return True
 
     def on_barcode_scanned(self, barcode):
-        if not self.env.company.nomenclature_id:
+        if not self.env.user.company_id.nomenclature_id:
             # Logic for products
             product = self.env['product.product'].search(['|', ('barcode', '=', barcode), ('default_code', '=', barcode)], limit=1)
             if product:
@@ -285,7 +277,7 @@ class StockPicking(models.Model):
                 if self._check_destination_location(location):
                     return
         else:
-            parsed_result = self.env.company.nomenclature_id.parse_barcode(barcode)
+            parsed_result = self.env.user.company_id.nomenclature_id.parse_barcode(barcode)
             if parsed_result['type'] in ['weight', 'product']:
                 if parsed_result['type'] == 'weight':
                     product_barcode = parsed_result['base_code']
@@ -334,6 +326,7 @@ class StockPicking(models.Model):
         return {
             'name': _('Open picking form'),
             'res_model': 'stock.picking',
+            'view_type': 'form',
             'view_mode': 'form',
             'view_id': view_id,
             'type': 'ir.actions.act_window',
@@ -351,6 +344,7 @@ class StockPicking(models.Model):
             return {
                 'name': _('Open picking form'),
                 'res_model': 'stock.picking',
+                'view_type': 'form',
                 'view_mode': 'form',
                 'view_id': view_id,
                 'type': 'ir.actions.act_window',
@@ -361,7 +355,7 @@ class StockPicking(models.Model):
             params = {
                 'model': 'stock.picking',
                 'picking_id': self.id,
-                'nomenclature_id': [self.env.company.nomenclature_id.id],
+                'nomenclature_id': [self.env.user.company_id.nomenclature_id.id],
             }
             return dict(action, target='fullscreen', params=params)
 
@@ -370,5 +364,6 @@ class StockPickingType(models.Model):
 
     _inherit = 'stock.picking.type'
 
+    @api.multi
     def get_action_picking_tree_ready_kanban(self):
         return self._get_action('stock_barcode.stock_picking_action_kanban')

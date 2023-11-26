@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
-from datetime import timedelta,datetime
+from datetime import timedelta
 from lxml import etree
 from lxml.objectify import fromstring
 from odoo import api, fields, models, release, tools, _
@@ -47,18 +47,18 @@ class IrasAuditFile(models.AbstractModel):
         """
         Generate the informations about the company for the IRAS Audit File
         """
-        if not self.env.company.l10n_sg_unique_entity_number:
+        if not self.env.user.company_id.l10n_sg_unique_entity_number:
             raise UserError(_('Your company must have a UEN.'))
-        if not self.env.company.vat:
+        if not self.env.user.company_id.vat:
             raise UserError(_('Your company must have a GSTNo.'))
 
         return {
-            'CompanyName': self.env.company.name,
-            'CompanyUEN': self.env.company.l10n_sg_unique_entity_number,
-            'GSTNo': self.env.company.vat,
+            'CompanyName': self.env.user.company_id.name,
+            'CompanyUEN': self.env.user.company_id.l10n_sg_unique_entity_number,
+            'GSTNo': self.env.user.company_id.vat,
             'PeriodStart': date_from,
             'PeriodEnd': date_to,
-            'IAFCreationDate': fields.Date.to_string(fields.Date.today()),
+            'IAFCreationDate': fields.Date.today(),
             'ProductVersion': release.product_name + release.version,
             'IAFVersion': IRAS_VERSION
         }
@@ -72,10 +72,10 @@ class IrasAuditFile(models.AbstractModel):
         gst_total_sgd = 0.0
         transaction_count_total = 0
 
-        invoice_ids = self.env['account.move'].search([
-            ('company_id', '=', self.env.company.id),
+        invoice_ids = self.env['account.invoice'].search([
+            ('company_id', '=', self.env.user.company_id.id),
             ('type', 'in', ['in_invoice', 'in_refund']),
-            ('state', '=', 'posted'),
+            ('state', 'in', ['open', 'in_payment', 'paid']),
             ('date', '>=', date_from),
             ('date', '<=', date_to)
             ])
@@ -84,29 +84,26 @@ class IrasAuditFile(models.AbstractModel):
             lines_number = 0
             for lines in invoice.invoice_line_ids:
                 lines_number += 1
-                sign = -1 if invoice.type == 'in_refund' else 1
-                tax_amount = lines.price_total - lines.price_subtotal
-                tax_amount_company = invoice.currency_id._convert(tax_amount, invoice.company_id.currency_id, invoice.company_id, invoice.invoice_date or invoice.date)
                 transaction_count_total += 1
-                purchase_total_sgd += lines.balance
-                gst_total_sgd += tax_amount
+                purchase_total_sgd += lines.price_subtotal_signed
+                gst_total_sgd += lines.l10n_sg_reports_amount_tax
 
                 if not invoice.partner_id.l10n_sg_unique_entity_number:
                     raise UserError(_('Your partner (%s) must have a UEN.') % invoice.partner_id.name)
                 purchases_lines.append({
                     'SupplierName': (invoice.partner_id.name or '')[:100],
                     'SupplierUEN': (invoice.partner_id.l10n_sg_unique_entity_number or '')[:16],
-                    'InvoiceDate': fields.Date.to_string(invoice.l10n_sg_permit_number_date if invoice.l10n_sg_permit_number and invoice.l10n_sg_permit_number_date else invoice.invoice_date),
-                    'InvoiceNo': (invoice.name or '')[:50],
+                    'InvoiceDate': invoice.l10n_sg_permit_number_date if invoice.l10n_sg_permit_number and invoice.l10n_sg_permit_number_date else invoice.date_invoice,
+                    'InvoiceNo': (invoice.number or '')[:50],
                     'PermitNo': invoice.l10n_sg_permit_number[:20] if invoice.l10n_sg_permit_number else False,
                     'LineNo': str(lines_number),
                     'ProductDescription': ('[' + lines.product_id.default_code + '] ' + lines.product_id.name if lines.product_id.default_code else lines.product_id.name or '')[:250],
-                    'PurchaseValueSGD': float_repr(lines.balance, IRAS_DIGITS),
-                    'GSTValueSGD': float_repr((lines.price_total - lines.price_subtotal) / (lines.quantity or 1), IRAS_DIGITS),
-                    'TaxCode': (lines.tax_ids and lines.tax_ids[0].name or ' ')[:20],
-                    'FCYCode': (invoice.currency_id.name if invoice.currency_id and invoice.currency_id.name != 'SGD' else 'XXX')[:3],
-                    'PurchaseFCY': float_repr(lines.price_subtotal, IRAS_DIGITS) if invoice.currency_id.name != 'SGD' else '0',
-                    'GSTFCY': float_repr(sign * tax_amount_company, IRAS_DIGITS) if invoice.currency_id.name != 'SGD' else '0'
+                    'PurchaseValueSGD': float_repr(lines.price_subtotal_signed, IRAS_DIGITS),
+                    'GSTValueSGD': float_repr(lines.l10n_sg_reports_amount_tax, IRAS_DIGITS),
+                    'TaxCode': (lines.l10n_sg_reports_tax.name if lines.l10n_sg_reports_tax else ' ')[:20],
+                    'FCYCode': (lines.currency_id.name if lines.currency_id.name != 'SGD' else 'XXX')[:3],
+                    'PurchaseFCY': float_repr(lines.price_subtotal, IRAS_DIGITS) if lines.currency_id.name != 'SGD' else '0',
+                    'GSTFCY': float_repr(lines.l10n_sg_reports_amount_tax_no_change, IRAS_DIGITS) if lines.currency_id.name != 'SGD' else '0'
                 })
 
         return {
@@ -125,10 +122,10 @@ class IrasAuditFile(models.AbstractModel):
         gst_total_sgd = 0.0
         transaction_count_total = 0
 
-        invoice_ids = self.env['account.move'].search([
-            ('company_id', '=', self.env.company.id),
+        invoice_ids = self.env['account.invoice'].search([
+            ('company_id', '=', self.env.user.company_id.id),
             ('type', 'in', ['out_invoice', 'out_refund']),
-            ('state', '=', 'posted'),
+            ('state', 'in', ['open', 'in_payment', 'paid']),
             ('date', '>=', date_from),
             ('date', '<=', date_to)
             ])
@@ -137,29 +134,26 @@ class IrasAuditFile(models.AbstractModel):
             lines_number = 0
             for lines in invoice.invoice_line_ids:
                 lines_number += 1
-                sign = -1 if invoice.type == 'out_refund' else 1
-                tax_amount = lines.price_total - lines.price_subtotal
-                tax_amount_company = invoice.currency_id._convert(tax_amount, invoice.company_id.currency_id, invoice.company_id, invoice.invoice_date or invoice.date)
                 transaction_count_total += 1
-                supply_total_sgd -= lines.balance
-                gst_total_sgd += tax_amount
+                supply_total_sgd += lines.price_subtotal_signed
+                gst_total_sgd += lines.l10n_sg_reports_amount_tax
 
                 if not invoice.partner_id.l10n_sg_unique_entity_number:
                     raise UserError(_('Your partner (%s) must have a UEN.') % invoice.partner_id.name)
                 supply_lines.append({
                     'CustomerName': (invoice.partner_id.name or '')[:100],
                     'CustomerUEN': (invoice.partner_id.l10n_sg_unique_entity_number or '')[:16],
-                    'InvoiceDate': fields.Date.to_string(invoice.invoice_date),
-                    'InvoiceNo': (invoice.name or '')[:50],
+                    'InvoiceDate': invoice.date_invoice,
+                    'InvoiceNo': (invoice.number or '')[:50],
                     'LineNo': str(lines_number),
                     'ProductDescription': ('[' + lines.product_id.default_code + '] ' + lines.product_id.name if lines.product_id.default_code else lines.product_id.name or '')[:250],
-                    'SupplyValueSGD': float_repr(-lines.balance, IRAS_DIGITS),
-                    'GSTValueSGD': float_repr((lines.price_total - lines.price_subtotal) / (lines.quantity or 1), IRAS_DIGITS),
-                    'TaxCode': (lines.tax_ids and lines.tax_ids[0].name or ' ')[:20],
-                    'Country': invoice.partner_id.commercial_partner_id.country_id.code if invoice.invoice_origin and invoice.partner_id.commercial_partner_id.country_id.code != 'SG' else False,
-                    'FCYCode': (invoice.currency_id.name if lines.currency_id and lines.currency_id.name != 'SGD' else 'XXX')[:3],
-                    'SupplyFCY': float_repr(lines.price_subtotal, IRAS_DIGITS) if invoice.currency_id.name != 'SGD' else '0',
-                    'GSTFCY': float_repr(sign * tax_amount_company, IRAS_DIGITS) if invoice.currency_id.name != 'SGD' else '0'
+                    'SupplyValueSGD': float_repr(lines.price_subtotal_signed, IRAS_DIGITS),
+                    'GSTValueSGD': float_repr(lines.l10n_sg_reports_amount_tax, IRAS_DIGITS),
+                    'TaxCode': (lines.l10n_sg_reports_tax.name if lines.l10n_sg_reports_tax else ' ')[:20],
+                    'Country': invoice.partner_id.commercial_partner_id.country_id.code if invoice.origin and invoice.partner_id.commercial_partner_id.country_id.code != 'SG' else False,
+                    'FCYCode': (lines.currency_id.name if lines.currency_id.name != 'SGD' else 'XXX')[:3],
+                    'SupplyFCY': float_repr(lines.price_subtotal, IRAS_DIGITS) if lines.currency_id.name != 'SGD' else '0',
+                    'GSTFCY': float_repr(lines.l10n_sg_reports_amount_tax_no_change, IRAS_DIGITS) if lines.currency_id.name != 'SGD' else '0'
                 })
         return {
             'lines': supply_lines,
@@ -178,27 +172,23 @@ class IrasAuditFile(models.AbstractModel):
         transaction_count_total = 0
         glt_currency = 'SGD'
 
-        company_id = self.env.company
+        company_id = self.env.user.company_id
         move_line_ids = self.env['account.move.line'].search([
             ('company_id', '=', company_id.id),
             ('date', '>=', date_from),
             ('date', '<=', date_to)
             ])
 
-        options_list = [{
-            'unfold_all': True,
-            'unfolded_lines': [],
-            'date': {
-                'mode':'range',
-                'date_from': fields.Date.from_string(date_from),
-                'date_to': fields.Date.from_string(date_from)}}]
-        accounts_results,taxes_results = self._do_query(options_list)
+        initial_bal_results = self.with_context(
+            date_to=fields.Date.from_string(date_from) + timedelta(days=-1)
+        )._do_query_group_by_account({}, None)
+
         all_accounts = self.env['account.account'].search([
             ('company_id', '=', company_id.id)
             ])
 
         for account in all_accounts:
-            initial_bal = dict(accounts_results).get(account.id, {'initial_balance':{'balance': 0, 'amount_currency': 0, 'debit': 0, 'credit': 0}})['initial_balance']
+            initial_bal = initial_bal_results.get(account.id, {'balance': 0, 'amount_currency': 0, 'debit': 0, 'credit': 0})
             gldata_lines.append({
                 'TransactionDate': date_from,
                 'AccountID': account.code,
@@ -220,13 +210,13 @@ class IrasAuditFile(models.AbstractModel):
                     total_debit += move_line_id.debit
                     transaction_count_total += 1
                     gldata_lines.append({
-                        'TransactionDate': fields.Date.to_string(move_line_id.date),
+                        'TransactionDate': move_line_id.date,
                         'AccountID': move_line_id.account_id.code,
                         'AccountName': move_line_id.account_id.name,
                         'TransactionDescription': move_line_id.name,
                         'Name': move_line_id.partner_id.name if move_line_id.partner_id else False,
                         'TransactionID': move_line_id.move_id.name,
-                        'SourceDocumentID': move_line_id.move_id.invoice_origin if move_line_id.move_id else False,
+                        'SourceDocumentID': move_line_id.invoice_id.origin if move_line_id.invoice_id else False,
                         'SourceType': move_line_id.account_id.user_type_id.name[:20],
                         'Debit': float_repr(move_line_id.debit, IRAS_DIGITS),
                         'Credit': float_repr(move_line_id.credit, IRAS_DIGITS),
@@ -353,6 +343,7 @@ class IrasAuditFile(models.AbstractModel):
     def _get_report_name(self):
         return _('IRAS Audit File')
 
+    @api.multi
     def l10n_sg_print_iras_audit_file_xml(self, options):
         """
         Print the IAF in xml format
@@ -366,6 +357,7 @@ class IrasAuditFile(models.AbstractModel):
             }
         }
 
+    @api.multi
     def l10n_sg_print_iras_audit_file_txt(self, options):
         """
         Print the IAF in txt format

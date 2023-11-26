@@ -9,4 +9,4 @@ class ResConfigSettings(models.TransientModel):
 
     company_country_id = fields.Many2one('res.country', string="Company country", related='company_id.country_id', readonly=True)
     intrastat_region_id = fields.Many2one('account.intrastat.code', string="Company Intrastat Region", related='company_id.intrastat_region_id',
-        domain="[('type', '=', 'region'), '|', ('country_id', '=', None), ('country_id', '=', company_country_id)]", readonly=False)
+        domain="[('type', '=', 'region'), '|', ('country_id', '=', None), ('country_id', '=', company_country_id)]")

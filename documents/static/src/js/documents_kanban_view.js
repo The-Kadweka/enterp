@@ -4,45 +4,47 @@ odoo.define('documents.DocumentsKanbanView', function (require) {
 var DocumentsKanbanController = require('documents.DocumentsKanbanController');
 var DocumentsKanbanModel = require('documents.DocumentsKanbanModel');
 var DocumentsKanbanRenderer = require('documents.DocumentsKanbanRenderer');
-var DocumentsSearchPanel = require('documents.DocumentsSearchPanel');
 
+var config = require('web.config');
 var core = require('web.core');
 var KanbanView = require('web.KanbanView');
 var view_registry = require('web.view_registry');
 
 var _lt = core._lt;
 
+if (config.device.isMobile) {
+    // use the classical KanbanView in mobile
+    view_registry.add('documents_kanban', KanbanView);
+    return;
+}
+
 var DocumentsKanbanView = KanbanView.extend({
     config: _.extend({}, KanbanView.prototype.config, {
         Controller: DocumentsKanbanController,
         Model: DocumentsKanbanModel,
         Renderer: DocumentsKanbanRenderer,
-        SearchPanel: DocumentsSearchPanel,
     }),
     display_name: _lt('Attachments Kanban'),
-    searchMenuTypes: ['filter', 'favorite'],
+    groupable: false,
 
     /**
      * @override
      */
     init: function () {
         this._super.apply(this, arguments);
-        // force the presence of a searchpanel in Documents
-        this.withSearchPanel = true;
-        this.rendererParams.withSearchPanel = true;
 
         // add the fields used in the DocumentsInspector to the list of fields to fetch
         var inspectorFields = [
             'active',
-            'activity_ids',
             'available_rule_ids',
             'checksum',
+            'datas_fname',
             'display_name', // necessary for the mail tracking system to work correctly
             'folder_id',
             'lock_uid',
-            'message_attachment_count',
             'message_follower_ids',
             'message_ids',
+            'activity_ids',
             'mimetype',
             'name',
             'owner_id',
@@ -65,13 +67,11 @@ var DocumentsKanbanView = KanbanView.extend({
                 default: {
                     display_name: {},
                     note: {},
-                    limited_to_single_record: {},
                 },
             },
             relatedFields: {
                 display_name: {type: 'string'},
                 note: {type: 'string'},
-                limited_to_single_record: {type: 'boolean'},
             },
             viewType: 'default',
         }, this.fieldsInfo[this.viewType].available_rule_ids);

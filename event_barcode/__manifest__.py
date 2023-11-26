@@ -14,7 +14,6 @@ the registration is confirmed.
         'views/event_barcode_template.xml',
         'views/event_barcode.xml',
         'views/event_report_template_badge.xml',
-        'views/res_config_settings_views.xml',
     ],
     'qweb': [
         "static/src/xml/event_barcode.xml",

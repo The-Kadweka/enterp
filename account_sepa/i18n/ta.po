@@ -1,44 +1,35 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # * account_sepa
-#
+# 
 # Translators:
+# Bagavathikumar Ramakrishnan <bagavathikumar@gmail.com>, 2019
+# Alagappan Karthikeyan <me@karthik.sg>, 2019
+# 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo 9.0\n"
+"Project-Id-Version: Odoo Server saas~11.5+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-19 11:34+0000\n"
-"PO-Revision-Date: 2016-02-11 10:14+0000\n"
-"Last-Translator: Martin Trigaux\n"
-"Language-Team: Tamil (http://www.transifex.com/odoo/odoo-9/language/ta/)\n"
-"Language: ta\n"
+"POT-Creation-Date: 2018-09-21 14:06+0000\n"
+"PO-Revision-Date: 2018-08-24 11:36+0000\n"
+"Last-Translator: Alagappan Karthikeyan <me@karthik.sg>, 2019\n"
+"Language-Team: Tamil (https://www.transifex.com/odoo/teams/41243/ta/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
+"Language: ta\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: account_sepa
-#: code:addons/account_sepa/account_payment.py:42
+#: code:addons/account_sepa/models/account_payment.py:0
 #, python-format
-msgid "A SEPA communication cannot exceed 140 characters"
+msgid "A bank account must be set on the following documents: "
 msgstr ""
 
 #. module: account_sepa
-#: model:ir.model.fields,field_description:account_sepa.field_account_sepa_credit_transfer_bank_account_id
-msgid "Bank Account"
-msgstr ""
-
-#. module: account_sepa
-#: model:ir.ui.view,arch_db:account_sepa.view_sepa_credit_transfer_download
-msgid "Cancel"
-msgstr "ரத்து"
-
-#. module: account_sepa
-#: model:ir.ui.view,arch_db:account_sepa.view_sepa_credit_transfer_download
-msgid ""
-"Click on the file to save it somewhere on your computer. Then upload that "
-"file on your bank's homebanking website to order the credit transfer."
-msgstr ""
+#: model:ir.model,name:account_sepa.model_account_batch_payment
+msgid "Batch Payment"
+msgstr "பேட்ச் செலுத்துதல்"
 
 #. module: account_sepa
 #: model:ir.model,name:account_sepa.model_res_company
@@ -46,247 +37,264 @@ msgid "Companies"
 msgstr "நிறுவனங்கள்"
 
 #. module: account_sepa
-#: model:ir.model,name:account_sepa.model_account_sepa_credit_transfer
-msgid "Create SEPA credit transfer files"
-msgstr ""
+#: model:ir.model,name:account_sepa.model_res_config_settings
+msgid "Config Settings"
+msgstr "கட்டமைப்பு அமைப்புகள்"
 
 #. module: account_sepa
-#: model:ir.model.fields,field_description:account_sepa.field_account_sepa_credit_transfer_create_uid
-msgid "Created by"
-msgstr "உருவாக்கியவர்"
+#: model:ir.model,name:account_sepa.model_account_abstract_payment
+msgid ""
+"Contains the logic shared between models which allows to register payments"
+msgstr "பணம் பதிவு செய்ய அனுமதிக்கும் மாதிரிகள் இடையே தர்க்கம் பகிர்ந்து"
 
 #. module: account_sepa
-#: model:ir.model.fields,field_description:account_sepa.field_account_sepa_credit_transfer_create_date
-msgid "Created on"
-msgstr ""
-"உருவாக்கப்பட்ட \n"
-"தேதி"
-
-#. module: account_sepa
-#: model:ir.model.fields,field_description:account_sepa.field_account_sepa_credit_transfer_display_name
-msgid "Display Name"
-msgstr "காட்சி பெயர்"
-
-#. module: account_sepa
-#: model:ir.ui.view,arch_db:account_sepa.view_sepa_credit_transfer_download
-msgid "Download SEPA Credit Transfer File"
-msgstr ""
-
-#. module: account_sepa
-#: model:ir.actions.server,name:account_sepa.action_account_download_sepa_sct_file
-msgid "Download SEPA Payment"
-msgstr ""
-
-#. module: account_sepa
-#: model:ir.model.fields,help:account_sepa.field_res_company_sepa_orgid_issr
+#: model:ir.model.fields,help:account_sepa.field_res_company__sepa_orgid_issr
 msgid ""
 "Entity that assigns the identification (eg. KBE-BCO or Finanzamt Muenchen "
 "IV)."
 msgstr ""
+"அந்த அடையாளத்தை அடையாளப்படுத்துதல் (எ.கா. KBE-BCO அல்லது Finanzamt Muenchen "
+"IV)."
 
 #. module: account_sepa
-#: model:ir.model.fields,field_description:account_sepa.field_account_sepa_credit_transfer_filename
-msgid "Filename"
-msgstr ""
+#: selection:res.company,sepa_pain_version:0
+msgid "Generic"
+msgstr "பொதுவான"
 
 #. module: account_sepa
-#: model:ir.model.fields,field_description:account_sepa.field_account_sepa_credit_transfer_id
-msgid "ID"
-msgstr "ID"
+#: selection:res.company,sepa_pain_version:0
+msgid "German Version"
+msgstr "ஜெர்மன் பதிப்பு"
 
 #. module: account_sepa
-#: model:ir.model.fields,field_description:account_sepa.field_res_company_sepa_orgid_id
+#: model:ir.model.fields,field_description:account_sepa.field_res_company__sepa_orgid_id
+#: model:ir.model.fields,field_description:account_sepa.field_res_config_settings__sepa_orgid_id
 msgid "Identification"
-msgstr ""
+msgstr "அடையாள"
 
 #. module: account_sepa
-#: model:ir.model.fields,help:account_sepa.field_res_company_sepa_orgid_id
+#: model:ir.model.fields,help:account_sepa.field_res_company__sepa_orgid_id
+#: model:ir.model.fields,help:account_sepa.field_res_config_settings__sepa_orgid_id
 msgid "Identification assigned by an institution (eg. VAT number)."
-msgstr ""
+msgstr "ஒரு நிறுவனம் (எ.கா. VAT எண்) வழங்கிய அடையாளம்."
 
 #. module: account_sepa
-#: code:addons/account_sepa/sepa_credit_transfer.py:76
+#: code:addons/account_sepa/models/account_batch_payment.py:44
+#: code:addons/account_sepa/models/account_batch_payment.py:51
 #, python-format
 msgid ""
-"In order to export a SEPA Credit Transfer file, please only select payments "
-"belonging to the same bank journal."
+"In result, the file might not be accepted by all bank as a valid SEPA Credit"
+" Transfer file"
 msgstr ""
+"இதன் விளைவாக, அனைத்து வங்கிகளும் ஒரு சரியான SEPA கிரெடிட் டிரான்ஸ்ஃபர் "
+"கோப்பு என ஏற்றுக் கொள்ளப்படாது"
 
 #. module: account_sepa
-#: model:ir.model.fields,field_description:account_sepa.field_account_sepa_credit_transfer_is_generic
-msgid "Is generic"
-msgstr ""
-
-#. module: account_sepa
-#: model:ir.model.fields,field_description:account_sepa.field_res_company_sepa_orgid_issr
+#: model:ir.model.fields,field_description:account_sepa.field_res_company__sepa_orgid_issr
+#: model:ir.model.fields,field_description:account_sepa.field_res_config_settings__sepa_orgid_issr
 msgid "Issuer"
-msgstr ""
+msgstr "வழங்குபவர்"
 
 #. module: account_sepa
 #: model:ir.model,name:account_sepa.model_account_journal
-#: model:ir.model.fields,field_description:account_sepa.field_account_sepa_credit_transfer_journal_id
 msgid "Journal"
+msgstr "ஜர்னல்"
+
+#. module: account_sepa
+#: model:ir.model.fields,help:account_sepa.field_res_config_settings__sepa_initiating_party_name
+msgid ""
+"Name of the Creditor Reference Party. Usage Rule: Limited to 70 characters "
+"in length."
 msgstr ""
+"கடனாளர் குறிப்புக் கட்சியின் பெயர். பயன்பாட்டு விதி: நீளம் 70 எழுத்துகளுக்கு"
+" வரையறுக்கப்பட்டுள்ளது"
 
 #. module: account_sepa
-#: model:ir.model.fields,field_description:account_sepa.field_account_sepa_credit_transfer___last_update
-msgid "Last Modified on"
-msgstr "கடைசியாக திருத்திய"
-
-#. module: account_sepa
-#: model:ir.model.fields,field_description:account_sepa.field_account_sepa_credit_transfer_write_uid
-msgid "Last Updated by"
-msgstr "கடைசியாக புதுப்பிக்கப்பட்டது"
-
-#. module: account_sepa
-#: model:ir.model.fields,field_description:account_sepa.field_account_sepa_credit_transfer_write_date
-msgid "Last Updated on"
-msgstr "கடைசியாக புதுப்பிக்கப்பட்டது"
-
-#. module: account_sepa
-#: model:ir.ui.view,arch_db:account_sepa.view_sepa_credit_transfer_download
-msgid "Ok"
-msgstr ""
-
-#. module: account_sepa
-#: model:ir.ui.view,arch_db:account_sepa.account_journal_dashboard_kanban_view_inherited
+#: model_terms:ir.ui.view,arch_db:account_sepa.account_journal_dashboard_kanban_view_inherited
 msgid "Payment to send via SEPA"
-msgstr ""
+msgstr "SEPA வழியாக அனுப்புவதற்கான கட்டணம்"
 
 #. module: account_sepa
 #: model:ir.model,name:account_sepa.model_account_payment
 msgid "Payments"
-msgstr ""
+msgstr "கொடுப்பனவு"
 
 #. module: account_sepa
-#: code:addons/account_sepa/sepa_credit_transfer.py:74
-#, python-format
-msgid ""
-"Payments to export as SEPA Credit Transfer must have 'SEPA Credit Transfer' "
-"selected as payment method and be posted"
-msgstr ""
-
-#. module: account_sepa
-#: model:ir.ui.view,arch_db:account_sepa.account_journal_dashboard_kanban_view_inherited
+#: model_terms:ir.ui.view,arch_db:account_sepa.account_journal_dashboard_kanban_view_inherited
 msgid "Payments to send via SEPA"
-msgstr ""
+msgstr "SEPA வழியாக அனுப்புவதற்கான கட்டணம்"
 
 #. module: account_sepa
-#: model:ir.model.fields,field_description:account_sepa.field_account_payment_partner_bank_account_id
-#: model:ir.model.fields,field_description:account_sepa.field_account_register_payments_partner_bank_account_id
+#: code:addons/account_sepa/models/account_batch_payment.py:42
+#, python-format
+msgid "Please note that the following warning has been raised:"
+msgstr "பின்வரும் எச்சரிக்கை எழுப்பப்பட்டது என்பதை நினைவில் கொள்க:"
+
+#. module: account_sepa
+#: code:addons/account_sepa/models/account_batch_payment.py:46
+#, python-format
+msgid "Please note that the following warnings have been raised:"
+msgstr "பின்வரும் எச்சரிக்கைகள் எழுப்பப்பட்டுள்ளன என்பதை நினைவில் கொள்க:"
+
+#. module: account_sepa
+#: model:ir.model.fields,field_description:account_sepa.field_account_payment__partner_bank_account_id
+#: model:ir.model.fields,field_description:account_sepa.field_account_register_payments__partner_bank_account_id
 msgid "Recipient Bank Account"
-msgstr ""
+msgstr "பெறுநர் வங்கி கணக்கு"
 
 #. module: account_sepa
 #: model:ir.model,name:account_sepa.model_account_register_payments
-msgid "Register payments on multiple invoices"
-msgstr ""
+msgid "Register Payments"
+msgstr "கட்டணம் செலுத்துங்கள்"
 
 #. module: account_sepa
-#: model:ir.ui.view,arch_db:account_sepa.view_company_form_inherited
-msgid "SEPA"
-msgstr ""
+#: model:account.payment.method,name:account_sepa.account_payment_method_sepa_ct
+msgid "SEPA Credit Transfer"
+msgstr "SEPA கடன் பரிவர்த்தனை"
 
 #. module: account_sepa
-#: code:addons/account_sepa/account_journal_dashboard.py:23
+#: model_terms:ir.ui.view,arch_db:account_sepa.view_sepa_credit_transfer_search
+msgid "SEPA Credit Transfer Payments To Send"
+msgstr "SEPA கடன் பரிவர்த்தனை கொடுப்பனவுகள் அனுப்புக"
+
+#. module: account_sepa
+#: code:addons/account_sepa/models/account_journal_dashboard.py:23
 #, python-format
 msgid "SEPA Credit Transfers to Send"
-msgstr ""
+msgstr "SEPA கடன் இடமாற்றங்கள் அனுப்ப"
 
 #. module: account_sepa
-#: model:ir.model.fields,field_description:account_sepa.field_account_sepa_credit_transfer_file
-msgid "SEPA XML File"
-msgstr ""
+#: model:ir.model.fields,field_description:account_sepa.field_res_company__sepa_pain_version
+#: model:ir.model.fields,field_description:account_sepa.field_res_config_settings__sepa_pain_version
+msgid "SEPA Pain Version"
+msgstr "SEPA வலி பதிப்பு"
 
 #. module: account_sepa
-#: model:ir.ui.view,arch_db:account_sepa.view_sepa_credit_transfer_search
-msgid "Sepa Payments To Send"
+#: model:ir.model.fields,help:account_sepa.field_res_company__sepa_pain_version
+#: model:ir.model.fields,help:account_sepa.field_res_config_settings__sepa_pain_version
+msgid ""
+"SEPA may be a generic format, some countries differ from the SEPA "
+"recommandations made by the EPC (European Payment Councile) and thus the XML"
+" created need some tweakenings."
 msgstr ""
+"SEPA ஒரு பொதுவான வடிவமாக இருக்கலாம், சில நாடுகளில் EPC (ஐரோப்பிய செலுத்தும் "
+"ஒப்பந்தம்) செய்யப்பட்ட SEPA பரிந்துரைகளை வேறுபடுத்துகின்றன, இதனால் "
+"எக்ஸ்எம்எல் உருவாக்கப்பட்டது சில மாற்றங்கள் தேவைப்படுகிறது."
 
 #. module: account_sepa
-#: model:ir.model.fields,help:account_sepa.field_account_sepa_credit_transfer_is_generic
+#: model:ir.model.fields,field_description:account_sepa.field_account_batch_payment__sct_generic
+msgid "Sct Generic"
+msgstr "SCT பொதுவான"
+
+#. module: account_sepa
+#: model:ir.model.fields,field_description:account_sepa.field_account_batch_payment__sct_warning
+msgid "Sct Warning"
+msgstr "SCT பொதுவானது"
+
+#. module: account_sepa
+#: selection:res.company,sepa_pain_version:0
+msgid "Swiss Version"
+msgstr "சுவிஸ் பதிப்பு"
+
+#. module: account_sepa
+#: model:ir.model.fields,help:account_sepa.field_account_batch_payment__sct_generic
 msgid ""
 "Technical feature used during the file creation. A SEPA message is said to "
 "be 'generic' if it cannot be considered as a standard european credit "
-"transfer. That is if the bank journal is not in €, a transaction is not in € "
-"or a payee is not identified by an IBAN account number and a bank BIC."
+"transfer. That is if the bank journal is not in €, a transaction is not in €"
+" or a payee is not identified by an IBAN account number and a bank BIC."
 msgstr ""
+"கோப்பு உருவாக்கியின் போது பயன்படுத்தப்படும் தொழில்நுட்ப அம்சம். ஒரு SEPA "
+"செய்தி ஒரு சாதாரண யூரோ கடன் பரிமாற்றமாக கருத முடியாது என்றால் 'பொதுவான' "
+"என்று கூறப்படுகிறது. வங்கி பத்திரிகை € ™ € ™ கள் € ™ €, ஒரு பரிவர்த்தனை அல்ல"
+" € அல்லது ஒரு payee ஒரு IBAN கணக்கு எண் மற்றும் வங்கி BIC அடையாளம் இல்லை "
+"என்றால்."
 
 #. module: account_sepa
-#: code:addons/account_sepa/sepa_credit_transfer.py:322
+#: code:addons/account_sepa/models/account_batch_payment.py:353
 #, python-format
 msgid ""
 "The account %s, linked to partner '%s', is not of type IBAN.\n"
 "A valid IBAN account is required to use SEPA features."
 msgstr ""
+"கணக்கு, பங்குதாரர் இணைக்கப்பட்டுள்ளது, வகை IBAN அல்ல.\n"
+"SEPA அம்சங்களைப் பயன்படுத்த சரியான IBAN கணக்கு தேவை."
 
 #. module: account_sepa
-#: code:addons/account_sepa/sepa_credit_transfer.py:81
+#: code:addons/account_sepa/models/account_batch_payment.py:103
 #, python-format
 msgid ""
 "The account %s, of journal '%s', is not of type IBAN.\n"
 "A valid IBAN account is required to use SEPA features."
 msgstr ""
+"இதழ் 'கணக்கு', IBAN வகை வகையல்ல.\n"
+"SEPA அம்சங்களைப் பயன்படுத்த சரியான IBAN கணக்கு தேவை."
 
 #. module: account_sepa
-#: code:addons/account_sepa/account_payment.py:52
+#: code:addons/account_sepa/models/account_payment.py:47
 #, python-format
 msgid ""
 "The account '%s' (journal %s) requires a Bank Identification Code (BIC) to "
 "pay via SEPA. Please configure it first."
 msgstr ""
+"கணக்கை (பத்திரிகை) SEPA வழியாக செலுத்த ஒரு வங்கி அடையாள கோட் (BIC) "
+"தேவைப்படுகிறது. முதலில் அதை உள்ளமைக்கவும்."
 
 #. module: account_sepa
-#: code:addons/account_sepa/sepa_credit_transfer.py:277
+#: code:addons/account_sepa/models/account_batch_payment.py:317
 #, python-format
 msgid ""
 "The amount of the payment '%s' is too high. The maximum permitted is %s."
-msgstr ""
+msgstr "கட்டணம் '' அளவு அதிகமாக உள்ளது. அனுமதிக்கப்பட்ட அதிகபட்சம்."
 
 #. module: account_sepa
-#: code:addons/account_sepa/sepa_credit_transfer.py:124
+#: code:addons/account_sepa/models/account_batch_payment.py:90
 #, python-format
 msgid ""
 "The creditor bank account %s used in payment %s is not identified by a BIC"
 msgstr ""
+"கட்டணத்தில் பயன்படுத்தப்படும் கடன் வங்கிக் கணக்கு பி.ஐ.சி மூலம் அடையாளம் "
+"காணப்படவில்லை"
 
 #. module: account_sepa
-#: code:addons/account_sepa/sepa_credit_transfer.py:126
+#: code:addons/account_sepa/models/account_batch_payment.py:92
 #, python-format
 msgid ""
 "The creditor bank account %s used in payment %s is not identified by an IBAN"
 msgstr ""
+"கட்டணம்% s இல் பயன்படுத்தப்படும் கடன் வங்கியின் கணக்கு% s ஐ IBAN அடையாளம் "
+"காணப்படவில்லை"
 
 #. module: account_sepa
-#: code:addons/account_sepa/sepa_credit_transfer.py:48
+#: code:addons/account_sepa/models/account_batch_payment.py:111
 #, python-format
 msgid ""
-"The generated payment file is not a generic SEPA credit transfer. Be aware "
-"that some banks may reject it because it is not implemented on their side.\n"
+"The following payments have no recipient bank account set: %s. \n"
 "\n"
-"In particular, the reason why it this payment file is not a generic is the "
-"following:\n"
-"   "
 msgstr ""
 
 #. module: account_sepa
-#: code:addons/account_sepa/account_payment.py:50
+#: code:addons/account_sepa/models/account_payment.py:45
 #, python-format
 msgid ""
 "The journal '%s' requires a proper IBAN account to pay via SEPA. Please "
 "configure it first."
 msgstr ""
+"இந்த பத்திரிகைக்கு SEPA வழியாக செலுத்த சரியான IBAN கணக்கு தேவைப்படுகிறது. "
+"முதலில் அதை உள்ளமைக்கவும்."
 
 #. module: account_sepa
-#: code:addons/account_sepa/account_payment.py:61
+#: code:addons/account_sepa/models/account_payment.py:56
 #, python-format
 msgid ""
 "The partner account '%s' requires a Bank Identification Code (BIC) to pay "
 "via SEPA. Please configure it first."
 msgstr ""
+"பங்குதாரர் கணக்கில் SEPA வழியாக பணம் செலுத்த ஒரு வங்கி அடையாள கோட் (BIC) "
+"தேவைப்படுகிறது. முதலில் அதை உள்ளமைக்கவும்."
 
 #. module: account_sepa
-#: code:addons/account_sepa/sepa_credit_transfer.py:17
+#: code:addons/account_sepa/models/account_batch_payment.py:18
 #, python-format
 msgid ""
 "The text used in SEPA files can only contain the following characters :\n"
@@ -296,63 +304,57 @@ msgid ""
 "0 1 2 3 4 5 6 7 8 9\n"
 "/ - ? : ( ) . , ' + (space)"
 msgstr ""
+"SEPA கோப்புகளில் பயன்படுத்தப்படும் உரை பின்வருமாறு:\n"
+"\n"
+"a b c d e f g h i j k l m n o p q r s s u u w x y z\n"
+"A B C D E F G H I I J K L M N O P Q ஆர் எஸ் எஸ் டி யூ வி எக்ஸ் எக்ஸ் எச் Z\n"
+"0 1 2 3 4 5 6 7 8 9\n"
+"/ -? : (). , '((இடம்)"
 
 #. module: account_sepa
-#: code:addons/account_sepa/sepa_credit_transfer.py:122
+#: code:addons/account_sepa/models/account_batch_payment.py:88
 #, python-format
 msgid "The transaction %s is instructed in another currency than EUR"
-msgstr ""
+msgstr "பரிவர்த்தனை EUR விட மற்றொரு நாணயத்தில் உத்தரவு"
 
 #. module: account_sepa
-#: code:addons/account_sepa/sepa_credit_transfer.py:306
+#: code:addons/account_sepa/models/account_batch_payment.py:347
 #, python-format
 msgid "There is no Bank Identifier Code recorded for bank account '%s'"
-msgstr ""
+msgstr "வங்கிக் கணக்குக்கு பதிவு செய்யப்பட்டுள்ள வங்கி அடையாள எண் இல்லை"
 
 #. module: account_sepa
-#: code:addons/account_sepa/sepa_credit_transfer.py:152
+#: code:addons/account_sepa/models/account_batch_payment.py:191
 #, python-format
 msgid ""
 "There is no Bank Identifier Code recorded for bank account '%s' of journal "
 "'%s'"
-msgstr ""
+msgstr "வங்கி கணக்கு \"பத்திரிகை\" பதிவு செய்யப்பட்டுள்ள வங்கி அடையாள எண்"
 
 #. module: account_sepa
-#: code:addons/account_sepa/sepa_credit_transfer.py:84
-#, python-format
-msgid "There is no bank account selected for payment '%s'"
-msgstr ""
-
-#. module: account_sepa
-#: code:addons/account_sepa/sepa_credit_transfer.py:150
+#: code:addons/account_sepa/models/account_batch_payment.py:189
 #, python-format
 msgid "Too many transactions for a single file."
-msgstr ""
+msgstr "ஒற்றை கோப்பிற்கான பல பரிமாற்றங்கள்."
 
 #. module: account_sepa
-#: model:ir.model.fields,field_description:account_sepa.field_account_sepa_credit_transfer_warning_message
-msgid "Warning"
-msgstr ""
-
-#. module: account_sepa
-#: model:ir.model.fields,help:account_sepa.field_res_company_sepa_initiating_party_name
+#: model:ir.model.fields,help:account_sepa.field_res_company__sepa_initiating_party_name
+#: model:ir.model.fields,help:account_sepa.field_res_config_settings__sepa_orgid_issr
 msgid ""
 "Will appear in SEPA payments as the name of the party initiating the "
 "payment. Limited to 70 characters."
 msgstr ""
+"பணம் செலுத்துவதற்கு முன்னர் கட்சியின் பெயர் என SEPA கொடுப்பனவுகளில் "
+"தோன்றும். 70 எழுத்துகளுக்கு வரையறுக்கப்பட்டது."
 
 #. module: account_sepa
-#: model:ir.model.fields,field_description:account_sepa.field_res_company_sepa_initiating_party_name
+#: model:ir.model.fields,field_description:account_sepa.field_res_company__sepa_initiating_party_name
+#: model:ir.model.fields,field_description:account_sepa.field_res_config_settings__sepa_initiating_party_name
 msgid "Your Company Name"
-msgstr ""
+msgstr "உங்கள் நிறுவனத்தின் பெயர்"
 
 #. module: account_sepa
-#: code:addons/account_sepa/sepa_credit_transfer.py:118
+#: code:addons/account_sepa/models/account_batch_payment.py:84
 #, python-format
 msgid "Your bank account is not labelled in EUR"
-msgstr ""
-
-#. module: account_sepa
-#: model:ir.ui.view,arch_db:account_sepa.view_sepa_credit_transfer_download
-msgid "or"
-msgstr ""
+msgstr "உங்கள் வங்கி கணக்கு EUR இல் பெயரிடப்படவில்லை"

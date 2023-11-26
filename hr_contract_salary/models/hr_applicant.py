@@ -7,7 +7,7 @@ from odoo import fields, models
 class HrApplicant(models.Model):
     _inherit = 'hr.applicant'
 
-    proposed_contracts = fields.Many2many('hr.contract', string="Proposed Contracts", domain="[('company_id', '=', company_id)]")
+    proposed_contracts = fields.Many2many('hr.contract', string="Proposed Contracts")
     proposed_contracts_count = fields.Integer(compute="_compute_proposed_contracts_count", string="Proposed Contracts Count")
     access_token = fields.Char('Security Token', copy=False)
     access_token_end_date = fields.Date('Access Token Validity Date', copy=False)

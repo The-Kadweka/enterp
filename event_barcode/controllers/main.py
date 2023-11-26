@@ -12,16 +12,19 @@ class EventBarcode(http.Controller):
         if not attendee:
             return {'warning': _('This ticket is not valid for this event')}
         res = {
-            'registration': dict(attendee.summary(), id=attendee.id, partner_id=attendee.partner_id.id),
+            'registration': dict(attendee.summary(), id=attendee.id),
         }
+        count = Registration.search_count([('state', '=', 'done'), ('event_id', '=', event_id)])
         attendee_name = attendee.name or _('Attendee')
         if attendee.state == 'cancel':
             res.update({'warning': _('Canceled registration')})
         elif attendee.state != 'done':
             attendee.write({'state': 'done', 'date_closed': fields.Datetime.now()})
+            count += 1
             res.update({'success': _('%s is successfully registered') % attendee_name})
         else:
             res.update({'warning': _('%s is already registered') % attendee_name})
+        res['count'] = count
         return res
 
     @http.route(['/event_barcode/event'], type='json', auth="user")
@@ -29,7 +32,10 @@ class EventBarcode(http.Controller):
         event = request.env['event.event'].browse(event_id)
         return {
             'name': event.name,
+            'start_date': event.date_begin,
+            'end_date': event.date_end,
             'country': event.address_id.country_id.name,
             'city': event.address_id.city,
-            'company_name': event.company_id.name
+            'count': len(event.registration_ids.filtered(lambda reg: reg.state == 'done')),
+            'total_attendee': len(event.registration_ids.filtered(lambda reg: reg.state != 'cancel'))
         }

@@ -10,7 +10,6 @@ from dateutil.relativedelta import relativedelta
 from babel.dates import format_datetime
 
 from odoo import api, fields, models, _
-from odoo.tools.misc import get_lang
 from odoo.addons.base.models.res_partner import _tz_get
 from odoo.addons.http_routing.models.ir_http import slug
 from odoo.exceptions import ValidationError
@@ -60,6 +59,7 @@ class CalendarAppointmentType(models.Model):
         for appointment_type in self:
             appointment_type.website_url = '/website/calendar/%s/appointment' % (slug(appointment_type),)
 
+    @api.multi
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
         default = default or {}
@@ -68,12 +68,7 @@ class CalendarAppointmentType(models.Model):
 
     def action_calendar_meetings(self):
         self.ensure_one()
-        action = self.env.ref('calendar.action_calendar_event').read()[0]
-        action['context'] = {
-            'default_appointment_type_id': self.id,
-            'search_default_appointment_type_id': self.id
-        }
-        return action
+        return self.env.ref('calendar.action_calendar_event').read()[0]
 
     # --------------------------------------
     # Slots Generation
@@ -109,15 +104,15 @@ class CalendarAppointmentType(models.Model):
         requested_tz = pytz.timezone(timezone)
 
         slots = []
-        for slot in self.slot_ids.filtered(lambda x: int(x.weekday) == first_day.isoweekday()):
+        for slot in self.slot_ids.filtered(lambda x: x.weekday == first_day.isoweekday()):
             if slot.hour > first_day.hour + first_day.minute / 60.0:
                 append_slot(first_day.date(), slot)
-        slot_weekday = [int(weekday) - 1 for weekday in self.slot_ids.mapped('weekday')]
+        slot_weekday = [weekday - 1 for weekday in self.slot_ids.mapped('weekday')]
         for day in rrule.rrule(rrule.DAILY,
                                dtstart=first_day.date() + timedelta(days=1),
                                until=last_day.date(),
                                byweekday=slot_weekday):
-            for slot in self.slot_ids.filtered(lambda x: int(x.weekday) == day.isoweekday()):
+            for slot in self.slot_ids.filtered(lambda x: x.weekday == day.isoweekday()):
                 append_slot(day, slot)
         return slots
 
@@ -170,25 +165,20 @@ class CalendarAppointmentType(models.Model):
         def is_calendar_available(slot, events, employee):
             """ Returns True if the given slot doesn't collide with given events for the employee
             """
-            start_dt = slot['UTC'][0]
-            end_dt = slot['UTC'][1]
+            start_dt_string = slot['UTC'][0]
+            end_dt_string = slot['UTC'][1]
+            employee_tz = pytz.timezone(employee.user_id.tz or self.sudo().env.user.tz or slot['slot'].appointment_type_id.appointment_tz or 'UTC')
 
-            event_in_scope = lambda ev: (
-                fields.Date.to_date(ev.start) <= fields.Date.to_date(end_dt)
-                and fields.Date.to_date(ev.stop) >= fields.Date.to_date(start_dt)
-            )
-
-            for ev in events.filtered(event_in_scope):
+            for ev in events.filtered(lambda ev: ev.start < end_dt_string and ev.stop > start_dt_string):
                 if ev.allday:
                     # allday events are considered to take the whole day in the related employee's timezone
-                    event_tz = pytz.timezone(ev.event_tz or employee.user_id.tz or self.env.user.tz or slot['slot'].appointment_type_id.appointment_tz or 'UTC')
                     ev_start_dt = datetime.combine(fields.Date.from_string(ev.start_date), time.min)
                     ev_stop_dt = datetime.combine(fields.Date.from_string(ev.stop_date), time.max)
-                    ev_start_dt = event_tz.localize(ev_start_dt).astimezone(pytz.UTC).replace(tzinfo=None)
-                    ev_stop_dt = event_tz.localize(ev_stop_dt).astimezone(pytz.UTC).replace(tzinfo=None)
-                    if ev_start_dt < end_dt and ev_stop_dt > start_dt:
+                    ev_start_dt = employee_tz.localize(ev_start_dt).astimezone(pytz.UTC).replace(tzinfo=None)
+                    ev_stop_dt = employee_tz.localize(ev_stop_dt).astimezone(pytz.UTC).replace(tzinfo=None)
+                    if ev_start_dt < slot['UTC'][1] and ev_stop_dt > slot['UTC'][0]:
                         return False
-                elif fields.Datetime.to_datetime(ev.start_datetime) < end_dt and fields.Datetime.to_datetime(ev.stop_datetime) > start_dt:
+                elif ev.start_datetime < end_dt_string and ev.stop_datetime > start_dt_string:
                     return False
             return True
 
@@ -197,7 +187,7 @@ class CalendarAppointmentType(models.Model):
 
         # With context will be used in resource.calendar to force the referential user
         # for work interval computing to the *user linked to the employee*
-        available_employees = [emp.with_context(tz=emp.user_id.tz) for emp in (employee or self.employee_ids)]
+        available_employees = [emp.with_context({'tz': emp.user_id.tz}) for emp in (employee or self.employee_ids)]
         random.shuffle(available_employees)
         for slot in slots:
             for emp_pos, emp in enumerate(available_employees):
@@ -205,9 +195,9 @@ class CalendarAppointmentType(models.Model):
                     workhours[emp_pos] = [
                         (interval[0].astimezone(pytz.UTC).replace(tzinfo=None),
                          interval[1].astimezone(pytz.UTC).replace(tzinfo=None))
-                        for interval in emp.resource_calendar_id._work_intervals_batch(
-                            first_day, last_day, resources=emp.resource_id,
-                        )[emp.resource_id.id]
+                        for interval in emp.resource_calendar_id._work_intervals(
+                            first_day, last_day, resource=emp.resource_id,
+                        )
                     ]
 
                 if is_work_available(slot['UTC'][0], slot['UTC'][1], workhours[emp_pos]):
@@ -277,7 +267,7 @@ class CalendarAppointmentType(models.Model):
                     }
 
             months.append({
-                'month': format_datetime(start, 'MMMM Y', locale=get_lang(self.env).code),
+                'month': format_datetime(start, 'MMMM Y', locale=self._context.get('lang', 'en_US')),
                 'weeks': dates
             })
             start = start + relativedelta(months=1)
@@ -292,13 +282,13 @@ class CalendarAppointmentSlot(models.Model):
 
     appointment_type_id = fields.Many2one('calendar.appointment.type', 'Appointment Type', ondelete='cascade')
     weekday = fields.Selection([
-        ('1', 'Monday'),
-        ('2', 'Tuesday'),
-        ('3', 'Wednesday'),
-        ('4', 'Thursday'),
-        ('5', 'Friday'),
-        ('6', 'Saturday'),
-        ('7', 'Sunday'),
+        (1, 'Monday'),
+        (2, 'Tuesday'),
+        (3, 'Wednesday'),
+        (4, 'Thursday'),
+        (5, 'Friday'),
+        (6, 'Saturday'),
+        (7, 'Sunday'),
     ], string='Week Day', required=True)
     hour = fields.Float('Starting Hour', required=True, default=8.0)
 

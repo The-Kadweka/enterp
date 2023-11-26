@@ -15,11 +15,3 @@ class AccountJournal(models.Model):
             res['tag_ids'] = tag_ids
 
         return res
-
-class AccountChartTemplate(models.Model):
-    _inherit = 'account.chart.template'
-
-    def _load(self, sale_tax_rate, purchase_tax_rate, company):
-        if company.country_id.code == 'DE':
-            self = self.with_context(no_create_move=True)
-        return super(AccountChartTemplate, self)._load(sale_tax_rate, purchase_tax_rate, company)

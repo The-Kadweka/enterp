@@ -7,14 +7,13 @@ import re
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
+    @api.multi
     def action_done(self):
-        results = []
-        for rec in self:
-            result = super(StockPicking, rec).action_done()
-            rec._ebay_update_carrier(transfered=True)
-            results.append(result)
-        return results
+        result = super(StockPicking, self).action_done()
+        self._ebay_update_carrier(transfered=True)
+        return result
 
+    @api.multi
     def _ebay_update_carrier(self, transfered=False):
         for picking in self:
             so = self.env['sale.order'].search([('name', '=', picking.origin), ('origin', 'like', 'eBay')])

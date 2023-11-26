@@ -16,15 +16,14 @@
         'data/res_country_data.xml',
         'data/res_partner_data.xml',
         'security/ir.model.access.csv',
-        'views/account_move_views.xml',
+        'views/account_invoice_views.xml',
         'views/account_journal_views.xml',
         'views/electronic_invoice.xml',
-        'views/electronic_invoice_vendor_document.xml',
         'views/product_template_views.xml',
         'views/res_config_settings_views.xml',
         'views/res_country_state_views.xml',
         'views/res_partner_views.xml',
-        'wizard/account_move_reversal_views.xml'
+        'wizard/account_invoice_refund_views.xml'
     ],
     'installable': True,
     'license': 'OEEL-1',

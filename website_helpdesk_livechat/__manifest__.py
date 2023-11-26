@@ -3,7 +3,7 @@
 
 {
     'name': 'Website IM Livechat Helpdesk',
-    'category': 'Operations/Helpdesk',
+    'category': 'Helpdesk',
     'sequence': 58,
     'summary': 'Ticketing, Support, Livechat',
     'depends': [

@@ -17,6 +17,7 @@ class Lead(models.Model):
 
     days_exceeding_closing = fields.Float('Exceeded Closing Days', compute='_compute_days_exceeding_closing', store=True)
 
+    @api.multi
     @api.depends('active', 'probability')
     def _compute_won_status(self):
         for lead in self:
@@ -27,18 +28,16 @@ class Lead(models.Model):
             else:
                 lead.won_status = 'pending'
 
+    @api.multi
     @api.depends('date_conversion', 'create_date')
     def _compute_days_to_convert(self):
         for lead in self:
             if lead.date_conversion:
                 lead.days_to_convert = (fields.Datetime.from_string(lead.date_conversion) - fields.Datetime.from_string(lead.create_date)).days
-            else:
-                lead.days_to_convert = 0
 
+    @api.multi
     @api.depends('date_deadline', 'date_closed')
     def _compute_days_exceeding_closing(self):
         for lead in self:
             if lead.date_closed and lead.date_deadline:
                 lead.days_exceeding_closing = (fields.Datetime.from_string(lead.date_deadline) - fields.Datetime.from_string(lead.date_closed)).days
-            else:
-                lead.days_exceeding_closing = 0

@@ -16,6 +16,7 @@ _logger = logging.getLogger(__name__)
 class IrAttachment(models.Model):
     _inherit = 'ir.attachment'
 
+    @api.multi
     def unlink(self):
         """In order to deny XML attachments deletion from an invoice, because
         the xml attachments are legal documents.
@@ -24,10 +25,11 @@ class IrAttachment(models.Model):
         invoice related to the attachment
         """
         self.filtered(
-            lambda r: r.datas and r.res_model == 'account.move' and
+            lambda r: r.datas and r.res_model == 'account.invoice' and
             splitext(r.name)[1].lower() == '.xml').check_valid_uuid()
         return super(IrAttachment, self).unlink()
 
+    @api.multi
     def check_valid_uuid(self):
         for attach in self:
             datas = attach.datas
@@ -37,12 +39,12 @@ class IrAttachment(models.Model):
             except (SyntaxError, ValueError) as err:
                 _logger.error(str(err))
                 continue
-            invoice = self.env['account.move'].browse(attach.res_id)
+            invoice = self.env['account.invoice'].browse(attach.res_id)
             tree = invoice.l10n_mx_edi_get_tfd_etree(xml)
             if tree is None:
                 continue
             uuid = tree.get('UUID', '')
-            if uuid and invoice.l10n_mx_edi_cfdi_uuid == uuid:
+            if uuid:
                 raise ValidationError(_(
                     "You cannot delete a set of documents which has a legal "
                     "information and it's declared to the SAT, please try to "

@@ -30,7 +30,7 @@
                     <div class="col-sm-6 col-md-4 mt16" t-foreach="walls" t-as="wall">
                         <div class="well well-sm o-tw-wall">
                             <a t-attf-href="/twitter_wall/view/#{wall.id}">
-                                <img t-att-title="wall.name" t-att-src="website.image_url(wall, 'image')" class="img-responsive img-thumbnail o-tw-image" />
+                                <img t-att-title="wall.name" t-attf-src="/web/image/website.twitter.wall/#{wall.id}/image" class="img-responsive img-thumbnail o-tw-image" />
                             </a>
                             <div class="o-tw-padding">
                                 <h4 class="mt4 mb8 o-tw-ellipsis">
@@ -52,7 +52,7 @@
             <script src="//platform.twitter.com/widgets.js" charset="utf-8" />
         </t>
         <t t-call="website.layout">
-            <div class="o-tw-toggle o-tw-storify-cover o-tw-cover" t-attf-style="background-image: url(#{website.image_url(wall, 'image')});">
+            <div class="o-tw-toggle o-tw-storify-cover o-tw-cover" t-attf-style="background-image: url(/web/image/website.twitter.wall/#{wall.id}/image);">
                 <div class="o-tw-shadow" >
                     <div class="container">
                         <div class="mt16">

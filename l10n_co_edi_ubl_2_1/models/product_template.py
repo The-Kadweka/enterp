@@ -1,5 +1,6 @@
 # coding: utf-8
-from odoo import fields, models
+from odoo import api, fields, models
+from odoo.tools import pycompat
 
 
 class ProductTemplate(models.Model):

@@ -1,36 +1,23 @@
-# -*- coding: utf-8 -*-
+# -*- encoding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-# Copyright (c) 2015 WT-IO-IT GmbH (https://www.wt-io-it.at)
-#                    Mag. Wolfgang Taferner <wolfgang.taferner@wt-io-it.at>
+# Copyright (C) conexus.at
 
 {
-    "name": "Austria - Accounting Reports",
-    "version": "2.0",
-    "author": "WT-IO-IT GmbH, Wolfgang Taferner",
-    "website": "https://www.wt-io-it.at",
-    "license": 'OEEL-1',
-    "category": "Accounting/Accounting",
-    'summary': "Austrian Financial Reports",
+    'name': 'Austria - Accounting',
+    'version': '1.0',
+    'author': 'conexus.at',
+    'website': 'http://www.conexus.at',
+    'category': 'Accounting',
+    'depends': ['l10n_at', 'account_reports'],
     'description': """
-
-Accounting reports for Austria.
-================================
-
-    * Defines the following reports:
-        * Profit/Loss (§ 231 UGB Gesamtkostenverfahren)
-        * Balance Sheet (§ 224 UGB)
-
-    """,
-    "depends": [
-        'l10n_at',
-        'account_reports',
-        'account_accountant',
-    ],
-    "data": [
-        'data/account_financial_html_report_balance.xml',
-        'data/account_financial_html_report_profit_loss.xml',
-    ],
-    'installable': True,
+This module provides the standard Accounting Chart for Austria which is based on the Template from BMF.gv.at.
+============================================================================================================= 
+Please keep in mind that you should review and adapt it with your Accountant, before using it in a live Environment.
+""",
+    'demo': [],
+    'data': ['data/account_financial_html_report_data.xml'],
     'auto_install': True,
+    'installable': True,
+    'license': 'OEEL-1',
 }

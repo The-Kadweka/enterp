@@ -7,6 +7,7 @@ from datetime import timedelta
 from math import floor
 from odoo import http, _, fields
 from odoo.http import request
+from odoo.tools import pycompat
 from .stat_types import STAT_TYPES, FORECAST_STAT_TYPES, compute_mrr_growth_values
 
 
@@ -19,7 +20,7 @@ class RevenueKPIsDashboard(http.Controller):
         return {
             'stat_types': {
                 key: {
-                    'name': stat['name'],
+                    'name': _(stat['name']),
                     'dir': stat['dir'],
                     'code': stat['code'],
                     'prior': stat['prior'],
@@ -29,19 +30,20 @@ class RevenueKPIsDashboard(http.Controller):
             },
             'forecast_stat_types': {
                 key: {
-                    'name': stat['name'],
+                    'name': _(stat['name']),
                     'code': stat['code'],
                     'prior': stat['prior'],
                     'add_symbol': stat['add_symbol'],
                 }
                 for key, stat in FORECAST_STAT_TYPES.items()
             },
-            'currency_id': request.env.company.currency_id.id,
+            'currency_id': request.env.user.company_id.currency_id.id,
             'contract_templates': request.env['sale.subscription.template'].search_read([], fields=['name']),
             'tags': request.env['account.analytic.tag'].search_read([], fields=['name']),
             'companies': request.env['res.company'].search_read([], fields=['name']),
             'has_template': bool(request.env['sale.subscription.template'].search_count([])),
-            'has_mrr': bool(request.env['account.move.line'].search_count([('subscription_start_date', '!=', False)])),
+            'has_def_revenues': bool(request.env['sale.subscription.template'].search([]).mapped('template_asset_category_id')),
+            'has_mrr': bool(request.env['account.invoice.line'].search_count([('asset_start_date', '!=', False)])),
             'sales_team': request.env['crm.team'].search_read([], fields=['name'])
         }
 
@@ -124,13 +126,13 @@ class RevenueKPIsDashboard(http.Controller):
 
         for template in template_ids:
             lines_domain = [
-                ('subscription_start_date', '<=', end_date),
-                ('subscription_end_date', '>=', end_date),
+                ('asset_start_date', '<=', end_date),
+                ('asset_end_date', '>=', end_date),
                 ('subscription_id.template_id', '=', template.id),
             ]
             if filters.get('company_ids'):
                 lines_domain.append(('company_id', 'in', filters.get('company_ids')))
-            recurring_invoice_line_ids = request.env['account.move.line'].search(lines_domain)
+            recurring_invoice_line_ids = request.env['account.invoice.line'].search(lines_domain)
             specific_filters = dict(filters)  # create a copy to modify it
             specific_filters.update({'template_ids': [template.id]})
             value = self.compute_stat(stat_type, start_date, end_date, specific_filters)
@@ -200,7 +202,7 @@ class RevenueKPIsDashboard(http.Controller):
             date = start_date + timedelta(days=i)
             value = self.compute_stat(stat_type, date, date, filters)
 
-            # format of results could be changed (we no longer use nvd3)
+            # '0' and '1' are the keys for nvd3 to render the graph
             results.append({
                 '0': str(date).split(' ')[0],
                 '1': value,
@@ -230,8 +232,10 @@ class RevenueKPIsDashboard(http.Controller):
     @http.route('/sale_subscription_dashboard/compute_stat', type='json', auth='user')
     def compute_stat(self, stat_type, start_date, end_date, filters):
 
-        start_date = fields.Date.to_date(start_date)
-        end_date = fields.Date.to_date(end_date)
+        if isinstance(start_date, pycompat.string_types):
+            start_date = fields.Date.from_string(start_date)
+        if isinstance(end_date, pycompat.string_types):
+            end_date = fields.Date.from_string(end_date)
 
         return STAT_TYPES[stat_type]['compute'](start_date, end_date, filters)
 

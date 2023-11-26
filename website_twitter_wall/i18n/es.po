@@ -1,20 +1,19 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_twitter_wall
+# * website_twitter_wall
 # 
 # Translators:
-# Martin Trigaux, 2019
+# Martin Trigaux, 2018
+# Gabriel Umana <gabriel.umana@delfixcr.com>, 2019
 # Rick Hunter <rick_hunter_ec@yahoo.com>, 2019
-# gabriumaa <gabriel.umana@delfixcr.com>, 2019
-# Jon Perez <jop@odoo.com>, 2019
 # Jesse Garza <jga@odoo.com>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server saas~11.5+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-05 12:37+0000\n"
-"PO-Revision-Date: 2019-08-26 09:39+0000\n"
+"POT-Creation-Date: 2018-09-21 14:07+0000\n"
+"PO-Revision-Date: 2018-08-24 11:50+0000\n"
 "Last-Translator: Jesse Garza <jga@odoo.com>, 2019\n"
 "Language-Team: Spanish (https://www.transifex.com/odoo/teams/41243/es/)\n"
 "MIME-Version: 1.0\n"
@@ -22,6 +21,11 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Language: es\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: website_twitter_wall
+#: model_terms:ir.ui.view,arch_db:website_twitter_wall.website_twitter_wall_view_form
+msgid "(Un)archiving a wall. Do you want to proceed?"
+msgstr "(Des)archivando un muro. ¿Quiere proceder?"
 
 #. module: website_twitter_wall
 #: model_terms:ir.ui.view,arch_db:website_twitter_wall.twitter_walls
@@ -65,17 +69,6 @@ msgstr "Token de acceso"
 #: model:ir.model.fields,field_description:website_twitter_wall.field_website_twitter_wall__active
 msgid "Active"
 msgstr "Activo"
-
-#. module: website_twitter_wall
-#: model_terms:ir.ui.view,arch_db:website_twitter_wall.website_twitter_wall_view_form
-#: model_terms:ir.ui.view,arch_db:website_twitter_wall.website_twitter_wall_view_search
-msgid "Archived"
-msgstr "Archivado"
-
-#. module: website_twitter_wall
-#: model:ir.model.fields,field_description:website_twitter_wall.field_website_twitter_wall__can_publish
-msgid "Can Publish"
-msgstr "Puede publicar"
 
 #. module: website_twitter_wall
 #: model:ir.model.fields,field_description:website_twitter_wall.field_website_twitter_wall__create_uid
@@ -138,14 +131,14 @@ msgid "Is Live"
 msgstr "Está En vivo"
 
 #. module: website_twitter_wall
-#: model:ir.model.fields,field_description:website_twitter_wall.field_website_twitter_wall__is_published
-msgid "Is Published"
-msgstr "Esta publicado"
-
-#. module: website_twitter_wall
 #: model:ir.model.fields,help:website_twitter_wall.field_website_twitter_wall__is_live
 msgid "Is live mode on/off"
 msgstr "Está el modo en vivo encendido/apagado"
+
+#. module: website_twitter_wall
+#: model:ir.model.fields,field_description:website_twitter_wall.field_website_twitter_wall__is_published
+msgid "Is published"
+msgstr "Es Publicado"
 
 #. module: website_twitter_wall
 #: model:ir.model.fields,field_description:website_twitter_wall.field_website_twitter_wall____last_update
@@ -178,7 +171,7 @@ msgid "Live mode"
 msgstr "Modo en vivo"
 
 #. module: website_twitter_wall
-#: model:ir.model.fields.selection,name:website_twitter_wall.selection__website_twitter_wall__mode__mixed
+#: selection:website.twitter.wall,mode:0
 msgid "Mixed"
 msgstr "Mezclado"
 
@@ -194,7 +187,7 @@ msgid "Name"
 msgstr "Nombre"
 
 #. module: website_twitter_wall
-#: model:ir.model.fields.selection,name:website_twitter_wall.selection__website_twitter_wall__mode__popular
+#: selection:website.twitter.wall,mode:0
 msgid "Popular"
 msgstr "Popular"
 
@@ -204,7 +197,7 @@ msgid "Query operators"
 msgstr "Operadores de la consulta"
 
 #. module: website_twitter_wall
-#: model:ir.model.fields.selection,name:website_twitter_wall.selection__website_twitter_wall__mode__recent
+#: selection:website.twitter.wall,mode:0
 msgid "Recent"
 msgstr "Reciente"
 
@@ -212,11 +205,6 @@ msgstr "Reciente"
 #: model_terms:ir.ui.view,arch_db:website_twitter_wall.twitter_wall_view
 msgid "Repeat"
 msgstr "Repetir"
-
-#. module: website_twitter_wall
-#: model_terms:ir.ui.view,arch_db:website_twitter_wall.website_twitter_wall_view_search
-msgid "Search CRM Score"
-msgstr "Buscar la puntuación del CRM"
 
 #. module: website_twitter_wall
 #: model:ir.model.fields,field_description:website_twitter_wall.field_website_twitter_wall__search_pattern
@@ -254,7 +242,7 @@ msgid "Single view"
 msgstr "Vista única"
 
 #. module: website_twitter_wall
-#: code:addons/website_twitter_wall/models/website_twitter_wall.py:0
+#: code:addons/website_twitter_wall/models/website_twitter_wall.py:83
 #, python-format
 msgid ""
 "The Twitter authentication failed. Please check your API key and secret."
@@ -277,7 +265,7 @@ msgstr ""
 "operadores de búsqueda de Twitter."
 
 #. module: website_twitter_wall
-#: code:addons/website_twitter_wall/models/website_twitter_wall.py:0
+#: code:addons/website_twitter_wall/models/website_twitter_wall.py:94
 #, python-format
 msgid "The tweets search failed. Check your credentials and access token"
 msgstr ""
@@ -293,7 +281,7 @@ msgstr "Vista de tres columnas"
 #: model:ir.model.fields,field_description:website_twitter_wall.field_website_twitter_wall__total_tweets
 #: model_terms:ir.ui.view,arch_db:website_twitter_wall.twitter_wall_view
 msgid "Total Tweets"
-msgstr "Total de tuits"
+msgstr "Total de tweets"
 
 #. module: website_twitter_wall
 #: model:ir.model.fields,field_description:website_twitter_wall.field_website_twitter_wall__tweet_ids
@@ -306,7 +294,7 @@ msgid "Tweet Html"
 msgstr "Tuitear HTML"
 
 #. module: website_twitter_wall
-#: code:addons/website_twitter_wall/models/website_twitter_wall.py:0
+#: code:addons/website_twitter_wall/models/website_twitter_wall.py:134
 #: model:ir.actions.act_window,name:website_twitter_wall.website_twitter_tweet_action
 #: model:ir.ui.menu,name:website_twitter_wall.website_twitter_tweet_menu
 #: model_terms:ir.ui.view,arch_db:website_twitter_wall.website_twitter_tweet_view_form

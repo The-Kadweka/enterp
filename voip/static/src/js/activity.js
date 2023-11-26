@@ -1,25 +1,21 @@
 odoo.define('voip.Activity', function (require) {
 "use strict";
 
-const Activity = require('mail.Activity');
+var MailActivity = require('mail.Activity');
 
-Activity.include({
-    events: Object.assign({}, Activity.prototype.events, {
-        'click .o_activity_voip_call': '_onClickVoipCall',
+var Activity = MailActivity.include({
+    events: _.extend({}, MailActivity.prototype.events, {
+        'click .o_activity_voip_call': '_onVoipCall',
     }),
 
     /**
      * @override
      */
-    init() {
-        this._super(...arguments);
-        const mailbus = this.call('mail_service', 'getMailBus');
-        mailbus.on('voip_reload_chatter', this, () =>
-            this._reload({
-                activity: true,
-                thread: true,
-            })
-        );
+    init: function () {
+        this._super.apply(this, arguments);
+        this.call('mail_service', 'getMailBus').on('voip_reload_chatter', this, function () {
+            this._reload({activity: true, thread: true});
+        });
     },
 
     //--------------------------------------------------------------------------
@@ -28,15 +24,17 @@ Activity.include({
 
     /**
      * @private
-     * @param {MouseEvent} ev
+     * @param  {Event} event
      */
-    _onClickVoipCall(ev) {
-        ev.preventDefault();
+    _onVoipCall: function (event) {
+        event.preventDefault();
         this.trigger_up('voip_activity_call', {
-            number: ev.currentTarget.text.trim(),
-            activityId: $(ev.currentTarget).data('activity-id'),
+            number: event.currentTarget.text.trim(),
+            activityId: $(event.currentTarget).data('activity-id'),
         });
     }
 });
+
+return Activity;
 
 });

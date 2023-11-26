@@ -4,6 +4,7 @@ odoo.define('web_cohort.CohortController', function (require) {
 var AbstractController = require('web.AbstractController');
 var config = require('web.config');
 var core = require('web.core');
+var crash_manager = require('web.crash_manager');
 var framework = require('web.framework');
 var session = require('web.session');
 
@@ -52,13 +53,11 @@ var CohortController = AbstractController.extend({
      * @override
      * @returns {Object}
      */
-    getOwnedQueryParams: function () {
+    getContext: function () {
         var state = this.model.get();
         return {
-            context: {
-                cohort_measure: state.measure,
-                cohort_interval: state.interval,
-            }
+            cohort_measure: state.measure,
+            cohort_interval: state.interval,
         };
     },
 
@@ -104,7 +103,7 @@ var CohortController = AbstractController.extend({
             url: '/web/cohort/export',
             data: {data: JSON.stringify(data)},
             complete: framework.unblockUI,
-            error: (error) => this.call('crash_manager', 'rpc_error', error),
+            error: crash_manager.rpc_error.bind(crash_manager)
         });
     },
     /**
@@ -124,7 +123,7 @@ var CohortController = AbstractController.extend({
     /**
      * @override
      * @private
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _update: function () {
       this._updateButtons();

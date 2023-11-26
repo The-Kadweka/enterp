@@ -4,15 +4,14 @@
 {
     'name': 'Odoo Mexico Localization for Stock/Landing',
     'summary': '''
-Generate Electronic Invoice with custom numbers
+        Generate Electronic Invoice with Customs Number
     ''',
     'version': '1.0',
     'category': 'Hidden',
     'depends': [
         'stock_landed_costs',
         'sale_management',
-        'sale_stock',
-        'l10n_mx_edi',
+        'l10n_mx_edi_customs',
     ],
     'data': [
         'views/stock_landed_cost.xml',

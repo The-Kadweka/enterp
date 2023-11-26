@@ -19,11 +19,11 @@ class StudioMixin(models.AbstractModel):
         res = super(StudioMixin, self).create(vals)
 
         if self._context.get('studio') and not self._context.get('install_mode'):
-            res._compute_display_name()
             res.create_studio_model_data(res.display_name)
 
         return res
 
+    @api.multi
     def write(self, vals):
         res = super(StudioMixin, self).write(vals)
 

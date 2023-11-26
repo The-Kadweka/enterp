@@ -89,12 +89,11 @@ class account_analytic_line(models.Model):
         project_ids_list = list(set(project_ids_from_tasks_list + project_ids_list))
         # Projects
         projects_ids = self.env["project.project"].search([
-            '&', '&', '&', '|',
+            '&', '&', '|',
             ("id", "in", project_ids_list),
             ("user_id", '=', self.env.uid),
             ('favorite_user_ids', 'in', self.env.uid),
             ('active', '=', True),
-            ('allow_timesheets', '=', True)
         ])
 
         projects_fields = [

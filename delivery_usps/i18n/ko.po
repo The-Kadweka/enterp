@@ -1,18 +1,20 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* delivery_usps
+# * delivery_usps
 # 
 # Translators:
-# heejun lee <tkm01b@gmail.com>, 2019
+# Martin Trigaux, 2018
+# heejun lee <tkm01b@gmail.com>, 2018
+# Link Up링크업 <linkup.way@gmail.com>, 2018
 # Linkup <link-up@naver.com>, 2019
 # JH CHOI <hwangtog@gmail.com>, 2020
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~12.5+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-13 11:38+0000\n"
-"PO-Revision-Date: 2019-08-26 09:35+0000\n"
+"POT-Creation-Date: 2019-01-15 15:18+0000\n"
+"PO-Revision-Date: 2018-08-24 11:37+0000\n"
 "Last-Translator: JH CHOI <hwangtog@gmail.com>, 2020\n"
 "Language-Team: Korean (https://www.transifex.com/odoo/teams/41243/ko/)\n"
 "MIME-Version: 1.0\n"
@@ -22,7 +24,7 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_intl_non_delivery_option__abandon
+#: selection:delivery.carrier,usps_intl_non_delivery_option:0
 msgid "Abandon"
 msgstr "취소"
 
@@ -32,12 +34,17 @@ msgid "Account Validated"
 msgstr "승인된 계정"
 
 #. module: delivery_usps
+#: selection:delivery.carrier,delivery_type:0
+msgid "Based on Rules"
+msgstr "기준 규칙"
+
+#. module: delivery_usps
 #: model:ir.model.fields,help:delivery_usps.field_delivery_carrier__usps_account_validated
 msgid "Check this box if your account is validated by USPS"
 msgstr "USPS에서 계정을 확인한 경우 이 확인란을 선택하십시오"
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:64
 #, python-format
 msgid "Company phone number is invalid. Please insert a US phone number."
 msgstr "회사 전화 번호가 잘못되었습니다. 미국 전화 번호를 입력하십시오."
@@ -48,22 +55,37 @@ msgid "Content Type"
 msgstr "내용 유형"
 
 #. module: delivery_usps
+#: selection:delivery.carrier,delivery_type:0
+msgid "DHL"
+msgstr "DHL"
+
+#. module: delivery_usps
+#: model:ir.model,name:delivery_usps.model_delivery_carrier
+msgid "Delivery Methods"
+msgstr "운송 방법"
+
+#. module: delivery_usps
 #: model:ir.model.fields,field_description:delivery_usps.field_delivery_carrier__usps_delivery_nature
 msgid "Delivery Nature"
 msgstr "배송 환경"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_content_type__documents
+#: selection:delivery.carrier,usps_content_type:0
 msgid "Documents"
 msgstr "문서"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_delivery_nature__domestic
+#: selection:delivery.carrier,usps_delivery_nature:0
 msgid "Domestic"
 msgstr "국내"
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/delivery_usps.py:0
+#: selection:delivery.carrier,delivery_type:0
+msgid "Easypost"
+msgstr "Easypost"
+
+#. module: delivery_usps
+#: code:addons/delivery_usps/models/delivery_usps.py:104
 #, python-format
 msgid ""
 "Error:\n"
@@ -73,72 +95,82 @@ msgstr ""
 "%s"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_service__express
+#: selection:delivery.carrier,usps_service:0
 msgid "Express"
 msgstr "특급"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_service__first_class
+#: selection:delivery.carrier,delivery_type:0
+msgid "FedEx"
+msgstr "FedEx"
+
+#. module: delivery_usps
+#: selection:delivery.carrier,usps_service:0
 msgid "First Class"
 msgstr "퍼스크 클래스"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_first_class_mail_type__flat
+#: selection:delivery.carrier,delivery_type:0
+msgid "Fixed Price"
+msgstr "고정 가격"
+
+#. module: delivery_usps
+#: selection:delivery.carrier,usps_first_class_mail_type:0
 msgid "Flat"
-msgstr "고정"
+msgstr "평평하게"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_mail_type__flatrate
+#: selection:delivery.carrier,usps_mail_type:0
 msgid "Flat Rate"
-msgstr "고정 비율"
+msgstr "고정 요금"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_domestic_regular_container__flat_rate_box
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_international_regular_container__flatratebox
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_mail_type__flatratebox
+#: selection:delivery.carrier,usps_domestic_regular_container:0
+#: selection:delivery.carrier,usps_international_regular_container:0
+#: selection:delivery.carrier,usps_mail_type:0
 msgid "Flat Rate Box"
-msgstr "고정 비율 상자"
+msgstr "고정율 상자"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_domestic_regular_container__flat_rate_envelope
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_international_regular_container__flatrateenv
+#: selection:delivery.carrier,usps_domestic_regular_container:0
+#: selection:delivery.carrier,usps_international_regular_container:0
 msgid "Flat Rate Envelope"
-msgstr "고정 비율 봉투"
+msgstr "고정율 봉투"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_content_type__gift
+#: selection:delivery.carrier,usps_content_type:0
 msgid "Gift"
 msgstr "선물"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_delivery_nature__international
+#: selection:delivery.carrier,usps_delivery_nature:0
 msgid "International"
 msgstr "국제"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_size_container__large
+#: selection:delivery.carrier,usps_size_container:0
 msgid "Large"
-msgstr "큰"
+msgstr "크게"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_mail_type__largeenvelope
+#: selection:delivery.carrier,usps_mail_type:0
 msgid "Large Envelope"
 msgstr "큰 봉투"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_domestic_regular_container__lg_flat_rate_box
+#: selection:delivery.carrier,usps_domestic_regular_container:0
 msgid "Large Flat Rate Box"
 msgstr "큰 고정 비율 상자"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_domestic_regular_container__legal_flat_rate_envelope
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_international_regular_container__legalflatrateenv
+#: selection:delivery.carrier,usps_domestic_regular_container:0
+#: selection:delivery.carrier,usps_international_regular_container:0
 msgid "Legal Flat Rate Envelope"
 msgstr "리갈 고정 비율 봉투"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_first_class_mail_type__letter
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_mail_type__letter
+#: selection:delivery.carrier,usps_first_class_mail_type:0
+#: selection:delivery.carrier,usps_mail_type:0
 msgid "Letter"
 msgstr "편지"
 
@@ -148,12 +180,12 @@ msgid "Machinable"
 msgstr "가공 가능"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_domestic_regular_container__md_flat_rate_box
+#: selection:delivery.carrier,usps_domestic_regular_container:0
 msgid "Medium Flat Rate Box"
 msgstr "중간 고정 비율 상자"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_content_type__merchandise
+#: selection:delivery.carrier,usps_content_type:0
 msgid "Merchandise"
 msgstr "상품"
 
@@ -163,22 +195,22 @@ msgid "Non delivery option"
 msgstr "비 배송 선택사항"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_container__nonrectangular
+#: selection:delivery.carrier,usps_container:0
 msgid "Non-rectangular"
 msgstr "직사각형이 아님"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_label_file_type__pdf
+#: selection:delivery.carrier,usps_label_file_type:0
 msgid "PDF"
 msgstr "PDF"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_mail_type__package
+#: selection:delivery.carrier,usps_mail_type:0
 msgid "Package"
-msgstr "패키지"
+msgstr "포장품"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_first_class_mail_type__package_service
+#: selection:delivery.carrier,usps_first_class_mail_type:0
 msgid "Package Service"
 msgstr "패키지 서비스"
 
@@ -203,13 +235,13 @@ msgid "Package width (in inches)"
 msgstr "패키지 너비 (인치)"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_domestic_regular_container__padded_flat_rate_envelope
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_international_regular_container__paddedflatrateenv
+#: selection:delivery.carrier,usps_domestic_regular_container:0
+#: selection:delivery.carrier,usps_international_regular_container:0
 msgid "Padded Flat Rate Envelope"
 msgstr "패딩 고정 비율 봉투"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_first_class_mail_type__parcel
+#: selection:delivery.carrier,usps_first_class_mail_type:0
 msgid "Parcel"
 msgstr "소포"
 
@@ -220,32 +252,32 @@ msgid ""
 msgstr "패키지가 가공 가능한지 USPS 웹 사이트를 확인하십시오."
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:83
 #, python-format
 msgid ""
 "Please choose another service (maximum weight of this service is 4 pounds)"
 msgstr "다른 서비스를 선택하십시오 (이 서비스의 최대 무게는 4 파운드입니다)"
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:69
 #, python-format
 msgid "Please enter a valid ZIP code in recipient address"
 msgstr "수신자 주소에 유효한 우편 번호를 입력하십시오"
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:62
 #, python-format
 msgid "Please enter a valid ZIP code in your Company address"
 msgstr "회사 주소에 유효한 우편 번호를 입력하십시오"
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:76
 #, python-format
 msgid "Please provide at least one item to ship."
 msgstr "최소한 하나의 배송품목을 입력해주세요."
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:60
 #, python-format
 msgid ""
 "Please set country U.S.A in your company address, Service is only available "
@@ -253,39 +285,33 @@ msgid ""
 msgstr "회사 주소로 국가 USA를 설정하십시오. 서비스는 미국에서만 가능합니다"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_first_class_mail_type__postcard
+#: selection:delivery.carrier,usps_first_class_mail_type:0
 msgid "Postcard"
 msgstr "엽서"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_service__priority
+#: selection:delivery.carrier,usps_service:0
 msgid "Priority"
-msgstr "우선 순위"
+msgstr "우선순위"
 
 #. module: delivery_usps
 #: model:ir.model.fields,field_description:delivery_usps.field_delivery_carrier__delivery_type
 msgid "Provider"
-msgstr "공급업체"
+msgstr "공급자"
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
-#, python-format
-msgid "Quantity for each move line should be less than 1000."
-msgstr "각 이동 라인의 수량은 1000보다 작아야합니다."
-
-#. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:372
 #, python-format
 msgid "Recipient address cannot be found. Please check the address exists."
 msgstr "받는 사람 주소를 찾을 수 없습니다. 주소가 있는지 확인하십시오."
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_container__rectangular
+#: selection:delivery.carrier,usps_container:0
 msgid "Rectangular"
 msgstr "직사각형"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_intl_non_delivery_option__redirect
+#: selection:delivery.carrier,usps_intl_non_delivery_option:0
 msgid "Redirect"
 msgstr "반송"
 
@@ -295,61 +321,55 @@ msgid "Redirect Partner"
 msgstr "반송 파트너"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_size_container__regular
+#: selection:delivery.carrier,usps_size_container:0
 msgid "Regular"
-msgstr "일반"
+msgstr "정기"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_container__variable
+#: selection:delivery.carrier,usps_container:0
 msgid "Regular < 12 inch"
 msgstr "일반 < 12인치"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_content_type__return
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_intl_non_delivery_option__return
+#: selection:delivery.carrier,usps_content_type:0
+#: selection:delivery.carrier,usps_intl_non_delivery_option:0
 msgid "Return"
 msgstr "반품"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_content_type__sample
+#: selection:delivery.carrier,usps_content_type:0
 msgid "Sample"
 msgstr "견본"
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/delivery_usps.py:0
+#: code:addons/delivery_usps/models/delivery_usps.py:169
 #, python-format
 msgid "Shipment N° %s has been cancelled"
 msgstr "N° %s 의 배송이 취소되었습니다"
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/delivery_usps.py:0
-#: code:addons/delivery_usps/models/delivery_usps.py:0
+#: code:addons/delivery_usps/models/delivery_usps.py:149
 #, python-format
 msgid "Shipment created into USPS <br/> <b>Tracking Number : </b>%s"
 msgstr "USPS 배송 <br/> <b>조회 번호 : </b>%s"
 
 #. module: delivery_usps
-#: model:ir.model,name:delivery_usps.model_delivery_carrier
-msgid "Shipping Methods"
-msgstr "배송 방법"
-
-#. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_domestic_regular_container__sm_flat_rate_box
+#: selection:delivery.carrier,usps_domestic_regular_container:0
 msgid "Small Flat Rate Box"
 msgstr "작은 고정 비율 상자"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_domestic_regular_container__sm_flat_rate_envelope
+#: selection:delivery.carrier,usps_domestic_regular_container:0
 msgid "Small Flat Rate Envelope"
 msgstr "작은 고정 비율 봉투"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_label_file_type__tif
+#: selection:delivery.carrier,usps_label_file_type:0
 msgid "TIF"
 msgstr "TIF"
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:46
 #, python-format
 msgid ""
 "The address of your company is missing or wrong (Missing field(s) :  \n"
@@ -359,15 +379,15 @@ msgstr ""
 "%s)"
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:66
 #, python-format
 msgid ""
-"The estimated price cannot be computed because the weight of your product %s"
-" is missing."
-msgstr ""
+"The estimated price cannot be computed because the weight of your product is"
+" missing."
+msgstr "상품의 무게가 누락되어 예상 가격을 계산할 수 없습니다."
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:55
 #, python-format
 msgid ""
 "The recipient address is missing or wrong (Missing field(s) :  \n"
@@ -377,7 +397,7 @@ msgstr ""
 "%s)"
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:155
 #, python-format
 msgid "The selected USPS service (%s) cannot be used to deliver this package."
 msgstr "선택한 USPS 서비스(%s)를 사용하여이 패키지를 배송할 수 없습니다."
@@ -398,7 +418,12 @@ msgid "Type of container"
 msgstr "컨테이너 유형"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__delivery_type__usps
+#: selection:delivery.carrier,delivery_type:0
+msgid "UPS"
+msgstr "UPS"
+
+#. module: delivery_usps
+#: selection:delivery.carrier,delivery_type:0
 msgid "USPS"
 msgstr "USPS"
 
@@ -408,6 +433,12 @@ msgid "USPS Configuration"
 msgstr "USPS 환경 설정"
 
 #. module: delivery_usps
+#: model_terms:ir.ui.view,arch_db:delivery_usps.res_config_settings_view_form_sale
+#: model_terms:ir.ui.view,arch_db:delivery_usps.res_config_settings_view_form_stock
+msgid "USPS Delivery Methods"
+msgstr ""
+
+#. module: delivery_usps
 #: model:delivery.carrier,name:delivery_usps.delivery_carrier_usps_domestic
 #: model:product.product,name:delivery_usps.product_product_delivery_usps_domestic
 #: model:product.template,name:delivery_usps.product_product_delivery_usps_domestic_product_template
@@ -415,7 +446,7 @@ msgid "USPS Domestic Flat Rate Envelope"
 msgstr "USPS 국내 고정 비율 봉투"
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:73
 #, python-format
 msgid ""
 "USPS Domestic is used only to ship inside of the U.S.A. Please change the "
@@ -435,7 +466,7 @@ msgid "USPS International Flat Rate Box"
 msgstr "USPS 국제 고정 비율 상자"
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:71
 #, python-format
 msgid ""
 "USPS International is used only to ship outside of the U.S.A. Please change "
@@ -459,12 +490,6 @@ msgid "USPS Service"
 msgstr "USPS 서비스"
 
 #. module: delivery_usps
-#: model_terms:ir.ui.view,arch_db:delivery_usps.res_config_settings_view_form_sale
-#: model_terms:ir.ui.view,arch_db:delivery_usps.res_config_settings_view_form_stock
-msgid "USPS Shipping Methods"
-msgstr "USPS 선적 방법"
-
-#. module: delivery_usps
 #: model:ir.model.fields,field_description:delivery_usps.field_delivery_carrier__usps_username
 msgid "USPS User ID"
 msgstr "USPS 사용자 ID"
@@ -474,16 +499,29 @@ msgstr "USPS 사용자 ID"
 #: model:product.product,uom_name:delivery_usps.product_product_delivery_usps_international
 #: model:product.template,uom_name:delivery_usps.product_product_delivery_usps_domestic_product_template
 #: model:product.template,uom_name:delivery_usps.product_product_delivery_usps_international_product_template
-msgid "Units"
+msgid "Unit(s)"
 msgstr "단위"
 
 #. module: delivery_usps
 #: model:ir.model.fields,field_description:delivery_usps.field_delivery_carrier__usps_size_container
 msgid "Usps Size Container"
-msgstr "Usps 컨테이너 크기"
+msgstr "Usps 크기 컨테이너"
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:374
 #, python-format
 msgid "Your company or recipient ZIP code is incorrect."
 msgstr "회사 또는 수신자 우편 번호가 잘못되었습니다."
+
+#. module: delivery_usps
+#: selection:delivery.carrier,delivery_type:0
+msgid "bpost"
+msgstr "bpost"
+
+#. module: delivery_usps
+#: model:product.product,weight_uom_name:delivery_usps.product_product_delivery_usps_domestic
+#: model:product.product,weight_uom_name:delivery_usps.product_product_delivery_usps_international
+#: model:product.template,weight_uom_name:delivery_usps.product_product_delivery_usps_domestic_product_template
+#: model:product.template,weight_uom_name:delivery_usps.product_product_delivery_usps_international_product_template
+msgid "kg"
+msgstr "kg"

@@ -6,13 +6,15 @@
 # Sengtha Chay <sengtha@gmail.com>, 2018
 # Chan Nath <channath@gmail.com>, 2018
 # Samkhann Seang <seangsamkhann@gmail.com>, 2018
+# Lux Sok <sok.lux@gmail.com>, 2019
+# 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~11.5+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-09-21 14:06+0000\n"
-"PO-Revision-Date: 2018-09-21 14:06+0000\n"
-"Last-Translator: Samkhann Seang <seangsamkhann@gmail.com>, 2018\n"
+"POT-Creation-Date: 2019-11-14 07:50+0000\n"
+"PO-Revision-Date: 2018-08-24 11:48+0000\n"
+"Last-Translator: Lux Sok <sok.lux@gmail.com>, 2019\n"
 "Language-Team: Khmer (https://www.transifex.com/odoo/teams/41243/km/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -167,7 +169,7 @@ msgstr "កូដ"
 #. module: sale_ebay
 #: model:ir.model,name:sale_ebay.model_res_config_settings
 msgid "Config Settings"
-msgstr ""
+msgstr "កំណត់រចនាសម្ព័ន្ធ"
 
 #. module: sale_ebay
 #: code:addons/sale_ebay/models/product.py:352
@@ -234,7 +236,7 @@ msgstr ""
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_res_config_settings__ebay_dev_id
 msgid "Developer Key"
-msgstr ""
+msgstr "កូនសោរអភិវឌ្ឍន៌"
 
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_ebay_category__display_name
@@ -249,6 +251,22 @@ msgstr "ឈ្មោះសំរាប់បង្ហាញ"
 #: model:ir.model.fields,field_description:sale_ebay.field_product_product__ebay_listing_duration
 #: model:ir.model.fields,field_description:sale_ebay.field_product_template__ebay_listing_duration
 msgid "Duration"
+msgstr "អំឡុងពេល"
+
+#. module: sale_ebay
+#: code:addons/sale_ebay/models/sale_order.py:305
+#, python-format
+msgid ""
+"Ebay Synchronisation could not confirm because of the following error:\n"
+"%s"
+msgstr ""
+
+#. module: sale_ebay
+#: code:addons/sale_ebay/models/sale_order.py:26
+#, python-format
+msgid ""
+"Ebay could not synchronize order:\n"
+"%s"
 msgstr ""
 
 #. module: sale_ebay
@@ -274,6 +292,25 @@ msgstr ""
 #. module: sale_ebay
 #: model:ir.actions.server,name:sale_ebay.action_unlink_items_listings
 msgid "Ebay: Unlink eBay Product Templates Listings"
+msgstr ""
+
+#. module: sale_ebay
+#: model:ir.actions.server,name:sale_ebay.ir_cron_sale_ebay_orders_sync_ir_actions_server
+#: model:ir.cron,cron_name:sale_ebay.ir_cron_sale_ebay_orders_sync
+#: model:ir.cron,name:sale_ebay.ir_cron_sale_ebay_orders_sync
+msgid "Ebay: get new orders"
+msgstr ""
+
+#. module: sale_ebay
+#: model:ir.actions.server,name:sale_ebay.ir_cron_sale_ebay_orders_recovery
+msgid "Ebay: orders recovery"
+msgstr ""
+
+#. module: sale_ebay
+#: model:ir.actions.server,name:sale_ebay.ir_cron_sale_ebay_stock_sync_ir_actions_server
+#: model:ir.cron,cron_name:sale_ebay.ir_cron_sale_ebay_stock_sync
+#: model:ir.cron,name:sale_ebay.ir_cron_sale_ebay_stock_sync
+msgid "Ebay: synchronise stock (for 'get new orders' synchronisation)"
 msgstr ""
 
 #. module: sale_ebay
@@ -317,7 +354,7 @@ msgstr ""
 #. module: sale_ebay
 #: model_terms:ir.ui.view,arch_db:sale_ebay.product_template_sale_ebay_form_view
 msgid "Fixed Price"
-msgstr ""
+msgstr "តំលៃថេរ"
 
 #. module: sale_ebay
 #: selection:product.template,ebay_listing_type:0
@@ -327,7 +364,7 @@ msgstr ""
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_ebay_category__full_name
 msgid "Full Name"
-msgstr ""
+msgstr "ឈ្មោះ​ពេញ"
 
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_res_config_settings__ebay_gallery_plus
@@ -439,12 +476,12 @@ msgstr ""
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_res_config_settings__ebay_location
 msgid "Location"
-msgstr ""
+msgstr "តំបន់"
 
 #. module: sale_ebay
 #: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
 msgid "Mode"
-msgstr ""
+msgstr "របៀប"
 
 #. module: sale_ebay
 #: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
@@ -496,7 +533,7 @@ msgstr ""
 #. module: sale_ebay
 #: selection:crm.team,team_type:0
 msgid "Point of Sale"
-msgstr ""
+msgstr "ចំនុច​នៃ​ការ​លក់"
 
 #. module: sale_ebay
 #: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
@@ -522,17 +559,23 @@ msgstr "ផលិតផល"
 #. module: sale_ebay
 #: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
 msgid "Product Categories"
-msgstr ""
+msgstr "ប្រភេទផលិតផល"
 
 #. module: sale_ebay
 #: model:ir.model,name:sale_ebay.model_product_template
 msgid "Product Template"
+msgstr "គំរូផលិតផល"
+
+#. module: sale_ebay
+#: code:addons/sale_ebay/models/sale_order.py:214
+#, python-format
+msgid "Product created from eBay transaction %s"
 msgstr ""
 
 #. module: sale_ebay
 #: selection:res.config.settings,ebay_domain:0
 msgid "Production"
-msgstr ""
+msgstr "ផលិតកម្ម"
 
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_res_config_settings__ebay_prod_app_id
@@ -588,14 +631,19 @@ msgid "Revise Item"
 msgstr ""
 
 #. module: sale_ebay
+#: model:ir.model,name:sale_ebay.model_sale_order
+msgid "Sale Order"
+msgstr "លក់តាមការម៉ង់"
+
+#. module: sale_ebay
 #: selection:crm.team,team_type:0
 msgid "Sales"
-msgstr ""
+msgstr "ការលក់"
 
 #. module: sale_ebay
 #: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
 msgid "Sales Channel"
-msgstr ""
+msgstr "ឆានែលលក់"
 
 #. module: sale_ebay
 #: model:ir.model,name:sale_ebay.model_crm_team
@@ -636,13 +684,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:sale_ebay.field_product_product__ebay_seller_shipping_policy_id
 #: model:ir.model.fields,field_description:sale_ebay.field_product_template__ebay_seller_shipping_policy_id
 msgid "Shipping Policy"
-msgstr ""
+msgstr "គោលនយោបាយដឹកជញ្ជូន"
 
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_product_product__ebay_start_date
 #: model:ir.model.fields,field_description:sale_ebay.field_product_template__ebay_start_date
 msgid "Start Date"
-msgstr ""
+msgstr "កាលបរិច្ឆេទ​ចាប់ផ្តើម"
 
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_product_product__ebay_price
@@ -676,7 +724,7 @@ msgstr "ចំណងជើងតូច"
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_ebay_policy__short_summary
 msgid "Summary"
-msgstr ""
+msgstr "សង្ខេប"
 
 #. module: sale_ebay
 #: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
@@ -686,7 +734,7 @@ msgstr ""
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_crm_team__team_type
 msgid "Team Type"
-msgstr ""
+msgstr "ប្រភេទក្រុម"
 
 #. module: sale_ebay
 #: code:addons/sale_ebay/models/product.py:719
@@ -719,7 +767,7 @@ msgstr ""
 #: model:ir.model.fields,help:sale_ebay.field_crm_team__team_type
 msgid ""
 "The type of this channel, it will define the resources this channel uses."
-msgstr ""
+msgstr "ប្រភេទនៃប៉ុស្តិ៍នេះវានឹងកំណត់ធនធានដែលឆានែលនេះប្រើ។"
 
 #. module: sale_ebay
 #: model:ir.model.fields,help:sale_ebay.field_product_product__ebay_category_2_id
@@ -727,6 +775,16 @@ msgstr ""
 msgid ""
 "The use of a secondary category is not allowed on every eBay sites. Fees can"
 " be claimed by eBay for this feature"
+msgstr ""
+
+#. module: sale_ebay
+#: code:addons/sale_ebay/models/product.py:668
+#, python-format
+msgid ""
+"There is no last synchronization date in your System Parameters. Create a "
+"System Parameter record with the key \"ebay_last_sync\" and the value set to"
+" the date of the oldest order you wish to synchronize in the format \"YYYY-"
+"MM-DD\"."
 msgstr ""
 
 #. module: sale_ebay
@@ -744,7 +802,7 @@ msgstr "ចំណងជើង​"
 #. module: sale_ebay
 #: model:ir.model,name:sale_ebay.model_stock_picking
 msgid "Transfer"
-msgstr ""
+msgstr "ផ្ទេរ"
 
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_ebay_policy__policy_type
@@ -770,7 +828,7 @@ msgstr ""
 #. module: sale_ebay
 #: model_terms:ir.ui.view,arch_db:sale_ebay.product_template_sale_ebay_form_view
 msgid "Variants"
-msgstr ""
+msgstr "វ៉ាដ្យង់"
 
 #. module: sale_ebay
 #: selection:crm.team,team_type:0
@@ -780,7 +838,7 @@ msgstr "វែបសាយ"
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_res_config_settings__ebay_zip_code
 msgid "Zip"
-msgstr ""
+msgstr "ពង្រួម"
 
 #. module: sale_ebay
 #: model:crm.team,name:sale_ebay.ebay_sales_team

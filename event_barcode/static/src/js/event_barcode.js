@@ -4,6 +4,7 @@ odoo.define('event_barcode.EventScanView', function (require) {
 var AbstractAction = require('web.AbstractAction');
 var core = require('web.core');
 var Dialog = require('web.Dialog');
+var time = require('web.time');
 
 var _t = core._t;
 var QWeb = core.qweb;
@@ -11,21 +12,17 @@ var QWeb = core.qweb;
 
 // load widget with main barcode scanning View
 var EventScanView = AbstractAction.extend({
-    contentTemplate: 'event_barcode_template',
+    template: 'event_barcode_template',
     events: {
-        'click .o_event_select_attendee': '_onClickSelectAttendee'
+        'keypress #event_barcode': 'on_manual_scan',
+        'click .o_event_social': 'open_attendees',
+        'click .o_event_info': 'open_event_form',
     },
 
-    /**
-     * @override
-     */
     init: function(parent, action) {
         this._super.apply(this, arguments);
         this.action = action;
     },
-    /**
-     * @override
-     */
     willStart: function() {
         var self = this;
         return this._super().then(function() {
@@ -35,32 +32,41 @@ var EventScanView = AbstractAction.extend({
                     event_id: self.action.context.active_id
                 }
             }).then(function (result) {
-                self.data = result;
+                self.data = self.prepare_data(result);
             });
         });
     },
-    /**
-     * @override
-     */
     start: function() {
+        var self = this;
         core.bus.on('barcode_scanned', this, this._onBarcodeScanned);
+        this.updateCount(
+            self.$('.o_event_reg_attendee'),
+            self.data.count
+        );
     },
-    /**
-     * @override
-     */
     destroy: function () {
         core.bus.off('barcode_scanned', this, this._onBarcodeScanned);
         this._super();
     },
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     * @param {string} barcode
-     */
+    prepare_data: function(result) {
+        var start_date = moment(time.auto_str_to_date(result.start_date));
+        var end_date = moment(time.auto_str_to_date(result.end_date));
+        var localedata = start_date.localeData();
+        result['date'] =  start_date.date() === end_date.date() ? start_date.date() : _.str.sprintf("%s - %s", start_date.date(), end_date.date());
+        result['month'] = start_date.month() === end_date.month() ? localedata._months[start_date.month()] : _.str.sprintf('%s - %s', localedata._monthsShort[start_date.month()], localedata._monthsShort[end_date.month()]);
+        return result;
+    },
+    on_manual_scan: function(e) {
+        if (e.which === 13) { // Enter
+            var value = $(e.currentTarget).val().trim();
+            if(value) {
+                this._onBarcodeScanned(value);
+                $(e.currentTarget).val('');
+            } else {
+                this.do_warn(_t('Error'), _t('Invalid user input'));
+            }
+        }
+    },
     _onBarcodeScanned: function(barcode) {
         var self = this;
         this._rpc({
@@ -70,6 +76,12 @@ var EventScanView = AbstractAction.extend({
                 event_id: self.action.context.active_id
             }
         }).then(function(result) {
+            if (result.success) {
+                self.updateCount(
+                    self.$('.o_event_reg_attendee'),
+                    result.count
+                );
+            }
             if (result.registration && (result.registration.alert || !_.isEmpty(result.registration.information))) {
                 new Dialog(self, {
                     title: _t('Registration Summary'),
@@ -106,21 +118,30 @@ var EventScanView = AbstractAction.extend({
             }
         });
     },
-
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     * @param {MouseEvent} ev
-     */
-    _onClickSelectAttendee(ev) {
-        this.do_action('event_barcode.act_event_registration_from_barcode', {
-            additional_context: {
-                active_id: this.action.context.active_id,
-            },
+    open_attendees: function() {
+        this.do_action({
+            name: "Attendees",
+            type:'ir.actions.act_window',
+            res_model: 'event.registration',
+            views: [[false, 'list'], [false, 'form']],
+            context :{
+                'search_default_event_id': this.action.context.active_id,
+                'default_event_id': this.action.context.active_id,
+                'search_default_expected': true
+            }
         });
+    },
+    open_event_form: function() {
+        this.do_action({
+            name: 'Event',
+            type: 'ir.actions.act_window',
+            res_model: 'event.event',
+            views: [[false, 'form'], [false, 'kanban'], [false, 'calendar'], [false, 'list']],
+            res_id: this.action.context.active_id,
+        });
+    },
+    updateCount: function(element, count) {
+        element.html(count);
     }
 });
 

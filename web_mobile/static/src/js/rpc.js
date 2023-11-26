@@ -17,23 +17,22 @@ if (available){
  * @param {String} name name of action want to perform in mobile
  * @param {Object} args extra arguments for mobile
  *
- * @returns Promise Object
+ * @returns Deferred Object
  */
 function native_invoke(name, args) {
     if(_.isUndefined(args)){
         args = {};
     }
+    var def = $.Deferred();
     var id = _.uniqueId();
-    var def = new Promise(function (resolve, reject) {
-        deferreds[id] = {
-            successCallback: function (success) {
-                resolve(success);
-            },
-            errorCallback: function (error) {
-                reject(error);
-            }
-        };
-    });
+    deferreds[id] = {
+        successCallback: function (success) {
+            def.resolve(success);
+        },
+        errorCallback: function (error) {
+            def.reject(error);
+        }
+    };
     args = JSON.stringify(args);
     DeviceUtility.execute(name, args, id);
     return def;

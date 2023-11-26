@@ -1,20 +1,20 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_calendar
+# * website_calendar
 # 
 # Translators:
-# Martin Trigaux, 2019
-# Link Up링크업 <linkup.way@gmail.com>, 2019
-# Seongseok Shin <shinss61@hotmail.com>, 2019
+# Martin Trigaux, 2018
+# Link Up링크업 <linkup.way@gmail.com>, 2018
+# Seongseok Shin <shinss61@hotmail.com>, 2018
 # Linkup <link-up@naver.com>, 2019
 # JH CHOI <hwangtog@gmail.com>, 2021
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-07 07:21+0000\n"
-"PO-Revision-Date: 2019-08-26 09:39+0000\n"
+"POT-Creation-Date: 2018-10-08 07:15+0000\n"
+"PO-Revision-Date: 2018-08-24 11:49+0000\n"
 "Last-Translator: JH CHOI <hwangtog@gmail.com>, 2021\n"
 "Language-Team: Korean (https://www.transifex.com/odoo/teams/41243/ko/)\n"
 "MIME-Version: 1.0\n"
@@ -24,10 +24,10 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: website_calendar
-#: code:addons/website_calendar/models/calendar_appointment.py:0
+#: code:addons/website_calendar/models/calendar_appointment.py:66
 #, python-format
 msgid " (copy)"
-msgstr " (사본)"
+msgstr " (복사)"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__appointment_count
@@ -40,7 +40,7 @@ msgid "#{day['today_cls'] and 'Today' or ''}"
 msgstr "#{day['today_cls'] and 'Today' or ''}"
 
 #. module: website_calendar
-#: code:addons/website_calendar/controllers/main.py:0
+#: code:addons/website_calendar/controllers/main.py:142
 #, python-format
 msgid "%s with %s"
 msgstr "%s와 %s"
@@ -48,7 +48,7 @@ msgstr "%s와 %s"
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_validated
 msgid "(timezone:"
-msgstr "(시간대 :"
+msgstr "(타임존:"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_form
@@ -56,15 +56,20 @@ msgid "+1 (650) 691-3277"
 msgstr "+1 (650) 691-3277"
 
 #. module: website_calendar
-#: code:addons/website_calendar/controllers/main.py:0
+#: code:addons/website_calendar/controllers/main.py:186
 #, python-format
 msgid ", All Day"
-msgstr ", 하루 종일"
+msgstr ", 종일"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_form
 msgid "-- select a country --"
 msgstr "-- 국가를 선택하세요 --"
+
+#. module: website_calendar
+#: model:calendar.alarm,name:website_calendar.calendar_alarm_data_1h_sms
+msgid "1 Hour SMS text"
+msgstr ""
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_validated
@@ -73,22 +78,17 @@ msgid ""
 "                            It's too late to cancel online, please contact the attendees another way if you really can't make it."
 msgstr ""
 "<br/>\n"
-"                            온라인에서 취소하기엔 늦었습니다. 만약 정말 약속을 지킬 수 없다면 참석자와 연락하여 다른 방법을 찾아보시기 바랍니다."
-
-#. module: website_calendar
-#: model_terms:ir.ui.view,arch_db:website_calendar.calendar_appointment_type_view_kanban
-msgid "<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" title=\"Manage\"/>"
-msgstr "<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" title=\"Manage\"/>"
+"                            온라인에서 취소 가능한 기간이 아닙니다, 만약 정말 약속을 지킬 수 없다면 참석자와 연락하여 다른 방법을 찾아보시기 바랍니다."
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_validated
 msgid "<i class=\"fa fa-fw fa-arrow-right\"/>Add to Google Calendar"
-msgstr "<i class=\"fa fa-fw fa-arrow-right\"/>구글 캘린더에 추가하기"
+msgstr "<i class=\"fa fa-fw fa-arrow-right\"/>구글 캘린더에 추가"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_validated
 msgid "<i class=\"fa fa-fw fa-arrow-right\"/>Add to iCal/Outlook"
-msgstr "<i class=\"fa fa-fw fa-arrow-right\"/>iCal/Outlook에 추가하기"
+msgstr "<i class=\"fa fa-fw fa-arrow-right\"/>iCal/Outlook에 추가"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_validated
@@ -170,17 +170,12 @@ msgstr "약속 전에 문자 메시지로 미리 알림이 전송됩니다."
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_event__access_token
 msgid "Access Token"
-msgstr "사용 권한 토큰"
+msgstr "액세스 토큰"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_needaction
 msgid "Action Needed"
 msgstr "작업이 필요함"
-
-#. module: website_calendar
-#: model:res.groups,name:website_calendar.group_calendar_manager
-msgid "Administrator"
-msgstr "관리자"
 
 #. module: website_calendar
 #: model:ir.actions.act_window,name:website_calendar.website_calendar_report
@@ -204,7 +199,7 @@ msgstr "고객이 여기에서 약속 유형을 작성하여 웹 사이트에서
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_answer__name
 #: model_terms:ir.ui.view,arch_db:website_calendar.calendar_appointment_answer_view_form
 msgid "Answer"
-msgstr "답변"
+msgstr "응답"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment
@@ -246,7 +241,7 @@ msgstr "약속 유형"
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_validated
 msgid "Appointment:"
-msgstr "약속 :"
+msgstr "약속:"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.index
@@ -254,6 +249,7 @@ msgid "Appointment<span class=\"chevron\"/>"
 msgstr "약속<span class=\"chevron\"/>"
 
 #. module: website_calendar
+#: model:ir.module.category,name:website_calendar.module_category_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.calendar_appointment_type_view_form
 #: model_terms:ir.ui.view,arch_db:website_calendar.calendar_event_view_graph
 #: model_terms:ir.ui.view,arch_db:website_calendar.calendar_event_view_pivot
@@ -273,12 +269,12 @@ msgstr "첨부 파일 수"
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_validated
 msgid "Attendees:"
-msgstr "참석자 :"
+msgstr "참석자:"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__slot_ids
 msgid "Availabilities"
-msgstr "사용 가능성"
+msgstr "유효성"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_question__answer_ids
@@ -293,17 +289,7 @@ msgstr "가능한 임직원"
 #. module: website_calendar
 #: model:ir.ui.menu,name:website_calendar.calendar_appointment_type_menu_action
 msgid "Calendar"
-msgstr "일정표"
-
-#. module: website_calendar
-#: model:ir.model,name:website_calendar.model_calendar_event
-msgid "Calendar Event"
-msgstr "행사 일정표"
-
-#. module: website_calendar
-#: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__can_publish
-msgid "Can Publish"
-msgstr "게시 가능"
+msgstr "달력"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__min_cancellation_hours
@@ -311,12 +297,12 @@ msgid "Cancel Before (hours)"
 msgstr "이전에 취소(시간)"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_question__question_type__checkbox
+#: selection:calendar.appointment.question,question_type:0
 msgid "Checkboxes (multiple answers)"
 msgstr "확인란(복수 응답)"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_type__assignation_method__chosen
+#: selection:calendar.appointment.type,assignation_method:0
 msgid "Chosen by the Customer"
 msgstr "고객이 선택"
 
@@ -354,13 +340,13 @@ msgstr "연락처"
 
 #. module: website_calendar
 #. openerp-web
-#: code:addons/website_calendar/static/src/js/appointment_employee_url.js:0
+#: code:addons/website_calendar/static/src/js/appointment_employee_url.js:67
 #, python-format
 msgid "Copied !"
 msgstr "복사됨 !"
 
 #. module: website_calendar
-#: code:addons/website_calendar/controllers/main.py:0
+#: code:addons/website_calendar/controllers/main.py:123
 #, python-format
 msgid "Country: %s"
 msgstr "국가 : %s"
@@ -376,7 +362,7 @@ msgstr "새 약속 유형 만들기"
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_slot__create_uid
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__create_uid
 msgid "Created by"
-msgstr "작성인"
+msgstr "작성자"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_answer__create_date
@@ -402,25 +388,20 @@ msgstr "설명 :"
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_slot__display_name
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__display_name
 msgid "Display Name"
-msgstr "표시 이름"
+msgstr "제목"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_question__question_type__select
+#: selection:calendar.appointment.question,question_type:0
 msgid "Dropdown (one answer)"
 msgstr "드롭다운 메뉴(한개의 응답)"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_validated
 msgid "Duration:"
-msgstr "기간 :"
+msgstr "기간:"
 
 #. module: website_calendar
-#: model_terms:ir.ui.view,arch_db:website_calendar.calendar_appointment_type_view_kanban
-msgid "Edit"
-msgstr "편집하기"
-
-#. module: website_calendar
-#: code:addons/website_calendar/controllers/main.py:0
+#: code:addons/website_calendar/controllers/main.py:125
 #, python-format
 msgid "Email: %s"
 msgstr "이메일 : %s"
@@ -430,6 +411,11 @@ msgstr "이메일 : %s"
 #: model_terms:ir.ui.view,arch_db:website_calendar.calendar_appointment_type_view_form
 msgid "Employees"
 msgstr "직원"
+
+#. module: website_calendar
+#: model:ir.model,name:website_calendar.model_calendar_event
+msgid "Event"
+msgstr "일정"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_follower_ids
@@ -444,15 +430,15 @@ msgstr "팔로워 (채널)"
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_partner_ids
 msgid "Followers (Partners)"
-msgstr "팔로워 (협력사)"
+msgstr "팔로워 (파트너)"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_calendar
 msgid "Fri"
-msgstr "금"
+msgstr "금요일"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__5
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Friday"
 msgstr "금요일"
 
@@ -478,16 +464,19 @@ msgid "ID"
 msgstr "ID"
 
 #. module: website_calendar
-#: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__message_needaction
 #: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__message_unread
+msgid "If checked new messages require your attention."
+msgstr "만약 선택하였으면, 새 메시지에 주의를 기울여야 합니다."
+
+#. module: website_calendar
+#: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "선택하면 새로운 메시지를 주목할 필요가 있습니다."
+msgstr "만약 선택하였으면, 새 메시지에 주의를 기울여야 합니다."
 
 #. module: website_calendar
 #: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__message_has_error
-#: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr "이 옵션을 선택하면 일부 정보가 전달 오류를 생성합니다."
+msgstr "이 옵션을 선택하면 일부 메시지에 배달 오류가 발생합니다."
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.setup
@@ -513,12 +502,12 @@ msgstr "소개 메시지"
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_is_follower
 msgid "Is Follower"
-msgstr "팔로워 여부"
+msgstr "팔로워입니다"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__is_published
-msgid "Is Published"
-msgstr "게시 여부"
+msgid "Is published"
+msgstr "게시됨"
 
 #. module: website_calendar
 #: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__country_ids
@@ -533,7 +522,7 @@ msgstr "모든 국가의 방문자를 허용하려면 비워 두십시오. 그�
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_slot____last_update
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type____last_update
 msgid "Last Modified on"
-msgstr "최근 수정일"
+msgstr "최근 수정"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_answer__write_uid
@@ -549,22 +538,22 @@ msgstr "최근 갱신한 사람"
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_slot__write_date
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__write_date
 msgid "Last Updated on"
-msgstr "최근 갱신일"
+msgstr "최근 갱신 날짜"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__location
 msgid "Location"
-msgstr "위치"
+msgstr "공간(위치)"
 
 #. module: website_calendar
 #: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__location
 msgid "Location of the appointments"
-msgstr "약속 장소"
+msgstr "약속장소:"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_validated
 msgid "Location:"
-msgstr "위치 :"
+msgstr "장소:"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_main_attachment_id
@@ -572,9 +561,14 @@ msgid "Main Attachment"
 msgstr "주요 첨부 파일"
 
 #. module: website_calendar
+#: model:res.groups,name:website_calendar.group_calendar_manager
+msgid "Manager"
+msgstr "관리자"
+
+#. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_has_error
 msgid "Message Delivery error"
-msgstr "메시지 전송 오류"
+msgstr "메시지 배달 오류"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_ids
@@ -583,7 +577,7 @@ msgid "Messages"
 msgstr "메시지"
 
 #. module: website_calendar
-#: code:addons/website_calendar/controllers/main.py:0
+#: code:addons/website_calendar/controllers/main.py:124
 #, python-format
 msgid "Mobile: %s"
 msgstr "모바일 : %s"
@@ -591,31 +585,31 @@ msgstr "모바일 : %s"
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_calendar
 msgid "Mon"
-msgstr "월"
+msgstr "월요일"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__1
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Monday"
 msgstr "월요일"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_question__question_type__text
+#: selection:calendar.appointment.question,question_type:0
 msgid "Multi-line text"
 msgstr "여러 줄 문자"
 
 #. module: website_calendar
 #. openerp-web
-#: code:addons/website_calendar/static/src/js/website_calendar.editor.js:0
+#: code:addons/website_calendar/static/src/js/website_calendar.editor.js:30
 #, python-format
 msgid "Name"
 msgstr "이름"
 
 #. module: website_calendar
 #. openerp-web
-#: code:addons/website_calendar/static/src/js/website_calendar.editor.js:0
+#: code:addons/website_calendar/static/src/js/website_calendar.editor.js:29
 #, python-format
 msgid "New Appointment Type"
-msgstr "새로운 약속 유형"
+msgstr "새로운 예약 유형"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.setup
@@ -631,11 +625,11 @@ msgstr "데이터가 없습니다"
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_needaction_counter
 msgid "Number of Actions"
-msgstr "작업 수"
+msgstr "작업 횟수"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_has_error_counter
-msgid "Number of errors"
+msgid "Number of error"
 msgstr "오류 횟수"
 
 #. module: website_calendar
@@ -646,7 +640,7 @@ msgstr "작업이 필요한 메시지 수"
 #. module: website_calendar
 #: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr "전송 오류 메시지 수"
+msgstr "배달 오류 메시지 수"
 
 #. module: website_calendar
 #: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__message_unread_counter
@@ -681,7 +675,6 @@ msgstr "온라인 약속 유형"
 #. module: website_calendar
 #: model:ir.actions.act_window,name:website_calendar.calendar_appointment_type_action
 #: model:ir.actions.act_window,name:website_calendar.calendar_event_action_reporting
-#: model:ir.module.category,name:website_calendar.module_category_calendar
 #: model:ir.ui.menu,name:website_calendar.appointment_type_menu
 #: model:ir.ui.menu,name:website_calendar.menu_schedule_report_all
 #: model:ir.ui.menu,name:website_calendar.website_appointment_type_menu
@@ -692,10 +685,10 @@ msgstr "온라인 약속"
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_question__placeholder
 msgid "Placeholder"
-msgstr "자리 표시자"
+msgstr "자리 표시"
 
 #. module: website_calendar
-#: code:addons/website_calendar/models/calendar_appointment.py:0
+#: code:addons/website_calendar/models/calendar_appointment.py:302
 #, python-format
 msgid "Please enter a valid hour between 0:00 to 24:00 for your slots."
 msgstr "슬롯에 유효한 시간을 0:00에서 24:00 사이로 입력하십시오."
@@ -708,7 +701,7 @@ msgstr "다른 날짜를 선택하세요."
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_question__name
 msgid "Question"
-msgstr "질문"
+msgstr "질의"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_question__question_type
@@ -723,19 +716,19 @@ msgid "Questions"
 msgstr "질문"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_question__question_type__radio
+#: selection:calendar.appointment.question,question_type:0
 msgid "Radio (one answer)"
 msgstr "라디오 버튼(한개의 답)"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_type__assignation_method__random
+#: selection:calendar.appointment.type,assignation_method:0
 msgid "Random"
 msgstr "무작위"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__reminder_ids
 msgid "Reminders"
-msgstr "미리 알림"
+msgstr "알림"
 
 #. module: website_calendar
 #: model:ir.ui.menu,name:website_calendar.menu_schedule_report
@@ -753,32 +746,17 @@ msgid "Restrict Countries"
 msgstr "국가 제한"
 
 #. module: website_calendar
-#: model_terms:ir.ui.view,arch_db:website_calendar.calendar_appointment_type_view_kanban
-msgid "SCHEDULED"
-msgstr "스케줄"
-
-#. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__is_seo_optimized
 msgid "SEO optimized"
 msgstr "SEO 최적화"
 
 #. module: website_calendar
-#: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_has_sms_error
-msgid "SMS Delivery error"
-msgstr "SMS 전송 에러"
-
-#. module: website_calendar
-#: model:calendar.alarm,name:website_calendar.calendar_alarm_data_1h_sms
-msgid "SMS Text Message - 1 Hours"
-msgstr "SMS 문자 메시지 - 1 시간"
-
-#. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_calendar
 msgid "Sat"
-msgstr "토"
+msgstr "토요일"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__6
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Saturday"
 msgstr "토요일"
 
@@ -816,10 +794,10 @@ msgstr "일정 잡기 및 가능성"
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_question__sequence
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__sequence
 msgid "Sequence"
-msgstr "순서"
+msgstr "순차적"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_question__question_type__char
+#: selection:calendar.appointment.question,question_type:0
 msgid "Single line text"
 msgstr "한 줄 문자"
 
@@ -841,25 +819,25 @@ msgstr "시작 시간(0:00 - 24:00)"
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_calendar
 msgid "Sun"
-msgstr "일"
+msgstr "일요일"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__7
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Sunday"
 msgstr "일요일"
 
 #. module: website_calendar
 #: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__website_url
 msgid "The full URL to access the document through the website."
-msgstr "웹사이트를 통해 문서에 접근하는 전체 URL입니다."
+msgstr "웹사이트를 통해 문서에 접근 하는 전체 URL입니다."
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_calendar
 msgid "Thu"
-msgstr "목"
+msgstr "목요일"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__4
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Thursday"
 msgstr "목요일"
 
@@ -876,7 +854,7 @@ msgstr "표시되는 시간"
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_select_timezone
 msgid "Time zone:"
-msgstr "시간대 :"
+msgstr "타임존:"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment
@@ -892,32 +870,32 @@ msgstr "시간대"
 #. module: website_calendar
 #: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__appointment_tz
 msgid "Timezone where appointment take place"
-msgstr "약속을 잡을 곳의 시간대"
+msgstr "약속을 잡을 곳의 타임존"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_calendar
 msgid "Tue"
-msgstr "화"
+msgstr "화요일"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__2
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Tuesday"
 msgstr "화요일"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_unread
 msgid "Unread Messages"
-msgstr "읽지 않은 메시지"
+msgstr "읽지 않은 메세지"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_unread_counter
 msgid "Unread Messages Counter"
-msgstr "읽지 않은 메시지 수"
+msgstr "읽지 않은 메세지 수"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.index
 msgid "View Availabilities <span class=\"fa fa-arrow-right\"/>"
-msgstr "가능 여부 확인<span class=\"fa fa-arrow-right\"/>"
+msgstr "가능성 체크<span class=\"fa fa-arrow-right\"/>"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__website_published
@@ -946,7 +924,7 @@ msgstr "웹 사이트 URL"
 #. module: website_calendar
 #: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__website_message_ids
 msgid "Website communication history"
-msgstr "웹사이트 의사소통 이력"
+msgstr "웹사이트 대화 이력"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__website_meta_description
@@ -971,10 +949,10 @@ msgstr "웹사이트 오픈그래프 이미지"
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_calendar
 msgid "Wed"
-msgstr "수"
+msgstr "수요일"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__3
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Wednesday"
 msgstr "수요일"
 
@@ -1012,7 +990,7 @@ msgstr "귀하의 이메일"
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_form
 msgid "Your Name"
-msgstr "성함"
+msgstr "귀하의 성명"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_form
@@ -1042,7 +1020,7 @@ msgstr "시간 후!"
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_form
 msgid "on"
-msgstr "있음"
+msgstr "작성일"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_calendar

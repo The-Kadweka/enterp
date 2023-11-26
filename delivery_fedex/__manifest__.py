@@ -3,9 +3,8 @@
 {
     'name': "Fedex Shipping",
     'description': "Send your shippings through Fedex and track them online",
-    'category': 'Operations/Inventory/Delivery',
+    'category': 'Warehouse',
     'version': '1.0',
-    'application': True,
     'depends': ['delivery', 'mail'],
     'data': [
         'data/delivery_fedex.xml',

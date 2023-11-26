@@ -11,6 +11,7 @@ import json
 import uuid
 import random
 
+from odoo.tools import pycompat
 from odoo.exceptions import UserError
 
 
@@ -45,7 +46,7 @@ class View(models.Model):
         # (many2many widget), they have been added to node (only in Studio).
         # This preprocess cannot be done at validation time because the
         # attribute `studio_groups` is not RNG valid.
-        if self._context.get('studio') and not self._context.get('check_field_names') and not self._context.get('check_field_names_original'):
+        if self._context.get('studio') and not self._context.get('check_field_names'):
             if node.get('groups'):
                 self.set_studio_groups(node)
 
@@ -97,7 +98,7 @@ class View(models.Model):
     def _groups_branding(self, specs_tree, view_id):
         groups_id = self.browse(view_id).groups_id
         if groups_id:
-            attr_value = ','.join(map(str, groups_id.ids))
+            attr_value = ','.join(pycompat.imap(str, groups_id.ids))
             for node in specs_tree.iter(tag=etree.Element):
                 node.set('studio-view-group-ids', attr_value)
 
@@ -106,7 +107,7 @@ class View(models.Model):
     # So, we add the groups name to find out when they will be available.
     # This information will be used in Studio to inform the user.
     def _set_groups_info(self, node, group_ids):
-        groups = self.env['res.groups'].browse(map(int, group_ids.split(',')))
+        groups = self.env['res.groups'].browse(pycompat.imap(int, group_ids.split(',')))
         view_group_names = ','.join(groups.mapped('name'))
         for child in node.iter(tag=etree.Element):
             child.set('studio-view-group-names', view_group_names)
@@ -145,13 +146,15 @@ class View(models.Model):
             self._groups_branding(specs_tree, inherit_id)
 
         # If this is studio view, we want to apply it spec by spec
-        if inherit_id and self.browse(inherit_id)._is_studio_view():
+        if self.browse(inherit_id)._is_studio_view():
             return self._apply_studio_specs(source, specs_tree, inherit_id)
         else:
-            # Remove branding added by '_groups_branding' before locating a node
-            pre_locate = lambda arch: arch.attrib.pop("studio-view-group-ids", None)
-            return super(View, self).apply_inheritance_specs(source, specs_tree, inherit_id,
-                                                                pre_locate=pre_locate)
+            return super(View, self).apply_inheritance_specs(source, specs_tree, inherit_id)
+
+    def locate_node(self, arch, spec):
+        # Remove branding added by '_groups_branding'
+        spec.attrib.pop("studio-view-group-ids", None)
+        return super(View, self).locate_node(arch, spec)
 
     def normalize(self):
         """
@@ -781,7 +784,6 @@ class View(models.Model):
 
     def copy_qweb_template(self):
         new = self.copy()
-        new.inherit_id = False
 
         domain = [
             ('type', '=', 'qweb'),
@@ -811,31 +813,14 @@ class View(models.Model):
                 callview.copy_qweb_template()
             node.set('t-call', cloned_templates[tcall])
 
-        subtree = arch_tree.xpath("//*[@t-name]")
-        if subtree:
-            subtree[0].set('t-name', new_key)
-            arch_tree = subtree[0]
-
-        # copy translation from view combinations
-        combined_views = self.browse()
-        views_to_process = [self]
-        while views_to_process:
-            view = views_to_process.pop()
-            if not view or view in combined_views:
-                continue
-            combined_views += view
-            views_to_process += view.inherit_id
-            inheriting_domain = self._get_inheriting_views_arch_domain(view.id, view.model)
-            for inheriting_view in self.search(inheriting_domain):
-                views_to_process.append(inheriting_view)
-        fields_to_ignore = (field for field in self._fields if field != 'arch_base')
-        for view in (combined_views - self).with_context(from_copy_translation=True):
-            view.copy_translations(new, fields_to_ignore)
+        arch_tree = arch_tree.find(".//*[@t-name]")
+        arch_tree.set('t-name', new_key)
 
         new.write({
             'name': '%s copy(%s)' % (new.name, copy_no),
             'key': new_key,
             'arch_base': etree.tostring(arch_tree, encoding='unicode'),
+            'inherit_id': False,
         })
 
         return new

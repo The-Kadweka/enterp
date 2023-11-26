@@ -7,7 +7,6 @@
     'category': "Hidden",
     'depends': ['marketing_automation', 'test_mail'],
     'data': [
-        'security/ir.model.access.csv',
     ],
     'demo': [
     ],

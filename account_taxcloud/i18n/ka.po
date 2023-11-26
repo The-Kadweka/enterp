@@ -3,33 +3,45 @@
 # * account_taxcloud
 # 
 # Translators:
-# Martin Trigaux <mat@odoo.com>, 2017
+# Saba Khmaladze <skhmaladze@uglt.org>, 2019
+# Martin Trigaux, 2019
+# Temur, 2019
+# Giorgi Melitauri <gmelitauri@live.com>, 2019
+# Gvantsa Gvinianidze <gvantsa@live.com>, 2019
+# 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 10.saas~18+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-09-20 11:33+0000\n"
-"PO-Revision-Date: 2017-09-20 11:33+0000\n"
-"Last-Translator: Martin Trigaux <mat@odoo.com>, 2017\n"
+"POT-Creation-Date: 2018-12-19 09:12+0000\n"
+"PO-Revision-Date: 2018-08-24 11:37+0000\n"
+"Last-Translator: Gvantsa Gvinianidze <gvantsa@live.com>, 2019\n"
 "Language-Team: Georgian (https://www.transifex.com/odoo/teams/41243/ka/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: ka\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
 #. module: account_taxcloud
-#: model:ir.ui.view,arch_db:account_taxcloud.res_config_settings_view_form
-msgid "<i class=\"fa fa-fw fa-arrow-right\"/>Create Account &amp; Get Credentials"
+#: model_terms:ir.ui.view,arch_db:account_taxcloud.res_config_settings_view_form
+msgid "<i class=\"fa fa-fw fa-arrow-right\"/>How to Get Credentials"
 msgstr ""
 
 #. module: account_taxcloud
-#: model:ir.ui.view,arch_db:account_taxcloud.res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:account_taxcloud.res_config_settings_view_form
+msgid ""
+"<i title=\"Import/update TICs from TaxCloud\" role=\"img\" aria-"
+"label=\"Import/update TICs from TaxCloud\" class=\"fa fa-refresh fa-fw\"/>"
+msgstr ""
+
+#. module: account_taxcloud
+#: model_terms:ir.ui.view,arch_db:account_taxcloud.res_config_settings_view_form
 msgid "API ID"
 msgstr ""
 
 #. module: account_taxcloud
-#: model:ir.ui.view,arch_db:account_taxcloud.res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:account_taxcloud.res_config_settings_view_form
 msgid "API KEY"
 msgstr ""
 
@@ -39,48 +51,52 @@ msgid "Companies"
 msgstr "კომპანიები"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category_create_uid
+#: model:ir.model,name:account_taxcloud.model_res_config_settings
+msgid "Config Settings"
+msgstr "კონფიგურაციის პარამეტრები"
+
+#. module: account_taxcloud
+#: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category__create_uid
 msgid "Created by"
 msgstr "შემქმნელი"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category_create_date
+#: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category__create_date
 msgid "Created on"
 msgstr "შექმნის თარიღი"
 
 #. module: account_taxcloud
-#: model:ir.ui.view,arch_db:account_taxcloud.res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:account_taxcloud.res_config_settings_view_form
 msgid "Default Category"
 msgstr ""
 
 #. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_res_company_tic_category_id
-#: model:ir.model.fields,field_description:account_taxcloud.field_res_config_settings_tic_category_id
+#: model:ir.model.fields,field_description:account_taxcloud.field_res_company__tic_category_id
+#: model:ir.model.fields,field_description:account_taxcloud.field_res_config_settings__tic_category_id
 msgid "Default TIC Code"
 msgstr ""
 
 #. module: account_taxcloud
-#: model:ir.model.fields,help:account_taxcloud.field_res_company_tic_category_id
-#: model:ir.model.fields,help:account_taxcloud.field_res_config_settings_tic_category_id
+#: model:ir.model.fields,help:account_taxcloud.field_res_company__tic_category_id
+#: model:ir.model.fields,help:account_taxcloud.field_res_config_settings__tic_category_id
 msgid ""
 "Default TICs(Taxability information codes) code to get sales tax from "
 "TaxCloud by product category."
 msgstr ""
 
 #. module: account_taxcloud
-#: model:ir.ui.view,arch_db:account_taxcloud.res_config_settings_view_form
-msgid "Default TaxCloud category for new products"
-msgstr ""
-
-#. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category_display_name
+#: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category__display_name
 msgid "Display Name"
 msgstr "სახელი"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_account_fiscal_position_tax_state_ids
-#: model:ir.model.fields,field_description:account_taxcloud.field_account_fiscal_position_tax_template_state_ids
-msgid "Federal States"
+#: model:ir.model.fields,help:account_taxcloud.field_product_product__tic_category_id
+#: model:ir.model.fields,help:account_taxcloud.field_product_template__tic_category_id
+msgid ""
+"Each product falls into a category which has specific taxes predermined by "
+"the government.The system will use the Tax Cloud category set on the "
+"internal category of the product. If thereisn't any, the one on the product "
+"itself will be used. Only used in United States."
 msgstr ""
 
 #. module: account_taxcloud
@@ -89,7 +105,7 @@ msgid "Fiscal Position"
 msgstr ""
 
 #. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category_id
+#: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category__id
 msgid "ID"
 msgstr "იდენტიფიკატორი"
 
@@ -99,64 +115,73 @@ msgid "Invoice"
 msgstr "ინვოისი"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category___last_update
+#: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category____last_update
 msgid "Last Modified on"
-msgstr "ბოლოს განახლებულია"
+msgstr "ბოლოს შეიცვალა"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category_write_uid
+#: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category__write_uid
 msgid "Last Updated by"
 msgstr "ბოლოს განაახლა"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category_write_date
+#: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category__write_date
 msgid "Last Updated on"
-msgstr "ბოლოს განახლებულია"
+msgstr "ბოლოს განახლდა"
 
 #. module: account_taxcloud
-#: model:ir.ui.view,arch_db:account_taxcloud.account_taxcloud_tic_category_search
+#: model:ir.model,name:account_taxcloud.model_product_category
+msgid "Product Category"
+msgstr "პროდუქტის კატეგორია"
+
+#. module: account_taxcloud
+#: model_terms:ir.ui.view,arch_db:account_taxcloud.account_taxcloud_tic_category_search
 msgid "Product TIC Categories"
+msgstr ""
+
+#. module: account_taxcloud
+#: model:ir.model,name:account_taxcloud.model_product_tic_category
+msgid "Product TIC Category"
 msgstr ""
 
 #. module: account_taxcloud
 #: model:ir.model,name:account_taxcloud.model_product_template
 msgid "Product Template"
-msgstr ""
+msgstr "პროდუქტის შაბლონი"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_account_fiscal_position_tax_template_tic_category_ids
-#: model:ir.model.fields,field_description:account_taxcloud.field_account_fiscal_position_tax_tic_category_ids
-#: model:ir.ui.view,arch_db:account_taxcloud.account_taxcloud_tic_category_tree
+#: model_terms:ir.ui.view,arch_db:account_taxcloud.account_taxcloud_tic_category_tree
 msgid "TIC Category"
 msgstr ""
 
 #. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category_code
+#: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category__code
 msgid "TIC Category Code"
 msgstr ""
 
 #. module: account_taxcloud
-#: model:ir.ui.view,arch_db:account_taxcloud.account_taxcloud_tic_category_search
+#: model:ir.model.fields,field_description:account_taxcloud.field_product_category__tic_category_id
+#: model_terms:ir.ui.view,arch_db:account_taxcloud.account_taxcloud_tic_category_search
 msgid "TIC Code"
 msgstr ""
 
 #. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category_description
+#: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category__description
 msgid "TIC Description"
 msgstr ""
 
 #. module: account_taxcloud
-#: model:ir.ui.view,arch_db:account_taxcloud.product_template_taxcloud_inherit_form
+#: model_terms:ir.ui.view,arch_db:account_taxcloud.product_category_view_form_inherit_account_taxcloud
 msgid "TaxCloud"
 msgstr ""
 
 #. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_res_config_settings_taxcloud_api_id
+#: model:ir.model.fields,field_description:account_taxcloud.field_res_config_settings__taxcloud_api_id
 msgid "TaxCloud API ID"
 msgstr ""
 
 #. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_res_config_settings_taxcloud_api_key
+#: model:ir.model.fields,field_description:account_taxcloud.field_res_config_settings__taxcloud_api_key
 msgid "TaxCloud API KEY"
 msgstr ""
 
@@ -167,20 +192,15 @@ msgid "TaxCloud Categories"
 msgstr ""
 
 #. module: account_taxcloud
-#: model:ir.ui.view,arch_db:account_taxcloud.res_config_settings_view_form
-msgid "TaxCloud Categories (TIC)"
-msgstr ""
-
-#. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_product_product_tic_category_id
-#: model:ir.model.fields,field_description:account_taxcloud.field_product_template_tic_category_id
-#: model:ir.ui.view,arch_db:account_taxcloud.product_template_taxcloud_inherit_form
+#: model:ir.model.fields,field_description:account_taxcloud.field_product_product__tic_category_id
+#: model:ir.model.fields,field_description:account_taxcloud.field_product_template__tic_category_id
+#: model_terms:ir.ui.view,arch_db:account_taxcloud.product_category_view_form_inherit_account_taxcloud
+#: model_terms:ir.ui.view,arch_db:account_taxcloud.product_template_taxcloud_inherit_form
 msgid "TaxCloud Category"
 msgstr ""
 
 #. module: account_taxcloud
-#: model:ir.model.fields,help:account_taxcloud.field_product_product_tic_category_id
-#: model:ir.model.fields,help:account_taxcloud.field_product_template_tic_category_id
+#: model:ir.model.fields,help:account_taxcloud.field_product_category__tic_category_id
 msgid ""
 "TaxCloud uses Taxability Information Codes (TIC) to make sure each item in "
 "your catalog is taxed at the right rate (or, for tax-exempt items, not taxed"
@@ -192,30 +212,20 @@ msgid ""
 msgstr ""
 
 #. module: account_taxcloud
-#: model:ir.model,name:account_taxcloud.model_account_fiscal_position_tax
-msgid "Taxes Fiscal Position"
-msgstr ""
-
-#. module: account_taxcloud
-#: model:ir.model,name:account_taxcloud.model_account_fiscal_position_tax_template
-msgid "Template Tax Fiscal Position"
-msgstr ""
-
-#. module: account_taxcloud
 #: model:ir.model,name:account_taxcloud.model_account_fiscal_position_template
 msgid "Template for Fiscal Position"
 msgstr ""
 
 #. module: account_taxcloud
-#: code:addons/account_taxcloud/models/account_fiscal_position.py:99
-#: code:addons/account_taxcloud/models/account_invoice.py:48
-#: code:addons/account_taxcloud/models/res_config_settings.py:40
+#: code:addons/account_taxcloud/models/account_invoice.py:43
+#: code:addons/account_taxcloud/models/res_config_settings.py:23
 #, python-format
 msgid "The configuration of TaxCloud is in the Accounting app, Settings menu."
 msgstr ""
+"TaxCloud კონფიგურაცია შესაძლებელია, აღრიცხვის აპიდან, სეთინგების მენიუდან "
 
 #. module: account_taxcloud
-#: code:addons/account_taxcloud/models/account_invoice.py:119
+#: code:addons/account_taxcloud/models/account_invoice.py:115
 #, python-format
 msgid ""
 "The source document on the refund is not valid and thus the refunded cart "
@@ -223,49 +233,41 @@ msgid ""
 msgstr ""
 
 #. module: account_taxcloud
-#: code:addons/account_taxcloud/models/account_invoice.py:89
+#: code:addons/account_taxcloud/models/account_invoice.py:85
 #, python-format
 msgid ""
 "The tax rates have been updated, you may want to check it before validation"
 msgstr ""
 
 #. module: account_taxcloud
-#: code:addons/account_taxcloud/models/account_fiscal_position.py:99
-#: code:addons/account_taxcloud/models/account_invoice.py:48
-#: code:addons/account_taxcloud/models/res_config_settings.py:40
+#: code:addons/account_taxcloud/models/account_invoice.py:43
+#: code:addons/account_taxcloud/models/res_config_settings.py:23
 #, python-format
 msgid "Unable to retrieve taxes from TaxCloud: "
-msgstr ""
+msgstr "ვერ ჩამოვტვირთე გადასახადები  TaxCloud-დან"
 
 #. module: account_taxcloud
 #: model:ir.actions.server,name:account_taxcloud.action_account_invoice_update_taxes
 msgid "Update taxes with Taxcloud"
-msgstr ""
+msgstr "განაახლე გადასახადები Taxcloud-ით"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_account_fiscal_position_is_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_account_fiscal_position_template_is_taxcloud
+#: model:ir.model.fields,field_description:account_taxcloud.field_account_fiscal_position__is_taxcloud
+#: model:ir.model.fields,field_description:account_taxcloud.field_account_fiscal_position_template__is_taxcloud
 msgid "Use TaxCloud API"
 msgstr ""
 
 #. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_account_fiscal_position_tax_template_zip_codes
-#: model:ir.model.fields,field_description:account_taxcloud.field_account_fiscal_position_tax_zip_codes
-msgid "Zip"
+#: code:addons/account_taxcloud/models/account_invoice.py:24
+#, python-format
+msgid ""
+"You cannot cancel an invoice sent to TaxCloud.\n"
+"You need to issue a refund (credit note) for it instead.\n"
+"This way the tax entries will be cancelled in TaxCloud."
 msgstr ""
 
 #. module: account_taxcloud
 #: code:addons/account_taxcloud/models/product.py:28
 #, python-format
 msgid "[%s] %s"
-msgstr ""
-
-#. module: account_taxcloud
-#: model:ir.model,name:account_taxcloud.model_product_tic_category
-msgid "product.tic.category"
-msgstr ""
-
-#. module: account_taxcloud
-#: model:ir.model,name:account_taxcloud.model_res_config_settings
-msgid "res.config.settings"
 msgstr ""

@@ -19,12 +19,10 @@ class LandingCost(InvoiceTransactionCase):
         self.landing = self.env['stock.landed.cost']
         isr_tag = self.env['account.account.tag'].search(
             [('name', '=', 'ISR')])
-        iva_tag = self.env['account.account.tag'].search(
-            [('name', '=', 'ISR')])
-        for rep_line in self.tax_negative.invoice_repartition_line_ids:
-            rep_line.tag_ids |= isr_tag
-        for rep_line in self.tax_positive.invoice_repartition_line_ids:
-            rep_line.tag_ids |= iva_tag
+        self.tax_negative.tag_ids |= isr_tag
+        self.company.partner_id.write({
+            'property_account_position_id': self.fiscal_position.id,
+        })
         self.journal_mx = self.env['account.journal'].search([
             ('name', '=', _('Customer Invoices'))], limit=1)
         self.journal_misc = self.env['account.journal'].search([
@@ -38,7 +36,7 @@ class LandingCost(InvoiceTransactionCase):
         })
         self.account_inventory = self.env.ref('l10n_mx.1_cuenta115_01')
         self.account_merchancy = self.env.ref('l10n_mx.1_cuenta115_05')
-        self.product.categ_id.sudo().write({
+        self.product.categ_id.write({
             'property_cost_method': 'fifo',
             'property_valuation': 'real_time',
             'property_stock_account_input_categ_id': self.account_merchancy,
@@ -133,7 +131,7 @@ class LandingCost(InvoiceTransactionCase):
         invoice.write({
             'journal_id': self.journal_mx.id,
         })
-        invoice.post()
+        invoice.action_invoice_open()
         customs = invoice.invoice_line_ids[0].l10n_mx_edi_customs_number
         self.assertEqual(customs, landing.l10n_mx_edi_customs_number)
         xml = invoice.l10n_mx_edi_get_xml_etree()

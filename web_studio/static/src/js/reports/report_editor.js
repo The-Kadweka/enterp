@@ -11,9 +11,6 @@ var _t = core._t;
 var ReportEditor = Widget.extend(EditorMixin, {
     template: 'web_studio.ReportEditor',
     nearest_hook_tolerance: 500,
-    events: _.extend({}, Widget.prototype.events, {
-        'click': '_onClick',
-    }),
 
     /**
      * @override
@@ -364,26 +361,6 @@ var ReportEditor = Widget.extend(EditorMixin, {
         }
     },
     /**
-     * Selects the given node if it's not already selected and deselects
-     * previously selected one.
-     *
-     * @private
-     * @param {Object} node
-     */
-    selectNode: function (node) {
-        if (this.selectedNode) {
-            if (this.selectedNode === node) {
-                return;
-            }
-            var $oldSelectedNodes = this._findAssociatedDOMNodes(this.selectedNode);
-            $oldSelectedNodes.removeClass('o_web_studio_report_selected');
-        }
-
-        this.selectedNode = node;
-        var $nodesToHighlight = this._findAssociatedDOMNodes(this.selectedNode);
-        $nodesToHighlight.addClass('o_web_studio_report_selected');
-    },
-    /**
      * @override
      */
     unselectedElements: function () {
@@ -396,7 +373,7 @@ var ReportEditor = Widget.extend(EditorMixin, {
      *
      * @param {Object} nodesArchs
      * @param {String} reportHTML
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     update: function (nodesArchs, reportHTML) {
         var self = this;
@@ -533,7 +510,6 @@ var ReportEditor = Widget.extend(EditorMixin, {
             }
             var $nodes = self._findAssociatedDOMNodes(node);
             $nodes.data('node', node);
-            node.$nodes = $nodes;
             if ($nodes.length) {
                 node.context = $nodes.data('oe-context');
             } else {
@@ -627,7 +603,7 @@ var ReportEditor = Widget.extend(EditorMixin, {
      */
     _processReportPreviewContent: function () {
         this.$content = this.$('iframe').contents();
-        this.$content.off('click').on('click', this._onContentClick.bind(this));
+        this.$content.off('click').on('click', this._onMouseClick.bind(this));
         this._connectNodes();
         this.$('.o_web_studio_loader').hide();
         this._resizeIframe();
@@ -679,7 +655,7 @@ var ReportEditor = Widget.extend(EditorMixin, {
         this.$content.find('html')[0].style.overflow = 'hidden';
 
         // set the size of the iframe
-        $(this.$content).find("img").on("load", function () {
+        $(this.$content).find("img").load(function () {
             self.$iframe[0].style.height = self.$iframe[0].contentWindow.document.body.scrollHeight + 'px';
         });
     },
@@ -700,7 +676,7 @@ var ReportEditor = Widget.extend(EditorMixin, {
      * Update the iframe content.
      *
      * @private
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _updateContent: function () {
         var self = this;
@@ -711,50 +687,44 @@ var ReportEditor = Widget.extend(EditorMixin, {
         if ($main.length) {
             $main.replaceWith($(reportHTML).find('main:first'));
             this._processReportPreviewContent();
-            return Promise.resolve();
+            return $.when();
         }
 
-        return new Promise(function (resolve, reject) {
-            window.top[self._onUpdateContentId] = function () {
-                if (!self.$('iframe')[0].contentWindow) {
-                    return reject();
-                }
-                self._processReportPreviewContent();
-                self.trigger_up('iframe_ready');
-                resolve();
-            };
-            if (reportHTML.error) {
-                throw new Error(reportHTML.message || reportHTML.error);
-            } else {
-                // determine when the body has been inserted
-                reportHTML = reportHTML.replace(
-                    '</body>',
-                    '<script>window.top.' + self._onUpdateContentId + '()</script></body>'
-                );
+        var def = $.Deferred();
+        window.top[this._onUpdateContentId] = function () {
+            if (!self.$('iframe')[0].contentWindow) {
+                return def.reject();
             }
+            self._processReportPreviewContent();
+            self.trigger_up('iframe_ready');
+            def.resolve();
+        };
+        if (reportHTML.error) {
+            throw new Error(reportHTML.message || reportHTML.error);
+        } else {
+            // determine when the body has been inserted
+            reportHTML = reportHTML.replace(
+                '</body>',
+                '<script>window.top.' + this._onUpdateContentId + '()</script></body>'
+            );
+        }
 
-            // inject HTML
-            var cwindow = self.$iframe[0].contentWindow;
-            cwindow.document
-                .open("text/html", "replace")
-                .write(reportHTML);
-        });
+        // inject HTML
+        var cwindow = this.$iframe[0].contentWindow;
+        cwindow.document
+            .open("text/html", "replace")
+            .write(reportHTML);
+
+        return def;
     },
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     */
-    _onClick: function () {
-        this.trigger_up('editor_clicked');
-    },
     /**
      * @private
      * @param {Event} e
      */
-    _onContentClick: function (e) {
+    _onMouseClick: function (e) {
         e.preventDefault();
         e.stopPropagation();
 
@@ -766,7 +736,19 @@ var ReportEditor = Widget.extend(EditorMixin, {
         if ($node.closest('[t-field], [t-esc]').length) {
             $node = $node.closest('[t-field], [t-esc]');
         }
-        this.selectNode($node.data('node'));
+        var node = $node.data('node');
+
+        if (this.selectedNode) {
+            if (this.selectedNode === node) {
+                return;
+            }
+            var $oldSelectedNodes = this._findAssociatedDOMNodes(this.selectedNode);
+            $oldSelectedNodes.removeClass('o_web_studio_report_selected');
+        }
+
+        this.selectedNode = node;
+        var $nodesToHighlight = this._findAssociatedDOMNodes(this.selectedNode);
+        $nodesToHighlight.addClass('o_web_studio_report_selected');
         this.trigger_up('node_clicked', {
             node: this.selectedNode,
         });

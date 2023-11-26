@@ -4,7 +4,7 @@
         <field name="name">sign.request.send.copy.view.form</field>
         <field name="model">sign.request.send.copy</field>
         <field name="arch" type="xml">
-            <form>
+            <form string="Send a copy to third parties">
                 <group>
                     <field name="partner_ids" widget="many2many_tags"/>
                 </group>
@@ -17,9 +17,10 @@
     </record>
 
     <record id="action_sign_request_send_copy" model="ir.actions.act_window">
-        <field name="name">Send a copy</field>
+        <field name="name">Send a copy to third parties</field>
         <field name="res_model">sign.request.send.copy</field>
         <field name="target">new</field>
+        <field name="view_type">form</field>
         <field name="view_mode">form</field>
     </record>
 </odoo>

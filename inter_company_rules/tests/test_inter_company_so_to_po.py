@@ -143,4 +143,4 @@ class TestInterCompanySaleToPurchase(TestInterCompanyRulesCommon):
         self.assertEqual(len(so.order_line), 2)
         # Check purchase order is created in company B ( for company A )
         po = self.validate_generated_purchase_order(self.company_a, self.company_b)
-        self.assertEqual(len(po.order_line), 2)
+        self.assertEqual(len(po.order_line), 1)

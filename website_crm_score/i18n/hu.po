@@ -1,21 +1,22 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_crm_score
+# * website_crm_score
 # 
 # Translators:
-# Martin Trigaux, 2019
-# krnkris, 2019
-# gezza <geza.nagy@oregional.hu>, 2019
+# Martin Trigaux, 2018
+# krnkris, 2018
+# gezza <geza.nagy@oregional.hu>, 2018
+# Kovács Tibor <kovika@gmail.com>, 2018
+# Tibor Kőnig <konig.tibor@evitalit.hu>, 2018
 # Ákos Nagy <akos.nagy@oregional.hu>, 2019
-# Tibor Kőnig <konig.tibor@evitalit.hu>, 2019
 # Tamás Németh <ntomasz81@gmail.com>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-05 12:37+0000\n"
-"PO-Revision-Date: 2019-08-26 09:39+0000\n"
+"POT-Creation-Date: 2019-01-15 15:18+0000\n"
+"PO-Revision-Date: 2018-08-24 11:49+0000\n"
 "Last-Translator: Tamás Németh <ntomasz81@gmail.com>, 2019\n"
 "Language-Team: Hungarian (https://www.transifex.com/odoo/teams/41243/hu/)\n"
 "MIME-Version: 1.0\n"
@@ -23,6 +24,11 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Language: hu\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_crm_lead__pageviews_count
+msgid "# Page Views"
+msgstr "# Oldal nézetek"
 
 #. module: website_crm_score
 #: model_terms:ir.ui.view,arch_db:website_crm_score.website_crm_score_view_kanban
@@ -35,24 +41,23 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_needaction
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__message_needaction
 msgid "Action Needed"
-msgstr "Akció szükséges"
+msgstr "Művelet szükséges"
 
 #. module: website_crm_score
-#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__active
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__running
 msgid "Active"
 msgstr "Aktív"
 
 #. module: website_crm_score
-#: model:ir.model.fields.selection,name:website_crm_score.selection__website_crm_score__rule_type__active
-msgid "Archive"
-msgstr "Archiválás"
+#: model:ir.model.fields,help:website_crm_score.field_ir_ui_view__track
+#: model:ir.model.fields,help:website_crm_score.field_website_page__track
+msgid "Allow to specify for one page of the website to be trackable or not"
+msgstr ""
 
 #. module: website_crm_score
-#: model_terms:ir.ui.view,arch_db:website_crm_score.team_user_view_search
-#: model_terms:ir.ui.view,arch_db:website_crm_score.view_crm_score_form
-#: model_terms:ir.ui.view,arch_db:website_crm_score.website_crm_score_view_search
-msgid "Archived"
-msgstr "Archivált"
+#: selection:website.crm.score,rule_type:0
+msgid "Archive"
+msgstr "Archiválás"
 
 #. module: website_crm_score
 #: model_terms:ir.ui.view,arch_db:website_crm_score.sales_team_form_view_assign
@@ -103,12 +108,14 @@ msgstr ""
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__create_uid
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__create_uid
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__create_uid
 msgid "Created by"
 msgstr "Létrehozta"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__create_date
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__create_date
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__create_date
 msgid "Created on"
 msgstr "Létrehozva"
@@ -145,16 +152,17 @@ msgstr ""
 
 #. module: website_crm_score
 #: model_terms:ir.actions.act_window,help:website_crm_score.team_action
-msgid "Define a new sales team"
-msgstr "Új értékesítési csapat összeállítása"
+msgid "Define a new sales channel"
+msgstr ""
 
 #. module: website_crm_score
-#: model:ir.model.fields.selection,name:website_crm_score.selection__website_crm_score__rule_type__unlink
+#: selection:website.crm.score,rule_type:0
 msgid "Delete"
 msgstr "Törlés"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__display_name
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__display_name
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__display_name
 msgid "Display Name"
 msgstr "Megjelenített név"
@@ -190,29 +198,32 @@ msgid "Followers (Partners)"
 msgstr "Követők (Partnerek)"
 
 #. module: website_crm_score
-#: model_terms:ir.ui.view,arch_db:website_crm_score.team_user_view_search
-msgid "Group By"
-msgstr "Csoportosítás"
+#: model:ir.model,name:website_crm_score.model_ir_http
+msgid "HTTP Routing"
+msgstr "HTTP irányítás"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__id
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__id
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__id
 msgid "ID"
 msgstr "Azonosító"
 
 #. module: website_crm_score
-#: model:ir.model.fields,help:website_crm_score.field_team_user__message_needaction
 #: model:ir.model.fields,help:website_crm_score.field_team_user__message_unread
-#: model:ir.model.fields,help:website_crm_score.field_website_crm_score__message_needaction
 #: model:ir.model.fields,help:website_crm_score.field_website_crm_score__message_unread
+msgid "If checked new messages require your attention."
+msgstr "Ha be van jelölve, akkor figyelje az új üzeneteket."
+
+#. module: website_crm_score
+#: model:ir.model.fields,help:website_crm_score.field_team_user__message_needaction
+#: model:ir.model.fields,help:website_crm_score.field_website_crm_score__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "Ha be van jelölve, akkor az új üzenetek figyelmet igényelnek."
+msgstr "Ha be van jelölve, akkor figyelje az új üzeneteket."
 
 #. module: website_crm_score
 #: model:ir.model.fields,help:website_crm_score.field_team_user__message_has_error
-#: model:ir.model.fields,help:website_crm_score.field_team_user__message_has_sms_error
 #: model:ir.model.fields,help:website_crm_score.field_website_crm_score__message_has_error
-#: model:ir.model.fields,help:website_crm_score.field_website_crm_score__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr ""
 "Ha be van jelölve, akkor néhány üzenetnél kézbesítési hiba lépett fel."
@@ -221,25 +232,38 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_is_follower
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__message_is_follower
 msgid "Is Follower"
-msgstr "Követő"
+msgstr "Ő egy követő"
+
+#. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_crm_lead__lang_id
+msgid "Language"
+msgstr "Nyelv"
+
+#. module: website_crm_score
+#: model:ir.model.fields,help:website_crm_score.field_crm_lead__lang_id
+msgid "Language from the website when lead has been created"
+msgstr ""
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user____last_update
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview____last_update
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score____last_update
 msgid "Last Modified on"
 msgstr "Legutóbb frissítve"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__write_uid
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__write_uid
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__write_uid
 msgid "Last Updated by"
-msgstr "Frissítette"
+msgstr "Legutóbb frissítette"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__write_date
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__write_date
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__write_date
 msgid "Last Updated on"
-msgstr "Frissítve "
+msgstr "Legutóbb frissítve "
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__last_run
@@ -247,13 +271,23 @@ msgid "Last run"
 msgstr "Utolsó futtatás"
 
 #. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__lead_id
+msgid "Lead"
+msgstr "Érdeklődő"
+
+#. module: website_crm_score
+#: model:ir.actions.act_window,name:website_crm_score.website_crm_score_pageviews
+#: model:ir.ui.menu,name:website_crm_score.pageview_menu
+msgid "Lead Page Views"
+msgstr ""
+
+#. module: website_crm_score
 #: model:ir.model,name:website_crm_score.model_crm_lead
 msgid "Lead/Opportunity"
-msgstr "Érdeklődés/Lehetőség"
+msgstr "Érdeklődő/Lehetőség"
 
 #. module: website_crm_score
 #: model:ir.actions.act_window,name:website_crm_score.score_leads
-#: model:ir.ui.menu,name:website_crm_score.menu_crm_leads
 #: model_terms:ir.ui.view,arch_db:website_crm_score.view_crm_score_form
 msgid "Leads"
 msgstr "Érdeklődések"
@@ -282,13 +316,24 @@ msgid ""
 msgstr ""
 
 #. module: website_crm_score
+#: model:ir.model.fields,help:website_crm_score.field_crm_lead__score_pageview_ids
+msgid "List of (tracked) pages seen by the owner of this lead"
+msgstr ""
+
+#. module: website_crm_score
+#. openerp-web
+#: code:addons/website_crm_score/static/src/xml/track_page.xml:9
+#, python-format
+msgid "Log visits on leads"
+msgstr ""
+
+#. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_main_attachment_id
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__message_main_attachment_id
 msgid "Main Attachment"
 msgstr "Fő melléklet"
 
 #. module: website_crm_score
-#: model_terms:ir.ui.view,arch_db:website_crm_score.sales_team_form_view_assign
 #: model_terms:ir.ui.view,arch_db:website_crm_score.view_crm_team_user_form
 msgid "Maximum Leads / 30 days"
 msgstr ""
@@ -326,13 +371,13 @@ msgstr "Név"
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_needaction_counter
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__message_needaction_counter
 msgid "Number of Actions"
-msgstr "Akciók száma"
+msgstr "Műveletek száma"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_has_error_counter
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__message_has_error_counter
-msgid "Number of errors"
-msgstr "Hibák száma"
+msgid "Number of error"
+msgstr "Hiba száma"
 
 #. module: website_crm_score
 #: model:ir.model.fields,help:website_crm_score.field_team_user__message_needaction_counter
@@ -353,9 +398,34 @@ msgid "Number of unread messages"
 msgstr "Olvasatlan üzenetek száma"
 
 #. module: website_crm_score
+#: model:ir.actions.act_window,name:website_crm_score.crm_score_views_action_table
+#: model_terms:ir.ui.view,arch_db:website_crm_score.crm_case_graph_view_leads_sales
+#: model_terms:ir.ui.view,arch_db:website_crm_score.crm_case_table_view_leads_sales
+#: model_terms:ir.ui.view,arch_db:website_crm_score.sales_team_form_view_assign
+msgid "Opportunities"
+msgstr "Lehetőségek"
+
+#. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_crm_lead__score_pageview_ids
+#: model_terms:ir.ui.view,arch_db:website_crm_score.crm_score_pageview_form
+#: model_terms:ir.ui.view,arch_db:website_crm_score.crm_score_pageview_graph
+msgid "Page Views"
+msgstr "Oldal nézetek"
+
+#. module: website_crm_score
+#: model_terms:ir.ui.view,arch_db:website_crm_score.lead_score_form
+msgid "Page views"
+msgstr "Oldalnézetek"
+
+#. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__percentage_leads
 msgid "Percentage leads"
 msgstr ""
+
+#. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_crm_lead__phone
+msgid "Phone"
+msgstr "Telefon"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_crm_team__ratio
@@ -368,15 +438,14 @@ msgid "Rule Type"
 msgstr ""
 
 #. module: website_crm_score
-#: model:ir.model.fields,field_description:website_crm_score.field_team_user__active
+#: model:ir.model.fields,field_description:website_crm_score.field_team_user__running
 msgid "Running"
 msgstr "Futó"
 
 #. module: website_crm_score
-#: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_has_sms_error
-#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__message_has_sms_error
-msgid "SMS Delivery error"
-msgstr "SMS kézbesítési hiba"
+#: model:ir.model.fields,field_description:website_crm_score.field_team_user__team_id
+msgid "SaleTeam"
+msgstr ""
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__user_id
@@ -384,27 +453,22 @@ msgid "Saleman"
 msgstr "Értékesítő"
 
 #. module: website_crm_score
+#: model:ir.actions.act_window,name:website_crm_score.team_action
+#: model:ir.model,name:website_crm_score.model_crm_team
+msgid "Sales Channels"
+msgstr "Értékesítési csatornák"
+
+#. module: website_crm_score
+#: model:ir.actions.act_window,name:website_crm_score.team_user_action
 #: model_terms:ir.ui.view,arch_db:website_crm_score.view_crm_team_user_form
 #: model_terms:ir.ui.view,arch_db:website_crm_score.view_crm_team_user_tree
 msgid "Sales Men"
 msgstr ""
 
 #. module: website_crm_score
-#: model_terms:ir.ui.view,arch_db:website_crm_score.team_user_view_search
-msgid "Sales Person"
-msgstr "Értékesítő"
-
-#. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_res_users__team_user_ids
 msgid "Sales Records"
 msgstr ""
-
-#. module: website_crm_score
-#: model:ir.model,name:website_crm_score.model_crm_team
-#: model:ir.model.fields,field_description:website_crm_score.field_team_user__team_id
-#: model_terms:ir.ui.view,arch_db:website_crm_score.team_user_view_search
-msgid "Sales Team"
-msgstr "Értékesítési csapat"
 
 #. module: website_crm_score
 #: model:ir.model.fields,help:website_crm_score.field_res_users__sale_team_id
@@ -424,11 +488,6 @@ msgid "Salesperson (Team Member)"
 msgstr ""
 
 #. module: website_crm_score
-#: model:ir.actions.act_window,name:website_crm_score.team_user_action
-msgid "Salespersons"
-msgstr ""
-
-#. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_crm_lead__score
 #: model_terms:ir.ui.view,arch_db:website_crm_score.crm_lead_view_dashboard
 #: model_terms:ir.ui.view,arch_db:website_crm_score.crm_opportunity_view_dashboard
@@ -443,8 +502,9 @@ msgid "Scores"
 msgstr ""
 
 #. module: website_crm_score
-#: model:ir.model.fields.selection,name:website_crm_score.selection__website_crm_score__rule_type__score
 #: model_terms:ir.ui.view,arch_db:website_crm_score.lead_score_form
+#: model_terms:ir.ui.view,arch_db:website_crm_score.score_opp_form_view
+#: selection:website.crm.score,rule_type:0
 msgid "Scoring"
 msgstr ""
 
@@ -465,14 +525,24 @@ msgid ""
 msgstr ""
 
 #. module: website_crm_score
-#: model_terms:ir.ui.view,arch_db:website_crm_score.website_crm_score_view_search
-msgid "Search CRM Score"
+#: model_terms:ir.ui.view,arch_db:website_crm_score.crm_score_pageview_filter
+msgid "Search PageViews"
 msgstr ""
 
 #. module: website_crm_score
-#: model:ir.actions.act_window,name:website_crm_score.team_action
 #: model:ir.ui.menu,name:website_crm_score.team
 msgid "Teams Assignation"
+msgstr ""
+
+#. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_ir_ui_view__track
+#: model:ir.model.fields,field_description:website_crm_score.field_website_page__track
+msgid "Track"
+msgstr "Követés"
+
+#. module: website_crm_score
+#: model:ir.actions.act_window,name:website_crm_score.crm_score_views_action_graph
+msgid "Unassigned leads"
 msgstr ""
 
 #. module: website_crm_score
@@ -485,18 +555,28 @@ msgstr "Olvasatlan üzenetek"
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_unread_counter
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__message_unread_counter
 msgid "Unread Messages Counter"
-msgstr "Olvasatlan üzenetek száma"
+msgstr "Olvasatlan üzenetek számlálója"
+
+#. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__url
+msgid "Url"
+msgstr "Url"
 
 #. module: website_crm_score
 #: model_terms:ir.actions.act_window,help:website_crm_score.team_action
 msgid ""
-"Use sales teams to organize your sales departments.\n"
-"                    Each team will work with a separate pipeline."
+"Use sales channels to organize your sales departments.\n"
+"                    Each channel will work with a separate pipeline."
 msgstr ""
 
 #. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__user_id
+msgid "User"
+msgstr "Felhasználó"
+
+#. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_res_users__sale_team_id
-msgid "User Sales Team"
+msgid "User Sales Channel"
 msgstr ""
 
 #. module: website_crm_score
@@ -510,6 +590,21 @@ msgid "Value"
 msgstr "Érték"
 
 #. module: website_crm_score
+#: model:ir.model,name:website_crm_score.model_ir_ui_view
+msgid "View"
+msgstr "Nézet"
+
+#. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__view_date
+msgid "Viewing Date"
+msgstr ""
+
+#. module: website_crm_score
+#: model:ir.model,name:website_crm_score.model_website_crm_pageview
+msgid "Website CRM Page View"
+msgstr ""
+
+#. module: website_crm_score
 #: model:ir.model,name:website_crm_score.model_website_crm_score
 msgid "Website CRM Score"
 msgstr ""
@@ -518,13 +613,18 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__website_message_ids
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__website_message_ids
 msgid "Website Messages"
-msgstr "Weboldali üzenetek"
+msgstr "Weboldal üzenetek"
+
+#. module: website_crm_score
+#: model_terms:ir.ui.view,arch_db:website_crm_score.website_crm_pageview_pivot
+msgid "Website Pages"
+msgstr ""
 
 #. module: website_crm_score
 #: model:ir.model.fields,help:website_crm_score.field_team_user__website_message_ids
 #: model:ir.model.fields,help:website_crm_score.field_website_crm_score__website_message_ids
 msgid "Website communication history"
-msgstr "Weboldali kommunikációs előzmények"
+msgstr "Weboldal  kommunikáció történet"
 
 #. module: website_crm_score
 #: model:ir.model.fields,help:website_crm_score.field_website_crm_score__event_based
@@ -533,6 +633,18 @@ msgid ""
 "have already been checked previously. This option incurs a large performance"
 " penalty, so it should be checked only for rules that depend on dynamic "
 "events"
+msgstr ""
+
+#. module: website_crm_score
+#: model_terms:ir.ui.view,arch_db:website_crm_score.sales_team_form_view_assign
+#: model_terms:ir.ui.view,arch_db:website_crm_score.team_user_kanban
+msgid "fa-check"
+msgstr ""
+
+#. module: website_crm_score
+#: model_terms:ir.ui.view,arch_db:website_crm_score.sales_team_form_view_assign
+#: model_terms:ir.ui.view,arch_db:website_crm_score.team_user_kanban
+msgid "fa-times"
 msgstr ""
 
 #. module: website_crm_score

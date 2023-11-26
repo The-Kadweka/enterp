@@ -1,23 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_calendar
+# * website_calendar
 # 
 # Translators:
-# Martin Trigaux, 2019
-# Jakub Lohnisky <jakub@lepremier.cz>, 2019
-# Ondřej Skuhravý <ondra.sk@volny.cz>, 2019
-# Jan Horzinka <jan.horzinka@centrum.cz>, 2019
-# Michal Veselý <michal@veselyberanek.net>, 2019
-# Jakub Snášel <jakub@potisk-tricek.cz>, 2019
+# Martin Trigaux, 2018
+# Adam Kettner, 2018
+# Jaroslav Helemik Nemec <nemec@helemik.cz>, 2018
+# Jakub Lohnisky <jakub@lepremier.cz>, 2018
+# Ondřej Skuhravý <ondra.sk@volny.cz>, 2018
+# Jan Horzinka <jan.horzinka@centrum.cz>, 2018
+# Michal Veselý <michal@veselyberanek.net>, 2018
 # trendspotter, 2019
 # Rastislav Brencic <rastislav.brencic@azet.sk>, 2021
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-07 07:21+0000\n"
-"PO-Revision-Date: 2019-08-26 09:39+0000\n"
+"POT-Creation-Date: 2018-10-08 07:15+0000\n"
+"PO-Revision-Date: 2018-08-24 11:49+0000\n"
 "Last-Translator: Rastislav Brencic <rastislav.brencic@azet.sk>, 2021\n"
 "Language-Team: Czech (https://www.transifex.com/odoo/teams/41243/cs/)\n"
 "MIME-Version: 1.0\n"
@@ -27,7 +28,7 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 
 #. module: website_calendar
-#: code:addons/website_calendar/models/calendar_appointment.py:0
+#: code:addons/website_calendar/models/calendar_appointment.py:66
 #, python-format
 msgid " (copy)"
 msgstr "(kopírovat)"
@@ -43,7 +44,7 @@ msgid "#{day['today_cls'] and 'Today' or ''}"
 msgstr "#{day['today_cls'] a 'Dnes' nebo ''}"
 
 #. module: website_calendar
-#: code:addons/website_calendar/controllers/main.py:0
+#: code:addons/website_calendar/controllers/main.py:142
 #, python-format
 msgid "%s with %s"
 msgstr "%s s %s"
@@ -59,7 +60,7 @@ msgid "+1 (650) 691-3277"
 msgstr "+1 (650) 691-3277"
 
 #. module: website_calendar
-#: code:addons/website_calendar/controllers/main.py:0
+#: code:addons/website_calendar/controllers/main.py:186
 #, python-format
 msgid ", All Day"
 msgstr ", Celý den"
@@ -70,6 +71,11 @@ msgid "-- select a country --"
 msgstr "-- vybrat zemi --"
 
 #. module: website_calendar
+#: model:calendar.alarm,name:website_calendar.calendar_alarm_data_1h_sms
+msgid "1 Hour SMS text"
+msgstr "SMS zpráva po 1 hodině"
+
+#. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_validated
 msgid ""
 "<br/>\n"
@@ -77,13 +83,6 @@ msgid ""
 msgstr ""
 "<br/> \n"
 "Je příliš pozdě na zrušení online, kontaktujte účastníky jiným způsobem, pokud to opravdu nemůžete schůzku uskutečnit."
-
-#. module: website_calendar
-#: model_terms:ir.ui.view,arch_db:website_calendar.calendar_appointment_type_view_kanban
-msgid "<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" title=\"Manage\"/>"
-msgstr ""
-"<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" "
-"title=\"Manage\"/>Prodej"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_validated
@@ -182,11 +181,6 @@ msgid "Action Needed"
 msgstr "Vyžaduje akci"
 
 #. module: website_calendar
-#: model:res.groups,name:website_calendar.group_calendar_manager
-msgid "Administrator"
-msgstr "Administrátor"
-
-#. module: website_calendar
 #: model:ir.actions.act_window,name:website_calendar.website_calendar_report
 #: model:ir.ui.menu,name:website_calendar.menu_schedule_report_online
 msgid "All Appointments"
@@ -260,6 +254,7 @@ msgid "Appointment<span class=\"chevron\"/>"
 msgstr "Schůzka <span class=\"chevron\"/>"
 
 #. module: website_calendar
+#: model:ir.module.category,name:website_calendar.module_category_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.calendar_appointment_type_view_form
 #: model_terms:ir.ui.view,arch_db:website_calendar.calendar_event_view_graph
 #: model_terms:ir.ui.view,arch_db:website_calendar.calendar_event_view_pivot
@@ -302,27 +297,17 @@ msgid "Calendar"
 msgstr "Kalendář"
 
 #. module: website_calendar
-#: model:ir.model,name:website_calendar.model_calendar_event
-msgid "Calendar Event"
-msgstr "Událost kalendáře"
-
-#. module: website_calendar
-#: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__can_publish
-msgid "Can Publish"
-msgstr "Může publikovat"
-
-#. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__min_cancellation_hours
 msgid "Cancel Before (hours)"
 msgstr "Zrušit před (hodiny)"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_question__question_type__checkbox
+#: selection:calendar.appointment.question,question_type:0
 msgid "Checkboxes (multiple answers)"
 msgstr "Zaškrtávací políčka (více odpovědí)"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_type__assignation_method__chosen
+#: selection:calendar.appointment.type,assignation_method:0
 msgid "Chosen by the Customer"
 msgstr "Vybral zákazník"
 
@@ -360,13 +345,13 @@ msgstr "Kontakt"
 
 #. module: website_calendar
 #. openerp-web
-#: code:addons/website_calendar/static/src/js/appointment_employee_url.js:0
+#: code:addons/website_calendar/static/src/js/appointment_employee_url.js:67
 #, python-format
 msgid "Copied !"
 msgstr "Zkopírováno !"
 
 #. module: website_calendar
-#: code:addons/website_calendar/controllers/main.py:0
+#: code:addons/website_calendar/controllers/main.py:123
 #, python-format
 msgid "Country: %s"
 msgstr "Štát: %s"
@@ -382,7 +367,7 @@ msgstr "Vytvořit nový typ schůzky"
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_slot__create_uid
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__create_uid
 msgid "Created by"
-msgstr "Vytvořeno od"
+msgstr "Vytvořil(a)"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_answer__create_date
@@ -408,10 +393,10 @@ msgstr "Popis"
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_slot__display_name
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__display_name
 msgid "Display Name"
-msgstr "Zobrazované jméno"
+msgstr "Zobrazovaný název"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_question__question_type__select
+#: selection:calendar.appointment.question,question_type:0
 msgid "Dropdown (one answer)"
 msgstr "Rozbalovací nabídka (jedna odpověď)"
 
@@ -421,12 +406,7 @@ msgid "Duration:"
 msgstr "Doba trvání:"
 
 #. module: website_calendar
-#: model_terms:ir.ui.view,arch_db:website_calendar.calendar_appointment_type_view_kanban
-msgid "Edit"
-msgstr "Upravit"
-
-#. module: website_calendar
-#: code:addons/website_calendar/controllers/main.py:0
+#: code:addons/website_calendar/controllers/main.py:125
 #, python-format
 msgid "Email: %s"
 msgstr "Email: %s"
@@ -438,6 +418,11 @@ msgid "Employees"
 msgstr "Zaměstnanci"
 
 #. module: website_calendar
+#: model:ir.model,name:website_calendar.model_calendar_event
+msgid "Event"
+msgstr "Událost"
+
+#. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_follower_ids
 msgid "Followers"
 msgstr "Sledující"
@@ -445,12 +430,12 @@ msgstr "Sledující"
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_channel_ids
 msgid "Followers (Channels)"
-msgstr "Sledující (kanály)"
+msgstr "Sledující (Kanály)"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_partner_ids
 msgid "Followers (Partners)"
-msgstr "Sledující (partneři)"
+msgstr "Sledující (Partneři)"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_calendar
@@ -458,7 +443,7 @@ msgid "Fri"
 msgstr "Pá"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__5
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Friday"
 msgstr "Pátek"
 
@@ -488,14 +473,17 @@ msgid "ID"
 msgstr "ID"
 
 #. module: website_calendar
-#: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__message_needaction
 #: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__message_unread
+msgid "If checked new messages require your attention."
+msgstr "Pokud je zaškrtnuto, nové zprávy vyžadují vaši pozornost."
+
+#. module: website_calendar
+#: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__message_needaction
 msgid "If checked, new messages require your attention."
 msgstr "Pokud je zaškrtnuto, nové zprávy vyžadují vaši pozornost."
 
 #. module: website_calendar
 #: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__message_has_error
-#: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr "Pokud je zaškrtnuto, některé zprávy mají chybu při doručení."
 
@@ -522,12 +510,12 @@ msgstr "Úvodní zpráva"
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_is_follower
 msgid "Is Follower"
-msgstr "Je sledující"
+msgstr "je Sledující"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__is_published
-msgid "Is Published"
-msgstr "Je publikováno"
+msgid "Is published"
+msgstr "Je zveřejněno"
 
 #. module: website_calendar
 #: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__country_ids
@@ -583,6 +571,11 @@ msgid "Main Attachment"
 msgstr "Hlavní příloha"
 
 #. module: website_calendar
+#: model:res.groups,name:website_calendar.group_calendar_manager
+msgid "Manager"
+msgstr "Manažer"
+
+#. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_has_error
 msgid "Message Delivery error"
 msgstr "Chyba při doručování zpráv"
@@ -594,7 +587,7 @@ msgid "Messages"
 msgstr "Zprávy"
 
 #. module: website_calendar
-#: code:addons/website_calendar/controllers/main.py:0
+#: code:addons/website_calendar/controllers/main.py:124
 #, python-format
 msgid "Mobile: %s"
 msgstr "Mobil: %s"
@@ -605,25 +598,25 @@ msgid "Mon"
 msgstr "Po"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__1
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Monday"
 msgstr "Pondělí"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_question__question_type__text
+#: selection:calendar.appointment.question,question_type:0
 msgid "Multi-line text"
 msgstr "Víceřádkový text"
 
 #. module: website_calendar
 #. openerp-web
-#: code:addons/website_calendar/static/src/js/website_calendar.editor.js:0
+#: code:addons/website_calendar/static/src/js/website_calendar.editor.js:30
 #, python-format
 msgid "Name"
 msgstr "Název"
 
 #. module: website_calendar
 #. openerp-web
-#: code:addons/website_calendar/static/src/js/website_calendar.editor.js:0
+#: code:addons/website_calendar/static/src/js/website_calendar.editor.js:29
 #, python-format
 msgid "New Appointment Type"
 msgstr "Nový typ schůzky"
@@ -646,7 +639,7 @@ msgstr "Počet akcí"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_has_error_counter
-msgid "Number of errors"
+msgid "Number of error"
 msgstr "Počet chyb"
 
 #. module: website_calendar
@@ -692,7 +685,6 @@ msgstr "Typ online schůzky"
 #. module: website_calendar
 #: model:ir.actions.act_window,name:website_calendar.calendar_appointment_type_action
 #: model:ir.actions.act_window,name:website_calendar.calendar_event_action_reporting
-#: model:ir.module.category,name:website_calendar.module_category_calendar
 #: model:ir.ui.menu,name:website_calendar.appointment_type_menu
 #: model:ir.ui.menu,name:website_calendar.menu_schedule_report_all
 #: model:ir.ui.menu,name:website_calendar.website_appointment_type_menu
@@ -706,7 +698,7 @@ msgid "Placeholder"
 msgstr "Zástupce"
 
 #. module: website_calendar
-#: code:addons/website_calendar/models/calendar_appointment.py:0
+#: code:addons/website_calendar/models/calendar_appointment.py:302
 #, python-format
 msgid "Please enter a valid hour between 0:00 to 24:00 for your slots."
 msgstr "Zadejte prosím platnou hodinu mezi 0:00 a 24:00 pro vaše sloty."
@@ -734,12 +726,12 @@ msgid "Questions"
 msgstr "Otázky"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_question__question_type__radio
+#: selection:calendar.appointment.question,question_type:0
 msgid "Radio (one answer)"
 msgstr "Výběr (jedna odpověď)"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_type__assignation_method__random
+#: selection:calendar.appointment.type,assignation_method:0
 msgid "Random"
 msgstr "Náhodný"
 
@@ -764,24 +756,9 @@ msgid "Restrict Countries"
 msgstr "Omezit země"
 
 #. module: website_calendar
-#: model_terms:ir.ui.view,arch_db:website_calendar.calendar_appointment_type_view_kanban
-msgid "SCHEDULED"
-msgstr "PLÁNOVÁNO"
-
-#. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__is_seo_optimized
 msgid "SEO optimized"
 msgstr "SEO optimalizováno"
-
-#. module: website_calendar
-#: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__message_has_sms_error
-msgid "SMS Delivery error"
-msgstr "Chyba doručení SMS"
-
-#. module: website_calendar
-#: model:calendar.alarm,name:website_calendar.calendar_alarm_data_1h_sms
-msgid "SMS Text Message - 1 Hours"
-msgstr "SMS textová zpráva - 1 hodina"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_calendar
@@ -789,7 +766,7 @@ msgid "Sat"
 msgstr "So"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__6
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Saturday"
 msgstr "Sobota"
 
@@ -830,7 +807,7 @@ msgid "Sequence"
 msgstr "Číselná řada"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_question__question_type__char
+#: selection:calendar.appointment.question,question_type:0
 msgid "Single line text"
 msgstr "Jednořádkový text"
 
@@ -855,7 +832,7 @@ msgid "Sun"
 msgstr "Ne"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__7
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Sunday"
 msgstr "Neděle"
 
@@ -870,7 +847,7 @@ msgid "Thu"
 msgstr "Čt"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__4
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Thursday"
 msgstr "Čtvrtek"
 
@@ -911,7 +888,7 @@ msgid "Tue"
 msgstr "Út"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__2
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Tuesday"
 msgstr "Úterý"
 
@@ -933,7 +910,7 @@ msgstr "Zobrazit možnosti <span class=\"fa fa-arrow-right\"/>"
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__website_published
 msgid "Visible on current website"
-msgstr "Viditelné na aktuální webstránce"
+msgstr "Viditelné na aktuálním webu"
 
 #. module: website_calendar
 #: model_terms:calendar.appointment.type,message_confirmation:website_calendar.calendar_appointment
@@ -947,37 +924,37 @@ msgstr ""
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__website_message_ids
 msgid "Website Messages"
-msgstr "Zprávy webové stránky"
+msgstr "Zprávy Webové stránky"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__website_url
 msgid "Website URL"
-msgstr "URL webové stránky"
+msgstr "URL Webové stránky"
 
 #. module: website_calendar
 #: model:ir.model.fields,help:website_calendar.field_calendar_appointment_type__website_message_ids
 msgid "Website communication history"
-msgstr "Historie komunikace webové stránky"
+msgstr "Historie komunikace Webové stránky"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__website_meta_description
 msgid "Website meta description"
-msgstr "Meta-popis webových stránek"
+msgstr "Meta-Popis webových stránek"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__website_meta_keywords
 msgid "Website meta keywords"
-msgstr "Meta-klíčová slova webových stránek"
+msgstr "Meta-Klíčová slova webových stránek"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__website_meta_title
 msgid "Website meta title"
-msgstr "Meta-název webových stránek"
+msgstr "Meta-Název webových stránek"
 
 #. module: website_calendar
 #: model:ir.model.fields,field_description:website_calendar.field_calendar_appointment_type__website_meta_og_img
 msgid "Website opengraph image"
-msgstr "Opengraph obrázek webových stránek"
+msgstr "opengraph obrázek webových stránek"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_calendar
@@ -985,7 +962,7 @@ msgid "Wed"
 msgstr "St"
 
 #. module: website_calendar
-#: model:ir.model.fields.selection,name:website_calendar.selection__calendar_appointment_slot__weekday__3
+#: selection:calendar.appointment.slot,weekday:0
 msgid "Wednesday"
 msgstr "Středa"
 
@@ -1053,7 +1030,7 @@ msgstr "hodiny od teď!"
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_form
 msgid "on"
-msgstr "na"
+msgstr "on"
 
 #. module: website_calendar
 #: model_terms:ir.ui.view,arch_db:website_calendar.appointment_calendar

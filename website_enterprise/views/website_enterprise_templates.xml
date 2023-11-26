@@ -16,6 +16,12 @@
         </xpath>
     </template>
 
+    <template id="external_snippets" inherit_id="website.external_snippets">
+        <xpath expr="//div[@id='snippet_feature']//t[@t-snippet][last()]" position="after">
+            <t t-install="website_form_editor" string="Form Builder" t-thumbnail="/website_enterprise/static/src/img/s_website_form.png"/>
+        </xpath>
+    </template>
+
     <template id="user_navbar_inherit_website_enterprise" inherit_id="website.user_navbar">
         <xpath expr="//div[@id='o_new_content_menu_choices']//div[@name='module_website_livechat']" position="after">
             <div groups="base.group_system" name="module_website_calendar" t-att-data-module-id="env.ref('base.module_website_calendar').id" t-att-data-module-shortdesc="env.ref('base.module_website_calendar').shortdesc" class="col-md-4 mb8 o_new_content_element">

@@ -2,7 +2,7 @@
 {
     'name': 'US Checks Layout',
     'version': '1.0',
-    'category': 'Accounting/Accounting',
+    'category': 'Accounting',
     'summary': 'Print US Checks',
     'description': """
 This module allows to print your payments on pre-printed check paper.

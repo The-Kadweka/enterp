@@ -9,8 +9,8 @@ var mobile = require('web_mobile.rpc');
     The apps detect the redirection and open the url in a seprate browser.
 
     In Odoo desktop, the redirection occurs in the same tab and the returned
-    promise is never resolved.
-    This override returns a resolved promise in case of mobile app redirects
+    deferred is never resolved.
+    This override returns a resolved deffered in case of mobile app redirects
     because Odoo is not aware of this and we need to reactivate status button.
 
     This behavior is the same as the one already done when opening the url in a new window.
@@ -20,7 +20,7 @@ ActionManager.include({
         var url = action.url;
         var result = this._super.apply(this, arguments);
         if (!_.isEmpty(mobile.methods) && !url.startsWith("/web")) {
-            return Promise.resolve();
+            return $.when();
         }
         return result;
     },

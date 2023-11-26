@@ -1,29 +1,25 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* timesheet_grid
+# * timesheet_grid
 # 
 # Translators:
-# Martin Trigaux, 2019
-# Cristopher Cravioto <ccr@odoo.com>, 2019
-# VivianMontana23 <vivianpvm@gmail.com>, 2019
+# Martin Trigaux, 2018
+# Cristopher Cravioto <ccr@odoo.com>, 2018
 # Jorge Obiols <jorge.obiols@gmail.com>, 2020
-# marcescu, 2022
-# Luis D Lafaurie, 2022
-# Leonardo J. Caballero G. <leonardocaballero@gmail.com>, 2022
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~12.5+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-23 11:39+0000\n"
-"PO-Revision-Date: 2019-08-26 09:38+0000\n"
-"Last-Translator: Leonardo J. Caballero G. <leonardocaballero@gmail.com>, 2022\n"
+"POT-Creation-Date: 2018-12-19 09:13+0000\n"
+"PO-Revision-Date: 2018-08-24 11:48+0000\n"
+"Last-Translator: Jorge Obiols <jorge.obiols@gmail.com>, 2020\n"
 "Language-Team: Spanish (https://www.transifex.com/odoo/teams/41243/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: es\n"
-"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: timesheet_grid
 #: model:mail.template,body_html:timesheet_grid.mail_template_timesheet_reminder_manager
@@ -110,86 +106,6 @@ msgid ""
 "</table>\n"
 "            "
 msgstr ""
-"<?xml version=\"1.0\"?>\n"
-"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: 16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;\"><tr><td align=\"center\">\n"
-"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"padding: 16px; background-color: white; color: #454748; border-collapse:separate;\">\n"
-"<tbody>\n"
-"    <!-- HEADER -->\n"
-"    <tr>\n"
-"        <td align=\"center\" style=\"min-width: 590px;\">\n"
-"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
-"                <tr><td valign=\"middle\">\n"
-"                    <span style=\"font-size: 10px;\">Sus hojas de tiempo</span><br/>\n"
-"                    <span style=\"font-size: 20px; font-weight: bold;\">\n"
-"                        ${object.name}\n"
-"                    </span>\n"
-"                </td><td valign=\"middle\" align=\"right\">\n"
-"                    <img src=\"/logo.png?company=${object.company_id.id}\" style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" alt=\"${object.company_id.name}\"/>\n"
-"                </td></tr>\n"
-"                <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
-"                <hr width=\"100%\" style=\"background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
-"                </td></tr>\n"
-"            </table>\n"
-"        </td>\n"
-"    </tr>\n"
-"    <!-- CONTENT -->\n"
-"    <tr>\n"
-"        <td align=\"center\" style=\"min-width: 590px;\">\n"
-"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
-"                <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
-"                    <div>\n"
-"                        Hola ${object.name},<br/><br/>\n"
-"                        Este es un recordatorio amistoso para aprobar las horas de su equipo para el período : ${ctx.get('date_start')} - ${ctx.get('date_stop')}.<br/>\n"
-"                        % if ctx.get('action_url'):\n"
-"                        <div style=\"margin: 16px 0px 16px 0px;\">\n"
-"                            <a href=\"${ctx.get('action_url')}\" style=\"background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size: 13px;\">Llene su hoja de tiempo</a>\n"
-"                        </div>\n"
-"                        % endif\n"
-"                        <br/>Gracias,<br/>\n"
-"                        % if user.signature\n"
-"                            ${user.signature | safe}\n"
-"                        % endif\n"
-"                    </div>\n"
-"                </td></tr>\n"
-"                <tr><td style=\"text-align:center;\">\n"
-"                    <hr width=\"100%\" style=\"background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
-"                </td></tr>\n"
-"            </table>\n"
-"        </td>\n"
-"    </tr>\n"
-"    <!-- FOOTER -->\n"
-"    <tr>\n"
-"        <td align=\"center\" style=\"min-width: 590px;\">\n"
-"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; font-size: 11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
-"                <tr><td valign=\"middle\" align=\"left\">\n"
-"                    ${object.company_id.name}\n"
-"                </td></tr>\n"
-"                <tr><td valign=\"middle\" align=\"left\" style=\"opacity: 0.7;\">\n"
-"                    ${object.company_id.phone}\n"
-"                    % if object.company_id.email\n"
-"                        | <a href=\"'mailto:%s' % ${object.company_id.email}\" style=\"text-decoration:none; color: #454748;\">${object.company_id.email}</a>\n"
-"                    % endif\n"
-"                    % if object.company_id.website\n"
-"                        | <a href=\"'%s' % ${object.company_id.website}\" style=\"text-decoration:none; color: #454748;\">\n"
-"                        ${object.company_id.website}\n"
-"                    </a>\n"
-"                    % endif\n"
-"                </td></tr>\n"
-"            </table>\n"
-"        </td>\n"
-"    </tr>\n"
-"</tbody>\n"
-"</table>\n"
-"</td></tr>\n"
-"<!-- POWERED BY -->\n"
-"<tr><td align=\"center\" style=\"min-width: 590px;\">\n"
-"    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;\">\n"
-"      <tr><td style=\"text-align: center; font-size: 13px;\">\n"
-"        Hecho con <a target=\"_blank\" href=\"https://www.odoo.com?utm_source=db&amp;utm_medium=mail\" style=\"color: #875A7B;\">Odoo</a>\n"
-"      </td></tr>\n"
-"    </table>\n"
-"</td></tr>\n"
-"</table>"
 
 #. module: timesheet_grid
 #: model:mail.template,body_html:timesheet_grid.mail_template_timesheet_reminder_user
@@ -276,87 +192,6 @@ msgid ""
 "</table>\n"
 "            "
 msgstr ""
-"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: 16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;\"><tr><td align=\"center\">\n"
-"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"padding: 16px; background-color: white; color: #454748; border-collapse:separate;\">\n"
-"<tbody>\n"
-"    <!-- HEADER -->\n"
-"    <tr>\n"
-"        <td align=\"center\" style=\"min-width: 590px;\">\n"
-"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
-"                <tr><td valign=\"middle\">\n"
-"                    <span style=\"font-size: 10px;\">Sus hojas de tiempo</span><br/>\n"
-"                    <span style=\"font-size: 20px; font-weight: bold;\">\n"
-"                        ${object.name}\n"
-"                    </span>\n"
-"                </td><td valign=\"middle\" align=\"right\">\n"
-"                    <img src=\"/logo.png?company=${object.company_id.id}\" style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" alt=\"${object.company_id.name}\"/>\n"
-"                </td></tr>\n"
-"                <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
-"                  <hr width=\"100%\" style=\"background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
-"                </td></tr>\n"
-"            </table>\n"
-"        </td>\n"
-"    </tr>\n"
-"    <!-- CONTENT -->\n"
-"    <tr>\n"
-"        <td align=\"center\" style=\"min-width: 590px;\">\n"
-"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
-"                <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
-"                    <div>\n"
-"                        Hola ${object.name},<br/><br/>\n"
-"                        Este es un recordatorio amistoso para registrar sus horas para el período : ${ctx.get('date_start')} - ${ctx.get('date_stop')}.\n"
-"                        Por el momento, solo registró ${ctx.get('timesheet_hours')} horas de las ${ctx.get('working_hours')} requeridas.<br/>\n"
-"                        % if ctx.get('action_url'):\n"
-"                        <div style=\"margin: 16px 0px 16px 0px;\">\n"
-"                            <a href=\"${ctx.get('action_url')}\" style=\"background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size: 13px;\">Llene su hoja de tiempo</a>\n"
-"                        </div>\n"
-"                        % endif\n"
-"                        <br/>Gracias,<br/>\n"
-"                        % if user.signature\n"
-"                            ${user.signature | safe}\n"
-"                        % endif\n"
-"                    </div>\n"
-"                </td></tr>\n"
-"                <tr><td style=\"text-align:center;\">\n"
-"                    <hr width=\"100%\" style=\"background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
-"                </td></tr>\n"
-"            </table>\n"
-"        </td>\n"
-"    </tr>\n"
-"    <!-- FOOTER -->\n"
-"    <tr>\n"
-"        <td align=\"center\" style=\"min-width: 590px;\">\n"
-"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; font-size: 11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
-"                <tr><td valign=\"middle\" align=\"left\">\n"
-"                    ${object.company_id.name}\n"
-"                </td></tr>\n"
-"                <tr><td valign=\"middle\" align=\"left\" style=\"opacity: 0.7;\">\n"
-"                    ${object.company_id.phone}\n"
-"                    % if object.company_id.email\n"
-"                        | <a href=\"'mailto:%s' % ${object.company_id.email}\" style=\"text-decoration:none; color: #454748;\">${object.company_id.email}</a>\n"
-"                    % endif\n"
-"                    % if object.company_id.website\n"
-"                        | <a href=\"'%s' % ${object.company_id.website}\" style=\"text-decoration:none; color: #454748;\">\n"
-"                            ${object.company_id.website}\n"
-"                        </a>\n"
-"                    % endif\n"
-"                </td></tr>\n"
-"            </table>\n"
-"        </td>\n"
-"    </tr>\n"
-"</tbody>\n"
-"</table>\n"
-"</td></tr>\n"
-"<!-- POWERED BY -->\n"
-"<tr><td align=\"center\" style=\"min-width: 590px;\">\n"
-"    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;\">\n"
-"      <tr><td style=\"text-align: center; font-size: 13px;\">\n"
-"        Hecho con <a target=\"_blank\" href=\"https://www.odoo.com?utm_source=db&amp;utm_medium=mail\" style=\"color: #875A7B;\">Odoo</a>\n"
-"      </td></tr>\n"
-"    </table>\n"
-"</td></tr>\n"
-"</table>\n"
-"            "
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.res_config_settings_view_form
@@ -378,14 +213,10 @@ msgid "Add a Task"
 msgstr "Agregar una Tarea"
 
 #. module: timesheet_grid
-#: code:addons/timesheet_grid/models/analytic.py:0
+#: code:addons/timesheet_grid/models/analytic.py:81
 #, python-format
-msgid ""
-"All selected timesheets for which you are indicated as responsible are "
-"already validated."
-msgstr ""
-"Todos los partes de hora seleccionados para los cuales Ud. es el responsable"
-" ya están validados."
+msgid "All selected timesheets are already validated"
+msgstr "Todos los horarios seleccionados están ya validados"
 
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_account_analytic_line__amount
@@ -404,12 +235,10 @@ msgstr "Cancelar"
 
 #. module: timesheet_grid
 #. openerp-web
-#: code:addons/timesheet_grid/static/src/js/tours/timesheet_grid.js:0
+#: code:addons/timesheet_grid/static/src/js/tour.js:21
 #, python-format
 msgid "Choose a <b>project name</b>. (e.g. name of a customer, or product)"
-msgstr ""
-"Elija un <b>nombre de proyecto</b>. (por ejemplo, nombre de un cliente o "
-"producto)"
+msgstr "<b/>"
 
 #. module: timesheet_grid
 #: model:ir.model,name:timesheet_grid.model_res_company
@@ -441,22 +270,21 @@ msgstr "Fecha hasta la cual el parte de horas del empleado ha sido validado"
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_res_config_settings__reminder_manager_delay
 msgid "Days to Remind Manager"
-msgstr "Días para recordar al gerente"
+msgstr ""
 
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_res_config_settings__reminder_user_delay
 msgid "Days to Remind User"
-msgstr "Días para recordar al usuario"
+msgstr ""
 
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_timesheet_validation__display_name
 #: model:ir.model.fields,field_description:timesheet_grid.field_timesheet_validation_line__display_name
 msgid "Display Name"
-msgstr "Nombre mostrado"
+msgstr "Nombre a mostrar"
 
 #. module: timesheet_grid
 #: model:ir.model,name:timesheet_grid.model_hr_employee
-#: model:ir.model.fields,field_description:timesheet_grid.field_account_analytic_line__employee_id
 #: model:ir.model.fields,field_description:timesheet_grid.field_timesheet_validation_line__employee_id
 msgid "Employee"
 msgstr "Empleado"
@@ -464,7 +292,7 @@ msgstr "Empleado"
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_res_company__timesheet_mail_employee_interval
 msgid "Employee Frequency"
-msgstr "Frecuencia del empleado"
+msgstr ""
 
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_res_company__timesheet_mail_employee_allow
@@ -475,7 +303,7 @@ msgstr "Recordatorio para empleados"
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_res_company__timesheet_mail_employee_delay
 msgid "Employee Reminder Days"
-msgstr "Días para recordar al empleado"
+msgstr ""
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.res_config_settings_view_form
@@ -548,13 +376,13 @@ msgstr "Recordatorio para gerentes"
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_res_company__timesheet_mail_manager_delay
 msgid "Manager Reminder Days"
-msgstr "Días para recordar al gerente"
+msgstr ""
 
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_res_company__timesheet_mail_manager_interval
 #: model:ir.model.fields,field_description:timesheet_grid.field_res_config_settings__reminder_manager_interval
 msgid "Manager Reminder Frequency"
-msgstr "Frecuencia de recordatorio al gerente"
+msgstr ""
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.timesheet_view_grid_by_employee
@@ -571,7 +399,7 @@ msgstr "Mi equipo"
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_res_company__timesheet_mail_employee_nextdate
 msgid "Next scheduled date for employee reminder"
-msgstr "Siguiente fecha programada para recordar al empleado"
+msgstr ""
 
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_res_company__timesheet_mail_manager_nextdate
@@ -584,48 +412,34 @@ msgid "Non Validated"
 msgstr "No Validado"
 
 #. module: timesheet_grid
-#: code:addons/timesheet_grid/models/analytic.py:0
+#: code:addons/timesheet_grid/models/analytic.py:106
 #, python-format
 msgid ""
-"Only a Timesheets Approver or Manager is allowed to create an entry older "
-"than the validation limit."
+"Only a Timesheets Manager is allowed to create an entry older than the "
+"validation limit."
 msgstr ""
-"Solo un aprobador o administrador de partes de horas puede crear una entrada"
-" anterior al límite de validación."
 
 #. module: timesheet_grid
-#: code:addons/timesheet_grid/models/analytic.py:0
+#: code:addons/timesheet_grid/models/analytic.py:121
 #, python-format
-msgid ""
-"Only a Timesheets Approver or Manager is allowed to delete a validated "
-"entry."
+msgid "Only a Timesheets Manager is allowed to delete a validated entry."
 msgstr ""
-"Sólo un autorizador o un responsable puede borrar una entrada ya validada."
 
 #. module: timesheet_grid
-#: code:addons/timesheet_grid/models/analytic.py:0
+#: code:addons/timesheet_grid/models/analytic.py:115
 #, python-format
-msgid ""
-"Only a Timesheets Approver or Manager is allowed to modify a validated "
-"entry."
+msgid "Only a Timesheets Manager is allowed to modify a validated entry."
 msgstr ""
-"Solo una persona que pueda aprobar las hojas de horas o un gerente puede "
-"modificar una entrada que ya esté validada."
-
-#. module: timesheet_grid
-#: model:ir.model,name:timesheet_grid.model_hr_employee_public
-msgid "Public Employee"
-msgstr "Empleado Público"
 
 #. module: timesheet_grid
 #: model:mail.template,subject:timesheet_grid.mail_template_timesheet_reminder_user
 msgid "Reminder to log your timesheets"
-msgstr "Recordatorio de que debe registrar sus hojas de horas"
+msgstr ""
 
 #. module: timesheet_grid
 #: model:mail.template,subject:timesheet_grid.mail_template_timesheet_reminder_manager
 msgid "Reminder to validate your team timesheets"
-msgstr "Recordatorio para validar las hojas de tiempo de su equipo"
+msgstr ""
 
 #. module: timesheet_grid
 #: model:ir.model.fields,help:timesheet_grid.field_account_analytic_line__is_timesheet
@@ -635,17 +449,20 @@ msgstr ""
 
 #. module: timesheet_grid
 #. openerp-web
-#: code:addons/timesheet_grid/static/src/js/tours/timesheet_grid.js:0
+#: code:addons/timesheet_grid/static/src/js/tour.js:35
 #, python-format
 msgid ""
 "Set the number of hours done on this task, for every day of the week. (e.g. "
 "1.5 or 1:30)"
 msgstr ""
-"Establezca el número de horas realizadas en esta tarea, para cada día de la "
-"semana. (por ej., 1.5 o 1:30)"
 
 #. module: timesheet_grid
-#: code:addons/timesheet_grid/models/analytic.py:0
+#: model:ir.model.fields,field_description:timesheet_grid.field_account_analytic_line__task_id
+msgid "Task"
+msgstr "Tarea"
+
+#. module: timesheet_grid
+#: code:addons/timesheet_grid/models/analytic.py:76
 #, python-format
 msgid "There aren't any timesheet to validate"
 msgstr "No hay partes de horas para validar"
@@ -656,18 +473,11 @@ msgid "Time Spent"
 msgstr "Tiempo dedicado"
 
 #. module: timesheet_grid
-#: model:ir.model.fields,field_description:timesheet_grid.field_hr_employee__timesheet_manager_id
-#: model:ir.model.fields,field_description:timesheet_grid.field_hr_employee_public__timesheet_manager_id
-#: model:ir.model.fields,field_description:timesheet_grid.field_res_users__timesheet_manager_id
-msgid "Timesheet"
-msgstr "Parte de horas"
-
-#. module: timesheet_grid
-#: code:addons/timesheet_grid/models/analytic.py:0
-#: code:addons/timesheet_grid/models/analytic.py:0
+#: code:addons/timesheet_grid/models/analytic.py:142
+#: code:addons/timesheet_grid/models/analytic.py:152
 #, python-format
 msgid "Timesheet Adjustment"
-msgstr "Ajuste de la hoja de horas"
+msgstr ""
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.res_config_settings_view_form
@@ -680,14 +490,19 @@ msgid "Timesheet Line"
 msgstr "Línea hoja de servicios"
 
 #. module: timesheet_grid
+#: model:ir.model.fields,field_description:timesheet_grid.field_hr_employee__timesheet_manager_id
+msgid "Timesheet Responsible"
+msgstr "Responsable de partes de horas"
+
+#. module: timesheet_grid
 #: model:ir.model,name:timesheet_grid.model_timesheet_validation
 msgid "Timesheet Validation"
-msgstr "Validación de parte de horas"
+msgstr ""
 
 #. module: timesheet_grid
 #: model:ir.model,name:timesheet_grid.model_timesheet_validation_line
 msgid "Timesheet Validation Line"
-msgstr "Línea de validación del parte de horas"
+msgstr ""
 
 #. module: timesheet_grid
 #: model:ir.actions.server,name:timesheet_grid.timesheet_reminder_user_ir_actions_server
@@ -719,12 +534,10 @@ msgstr "Fecha de validación de partes de horas"
 
 #. module: timesheet_grid
 #. openerp-web
-#: code:addons/timesheet_grid/static/src/js/tours/timesheet_grid.js:0
+#: code:addons/timesheet_grid/static/src/js/tour.js:17
 #, python-format
 msgid "Timesheets are done on tasks, click here to create your first one."
 msgstr ""
-"Los partes de horas se realizan en tareas, haga clic aquí para crear el "
-"primero."
 
 #. module: timesheet_grid
 #: model:ir.ui.menu,name:timesheet_grid.menu_timesheet_grid_validate
@@ -733,41 +546,33 @@ msgstr "A validar"
 
 #. module: timesheet_grid
 #. openerp-web
-#: code:addons/timesheet_grid/static/src/js/tours/timesheet_grid.js:0
+#: code:addons/timesheet_grid/static/src/js/tour.js:13
 #, python-format
 msgid "Track the time spent on your projects. <i>It starts here.</i>"
 msgstr ""
-"Seguimiento del tiempo dedicado a sus proyectos. <i>comienza aquí.</i>"
 
 #. module: timesheet_grid
 #. openerp-web
-#: code:addons/timesheet_grid/static/src/js/tours/timesheet_grid.js:0
+#: code:addons/timesheet_grid/static/src/js/tour.js:28
 #, python-format
 msgid ""
 "Use tasks to track the different type of activities. (e.g. Graphic Design, "
 "Programming, Project Management)"
 msgstr ""
-"Use tareas para supervisar los distintos tipos de actividades (por ej.: "
-"diseño gráfico, programación, gestión de proyectos)"
+"Use tareas para supervisar los distintos tipos de actividades (por ejemplo: "
+"diseño gráfico, programación, gestión de proyectos)."
 
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_res_config_settings__reminder_user_interval
 msgid "User Reminder Frequency"
-msgstr "Frecuencia de recordatorio al usuario"
+msgstr ""
 
 #. module: timesheet_grid
 #: model:ir.model.fields,help:timesheet_grid.field_hr_employee__timesheet_manager_id
-#: model:ir.model.fields,help:timesheet_grid.field_hr_employee_public__timesheet_manager_id
-#: model:ir.model.fields,help:timesheet_grid.field_res_users__timesheet_manager_id
 msgid "User responsible of timesheet validation. Should be Timesheet Manager."
 msgstr ""
 "Usuario responsable de la validación del parte de horas. Debería ser un "
 "gerente de partes de horas."
-
-#. module: timesheet_grid
-#: model:ir.model,name:timesheet_grid.model_res_users
-msgid "Users"
-msgstr "Usuarios"
 
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_timesheet_validation_line__validate
@@ -780,12 +585,6 @@ msgstr "Validar"
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.timesheet_validation_view_form
 msgid "Validate Timesheets"
 msgstr "Validar parte de horas"
-
-#. module: timesheet_grid
-#: code:addons/timesheet_grid/models/analytic.py:0
-#, python-format
-msgid "Validate the timesheets"
-msgstr "Validar las hojas de tiempo"
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.timesheet_validation_view_form
@@ -837,16 +636,16 @@ msgid "Week"
 msgstr "Semana"
 
 #. module: timesheet_grid
-#: model:ir.model.fields.selection,name:timesheet_grid.selection__res_company__timesheet_mail_employee_interval__months
-#: model:ir.model.fields.selection,name:timesheet_grid.selection__res_company__timesheet_mail_manager_interval__months
-msgid "after the end of the month"
-msgstr "después de fin del mes"
+#: selection:res.company,timesheet_mail_employee_interval:0
+#: selection:res.company,timesheet_mail_manager_interval:0
+msgid "after end of month"
+msgstr "después de fin de mes"
 
 #. module: timesheet_grid
-#: model:ir.model.fields.selection,name:timesheet_grid.selection__res_company__timesheet_mail_employee_interval__weeks
-#: model:ir.model.fields.selection,name:timesheet_grid.selection__res_company__timesheet_mail_manager_interval__weeks
-msgid "after the end of the week"
-msgstr "después del fin de la semana"
+#: selection:res.company,timesheet_mail_employee_interval:0
+#: selection:res.company,timesheet_mail_manager_interval:0
+msgid "after end of week"
+msgstr "después del final de semana"
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.res_config_settings_view_form

@@ -7,14 +7,15 @@ from odoo.tools.float_utils import float_compare
 # Available values for the release_to_pay field.
 _release_to_pay_status_list = [('yes', 'Yes'), ('no', 'No'), ('exception', 'Exception')]
 
-class AccountMove(models.Model):
-    _inherit = 'account.move'
+class AccountInvoice(models.Model):
+    _inherit = 'account.invoice'
 
     release_to_pay = fields.Selection(
         _release_to_pay_status_list,
         compute='_compute_release_to_pay',
         copy=False,
         store=True,
+        string='Should be paid',
         help="This field can take the following values :\n"
              "  * Yes: you should pay the bill, you have received the products\n"
              "  * No, you should not pay the bill, you have not received the products\n"
@@ -22,27 +23,18 @@ class AccountMove(models.Model):
              "This status is defined automatically, but you can force it by ticking the 'Force Status' checkbox.")
     release_to_pay_manual = fields.Selection(
         _release_to_pay_status_list,
-        string='Should Be Paid',
+        string='Should be paid Manual',
         help="  * Yes: you should pay the bill, you have received the products\n"
              "  * No, you should not pay the bill, you have not received the products\n"
-             "  * Exception, there is a difference between received and billed quantities\n"
-             "This status is defined automatically, but you can force it by ticking the 'Force Status' checkbox.")
+             "  * Exception, there is a difference between received and billed quantities.")
     force_release_to_pay = fields.Boolean(
-        string="Force Status",
-        help="Indicates whether the 'Should Be Paid' status is defined automatically or manually.")
+        string="Force status",
+        help="Indicates whether the 'Can be paid' status is defined automatically or manually.")
 
-    @api.depends('invoice_line_ids.can_be_paid', 'force_release_to_pay', 'invoice_payment_state')
+    @api.depends('invoice_line_ids.can_be_paid', 'release_to_pay_manual', 'force_release_to_pay')
     def _compute_release_to_pay(self):
-        records = self
-        if self.env.context.get('module') == 'account_3way_match':
-            # on module installation we set 'no' for all paid bills and other non relevant records at once
-            records = records.filtered(lambda r: r.invoice_payment_state != 'paid' and r.type in ('in_invoice', 'in_refund'))
-            (self - records).release_to_pay = 'no'
-        for invoice in records:
-            if invoice.invoice_payment_state == 'paid':
-                # no need to pay, if it's already paid
-                invoice.release_to_pay = 'no'
-            elif invoice.force_release_to_pay:
+        for invoice in self:
+            if invoice.force_release_to_pay and invoice.release_to_pay_manual:
                 #we must use the manual value contained in release_to_pay_manual
                 invoice.release_to_pay = invoice.release_to_pay_manual
             else:
@@ -64,16 +56,11 @@ class AccountMove(models.Model):
                     #Otherwise, its status will be the one all its lines share.
 
                 #'result' can be None if the bill was entirely empty.
-                invoice.release_to_pay = invoice.release_to_pay_manual = result or 'no'
-
-    @api.onchange('release_to_pay_manual')
-    def _onchange_release_to_pay_manual(self):
-        if self.release_to_pay and self.release_to_pay_manual != self.release_to_pay:
-            self.force_release_to_pay = True
+                invoice.release_to_pay = result or 'no'
 
 
-class AccountMoveLine(models.Model):
-    _inherit = 'account.move.line'
+class AccountInvoiceLine(models.Model):
+    _inherit = 'account.invoice.line'
 
     @api.depends('purchase_line_id.qty_received', 'purchase_line_id.qty_invoiced', 'purchase_line_id.product_qty')
     def _can_be_paid(self):
@@ -125,6 +112,7 @@ class AccountMoveLine(models.Model):
             self.can_be_paid = 'yes'
         else:
             self.can_be_paid = 'exception'
+
 
     def _can_be_paid_received_qty(self, invoiced_qty, received_qty, ordered_qty, precision):
         """

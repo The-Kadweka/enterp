@@ -237,17 +237,8 @@ models.Order = models.Order.extend({
                 continue;
             } else if(reward.reward_type === 'gift' && reward.point_cost > this.get_spendable_points()) {
                 continue;
-            } else if(reward.reward_type === 'resale') {
-                if (this.get_spendable_points() <= 0) {
-                    continue;
-                }
-                var reward_price = this.pos.db.get_product_by_id(reward.point_product_id[0]).get_price(this.pricelist, 1);
-                if (reward_price * this.pos.loyalty.rounding > this.get_total_with_tax()) {
-                    // If the total price of the lowest possible reward point is greater than
-                    // the order's total cost, it will result to negative order cost so do not add
-                    // to available rewards.
-                    continue;
-                }
+            } else if(reward.reward_type === 'resale' && this.get_spendable_points() <= 0) {
+                continue;
             }
             rewards.push(reward);
         }
@@ -314,29 +305,7 @@ models.Order = models.Order.extend({
 
             product_price = product.get_price(this.pricelist, 1);
             if ( round_pr( spendable * product_price, crounding ) > order_total ) {
-                /**
-                 * round_pr returns the rounded value based on the precision provided.
-                 *  e.g. round_pr(6.3, 0.5) -> 6.5
-                 *
-                 * This, however, is not the behavior we want here. We want to round down
-                 * to the nearest multiple of the given precision. So in the above example,
-                 * we want to round down to 6.0.
-                 *
-                 * The reason for the round down is to prevent the reward price to exceed
-                 * the total order cost.
-                 *  e.g.
-                 *      order_total = 90
-                 *      product_price = 100 <- the reward per point
-                 *      lrounding = 0.5 <- meaning, it is allowed to spend 0.5 point at minimum
-                 *
-                 * - With normal rounding (using round_pr), `spendable` will result to
-                 *  round_pr(90 / 100, 0.5) -> 1.0. And if this reward is applied to the order,
-                 *  the order_total will become -10 (90 - 100 * 1.0) and we want to avoid
-                 *  negative order cost.
-                 * - With this implementation, `spendable` will be calculated as 0.5 resulting
-                 *  to order_total of 40 (90 - 100 * 0.5).
-                 */
-                spendable = Math.floor(order_total / product_price / lrounding) * lrounding;
+                spendable = round_pr(order_total / product_price, lrounding);
             }
 
             if ( spendable < 0.00001 ) {

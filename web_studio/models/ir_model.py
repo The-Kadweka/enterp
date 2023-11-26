@@ -123,41 +123,6 @@ class IrModelField(models.Model):
     _name = 'ir.model.fields'
     _inherit = ['studio.mixin', 'ir.model.fields']
 
-    def name_get(self):
-        if self.env.context.get('studio'):
-            return [(field.id, "%s (%s)" % (field.field_description, field.model_id.name)) for field in self]
-        return super(IrModelField, self).name_get()
-
-
-    @api.model
-    def _get_next_relation(self, model_name, comodel_name):
-        """Prevent using the same m2m relation table when adding the same field.
-
-        If the same m2m field was already added on the model, the user is in fact
-        trying to add another relation - not the same one. We need to create another
-        relation table.
-        """
-        result = super()._custom_many2many_names(model_name, comodel_name)[0]
-        # check if there's already a m2m field from model_name to comodel_name;
-        # if yes, check the relation table and add a sequence to it - we want to
-        # be able to mirror these fields on the other side in the same order
-        base = result
-        attempt = 0
-        existing_m2m = self.search([
-            ('model', '=', model_name),
-            ('relation', '=', comodel_name),
-            ('relation_table', '=', result)
-        ])
-        while existing_m2m:
-            attempt += 1
-            result = '%s_%s' % (base, attempt)
-            existing_m2m = self.search([
-                ('model', '=', model_name),
-                ('relation', '=', comodel_name),
-                ('relation_table', '=', result)
-            ])
-        return result
-
 
 class IrModelAccess(models.Model):
     _name = 'ir.model.access'

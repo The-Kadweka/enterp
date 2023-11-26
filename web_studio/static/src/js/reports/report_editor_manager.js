@@ -17,9 +17,7 @@ var _t = core._t;
 var ReportEditorManager = AbstractEditorManager.extend({
     className: AbstractEditorManager.prototype.className + ' o_web_studio_report_editor_manager',
     custom_events: _.extend({}, AbstractEditorManager.prototype.custom_events, {
-        editor_clicked: '_onEditorClick',
         hover_editor: '_onHighlightPreview',
-        node_expanded: '_onNodeExpanded',
         drop_component: '_onDropComponent',
         begin_drag_component: '_onBeginDragComponent',
         element_removed: '_onElementRemoved',
@@ -33,7 +31,6 @@ var ReportEditorManager = AbstractEditorManager.extend({
     /**
      * @override
      * @param {Object} params
-     * @param {Object} params.env - environment (model and ids)
      * @param {Object} params.models
      * @param {Object} params.report
      * @param {Object} params.reportHTML
@@ -49,7 +46,6 @@ var ReportEditorManager = AbstractEditorManager.extend({
 
         this.view_id = params.reportMainViewID;
 
-        this.env = params.env;
         this.models = params.models;
         this.report = params.report;
         this.reportHTML = params.reportHTML;
@@ -60,13 +56,7 @@ var ReportEditorManager = AbstractEditorManager.extend({
         this.paperFormat = params.paperFormat;
         this.widgetsOptions = params.widgetsOptions;
 
-        this.editorIframeResolved = false;
-        var self = this;
-        this.editorIframeDef = new Promise(function (resolve, reject) {
-            self._resolveEditorIframeDef = resolve;
-        }).then(function () {
-            self.editorIframeResolved = true;
-        });
+        this.editorIframeDef = $.Deferred();
     },
     /**
      * @override
@@ -112,7 +102,7 @@ var ReportEditorManager = AbstractEditorManager.extend({
             var msg = '<pre>' + error + '</pre>';
             this.do_warn(_t("Error when compiling AST"), msg, true);
             return this._undo(opID, true).then(function () {
-                return Promise.reject();
+                return $.Deferred().reject();
             });
         }
 
@@ -185,6 +175,11 @@ var ReportEditorManager = AbstractEditorManager.extend({
                 view_arch: view_arch,
                 context: session.user_context,
             },
+        }).done(function (result) {
+            if (result.report_html.error) {
+                return $.Deferred().reject();
+            }
+            //self._applyChangeHandling(result);
         });
     },
     /**
@@ -206,7 +201,7 @@ var ReportEditorManager = AbstractEditorManager.extend({
     },
     /**
      * @private
-     * @returns {Promise<Object>}
+     * @returns {Deferred<Object>}
      */
     _getReportViews: function () {
         return this._rpc({
@@ -228,7 +223,7 @@ var ReportEditorManager = AbstractEditorManager.extend({
             paperFormat: this.paperFormat,
             reportHTML: this.reportHTML,
         });
-        return Promise.resolve(this.view);
+        return $.when(this.view);
     },
     /**
      * @override
@@ -243,7 +238,6 @@ var ReportEditorManager = AbstractEditorManager.extend({
             models: this.models,
             state: state,
             previousState: previousState,
-            paperFormat: this.paperFormat,
         });
     },
     /**
@@ -370,12 +364,6 @@ var ReportEditorManager = AbstractEditorManager.extend({
     },
     /**
      * @private
-     */
-    _onEditorClick: function () {
-        this.view.unselectedElements();
-    },
-    /**
-     * @private
      * @param {OdooEvent} ev
      */
     _onElementRemoved: function (ev) {
@@ -411,16 +399,9 @@ var ReportEditorManager = AbstractEditorManager.extend({
     },
     /**
      * @private
-     * @param {OdooEvent} ev
-     */
-    _onNodeExpanded: function (ev) {
-        this.view.selectNode(ev.data.node);
-    },
-    /**
-     * @private
      */
     _onIframeReady: function () {
-        this._resolveEditorIframeDef();
+        this.editorIframeDef.resolve();
     },
     /**
      * @override
@@ -498,9 +479,9 @@ var ReportEditorManager = AbstractEditorManager.extend({
                 console.warn("the key 'node' should be present");
             }
         }
-        Promise.resolve(def).then(function () {
+        $.when(def).then(function () {
             return self._do(operation);
-        }).guardedCatch(ev.data.fail);
+        }).fail(ev.data.fail);
     },
 });
 

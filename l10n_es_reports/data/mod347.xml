@@ -12,6 +12,7 @@
             <field name="unfold_all_filter" eval="True"/>
             <field name="show_journal_filter" eval="False"/>
             <field name="parent_id" ref="spanish_reports_menu"/>
+            <field name="cash_basis" eval="None"/>
         </record>
 
         <record id="mod_347_summary_title" model="account.financial.html.report.line">
@@ -27,8 +28,8 @@
             <field name="code">aeat_mod_347_statistics_operations_count</field>
             <field name="parent_id" ref="mod_347_summary_title"/>
             <field name="domain" eval="[
-                ('move_id.l10n_es_reports_mod349_available', '=', False),
-                ('move_id.l10n_es_reports_mod347_invoice_type', '!=', None)
+                ('invoice_id.l10n_es_reports_mod349_available', '=', False),
+                ('invoice_id.l10n_es_reports_mod347_invoice_type', '!=', None)
             ]"/>
             <field name="formulas">balance = count_rows</field>
             <field name="groupby">partner_id</field>
@@ -63,9 +64,9 @@
             <field name="code">aeat_mod_347_operations_insurance_bought</field>
             <field name="parent_id" ref="mod_347_operations_insurance_title"/>
             <field name="domain" eval="[
-                ('move_id.l10n_es_reports_mod349_available', '=', False),
-                ('move_id.l10n_es_reports_mod347_invoice_type','=','insurance'),
-                ('move_id.type','in',['in_invoice','in_refund']),
+                ('invoice_id.l10n_es_reports_mod349_available', '=', False),
+                ('invoice_id.l10n_es_reports_mod347_invoice_type','=','insurance'),
+                ('invoice_id.type','in',['in_invoice','in_refund']),
                 ('account_id.user_type_id','in',[ref('account.data_account_type_payable'), ref('account.data_account_type_receivable')]),
             ]"/>
             <field name="show_domain">always</field>
@@ -91,9 +92,9 @@
             <field name="code">aeat_mod_347_operations_regular_bought</field>
             <field name="parent_id" ref="mod_347_operations_regular_title"/>
             <field name="domain" eval="[
-                ('move_id.l10n_es_reports_mod349_available', '=', False),
-                ('move_id.l10n_es_reports_mod347_invoice_type','=','regular'),
-                ('move_id.type','in',['in_invoice','in_refund']),
+                ('invoice_id.l10n_es_reports_mod349_available', '=', False),
+                ('invoice_id.l10n_es_reports_mod347_invoice_type','=','regular'),
+                ('invoice_id.type','in',['in_invoice','in_refund']),
                 ('account_id.user_type_id','in',[ref('account.data_account_type_payable'), ref('account.data_account_type_receivable')]),
             ]"/>
             <field name="show_domain">always</field>
@@ -111,9 +112,9 @@
             <field name="code">aeat_mod_347_operations_regular_sold</field>
             <field name="parent_id" ref="mod_347_operations_regular_title"/>
             <field name="domain" eval="[
-                ('move_id.l10n_es_reports_mod349_available', '=', False),
-                ('move_id.l10n_es_reports_mod347_invoice_type','=','regular'),
-                ('move_id.type','in',['out_invoice','out_refund']),
+                ('invoice_id.l10n_es_reports_mod349_available', '=', False),
+                ('invoice_id.l10n_es_reports_mod347_invoice_type','=','regular'),
+                ('invoice_id.type','in',['out_invoice','out_refund']),
                 ('account_id.user_type_id','in',[ref('account.data_account_type_payable'), ref('account.data_account_type_receivable')]),
             ]"/>
             <field name="show_domain">always</field>

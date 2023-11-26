@@ -16,7 +16,6 @@ var HomeMenu = Widget.extend({
         'input input.o_menu_search_input': '_onMenuSearchInput',
         'compositionstart': '_onCompositionStart',
         'compositionend': '_onCompositionEnd',
-        'blur input.o_menu_search_input': '_onInputBlur',
     },
     /**
      * @override
@@ -44,7 +43,6 @@ var HomeMenu = Widget.extend({
         core.bus.on("keydown", this, this._onKeydown);
         this._state = this._getInitialState();
         this.$input.val('');
-        this.$input.focus();
         this._render();
     },
     /**
@@ -166,6 +164,9 @@ var HomeMenu = Widget.extend({
         this.$mainContent.html(QWeb.render('HomeMenu.Content', { widget: this }));
         var $focused = this.$mainContent.find('.o_focused');
         if ($focused.length && !config.device.isMobile) {
+            if (!this._state.isComposing) {
+                $focused.focus();
+            }
             this.$el.scrollTo($focused, {offset: {top:-0.5*this.$el.height()}});
         }
 
@@ -258,7 +259,7 @@ var HomeMenu = Widget.extend({
                 ev.preventDefault();
                 break;
             case $.ui.keyCode.RIGHT:
-                if (!elemFocused && $input.is(':focus') && $input[0].selectionEnd < $input.val().length) {
+                if ($input.is(':focus') && $input[0].selectionEnd < $input.val().length) {
                     return;
                 }
                 this._update({focus: elemFocused ? 1 : 0});
@@ -277,7 +278,7 @@ var HomeMenu = Widget.extend({
                 ev.preventDefault();
                 break;
             case $.ui.keyCode.LEFT:
-                if (!elemFocused && $input.is(':focus') && $input[0].selectionStart > 0) {
+                if ($input.is(':focus') && $input[0].selectionStart > 0) {
                     return;
                 }
                 this._update({focus: elemFocused ? -1 : 0});
@@ -336,19 +337,6 @@ var HomeMenu = Widget.extend({
     },
     /**
      * @private
-     * @param {Event} ev
-     */
-    _onInputBlur: function(ev) {
-        // if we blur search input to focus on body (eg. click on any
-        // non-interactive element) restore focus to avoid IME input issue
-        setTimeout(() => {
-            if (document.activeElement === document.body) {
-                this.$input.focus();
-            }
-        }, 0);
-    },
-    /**
-     * @private
      * @param {MouseEvent} ev
      */
     _onMenuitemClick: function (ev) {
@@ -377,7 +365,6 @@ return HomeMenu;
 odoo.define('web_enterprise.ExpirationPanel', function (require) {
 "use strict";
 
-var ajax = require('web.ajax');
 var core = require('web.core');
 var session = require('web.session');
 var utils = require('web.utils');
@@ -394,7 +381,6 @@ HomeMenu.include({
         'click #confirm_enterprise_code': '_onEnterpriseCodeSubmit',
         'click .oe_instance_hide_panel': '_onEnterpriseHidePanel',
         'click .check_enterprise_status': '_onEnterpriseCheckStatus',
-        'click .oe_contract_send_mail': '_onEnterpriseSendUnlinkEmail',
     }),
     /**
      * @override
@@ -533,29 +519,6 @@ HomeMenu.include({
                 }
             });
     },
-    _onEnterpriseSendUnlinkEmail: function(ev) {
-        ev.preventDefault();
-        this._rpc({
-            model: 'ir.config_parameter',
-            method: 'get_param',
-            args: ['database.already_linked_send_mail_url']
-        })
-        .then(function(unlink_mail_send_url) {
-            $('.oe_contract_sending_mail').show();
-            $('.oe_contract_sending_mail_success, .oe_contract_sending_mail_fail').hide();
-            ajax.jsonRpc(unlink_mail_send_url, 'call', {}).then(function (result) {
-                if(result.result) {
-                    $('.oe_contract_sending_mail').hide();
-                    $('.oe_contract_sending_mail_success').show();
-                }
-                else {
-                    $('.oe_contract_sending_mail').hide();
-                    $('.oe_contract_sending_mail_fail_reason').text(result.reason);
-                    $('.oe_contract_sending_mail_fail').show();
-                }
-            });
-        });
-    },
     /**
      * Save the registration code then triggers a ping to submit it
      *
@@ -571,8 +534,8 @@ HomeMenu.include({
             $c.attr('placeholder', $c.attr('title')); // raise attention to input
             return;
         }
-        Promise.all(
-            [this._rpc({
+        $.when(
+            this._rpc({
                     model: 'ir.config_parameter',
                     method: 'get_param',
                     args: ['database.expiration_date']
@@ -581,9 +544,8 @@ HomeMenu.include({
                     model: 'ir.config_parameter',
                     method: 'set_param',
                     args: ['database.enterprise_code', enterpriseCode]
-                })]
-        ).then(function (results) {
-            var oldDate = results[0];
+                })
+        ).then(function (oldDate) {
             utils.set_cookie('oe_instance_hide_panel', '', -1);
             self._rpc({
                     model: 'publisher_warranty.contract',
@@ -592,8 +554,8 @@ HomeMenu.include({
                 })
                 .then(function () {
                     $.unblockUI();
-                    Promise.all(
-                        [self._rpc({
+                    $.when(
+                        self._rpc({
                                 model: 'ir.config_parameter',
                                 method: 'get_param',
                                 args: ['database.expiration_date']
@@ -602,45 +564,16 @@ HomeMenu.include({
                                 model: 'ir.config_parameter',
                                 method: 'get_param',
                                 args: ['database.expiration_reason']
-                            }),
-                        self._rpc({
-                                model: 'ir.config_parameter',
-                                method: 'get_param',
-                                args: ['database.already_linked_subscription_url']
-                            }),
-                        self._rpc({
-                                model: 'ir.config_parameter',
-                                method: 'get_param',
-                                args: ['database.already_linked_email']
-                            })]
-                    ).then(function (results) {
-                        var dbexpirationDate = results[0];
-                        var dbalready_linked_subscription_url = results[2];
-                        var dbalready_linked_email = results[3];
+                            })
+                    ).then(function (dbexpirationDate) {
                         $('.oe_instance_register').hide();
-                        $('.oe_contract_email_block').hide();
-                        $('.oe_contract_no_email_block').hide();
                         $('.database_expiration_panel .alert')
                                 .removeClass('alert-info alert-warning alert-danger');
-                        if (dbexpirationDate !== oldDate && !dbalready_linked_subscription_url) {
+                        if (dbexpirationDate !== oldDate) {
                             $('.oe_instance_hide_panel').show();
                             $('.database_expiration_panel .alert').addClass('alert-success');
                             $('.valid_date').html(moment(dbexpirationDate).format('LL'));
                             $('.oe_instance_success').show();
-                        } else if (dbalready_linked_subscription_url) {
-                            $('.database_expiration_panel .alert').addClass('alert-danger');
-                            $('.oe_database_already_linked, .oe_instance_register_form').show();
-                            $('.oe_contract_sending_mail, .oe_contract_sending_mail_success, .oe_contract_sending_mail_fail').hide();
-                            $('.oe_contract_link')
-                                .attr('href', dbalready_linked_subscription_url)
-                                .text(dbalready_linked_subscription_url);
-                            if (dbalready_linked_email.length > 0) {
-                                $('.oe_contract_email_block').show();
-                                $('.oe_contract_email').text(dbalready_linked_email);
-                            } else {
-                                $('.oe_contract_no_email_block').show();
-                            }
-                            $('#confirm_enterprise_code').html('Retry');
                         } else {
                             $('.database_expiration_panel .alert').addClass('alert-danger');
                             $('.oe_instance_error, .oe_instance_register_form').show();
@@ -683,8 +616,8 @@ HomeMenu.include({
                         args: [[]],
                     })
                     .then(function () {
-                        Promise.all(
-                            [self._rpc({
+                        $.when(
+                            self._rpc({
                                     model: 'ir.config_parameter',
                                     method: 'get_param',
                                     args: ['database.expiration_date']
@@ -698,11 +631,8 @@ HomeMenu.include({
                                     model: 'ir.config_parameter',
                                     method: 'get_param',
                                     args: ['database.enterprise_code']
-                                })]
-                        ).then(function (results) {
-                            var newDate = results[0];
-                            var dbexpirationDate = results[1];
-                            var enterpriseCode = results[2];
+                                })
+                        ).then(function (newDate, dbexpirationReason, enterpriseCode) {
                             var mtNewDate = new moment(newDate);
                             if (newDate !== oldDate && mtNewDate > new moment()) {
                                 $.unblockUI();

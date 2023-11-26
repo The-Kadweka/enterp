@@ -1,125 +1,141 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from contextlib import contextmanager
 
+
+from dateutil.relativedelta import relativedelta
+from datetime import datetime, timedelta, date, time
+
+from .common import HelpdeskTransactionCase
 from odoo import fields
-from odoo.tests.common import SavepointCase
 
 
-class HelpdeskCommon(SavepointCase):
+class TestHelpdeskSLA(HelpdeskTransactionCase):
+    """ Test used to check that SLAs function as expected.
+        - test_sla_base: tests the SLA gets applied and fails when it should
+        - test_sla_priority: tests the correct SLA gets applied according to ticket priorities
+        - test_sla_type: tests the correct SLA gets applied according to ticket types
+    """
 
-    @classmethod
-    def setUpClass(cls):
-        super(HelpdeskCommon, cls).setUpClass()
-
-        # we create a helpdesk user and a manager
-        Users = cls.env['res.users'].with_context(tracking_disable=True)
-        cls.main_company_id = cls.env.ref('base.main_company').id
-        cls.helpdesk_manager = Users.create({
-            'company_id': cls.main_company_id,
-            'name': 'Helpdesk Manager',
-            'login': 'hm',
-            'email': 'hm@example.com',
-            'groups_id': [(6, 0, [cls.env.ref('helpdesk.group_helpdesk_manager').id])]
-        })
-        cls.helpdesk_user = Users.create({
-            'company_id': cls.main_company_id,
-            'name': 'Helpdesk User',
-            'login': 'hu',
-            'email': 'hu@example.com',
-            'groups_id': [(6, 0, [cls.env.ref('helpdesk.group_helpdesk_user').id])]
-        })
-        # the manager defines a team for our tests (the .sudo() at the end is to avoid potential uid problems)
-        cls.test_team = cls.env['helpdesk.team'].with_user(cls.helpdesk_manager).create({
-            'name': 'Test Team',
-            'use_sla': True
-        }).sudo()
-        # He then defines its stages
-        stage_as_manager = cls.env['helpdesk.stage'].with_user(cls.helpdesk_manager)
-        cls.stage_new = stage_as_manager.create({
-            'name': 'New',
-            'sequence': 10,
-            'team_ids': [(4, cls.test_team.id, 0)],
-            'is_close': False,
-        })
-        cls.stage_progress = stage_as_manager.create({
-            'name': 'In Progress',
-            'sequence': 20,
-            'team_ids': [(4, cls.test_team.id, 0)],
-            'is_close': False,
-        })
-        cls.stage_done = stage_as_manager.create({
-            'name': 'Done',
-            'sequence': 30,
-            'team_ids': [(4, cls.test_team.id, 0)],
-            'is_close': True,
-        })
-        cls.stage_cancel = stage_as_manager.create({
-            'name': 'Cancelled',
-            'sequence': 40,
-            'team_ids': [(4, cls.test_team.id, 0)],
-            'is_close': True,
-        })
-
-        cls.sla = cls.env['helpdesk.sla'].create({
-            'name': 'SLA',
-            'team_id': cls.test_team.id,
-            'time_days': 1,
-            'time_hours': 24,
-            'stage_id': cls.stage_progress.id,
-        })
-        # He also creates a ticket types for Question and Issue
-        cls.type_question = cls.env['helpdesk.ticket.type'].with_user(cls.helpdesk_manager).create({
-            'name': 'Question_test',
-        }).sudo()
-        cls.type_issue = cls.env['helpdesk.ticket.type'].with_user(cls.helpdesk_manager).create({
-            'name': 'Issue_test',
-        }).sudo()
-
-    def _utils_set_create_date(self, records, date_str):
-        """ This method is a hack in order to be able to define/redefine the create_date
-            of the any recordset. This is done in SQL because ORM does not allow to write
-            onto the create_date field.
-            :param records: recordset of any odoo models
-        """
-        query = """
-            UPDATE %s
-            SET create_date = %%s
-            WHERE id IN %%s
-        """ % (records._table,)
-        self.env.cr.execute(query, (date_str, tuple(records.ids)))
-
-        records.invalidate_cache()
-
-    @contextmanager
-    def _ticket_patch_now(self, datetime_str):
-        datetime_now_old = getattr(fields.Datetime, 'now')
-        datetime_today_old = getattr(fields.Datetime, 'today')
-
-        def new_now():
-            return fields.Datetime.from_string(datetime_str)
-
-        def new_today():
-            return fields.Datetime.from_string(datetime_str).replace(hour=0, minute=0, second=0)
-
-        try:
-            setattr(fields.Datetime, 'now', new_now)
-            setattr(fields.Datetime, 'today', new_today)
-
-            yield
-        finally:
-            # back
-            setattr(fields.Datetime, 'now', datetime_now_old)
-            setattr(fields.Datetime, 'today', datetime_today_old)
-
-    def create_ticket(self, *arg, create_date=None, **kwargs):
-        default_values = {
-            'name': "Help me",
+    def setUp(self):
+        super(TestHelpdeskSLA, self).setUp()
+        self.Sla = self.env['helpdesk.sla']
+        # the manager enables our test team to use SLA's
+        self.test_team.sudo(self.helpdesk_manager.id).write({'use_sla': True})
+        # we check the associated group has correctly been applied to all users
+        self.assertTrue(self.helpdesk_user.user_has_groups('helpdesk.group_use_sla'), "SLA group not applied to user after applying it to team.")
+        # the manager then creates a SLA for our test team, to be applied to all its tickets regardless of type or priority
+        self.test_sla = self.Sla.sudo(self.helpdesk_manager.id).create({
+            'name': 'A day, an hour and a minute on all Tickets',
             'team_id': self.test_team.id,
-            'stage_id': self.stage_new.id,
-        }
-        values = dict(default_values, **kwargs)
-        ticket = self.env['helpdesk.ticket'].create(values)
-        if create_date:
-            self._utils_set_create_date(ticket, create_date)
-        return ticket
+            'stage_id': self.stage_done.id,
+            'time_days': 1,
+            'time_hours': 1,
+        })
+
+    def test_sla_base(self):
+        # helpdesk user create a ticket
+        ticket_creation_date = '2016-06-24 13:08:07'
+        # counting from monday 1 day+ 1hour based on ticket creation time
+        ticket_expected_deadline = '2016-06-27 14:08:07'
+
+        ticket1 = self.env['helpdesk.ticket'].sudo(self.helpdesk_user.id).create({
+            'name': 'test ticket 1',
+            'team_id': self.test_team.id,
+        })
+        # we check the SLA is applied
+        self.assertTrue(ticket1.sla_active and ticket1.sla_id == self.test_sla, "SLA didn't get associated to ticket.")
+        # we rewind its creation date of more than the SLA time (we have to bypass the ORM as it doesn't let you write on create_date)
+        ticket1._cr.execute(
+            "UPDATE helpdesk_ticket set create_date=%s where id=%s",
+            ["'" + ticket_creation_date + "'", ticket1.id])
+        # invalidate the cache and manually run the compute as our cr.execute() bypassed the ORM
+        ticket1.invalidate_cache()
+        ticket1.sla_id = False  # the deadline will only be computed if the sla actually changes
+        ticket1._compute_sla()
+        ticket1.sla_id = self.test_sla
+        ticket1._compute_sla()
+        # helpdesk user closes the ticket
+        ticket1.write({'stage_id': self.stage_done.id})
+        # we verify the SLA is failed
+        self.assertFalse(ticket1.sla_active)
+        self.assertTrue(ticket1.sla_fail)
+        self.assertEqual(str(ticket1.deadline), ticket_expected_deadline)
+
+        # helpdesk user creates a second ticket and closes it without SLA fail
+        ticket2 = self.env['helpdesk.ticket'].sudo(self.helpdesk_user.id).create({
+            'name': 'test ticket 2',
+            'team_id': self.test_team.id,
+        })
+        # helpdesk user closes the ticket
+        ticket2.write({'stage_id': self.stage_done.id})
+        # we check the sla didn't fail
+        self.assertFalse(ticket2.sla_active)
+        self.assertFalse(ticket2.sla_fail)
+
+    def test_sla_priority(self):
+        # the manager creates SLAs for ticket priorities
+        self.test_sla_high = self.Sla.sudo(self.helpdesk_manager.id).create({
+            'name': '20 hours on High Priority Tickets',
+            'team_id': self.test_team.id,
+            'stage_id': self.stage_done.id,
+            'priority': '2',
+            'time_hours': 20,
+        })
+        self.test_sla_urgent = self.Sla.sudo(self.helpdesk_manager.id).create({
+            'name': '12 hours on Urgent Tickets',
+            'team_id': self.test_team.id,
+            'stage_id': self.stage_done.id,
+            'priority': '3',
+            'time_hours': 12,
+        })
+        # helpdesk user creates a ticket
+        new_ticket = self.env['helpdesk.ticket'].sudo(self.helpdesk_user.id).create({
+            'name': 'New Ticket',
+            'team_id': self.test_team.id,
+        })
+        # we check the correct SLA is applied
+        self.assertTrue(new_ticket.sla_id == self.test_sla, "Incorrect SLA associated with ticket.")
+        # helpdesk user changes the priority of the ticket to high
+        new_ticket.write({'priority': '2'})
+        # we check the correct SLA is applied
+        self.assertTrue(new_ticket.sla_id == self.test_sla_high, "Incorrect SLA associated with ticket.")
+        # helpdesk user changes the priority of the ticket to urgent
+        new_ticket.write({'priority': '3'})
+        # we check the correct SLA is applied
+        self.assertTrue(new_ticket.sla_id == self.test_sla_urgent, "Incorrect SLA associated with ticket.")
+
+    def test_sla_type(self):
+        # the manager creates SLAs for ticket types
+        self.test_sla_question = self.Sla.sudo(self.helpdesk_manager.id).create({
+            'name': '12 hours on Question Tickets',
+            'team_id': self.test_team.id,
+            'stage_id': self.stage_done.id,
+            'ticket_type_id': self.type_question.id,
+            'time_hours': 12,
+        })
+        self.test_sla_issue = self.Sla.sudo(self.helpdesk_manager.id).create({
+            'name': '20 hours on Issue Tickets',
+            'team_id': self.test_team.id,
+            'stage_id': self.stage_done.id,
+            'ticket_type_id': self.type_issue.id,
+            'time_hours': 20,
+        })
+        # helpdesk user creates a ticket
+        new_ticket = self.env['helpdesk.ticket'].sudo(self.helpdesk_user.id).create({
+            'name': 'Undefined Ticket',
+            'team_id': self.test_team.id,
+        })
+        # we check the correct SLA is applied
+        self.assertTrue(new_ticket.sla_id == self.test_sla, "Incorrect SLA associated with ticket.")
+        # helpdesk user changes the ticket type and we check the correct SLA is applied
+        new_ticket.write({'name': 'Question Ticket', 'ticket_type_id': self.type_question.id})
+        self.assertTrue(new_ticket.sla_id == self.test_sla_question, "Incorrect SLA associated with ticket.")
+
+        # helpdesk user creates an issue ticket
+        issue_ticket = self.env['helpdesk.ticket'].sudo(self.helpdesk_user.id).create({
+            'name': 'Issue',
+            'team_id': self.test_team.id,
+            'ticket_type_id': self.type_issue.id,
+        })
+        # we check the correct sla is applied
+        self.assertTrue(issue_ticket.sla_id == self.test_sla_issue, "Incorrect SLA associated with ticket.")

@@ -21,22 +21,17 @@ class TestCaseDocumentsBridgeSign(TransactionCase):
             'name': 'folder A - A',
             'parent_folder_id': self.folder_a.id,
         })
-        self.document_txt = self.env['documents.document'].create({
+        self.attachment_txt = self.env['ir.attachment'].create({
             'datas': TEXT,
-            'name': 'file.txt',
+            'name': 'Test mimetype txt',
+            'datas_fname': 'file.txt',
             'mimetype': 'text/plain',
             'folder_id': self.folder_a_a.id,
         })
         self.workflow_rule_template = self.env['documents.workflow.rule'].create({
             'domain_folder_id': self.folder_a.id,
             'name': 'workflow rule create template on f_a',
-            'create_model': 'sign.template.new',
-        })
-
-        self.workflow_rule_direct_sign = self.env['documents.workflow.rule'].create({
-            'domain_folder_id': self.folder_a.id,
-            'name': 'workflow rule direct sign',
-            'create_model': 'sign.template.direct',
+            'create_model': 'sign.template',
         })
 
     def test_bridge_folder_workflow(self):
@@ -44,13 +39,11 @@ class TestCaseDocumentsBridgeSign(TransactionCase):
         tests the create new business model (sign).
     
         """
-        self.assertEqual(self.document_txt.res_model, 'documents.document', "failed at default res model")
-        self.workflow_rule_template.apply_actions([self.document_txt.id])
-        self.assertTrue(self.workflow_rule_direct_sign.limited_to_single_record,
-                        "this rule should only be available on single records")
+        self.assertFalse(self.attachment_txt.res_model, "failed at workflow_bridge_dms_sign original res model")
+        self.workflow_rule_template.apply_actions([self.attachment_txt.id])
     
-        self.assertEqual(self.document_txt.res_model, 'sign.template',
-                         "failed at workflow_bridge_dms_sign new res_model")
-        template = self.env['sign.template'].search([('id', '=', self.document_txt.res_id)])
+        self.assertEqual(self.attachment_txt.res_model, 'sign.template', "failed at workflow_bridge_dms_sign"
+                                                                         " new res_model")
+        template = self.env['sign.template'].search([('id', '=', self.attachment_txt.res_id)])
         self.assertTrue(template.exists(), 'failed at workflow_bridge_dms_account template')
-        self.assertEqual(self.document_txt.res_id, template.id, "failed at workflow_bridge_dms_account res_id")
+        self.assertEqual(self.attachment_txt.res_id, template.id, "failed at workflow_bridge_dms_account res_id")

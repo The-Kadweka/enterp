@@ -41,6 +41,7 @@ class StockReport(models.Model):
     company_id = fields.Many2one('res.company', 'Company', readonly=True)
     categ_id = fields.Many2one('product.category', 'Product Category', readonly=True)
 
+    @api.multi
     @api.depends('reference', 'product_id.name')
     def name_get(self):
         res = []
@@ -104,7 +105,6 @@ class StockReport(models.Model):
             INNER JOIN product_product p ON sm.product_id = p.id
             INNER JOIN product_template t ON p.product_tmpl_id = t.id
             INNER JOIN product_category cat ON t.categ_id = cat.id
-            WHERE t.type = 'product'
         """
 
         return from_str
@@ -135,6 +135,7 @@ class StockReport(models.Model):
 
         return group_by_str
 
+    @api.model_cr
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
         self.env.cr.execute("""CREATE or REPLACE VIEW %s as (

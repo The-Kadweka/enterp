@@ -5,7 +5,7 @@
 {
     'name': 'Subscriptions',
     'version': '1.1',
-    'category': 'Sales/Subscription',
+    'category': 'Sales',
     'summary': 'Generate recurring invoices and manage renewals',
     'description': """
 This module allows you to manage subscriptions.
@@ -18,17 +18,16 @@ Features:
     'author': 'Camptocamp / Odoo',
     'website': 'https://www.odoo.com/page/subscriptions',
     'depends': [
+        'account_deferred_revenue',
         'sale_management',
         'portal',
         'web_cohort',
         'rating',
         'base_automation',
-        'sms',
     ],
     'data': [
         'security/sale_subscription_security.xml',
         'security/ir.model.access.csv',
-        'security/sms_security.xml',
         'wizard/sale_subscription_close_reason_wizard_views.xml',
         'wizard/sale_subscription_wizard_views.xml',
         'views/sale_order_views.xml',
@@ -39,9 +38,8 @@ Features:
         'views/assets.xml',
         'views/subscription_portal_templates.xml',
         'views/mail_activity_views.xml',
-        'data/mail_template_data.xml',
         'data/sale_subscription_data.xml',
-        'data/sms_template_data.xml',
+        'data/mail_template_data.xml',
         'report/sale_subscription_report_view.xml',
     ],
     'demo': [

@@ -16,13 +16,17 @@
                         <label string="Interval" for="currency_interval_unit" class="col-lg-3 o_light_label"/>
                         <field name="currency_interval_unit"/>
                     </div>
-                    <div class="mt8 row">
+                    <div class="row">
                         <label string="Next Run" for="currency_next_execution_date" class="col-lg-3 o_light_label"/>
                         <field name="currency_next_execution_date"/>
                         <button name="update_currency_rates_manually" type="object" class="btn-link">
                             <i title="Update now" role="img" aria-label="Update now" class="fa fa-fw fa-refresh"></i>
                         </button>
                     </div>
+                </div>
+                <div class="row">
+                    <label string="Last Sync Date" for="last_currency_sync_date" class="col-lg-3 o_light_label" attrs="{'invisible': [('last_currency_sync_date','=',False)]}"/>
+                    <field name="last_currency_sync_date"/>
                 </div>
             </xpath>
         </field>

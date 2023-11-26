@@ -3,10 +3,10 @@
 
 {
     'name': 'HR Contract Salary (Belgium)',
-    'category': 'Human Resources',
+    'category': 'Human Resource',
     'summary': 'Salary Package Configurator',
     'depends': [
-        'hr_contract_sign',
+        'hr',
         'website',
         'hr_recruitment',
         'l10n_be_hr_payroll_fleet',
@@ -20,9 +20,10 @@
         'views/hr_contract_salary_templates.xml',
         'views/hr_contract_views.xml',
         'views/hr_job_views.xml',
-        'views/hr_employee_views.xml',
         'views/res_config_settings_views.xml',
         'data/hr_contract_salary_data.xml',
+    ],
+    'qweb': [
     ],
     'demo': [
         'data/hr_contract_salary_demo.xml',

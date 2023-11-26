@@ -26,7 +26,7 @@
             <field name="name">Número total de operadores intracomunitarios</field>
             <field name="code">aeat_mod_349_statistics_invoices_partners_count</field>
             <field name="parent_id" ref="mod_349_summary_title"/>
-            <field name="domain" eval="[('move_id.l10n_es_reports_mod349_available', '=', True), ('move_id.type','in',['in_invoice','out_invoice']), ('tax_line_id', '=', False)]"/>
+            <field name="domain" eval="[('invoice_id.l10n_es_reports_mod349_available', '=', True), ('invoice_id.type','in',['in_invoice','out_invoice']), ('tax_line_id', '=', False)]"/>
             <field name="formulas">balance = count_rows</field>
             <field name="groupby">partner_id</field>
             <field name="figure_type">no_unit</field>
@@ -40,7 +40,7 @@
             <field name="name">Importe de las operaciones intracomunitarias</field>
             <field name="code">aeat_mod_349_statistics_invoices_total_amount</field>
             <field name="parent_id" ref="mod_349_summary_title"/>
-            <field name="domain" eval="[('move_id.l10n_es_reports_mod349_available', '=', True), ('move_id.type','in',['in_invoice','out_invoice']), ('tax_line_id', '=', False)]"/>
+            <field name="domain" eval="[('invoice_id.l10n_es_reports_mod349_available', '=', True), ('invoice_id.type','in',['in_invoice','out_invoice']), ('tax_line_id', '=', False)]"/>
             <field name="formulas">balance = sum.debit</field>
             <field name="special_date_changer">strict_range</field>
             <field name="sequence" eval="3"/>
@@ -52,7 +52,7 @@
             <field name="name">Número total de operadores intracomunitarios con rectificaciones</field>
             <field name="code">aeat_mod_349_statistics_refunds_partners_count</field>
             <field name="parent_id" ref="mod_349_summary_title"/>
-            <field name="domain" eval="[('move_id.l10n_es_reports_mod349_available', '=', True), ('move_id.type','in',['in_refund','out_refund']), ('tax_line_id', '=', False)]"/>
+            <field name="domain" eval="[('invoice_id.l10n_es_reports_mod349_available', '=', True), ('invoice_id.type','in',['in_refund','out_refund']), ('tax_line_id', '=', False)]"/>
             <field name="formulas">balance = count_rows</field>
             <field name="groupby">partner_id</field>
             <field name="figure_type">no_unit</field>
@@ -66,7 +66,7 @@
             <field name="name">Importe de las operaciones intracomunitarias con rectificaciones</field>
             <field name="code">aeat_mod_349_statistics_refunds_total_amount</field>
             <field name="parent_id" ref="mod_349_summary_title"/>
-            <field name="domain" eval="[('move_id.l10n_es_reports_mod349_available', '=', True), ('move_id.type','in',['in_refund','out_refund']), ('tax_line_id', '=', False)]"/>
+            <field name="domain" eval="[('invoice_id.l10n_es_reports_mod349_available', '=', True), ('invoice_id.type','in',['in_refund','out_refund']), ('tax_line_id', '=', False)]"/>
             <field name="formulas">balance = sum.debit</field>
             <field name="special_date_changer">strict_range</field>
             <field name="sequence" eval="5"/>
@@ -86,7 +86,7 @@
             <field name="name">E. Entregas intracomunitarias</field>
             <field name="code">aeat_mod_349_supplies</field>
             <field name="parent_id" ref="mod_349_invoices_title"/>
-            <field name="domain" eval="[('move_id.l10n_es_reports_mod349_available', '=', True), ('move_id.type','in',['in_invoice','out_invoice']), ('move_id.l10n_es_reports_mod349_invoice_type','=','E'), ('tax_line_id', '=', False)]"/>
+            <field name="domain" eval="[('invoice_id.l10n_es_reports_mod349_available', '=', True), ('invoice_id.type','in',['in_invoice','out_invoice']), ('invoice_id.l10n_es_reports_mod349_invoice_type','=','E'), ('tax_line_id', '=', False)]"/>
             <field name="show_domain">always</field>
             <field name="formulas">balance= sum.debit</field>
             <field name="groupby">partner_id</field>
@@ -100,7 +100,7 @@
             <field name="name">A. Adquisiciones intracomunitarias sujetas</field>
             <field name="code">aeat_mod_349_acquisitions</field>
             <field name="parent_id" ref="mod_349_invoices_title"/>
-            <field name="domain" eval="[('move_id.l10n_es_reports_mod349_available', '=', True), ('move_id.type','in',['in_invoice','out_invoice']), ('move_id.l10n_es_reports_mod349_invoice_type','=','A'), ('tax_line_id', '=', False)]"/>
+            <field name="domain" eval="[('invoice_id.l10n_es_reports_mod349_available', '=', True), ('invoice_id.type','in',['in_invoice','out_invoice']), ('invoice_id.l10n_es_reports_mod349_invoice_type','=','A'), ('tax_line_id', '=', False)]"/>
             <field name="show_domain">always</field>
             <field name="formulas">balance= sum.debit</field>
             <field name="groupby">partner_id</field>
@@ -114,7 +114,7 @@
             <field name="name">T. Entregas en otros Estados miembros subsiguientes a adquisiciones intracomunitarias exentas en el marco de operaciones triangulares</field>
             <field name="code">aeat_mod_349_triangular</field>
             <field name="parent_id" ref="mod_349_invoices_title"/>
-            <field name="domain" eval="[('move_id.l10n_es_reports_mod349_available', '=', True), ('move_id.type','in',['in_invoice','out_invoice']), ('move_id.l10n_es_reports_mod349_invoice_type','=','T'), ('tax_line_id', '=', False)]"/>
+            <field name="domain" eval="[('invoice_id.l10n_es_reports_mod349_available', '=', True), ('invoice_id.type','in',['in_invoice','out_invoice']), ('invoice_id.l10n_es_reports_mod349_invoice_type','=','T'), ('tax_line_id', '=', False)]"/>
             <field name="show_domain">always</field>
             <field name="formulas">balance= sum.debit</field>
             <field name="groupby">partner_id</field>
@@ -128,7 +128,7 @@
             <field name="name">S. Prestaciones intracomunitarias de servicios realizadas por el declarante</field>
             <field name="code">aeat_mod_349_services_sold</field>
             <field name="parent_id" ref="mod_349_invoices_title"/>
-            <field name="domain" eval="[('move_id.l10n_es_reports_mod349_available', '=', True), ('move_id.type','in',['in_invoice','out_invoice']), ('move_id.l10n_es_reports_mod349_invoice_type','=','S'), ('tax_line_id', '=', False)]"/>
+            <field name="domain" eval="[('invoice_id.l10n_es_reports_mod349_available', '=', True), ('invoice_id.type','in',['in_invoice','out_invoice']), ('invoice_id.l10n_es_reports_mod349_invoice_type','=','S'), ('tax_line_id', '=', False)]"/>
             <field name="show_domain">always</field>
             <field name="formulas">balance= sum.debit</field>
             <field name="groupby">partner_id</field>
@@ -142,7 +142,7 @@
             <field name="name">I. Adquisiciones intracomunitarias de servicios</field>
             <field name="code">aeat_mod_349_services_acquired</field>
             <field name="parent_id" ref="mod_349_invoices_title"/>
-            <field name="domain" eval="[('move_id.l10n_es_reports_mod349_available', '=', True), ('move_id.type','in',['in_invoice','out_invoice']), ('move_id.l10n_es_reports_mod349_invoice_type','=','I'), ('tax_line_id', '=', False)]"/>
+            <field name="domain" eval="[('invoice_id.l10n_es_reports_mod349_available', '=', True), ('invoice_id.type','in',['in_invoice','out_invoice']), ('invoice_id.l10n_es_reports_mod349_invoice_type','=','I'), ('tax_line_id', '=', False)]"/>
             <field name="show_domain">always</field>
             <field name="formulas">balance= sum.debit</field>
             <field name="groupby">partner_id</field>
@@ -156,7 +156,7 @@
             <field name="name">M. Entregas intracomunitarias de bienes posteriores a una importación exenta</field>
             <field name="code">aeat_mod_349_supplies_without_taxes</field>
             <field name="parent_id" ref="mod_349_invoices_title"/>
-            <field name="domain" eval="[('move_id.l10n_es_reports_mod349_available', '=', True), ('move_id.type','in',['in_invoice','out_invoice']), ('move_id.l10n_es_reports_mod349_invoice_type','=','M'), ('tax_line_id', '=', False)]"/>
+            <field name="domain" eval="[('invoice_id.l10n_es_reports_mod349_available', '=', True), ('invoice_id.type','in',['in_invoice','out_invoice']), ('invoice_id.l10n_es_reports_mod349_invoice_type','=','M'), ('tax_line_id', '=', False)]"/>
             <field name="show_domain">always</field>
             <field name="formulas">balance= sum.debit</field>
             <field name="groupby">partner_id</field>
@@ -170,7 +170,7 @@
             <field name="name">H. Entregas intracomunitarias de bienes posteriores a una importación exenta efectuadas por el representante fiscal</field>
             <field name="code">aeat_mod_349_supplies_without_taxes_legal_representative</field>
             <field name="parent_id" ref="mod_349_invoices_title"/>
-            <field name="domain" eval="[('move_id.l10n_es_reports_mod349_available', '=', True), ('move_id.type','in',['in_invoice','out_invoice']), ('move_id.l10n_es_reports_mod349_invoice_type','=','H'), ('tax_line_id', '=', False)]"/>
+            <field name="domain" eval="[('invoice_id.l10n_es_reports_mod349_available', '=', True), ('invoice_id.type','in',['in_invoice','out_invoice']), ('invoice_id.l10n_es_reports_mod349_invoice_type','=','H'), ('tax_line_id', '=', False)]"/>
             <field name="show_domain">always</field>
             <field name="formulas">balance= sum.debit</field>
             <field name="groupby">partner_id</field>
@@ -192,7 +192,7 @@
             <field name="name">E. Entregas intracomunitarias exentas</field>
             <field name="code">aeat_mod_349_supplies_refunds</field>
             <field name="parent_id" ref="mod_349_refunds_title"/>
-            <field name="domain" eval="[('move_id.l10n_es_reports_mod349_available', '=', True), ('move_id.type','in',['in_refund','out_refund']), ('move_id.l10n_es_reports_mod349_invoice_type','=','E'), ('tax_line_id', '=', False)]"/>
+            <field name="domain" eval="[('invoice_id.l10n_es_reports_mod349_available', '=', True), ('invoice_id.type','in',['in_refund','out_refund']), ('invoice_id.l10n_es_reports_mod349_invoice_type','=','E'), ('tax_line_id', '=', False)]"/>
             <field name="show_domain">always</field>
             <field name="formulas">balance= sum.debit</field>
             <field name="groupby">partner_id</field>
@@ -206,7 +206,7 @@
             <field name="name">A. Adquisiciones intracomunitarias sujetas</field>
             <field name="code">aeat_mod_349_acquisitions_refunds</field>
             <field name="parent_id" ref="mod_349_refunds_title"/>
-            <field name="domain" eval="[('move_id.l10n_es_reports_mod349_available', '=', True), ('move_id.type','in',['in_refund','out_refund']), ('move_id.l10n_es_reports_mod349_invoice_type','=','A'), ('tax_line_id', '=', False)]"/>
+            <field name="domain" eval="[('invoice_id.l10n_es_reports_mod349_available', '=', True), ('invoice_id.type','in',['in_refund','out_refund']), ('invoice_id.l10n_es_reports_mod349_invoice_type','=','A'), ('tax_line_id', '=', False)]"/>
             <field name="show_domain">always</field>
             <field name="formulas">balance= sum.debit</field>
             <field name="groupby">partner_id</field>
@@ -220,7 +220,7 @@
             <field name="name">T. Entregas en otros Estados miembros subsiguientes a adquisiciones intracomunitarias exentas en el marco de operaciones triangulares</field>
             <field name="code">aeat_mod_349_triangular_refunds</field>
             <field name="parent_id" ref="mod_349_refunds_title"/>
-            <field name="domain" eval="[('move_id.l10n_es_reports_mod349_available', '=', True), ('move_id.type','in',['in_refund','out_refund']), ('move_id.l10n_es_reports_mod349_invoice_type','=','T'), ('tax_line_id', '=', False)]"/>
+            <field name="domain" eval="[('invoice_id.l10n_es_reports_mod349_available', '=', True), ('invoice_id.type','in',['in_refund','out_refund']), ('invoice_id.l10n_es_reports_mod349_invoice_type','=','T'), ('tax_line_id', '=', False)]"/>
             <field name="show_domain">always</field>
             <field name="formulas">balance= sum.debit</field>
             <field name="groupby">partner_id</field>
@@ -234,7 +234,7 @@
             <field name="name">S. Prestaciones intracomunitarias de servicios realizadas por el declarante</field>
             <field name="code">aeat_mod_349_services_sold_refunds</field>
             <field name="parent_id" ref="mod_349_refunds_title"/>
-            <field name="domain" eval="[('move_id.l10n_es_reports_mod349_available', '=', True), ('move_id.type','in',['in_refund','out_refund']), ('move_id.l10n_es_reports_mod349_invoice_type','=','S'), ('tax_line_id', '=', False)]"/>
+            <field name="domain" eval="[('invoice_id.l10n_es_reports_mod349_available', '=', True), ('invoice_id.type','in',['in_refund','out_refund']), ('invoice_id.l10n_es_reports_mod349_invoice_type','=','S'), ('tax_line_id', '=', False)]"/>
             <field name="show_domain">always</field>
             <field name="formulas">balance= sum.debit</field>
             <field name="groupby">partner_id</field>
@@ -248,7 +248,7 @@
             <field name="name">I. Adquisiciones intracomunitarias de servicios</field>
             <field name="code">aeat_mod_349_services_acquired_refunds</field>
             <field name="parent_id" ref="mod_349_refunds_title"/>
-            <field name="domain" eval="[('move_id.l10n_es_reports_mod349_available', '=', True), ('move_id.type','in',['in_refund','out_refund']), ('move_id.l10n_es_reports_mod349_invoice_type','=','I'), ('tax_line_id', '=', False)]"/>
+            <field name="domain" eval="[('invoice_id.l10n_es_reports_mod349_available', '=', True), ('invoice_id.type','in',['in_refund','out_refund']), ('invoice_id.l10n_es_reports_mod349_invoice_type','=','I'), ('tax_line_id', '=', False)]"/>
             <field name="show_domain">always</field>
             <field name="formulas">balance= sum.debit</field>
             <field name="groupby">partner_id</field>
@@ -262,7 +262,7 @@
             <field name="name">M. Entregas intracomunitarias de bienes posteriores a una importación exenta</field>
             <field name="code">aeat_mod_349_supplies_without_taxes_refunds</field>
             <field name="parent_id" ref="mod_349_refunds_title"/>
-            <field name="domain" eval="[('move_id.l10n_es_reports_mod349_available', '=', True), ('move_id.type','in',['in_refund','out_refund']), ('move_id.l10n_es_reports_mod349_invoice_type','=','M'), ('tax_line_id', '=', False)]"/>
+            <field name="domain" eval="[('invoice_id.l10n_es_reports_mod349_available', '=', True), ('invoice_id.type','in',['in_refund','out_refund']), ('invoice_id.l10n_es_reports_mod349_invoice_type','=','M'), ('tax_line_id', '=', False)]"/>
             <field name="show_domain">always</field>
             <field name="formulas">balance= sum.debit</field>
             <field name="groupby">partner_id</field>
@@ -276,7 +276,7 @@
             <field name="name">H. Entregas intracomunitarias de bienes posteriores a una importación exenta efectuadas por el representante fiscal</field>
             <field name="code">aeat_mod_349_supplies_without_taxes_legal_representative_refunds</field>
             <field name="parent_id" ref="mod_349_refunds_title"/>
-            <field name="domain" eval="[('move_id.l10n_es_reports_mod349_available', '=', True), ('move_id.type','in',['in_refund','out_refund']), ('move_id.l10n_es_reports_mod349_invoice_type','=','H'), ('tax_line_id', '=', False)]"/>
+            <field name="domain" eval="[('invoice_id.l10n_es_reports_mod349_available', '=', True), ('invoice_id.type','in',['in_refund','out_refund']), ('invoice_id.l10n_es_reports_mod349_invoice_type','=','H'), ('tax_line_id', '=', False)]"/>
             <field name="show_domain">always</field>
             <field name="formulas">balance= sum.debit</field>
             <field name="groupby">partner_id</field>

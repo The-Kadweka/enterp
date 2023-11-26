@@ -64,11 +64,6 @@
             <field name="bom_id" ref="mrp.mrp_bom_desk"/>
         </record>
 
-        <function model="stock.move" name="create">
-            <value model="stock.move" eval="obj().env.ref('purchase_mrp_workorder_quality.mrp_production')._get_moves_raw_values()"/>
-        </function>
-
-        <function model="mrp.production" name="action_confirm" eval="[ref('purchase_mrp_workorder_quality.mrp_production')]"/>
         <function model="mrp.production" name="action_assign" eval="[ref('purchase_mrp_workorder_quality.mrp_production')]"/>
         <function model="mrp.production" name="button_plan" eval="[ref('purchase_mrp_workorder_quality.mrp_production')]"/>
 
@@ -80,25 +75,24 @@
             <field name="name">0000000000003</field>
             <field name="product_id" ref="mrp.product_product_computer_desk"/>
             <field name="product_qty">1</field>
-            <field name="company_id" ref="base.main_company"/>
         </record>
 
         <function model="mrp.workorder" name="write">
             <value model="mrp.production" eval="obj().env.ref('purchase_mrp_workorder_quality.mrp_production').workorder_ids.ids"/>
             <value eval="{
-                'finished_lot_id': ref('purchase_mrp_workorder_quality.stock_production_lot'),
+                'final_lot_id': ref('purchase_mrp_workorder_quality.stock_production_lot'),
                 'qty_producing': 1
             }"/>
         </function>
 
-        <function model="mrp.workorder.line" name="write">
-            <value model="mrp.production" eval="obj().env.ref('purchase_mrp_workorder_quality.mrp_production').workorder_ids.raw_workorder_line_ids.filtered(lambda line: line.product_id == obj().env.ref('mrp.product_product_computer_desk_head')).ids"/>
-            <value model="stock.production.lot" eval="{'lot_id': obj().search([('name', '=', '0000000000001')], limit=1).id, 'qty_done': 1}"/>
+        <function model="stock.move.line" name="write">
+            <value model="mrp.production" eval="obj().env.ref('purchase_mrp_workorder_quality.mrp_production').workorder_ids.active_move_line_ids.filtered(lambda line: line.product_id == obj().env.ref('mrp.product_product_computer_desk_head')).ids"/>
+            <value model="stock.production.lot" eval="{'lot_id': obj().search([('name', '=', '0000000000001')], limit=1).id}"/>
         </function>
 
-        <function model="mrp.workorder.line" name="write">
-            <value model="mrp.production" eval="obj().env.ref('purchase_mrp_workorder_quality.mrp_production').workorder_ids.raw_workorder_line_ids.filtered(lambda line: line.product_id == obj().env.ref('mrp.product_product_computer_desk_leg')).ids"/>
-            <value model="stock.production.lot" eval="{'lot_id': obj().search([('name', '=', '0000000000002')], limit=1).id, 'qty_done': 4}"/>
+        <function model="stock.move.line" name="write">
+            <value model="mrp.production" eval="obj().env.ref('purchase_mrp_workorder_quality.mrp_production').workorder_ids.active_move_line_ids.filtered(lambda line: line.product_id == obj().env.ref('mrp.product_product_computer_desk_leg')).ids"/>
+            <value model="stock.production.lot" eval="{'lot_id': obj().search([('name', '=', '0000000000002')], limit=1).id}"/>
         </function>
 
         <function model="stock.move.line" name="write">
@@ -130,7 +124,7 @@
 
         <function model="quality.check" name="write">
             <value model="mrp.production" eval="obj().env.ref('purchase_mrp_workorder_quality.mrp_production').workorder_ids.check_ids[3].id"/>
-            <value model="mrp.production" eval="{'picture': obj().env.ref('mrp.product_product_computer_desk').image_128}"/>
+            <value model="mrp.production" eval="{'picture': obj().env.ref('mrp.product_product_computer_desk').image_medium}"/>
         </function>
 
         <function model="quality.check" name="do_pass">

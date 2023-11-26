@@ -2,7 +2,6 @@ import random
 import textwrap
 from odoo.http import _request_stack
 from odoo.tests.common import TransactionCase
-from odoo.tools import DotDict
 from odoo.addons.web_studio.controllers.main import WebStudioController
 
 
@@ -13,7 +12,6 @@ class TestViewNormalization(TransactionCase):
     def setUp(self):
         super(TestViewNormalization, self).setUp()
         random.seed('https://youtu.be/tFjNH9l6-sQ')
-        self.session = DotDict({'debug': False})
         _request_stack.push(self)
         self.base_view = self.env.ref('base.view_partner_form')
         self.gantt_view = self.env['ir.ui.view'].create({
@@ -30,7 +28,12 @@ class TestViewNormalization(TransactionCase):
             """
             <form string="Partners">
                 <sheet>
-                    <field name="image_1920" widget="image" class="oe_avatar" options="{&quot;preview_image&quot;: &quot;image_128&quot;, &quot;size&quot;: [90, 90]}"/>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="toggle_active" type="object" groups="base.group_no_one" class="oe_stat_button" icon="fa-archive">
+                            <field name="active" widget="boolean_button" options="{&quot;terminology&quot;: &quot;archive&quot;}"/>
+                        </button>
+                    </div>
+                    <field name="image" widget="image" class="oe_avatar" options="{&quot;preview_image&quot;: &quot;image_medium&quot;, &quot;size&quot;: [90, 90]}"/>
                     <div class="oe_title">
                         <field name="is_company" invisible="1"/>
                         <field name="company_type" widget="radio" class="oe_edit_only" on_change="on_change_company_type(company_type)" options="{'horizontal': true}"/>
@@ -95,7 +98,7 @@ class TestViewNormalization(TransactionCase):
                                     <field name="country_id"/>
                                     <field name="mobile"/>
                                     <field name="state_id"/>
-                                    <field name="image_1920"/>
+                                    <field name="image"/>
                                     <templates>
                                         <t t-name="kanban-box">
                                             <div class="oe_kanban_details">
@@ -734,7 +737,7 @@ class TestViewNormalization(TransactionCase):
             </data>
         """, """
             <data>
-              <xpath expr="//form[1]/sheet[1]/notebook[1]/page[1]/field[@name='child_ids']/kanban[1]/field[@name='image_1920']" position="after">
+              <xpath expr="//form[1]/sheet[1]/notebook[1]/page[1]/field[@name='child_ids']/kanban[1]/field[@name='image']" position="after">
                 <field name="lang"/>
               </xpath>
               <xpath expr="//form[1]/sheet[1]/notebook[1]/page[1]/field[@name='child_ids']/kanban[1]/templates[1]/t[1]/div[1]" position="attributes">

@@ -23,34 +23,13 @@
                     type="button">
                 <span class="fa fa-arrow-right" role="img" aria-label="Next" title="Next"/>
             </button>
-
-            <div t-if="widget._ranges.length > 1" class="btn-group o_grid_range">
-                <t t-if="isMobile">
-                    <t t-call="grid.RangeButtons.Mobile"/>
-                </t>
-                <t t-else="">
-                    <t t-foreach="widget._ranges" t-as="range">
-                        <t t-call="grid.RangeButton"/>
-                    </t>
-                </t>
+            <div t-if="widget._ranges.length > 1" class="btn-group">
+                <button t-foreach="widget._ranges" t-as="range"
+                        class="grid_arrow_range btn btn-secondary"
+                        type="button" t-att-data-name="range.name">
+                    <t t-esc="range.string"/>
+                </button>
             </div>
         </div>
     </t>
-
-    <t t-name="grid.RangeButtons.Mobile">
-        <button class="btn btn-link btn-sm fa fa-calendar" data-toggle="dropdown" aria-expanded="false">
-        </button>
-        <ul class="dropdown-menu dropdown-menu-right list-inline">
-            <li t-foreach="widget._ranges" t-as="range">
-                <t t-call="grid.RangeButton"/>
-            </li>
-        </ul>
-    </t>
-
-    <t t-name="grid.RangeButton">
-        <button class="grid_arrow_range btn btn-secondary" type="button" t-att-data-name="range.name">
-            <t t-esc="range.string"/>
-        </button>
-    </t>
-
 </templates>

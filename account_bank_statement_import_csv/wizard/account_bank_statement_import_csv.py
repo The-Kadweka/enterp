@@ -4,9 +4,7 @@
 import base64
 import psycopg2
 
-from odoo import _, api, models
-from odoo.exceptions import UserError
-from odoo.addons.base_import.models.base_import import FIELDS_RECURSION_LIMIT
+from odoo import api, models
 
 
 class AccountBankStatementImport(models.TransientModel):
@@ -15,23 +13,15 @@ class AccountBankStatementImport(models.TransientModel):
     def _check_csv(self, filename):
         return filename and filename.lower().strip().endswith('.csv')
 
+    @api.multi
     def import_file(self):
-        # In case of CSV files, only one file can be imported at a time.
-        if len(self.attachment_ids) > 1:
-            csv = [bool(self._check_csv(att.name)) for att in self.attachment_ids]
-            if True in csv and False in csv:
-                raise UserError(_('Mixing CSV files with other file types is not allowed.'))
-            if csv.count(True) > 1:
-                raise UserError(_('Only one CSV file can be selected.'))
-            return super(AccountBankStatementImport, self).import_file()
-
-        if not self._check_csv(self.attachment_ids.name):
+        if not self._check_csv(self.filename):
             return super(AccountBankStatementImport, self).import_file()
         ctx = dict(self.env.context)
         import_wizard = self.env['base_import.import'].create({
             'res_model': 'account.bank.statement.line',
-            'file': base64.b64decode(self.attachment_ids.datas),
-            'file_name': self.attachment_ids.name,
+            'file': base64.b64decode(self.data_file),
+            'file_name': self.filename,
             'file_type': 'text/csv'
         })
         ctx['wizard_id'] = import_wizard.id
@@ -41,7 +31,7 @@ class AccountBankStatementImport(models.TransientModel):
             'params': {
                 'model': 'account.bank.statement.line',
                 'context': ctx,
-                'filename': self.attachment_ids.name,
+                'filename': self.filename,
             }
         }
 
@@ -51,7 +41,7 @@ class AccountBankStmtImportCSV(models.TransientModel):
     _inherit = 'base_import.import'
 
     @api.model
-    def get_fields(self, model, depth=FIELDS_RECURSION_LIMIT):
+    def get_fields(self, model, depth=2):
         fields_list = super(AccountBankStmtImportCSV, self).get_fields(model, depth=depth)
         if self._context.get('bank_stmt_import', False):
             add_fields = [{
@@ -82,6 +72,7 @@ class AccountBankStmtImportCSV(models.TransientModel):
     def _convert_to_float(self, value):
         return float(value) if value else 0.0
 
+    @api.multi
     def _parse_import_data(self, data, import_fields, options):
         data = super(AccountBankStmtImportCSV, self)._parse_import_data(data, import_fields, options)
         statement_id = self._context.get('bank_statement_id', False)
@@ -147,11 +138,13 @@ class AccountBankStmtImportCSV(models.TransientModel):
             statement.write(vals)
         return ret_data
 
+    @api.multi
     def parse_preview(self, options, count=10):
         if options.get('bank_stmt_import', False):
             self = self.with_context(bank_stmt_import=True)
         return super(AccountBankStmtImportCSV, self).parse_preview(options, count=count)
 
+    @api.multi
     def do(self, fields, columns, options, dryrun=False):
         if options.get('bank_stmt_import', False):
             self._cr.execute('SAVEPOINT import_bank_stmt')

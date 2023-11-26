@@ -12,6 +12,7 @@ class TestInterCompanyRulesCommon(common.SavepointCase):
         # Create a new company named company_a
         cls.company_a = cls.env['res.company'].create({
             'name': 'Company A',
+            'parent_id': cls.env.ref('base.main_company').id,
             'currency_id': cls.env.ref('base.EUR').id,
         })
 
@@ -21,6 +22,7 @@ class TestInterCompanyRulesCommon(common.SavepointCase):
         # Create a new company named company_b
         cls.company_b = cls.env['res.company'].create({
             'name': 'Company B',
+            'parent_id': cls.env.ref('base.main_company').id,
             'currency_id': cls.env.ref('base.EUR').id,
         })
 

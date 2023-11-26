@@ -13,7 +13,7 @@ var _t = core._t;
 var SubMenu = Widget.extend({
     template: 'web_studio.Menu',
     events: {
-        'click .o_menu_sections > li': '_onMenu',
+        'click .o_menu_sections > li > a': '_onMenu',
         'click .o_web_studio_undo': '_onUndo',
         'click .o_web_studio_redo': '_onRedo',
         'click .o_menu_sections .o_web_studio_views_icons > a': '_onIcon',
@@ -30,8 +30,6 @@ var SubMenu = Widget.extend({
         this.activeMenu = 'Views';
         this.studio_actions = [{action: 'action_web_studio_action_editor', title: 'Views'}];
         this.multi_lang = session.multi_lang;
-        this._isRedoToggled = false;
-        this._isUndoToggled = false;
 
         bus.on('action_changed', this, this._onActionChanged);
 
@@ -53,7 +51,7 @@ var SubMenu = Widget.extend({
      */
     renderElement: function() {
         this._super.apply(this, arguments);
-        this._setActiveButtons();
+        this.$('.o_menu_sections li a:contains(' + this.activeMenu +')').addClass('active');
         this._renderBreadcrumb();
     },
 
@@ -161,7 +159,6 @@ var SubMenu = Widget.extend({
         } else {
             this.studio_actions = [{action: action, title: title}];
         }
-        delete options.index; // to prevent collision with option of doAction
 
         if (action === 'action_web_studio_action_editor') {
             // do not open the default view in this case
@@ -171,28 +168,8 @@ var SubMenu = Widget.extend({
         if (action._originalAction) {
             action = JSON.parse(action._originalAction);
         }
-        if (action === 'action_web_studio_action_editor') {
-            this.trigger_up('switch_studio_view', options);
-        } else {
-            this.do_action(action, options);
-        }
+        this.do_action(action, options);
         this.renderElement();
-    },
-    /**
-     * @private
-     */
-    _setActiveButtons() {
-        this.$(`.o_menu_sections li:contains(${this.activeMenu})`).addClass('active');
-        if (this.studio_actions.length === 0) {
-            return;
-        }
-        const currentAction = _.last(this.studio_actions);
-        const isReportAction = currentAction.action === 'web_studio.action_edit_report';
-        // undo / redo button should be displayed only when editing view or a report
-        this.$('.o_web_studio_menu_undo_redo')
-            .toggleClass('d-none', !currentAction.viewType && !isReportAction);
-        this.$('.o_web_studio_breadcrumb')
-            .toggleClass('o_web_studio_breadcrumb_report', isReportAction);
     },
 
     //--------------------------------------------------------------------------
@@ -242,6 +219,7 @@ var SubMenu = Widget.extend({
      * @param {Event} ev
      */
     _onMenu: function (ev) {
+        ev.preventDefault();
         var $menu = $(ev.currentTarget);
         if (!$menu.data('name')) { return; }
 
@@ -260,6 +238,9 @@ var SubMenu = Widget.extend({
                 model: this.action.res_model,
                 view_id: this.action.view_id[0],
             }).then(function (result) {
+                result.flags = _.extend({}, result.flags, {
+                    studioActionEnv: self.action.env,
+                });
                 self._replaceAction(result, title, {
                     studio_clear_studio_breadcrumbs: true,
                 });
@@ -300,7 +281,6 @@ var SubMenu = Widget.extend({
      * @param {Boolean} display
      */
     _onToggleUndo: function (display) {
-        this._isUndoToggled = display;
         this.$('.o_web_studio_undo').toggleClass('o_web_studio_active', display);
     },
     /**
@@ -308,29 +288,29 @@ var SubMenu = Widget.extend({
      * @param {Boolean} display
      */
     _onToggleRedo: function (display) {
-        this._isRedoToggled = display;
         this.$('.o_web_studio_redo').toggleClass('o_web_studio_active', display);
     },
     /**
      * @private
-     * @param {string} param0.type ['saved', 'saving']
+     * @param {string} message
+     * @param {Boolean} [autoRemove] if true, the snackbar will be emptied after
+     *   a short period
      */
-    _onToggleSnackBar(type) {
-        switch (type) {
-            case 'saved':
-                this.$('.o_web_studio_snackbar_icon')
-                    .removeClass('fa-spinner fa-pulse');
-                this.$('.o_web_studio_snackbar_icon')
-                    .addClass('show fa fa-check');
-                this.$('.o_web_studio_snackbar_text')
-                    .text(_t("Saved"));
-                break;
-            case 'saving':
-                this.$('.o_web_studio_snackbar_icon')
-                    .addClass('show fa fa-spinner fa-pulse');
-                this.$('.o_web_studio_snackbar_text')
-                    .text(_t("Saving"));
-                break;
+    _onToggleSnackBar: function (message, autoRemove) {
+        var self = this;
+        if (this.snackBarTimeout) {
+            clearTimeout(this.snackBarTimeout);
+        }
+        this.$('.o_web_studio_snackbar')
+            .empty()
+            .append($('<span>', {
+                text: message,
+            }));
+        if (autoRemove) {
+            this.snackBarTimeout = setTimeout(function () {
+                self.$('.o_web_studio_snackbar')
+                    .empty();
+            }, 3000);
         }
     },
     /**

@@ -1,20 +1,18 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* helpdesk_timesheet
+# * helpdesk_timesheet
 # 
 # Translators:
+# Nathan Grognet <ngr@odoo.com>, 2018
 # Martin Trigaux, 2019
-# Nathan Grognet <ngr@odoo.com>, 2019
-# Alexandra Jubert <aju@odoo.com>, 2020
-# Cécile Collart <cco@odoo.com>, 2020
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~12.5+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-26 08:05+0000\n"
-"PO-Revision-Date: 2019-08-26 09:36+0000\n"
-"Last-Translator: Cécile Collart <cco@odoo.com>, 2020\n"
+"POT-Creation-Date: 2019-11-14 07:50+0000\n"
+"PO-Revision-Date: 2018-08-24 11:38+0000\n"
+"Last-Translator: Martin Trigaux, 2019\n"
 "Language-Team: French (https://www.transifex.com/odoo/teams/41243/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -28,7 +26,7 @@ msgid "# Tickets"
 msgstr "Nbr de tickets"
 
 #. module: helpdesk_timesheet
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
+#: code:addons/helpdesk_timesheet/models/helpdesk.py:71
 #, python-format
 msgid ""
 "All timesheet hours will be assigned to the selected task on save. Discard "
@@ -44,8 +42,8 @@ msgid "Analytic Line"
 msgstr "Ligne analytique"
 
 #. module: helpdesk_timesheet
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
+#: code:addons/helpdesk_timesheet/models/helpdesk.py:19
+#: code:addons/helpdesk_timesheet/models/helpdesk.py:34
 #, python-format
 msgid "Closed"
 msgstr "Fermé"
@@ -73,17 +71,17 @@ msgstr "Durée"
 #. module: helpdesk_timesheet
 #: model:ir.model,name:helpdesk_timesheet.model_helpdesk_team
 msgid "Helpdesk Team"
-msgstr "Équipe Assistance"
+msgstr "Equipe Helpdesk"
 
 #. module: helpdesk_timesheet
 #: model:ir.model,name:helpdesk_timesheet.model_helpdesk_ticket
 #: model:ir.model.fields,field_description:helpdesk_timesheet.field_account_analytic_line__helpdesk_ticket_id
 msgid "Helpdesk Ticket"
-msgstr "Ticket d'Assistance"
+msgstr "Ticket Helpdesk"
 
 #. module: helpdesk_timesheet
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
+#: code:addons/helpdesk_timesheet/models/helpdesk.py:18
+#: code:addons/helpdesk_timesheet/models/helpdesk.py:33
 #, python-format
 msgid "In Progress"
 msgstr "En cours"
@@ -99,6 +97,11 @@ msgid "Is Task Active"
 msgstr "Est une tâche active"
 
 #. module: helpdesk_timesheet
+#: model:ir.model.fields,field_description:helpdesk_timesheet.field_project_task_type__is_closed
+msgid "Is a close stage"
+msgstr "Dans un état fermé"
+
+#. module: helpdesk_timesheet
 #: model:ir.model,name:helpdesk_timesheet.model_project_project
 #: model:ir.model.fields,field_description:helpdesk_timesheet.field_helpdesk_team__project_id
 #: model:ir.model.fields,field_description:helpdesk_timesheet.field_helpdesk_ticket__project_id
@@ -111,33 +114,20 @@ msgid "Project Tickets"
 msgstr "Tickets du projet"
 
 #. module: helpdesk_timesheet
-#: model:ir.model.fields,help:helpdesk_timesheet.field_helpdesk_team__project_id
-msgid ""
-"Project to which the tickets (and the timesheets) will be linked by default."
-msgstr ""
-"Projet auquel les tickets (et les feuilles de temps) seront liés par défaut."
-
-#. module: helpdesk_timesheet
 #: model:ir.model.fields,field_description:helpdesk_timesheet.field_helpdesk_ticket__task_id
 msgid "Task"
 msgstr "Tâche"
 
 #. module: helpdesk_timesheet
+#: model:ir.model,name:helpdesk_timesheet.model_project_task_type
+msgid "Task Stage"
+msgstr "Étape de tâche"
+
+#. module: helpdesk_timesheet
 #: model:ir.model.fields,help:helpdesk_timesheet.field_helpdesk_ticket__is_closed
+#: model:ir.model.fields,help:helpdesk_timesheet.field_project_task_type__is_closed
 msgid "Tasks in this stage are considered as closed."
 msgstr "Les tâches dans cet état sont considérées comme fermées"
-
-#. module: helpdesk_timesheet
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
-#, python-format
-msgid "The project is required to track time on ticket."
-msgstr "Le projet est requis pour tracker le temps passé sur le ticket."
-
-#. module: helpdesk_timesheet
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
-#, python-format
-msgid "The task must be in ticket's project."
-msgstr "La tâche doit être dans le projet du ticket."
 
 #. module: helpdesk_timesheet
 #: model:ir.model.fields,help:helpdesk_timesheet.field_helpdesk_ticket__task_id
@@ -167,7 +157,7 @@ msgid "Timesheet activated on Team"
 msgstr "Feuille de temps activée sur l'équipe"
 
 #. module: helpdesk_timesheet
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
+#: code:addons/helpdesk_timesheet/models/helpdesk.py:73
 #, python-format
 msgid ""
 "Timesheet hours will not be assigned to a customer task. Set a task to "
@@ -193,7 +183,7 @@ msgid "View task."
 msgstr "Affichez la tâche."
 
 #. module: helpdesk_timesheet
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
+#: code:addons/helpdesk_timesheet/models/helpdesk.py:76
 #, python-format
 msgid "Warning"
 msgstr "Avertissement"

@@ -18,7 +18,9 @@ return AbstractModel.extend({
     init: function () {
         this._super.apply(this, arguments);
         this._gridData = null;
-        this._fetchMutex = new concurrency.MutexedDropPrevious();
+        this._fetchMutex = new concurrency.Mutex();
+        this._pendingFetch = null;
+        this._waitingDef = $.Deferred();
     },
 
     //--------------------------------------------------------------------------
@@ -46,7 +48,7 @@ return AbstractModel.extend({
      * have any res_ids. A big domain is thus computed with the domain of all
      * cells and this big domain is used to search for res_ids.
      *
-     * @returns {Promise<integer[]>} the list of ids used in the grid
+     * @returns {Deferred<integer[]>} the list of ids used in the grid
      */
     getIds: function () {
         var data = this._gridData;
@@ -78,7 +80,7 @@ return AbstractModel.extend({
         // which will select all records of the model... that is *not* what
         // we want
         if (cells === 0) {
-            return Promise.resolve([]);
+            return $.when([]);
         }
 
         while (--cells > 0) {
@@ -95,7 +97,7 @@ return AbstractModel.extend({
     /**
      * @override
      * @param {Object} params
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     load: function (params) {
         this.modelName = params.modelName;
@@ -110,18 +112,17 @@ return AbstractModel.extend({
         var groupedBy = (params.groupedBy && params.groupedBy.length) ?
             params.groupedBy : this.rowFields;
         this.groupedBy = Array.isArray(groupedBy) ? groupedBy : [groupedBy];
-        this.readonlyField = params.readonlyField;
         return this._fetch(this.groupedBy);
     },
     /**
      * @override
      * @param {any} handle this parameter is ignored
      * @param {Object} params
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     reload: function (handle, params) {
         if (params === 'special') {
-            return Promise.resolve();
+            return $.when();
         }
         params = params || {};
         if ('context' in params) {
@@ -155,19 +156,65 @@ return AbstractModel.extend({
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
+
+    /**
+     * We only want a single fetch being performed at any time (because
+     * there's really no point in performing 5 fetches concurrently just
+     * because the user has just edited 5 records), utils.Mutex does that
+     * fine, *however* we don't actually care about all the fetches, if
+     * we're enqueuing fetch n while fetch n-1 is waiting, we can just
+     * drop the older one, it's only going to delay the currently
+     * useful and interesting job.
+     *
+     * So when requesting a fetch
+     * * if there's no request waiting on the mutex (for a fetch to come
+     *   back) set the new request waiting and queue up a fetch on the
+     *   mutex
+     * * if there is already a request waiting (and thus an enqueued fetch
+     *   on the mutex) just replace the old request, so it'll get taken up
+     *   by the enqueued fetch eventually
+     *
+     * @private
+     * @param {Function} fn the handler function to enqueue. Note that this
+     *                      handler can be dropped if there was a n-1 (so n
+     *                      is waiting) and a n+1 arrives before n-1 is done.
+     * @returns {Deferred}
+     */
+    _enqueue: function (fn) {
+        var self = this;
+        this._waitingDef = $.Deferred();
+        if (this._pendingFetch) {
+            // if there's already a query waiting for a slot, drop it and replace
+            // it by the new updated query
+            this._pendingFetch = fn;
+        } else {
+            // if there's no query waiting for a slot, add the current one and
+            // enqueue a fetch job
+            this._pendingFetch = fn;
+            this._fetchMutex.exec(function () {
+
+                var def = self._waitingDef;
+                var fn = self._pendingFetch;
+                self._pendingFetch = null;
+
+                return fn().then(def.resolve.bind(def));
+            });
+        }
+        return this._waitingDef;
+    },
     /**
      * @private
      * @param {string[]} groupBy
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _fetch: function (groupBy) {
         var self = this;
 
         if (!this.currentRange) {
-            return Promise.resolve();
+            return $.when();
         }
 
-        return this._fetchMutex.exec(function () {
+        return this._enqueue(function () {
             if (self.sectionField && self.sectionField === groupBy[0]) {
                 return self._fetchGroupedData(groupBy);
             } else {
@@ -178,7 +225,7 @@ return AbstractModel.extend({
     /**
      * @private
      * @param {string[]} groupBy
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _fetchGroupedData: function (groupBy) {
         var self = this;
@@ -207,14 +254,15 @@ return AbstractModel.extend({
                 // to fetch an empty grid so we can render the table's
                 // decoration (pagination and columns &etc) otherwise
                 // we get a completely empty grid
-                return Promise.all([self._fetchSectionGrid(groupBy, {
+                return self._fetchSectionGrid(groupBy, {
                     __domain: self.domain || [],
-                })]);
+                });
             }
-            return Promise.all((groups || []).map(function (group) {
+            return $.when.apply(null, _(groups).map(function (group) {
                 return self._fetchSectionGrid(groupBy, group);
             }));
-        }).then(function (results) {
+        }).then(function () {
+            var results = [].slice.apply(arguments);
             self._gridData = results;
             self._gridData.groupBy = groupBy;
             self._gridData.colField = self.colField;
@@ -233,11 +281,11 @@ return AbstractModel.extend({
      * @param {string[]} groupBy
      * @param {Object} sectionGroup
      * @param {Object} [additionalContext]
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _fetchSectionGrid: function (groupBy, sectionGroup, additionalContext) {
         var self = this;
-        var rpcProm = this._rpc({
+        return this._rpc({
             model: this.modelName,
             method: 'read_grid',
             kwargs: {
@@ -246,19 +294,16 @@ return AbstractModel.extend({
                 cell_field: this.cellField,
                 range: this.currentRange,
                 domain: sectionGroup.__domain,
-                readonly_field: this.readonlyField,
             },
             context: this.getContext(additionalContext),
-        })
-        rpcProm.then(function (grid) {
+        }).done(function (grid) {
             grid.__label = sectionGroup[self.sectionField];
         });
-        return rpcProm;
     },
     /**
      * @private
      * @param {string[]} groupBy
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _fetchUngroupedData: function (groupBy) {
         var self = this;
@@ -271,7 +316,6 @@ return AbstractModel.extend({
                 cell_field: self.cellField,
                 domain: self.domain,
                 range: self.currentRange,
-                readonly_field: this.readonlyField,
             },
             context: self.getContext(),
         })

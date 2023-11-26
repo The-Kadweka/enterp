@@ -8,10 +8,9 @@ import requests
 
 from lxml import etree
 from lxml.objectify import fromstring
-from zeep import Client
-from zeep.transports import Transport
+from suds.client import Client
 from odoo import _, api, fields, models
-from odoo.tools import DEFAULT_SERVER_TIME_FORMAT, float_is_zero
+from odoo.tools import DEFAULT_SERVER_TIME_FORMAT
 from odoo.tools.float_utils import float_compare
 from odoo.tools.misc import html_escape
 from odoo.exceptions import UserError
@@ -59,7 +58,7 @@ class AccountPayment(models.Model):
         string='SAT status',
         help='Refers to the status of the CFDI inside the SAT system.',
         readonly=True, copy=False, required=True,
-        tracking=True, default='undefined')
+        track_visibility='onchange', default='undefined')
     l10n_mx_edi_cfdi_name = fields.Char(string='CFDI name', copy=False, readonly=True,
         help='The attachment name of the CFDI.')
     l10n_mx_edi_payment_method_id = fields.Many2one(
@@ -76,6 +75,10 @@ class AccountPayment(models.Model):
     l10n_mx_edi_cfdi_uuid = fields.Char(string='Fiscal Folio', copy=False, readonly=True,
         help='Folio in electronic invoice, is returned by SAT when send to stamp.',
         compute='_compute_cfdi_values')
+    l10n_mx_edi_cfdi_certificate_id = fields.Many2one('l10n_mx_edi.certificate',
+        string='Certificate', copy=False, readonly=True,
+        help='The certificate used during the generation of the cfdi.',
+        compute='_compute_cfdi_values')
     l10n_mx_edi_cfdi_supplier_rfc = fields.Char('Supplier RFC', copy=False, readonly=True,
         help='The supplier tax identification number.',
         compute='_compute_cfdi_values')
@@ -88,35 +91,15 @@ class AccountPayment(models.Model):
         'In that cases is necessary this field filled, the format is: '
         '\n04|UUID1, UUID2, ...., UUIDn.\n'
         'Example:\n"04|89966ACC-0F5C-447D-AEF3-3EED22E711EE,89966ACC-0F5C-447D-AEF3-3EED22E711EE"')
-    l10n_mx_edi_expedition_date = fields.Date(
-        string='Expedition Date', copy=False,
-        help='Save the expedition date of the CFDI that according to the SAT '
-        'documentation must be the date when the CFDI is issued.')
-    l10n_mx_edi_time_payment = fields.Char(
-        string='Time payment', readonly=True, copy=False,
-        states={'draft': [('readonly', False)]},
-        help="Keep empty to use the current Mexico central time")
-    l10n_mx_edi_partner_bank_id = fields.Many2one(
-        'res.partner.bank', 'Partner Bank', help='If the payment was made '
-        'with a financial institution define the bank account used in this '
-        'payment.')
 
+    @api.multi
     def post(self):
         """Generate CFDI to payment after that invoice is paid"""
         res = super(AccountPayment, self.with_context(
             l10n_mx_edi_manual_reconciliation=False)).post()
         for record in self.filtered(lambda r: r.l10n_mx_edi_is_required()):
-            partner = record.journal_id.l10n_mx_address_issued_id or record.company_id.partner_id.commercial_partner_id
-            tz = self.env['account.move']._l10n_mx_edi_get_timezone(
-                partner.state_id.code)
-            date_mx = datetime.now(tz)
-            record.write({
-                'l10n_mx_edi_expedition_date': date_mx,
-                'l10n_mx_edi_time_payment': date_mx.strftime(
-                    DEFAULT_SERVER_TIME_FORMAT),
-                'l10n_mx_edi_cfdi_name': ('%s-%s-MX-Payment-10.xml' % (
-                    record.journal_id.code, record.name)),
-            })
+            record.l10n_mx_edi_cfdi_name = ('%s-%s-MX-Payment-10.xml' % (
+                record.journal_id.code, record.name))
             record._l10n_mx_edi_retry()
         return res
 
@@ -124,6 +107,7 @@ class AccountPayment(models.Model):
     # Cancellation
     # -----------------------------------------------------------------------
 
+    @api.multi
     def cancel(self):
         result = super(AccountPayment, self).cancel()
         for record in self.filtered(lambda r: r.l10n_mx_edi_pac_status in [
@@ -131,6 +115,7 @@ class AccountPayment(models.Model):
             record._l10n_mx_edi_cancel()
         return result
 
+    @api.multi
     def _l10n_mx_edi_cancel(self):
         """Call the cancel service with records that can be cancelled."""
         records = self.search([
@@ -182,7 +167,7 @@ class AccountPayment(models.Model):
         #TODO helper which is not of too much help and should be removed
         self.ensure_one()
         if cfdi is None:
-            cfdi = base64.decodebytes(self.l10n_mx_edi_cfdi)
+            cfdi = base64.decodestring(self.l10n_mx_edi_cfdi)
         return fromstring(cfdi)
 
     @api.model
@@ -219,12 +204,13 @@ class AccountPayment(models.Model):
         #get the xslt path
         xslt_path = CFDI_XSLT_CADENA_TFD
         #get the cfdi as eTree
-        cfdi = base64.decodebytes(self.l10n_mx_edi_cfdi)
+        cfdi = base64.decodestring(self.l10n_mx_edi_cfdi)
         cfdi = self.l10n_mx_edi_get_xml_etree(cfdi)
         cfdi = self.l10n_mx_edi_get_tfd_etree(cfdi)
         #return the cadena
-        return self.env['account.move'].l10n_mx_edi_generate_cadena(xslt_path, cfdi)
+        return self.env['account.invoice'].l10n_mx_edi_generate_cadena(xslt_path, cfdi)
 
+    @api.multi
     def l10n_mx_edi_is_required(self):
         self.ensure_one()
         required = (
@@ -288,30 +274,29 @@ class AccountPayment(models.Model):
         return self.env.ref(
             'l10n_mx_edi.res_partner_category_force_rep', False)
 
+    @api.multi
     def l10n_mx_edi_log_error(self, message):
         self.ensure_one()
         self.message_post(body=_('Error during the process: %s') % message)
 
+    @api.multi
     @api.depends('l10n_mx_edi_cfdi_name')
     def _compute_cfdi_values(self):
         """Fill the invoice fields from the cfdi values."""
         for rec in self:
             attachment_id = rec.l10n_mx_edi_retrieve_last_attachment()
-            attachment_id = attachment_id[0] if attachment_id else None
+            if not attachment_id:
+                continue
+            attachment_id = attachment_id[0]
             # At this moment, the attachment contains the file size in its 'datas' field because
             # to save some memory, the attachment will store its data on the physical disk.
             # To avoid this problem, we read the 'datas' directly on the disk.
-            datas = attachment_id._file_read(attachment_id.store_fname) if attachment_id else None
-            rec.l10n_mx_edi_cfdi_uuid = None
+            datas = attachment_id._file_read(attachment_id.store_fname)
             if not datas:
-                if attachment_id:
-                    _logger.exception('The CFDI attachment cannot be found')
-                rec.l10n_mx_edi_cfdi = None
-                rec.l10n_mx_edi_cfdi_supplier_rfc = None
-                rec.l10n_mx_edi_cfdi_customer_rfc = None
+                _logger.exception('The CFDI attachment cannot be found')
                 continue
             rec.l10n_mx_edi_cfdi = datas
-            tree = rec.l10n_mx_edi_get_xml_etree(base64.decodebytes(datas))
+            tree = rec.l10n_mx_edi_get_xml_etree(base64.decodestring(datas))
             tfd_node = rec.l10n_mx_edi_get_tfd_etree(tree)
             if tfd_node is not None:
                 rec.l10n_mx_edi_cfdi_uuid = tfd_node.get('UUID')
@@ -320,7 +305,10 @@ class AccountPayment(models.Model):
             rec.l10n_mx_edi_cfdi_customer_rfc = tree.Receptor.get(
                 'Rfc', tree.Receptor.get('rfc'))
             certificate = tree.get('noCertificado', tree.get('NoCertificado'))
+            rec.l10n_mx_edi_cfdi_certificate_id = self.env['l10n_mx_edi.certificate'].sudo().search(
+                [('serial_number', '=', certificate)], limit=1)
 
+    @api.multi
     def _l10n_mx_edi_retry(self):
         rep_is_required = self.filtered(lambda r: r.l10n_mx_edi_is_required())
         for rec in rep_is_required:
@@ -343,7 +331,8 @@ class AccountPayment(models.Model):
                 'name': filename,
                 'res_id': rec.id,
                 'res_model': rec._name,
-                'datas': base64.encodebytes(cfdi),
+                'datas': base64.encodestring(cfdi),
+                'datas_fname': filename,
                 'description': _('Mexican CFDI to payment'),
                 })
             rec.message_post(
@@ -354,6 +343,7 @@ class AccountPayment(models.Model):
             'l10n_mx_edi_pac_status': 'none',
         })
 
+    @api.multi
     def _l10n_mx_edi_create_cfdi_payment(self):
         self.ensure_one()
         qweb = self.env['ir.qweb']
@@ -387,17 +377,10 @@ class AccountPayment(models.Model):
 
         # -Compute date and time of the invoice
         partner = self.journal_id.l10n_mx_address_issued_id or self.company_id.partner_id.commercial_partner_id
-        tz = self.env['account.move']._l10n_mx_edi_get_timezone(
+        tz = self.env['account.invoice']._l10n_mx_edi_get_timezone(
             partner.state_id.code)
         date_mx = datetime.now(tz)
-        if not self.l10n_mx_edi_expedition_date:
-            self.l10n_mx_edi_expedition_date = date_mx.date()
-        if not self.l10n_mx_edi_time_payment:
-            self.l10n_mx_edi_time_payment = date_mx.strftime(
-                DEFAULT_SERVER_TIME_FORMAT)
-
-        time_invoice = datetime.strptime(self.l10n_mx_edi_time_payment,
-                                         DEFAULT_SERVER_TIME_FORMAT).time()
+        time_invoice = date_mx.strftime(DEFAULT_SERVER_TIME_FORMAT)
 
         # -----------------------
         # Create the EDI document
@@ -405,8 +388,8 @@ class AccountPayment(models.Model):
 
         # -Compute certificate data
         values['date'] = datetime.combine(
-            fields.Datetime.from_string(self.l10n_mx_edi_expedition_date),
-            time_invoice).strftime('%Y-%m-%dT%H:%M:%S')
+            fields.Datetime.from_string(self.payment_date),
+            datetime.strptime(time_invoice, '%H:%M:%S').time()).strftime('%Y-%m-%dT%H:%M:%S')
         values['certificate_number'] = certificate_id.serial_number
         values['certificate'] = certificate_id.sudo().get_data()[0]
 
@@ -415,7 +398,7 @@ class AccountPayment(models.Model):
 
         # -Compute cadena
         tree = self.l10n_mx_edi_get_xml_etree(cfdi)
-        cadena = self.env['account.move'].l10n_mx_edi_generate_cadena(
+        cadena = self.env['account.invoice'].l10n_mx_edi_generate_cadena(
             CFDI_XSLT_CADENA, tree)
 
         # Post append cadena
@@ -424,11 +407,12 @@ class AccountPayment(models.Model):
         # TODO - Check with XSD
         return {'cfdi': etree.tostring(tree, pretty_print=True, xml_declaration=True, encoding='UTF-8')}
 
+    @api.multi
     def _l10n_mx_edi_create_cfdi_values(self):
         """Create the values to fill the CFDI template with complement to
         payments."""
         self.ensure_one()
-        invoice_obj = self.env['account.move']
+        invoice_obj = self.env['account.invoice']
         precision_digits = self.env['decimal.precision'].precision_get(
             self.currency_id.name)
         values = {
@@ -436,7 +420,7 @@ class AccountPayment(models.Model):
             'supplier': self.company_id.partner_id.commercial_partner_id,
             'issued': self.journal_id.l10n_mx_address_issued_id,
             'customer': self.partner_id.commercial_partner_id,
-            'fiscal_regime': self.company_id.l10n_mx_edi_fiscal_regime,
+            'fiscal_position': self.company_id.partner_id.property_account_position_id,
             'invoice': invoice_obj,
         }
 
@@ -446,6 +430,7 @@ class AccountPayment(models.Model):
         values.update(self.l10n_mx_edi_payment_data())
         return values
 
+    @api.multi
     def get_cfdi_related(self):
         """To node CfdiRelacionados get documents related with each invoice
         from l10n_mx_edi_origin, hope the next structure:
@@ -460,19 +445,20 @@ class AccountPayment(models.Model):
             'related': [u.strip() for u in uuids],
             }
 
+    @api.multi
     def _l10n_mx_edi_invoice_payment_data(self):
         """Provide a single method to fetch the Totals paid in the Payment
         and makes the l10n_mx_edi_payment_data method more inheritable"""
         self.ensure_one()
         total_paid = total_curr = total_currency = 0
         for invoice in self.invoice_ids:
-            amount = [p for p in invoice._get_reconciled_info_JSON_values() if (
+            amount = [p for p in invoice._get_payments_vals() if (
                 p.get('account_payment_id', False) == self.id or not p.get(
-                    'account_payment_id') and (not p.get('move_id') or p.get(
-                        'move_id') == invoice.id))]
+                    'account_payment_id') and (not p.get('invoice_id') or p.get(
+                        'invoice_id') == invoice.id))]
             amount_payment = sum([data.get('amount', 0.0) for data in amount])
             amount_payment = amount_payment if sum([
-                p.get('amount') for p in invoice._get_reconciled_info_JSON_values()]) <= invoice.amount_total else invoice.amount_total
+                p.get('amount') for p in invoice._get_payments_vals()]) <= invoice.amount_total else invoice.amount_total
             total_paid += amount_payment if invoice.currency_id != self.currency_id else 0
             total_currency += amount_payment if invoice.currency_id == self.currency_id else 0
             total_curr += invoice.currency_id.with_context(
@@ -484,6 +470,7 @@ class AccountPayment(models.Model):
             total_curr=total_curr,
             total_currency=total_currency)
 
+    @api.multi
     def l10n_mx_edi_payment_data(self):
         self.ensure_one()
         # Based on "En caso de no contar con la hora se debe registrar 12:00:00"
@@ -520,16 +507,6 @@ class AccountPayment(models.Model):
         ctx = dict(company_id=self.company_id.id, date=self.payment_date)
         rate = ('%.6f' % (self.currency_id.with_context(**ctx)._convert(
             1, mxn, self.company_id, self.payment_date, round=False))) if self.currency_id.name != 'MXN' else False
-        partner_bank = self.l10n_mx_edi_partner_bank_id.bank_id
-        company_bank = self.journal_id.bank_account_id
-        payment_code = self.l10n_mx_edi_payment_method_id.code
-        acc_emitter_ok = payment_code in [
-            '02', '03', '04', '05', '06', '28', '29', '99']
-        acc_receiver_ok = payment_code in [
-            '02', '03', '04', '05', '28', '29', '99']
-        bank_name_ok = payment_code in ['02', '03', '04', '28', '29', '99']
-        vat = 'XEXX010101000' if partner_bank.country and partner_bank.country != self.env.ref(
-            'base.mx') else partner_bank.l10n_mx_edi_vat
         return {
             'mxn': mxn,
             'payment_date': date,
@@ -544,15 +521,9 @@ class AccountPayment(models.Model):
             'pay_stamp': False,
             'total_paid': total_paid,
             'total_currency': total_currency,
-            'pay_vat_ord': vat if acc_emitter_ok else None,
-            'pay_name_ord': partner_bank.name if bank_name_ok else None,
-            'pay_account_ord': (self.l10n_mx_edi_partner_bank_id.acc_number or '').replace(
-                ' ', '') if acc_emitter_ok else None,
-            'pay_vat_receiver': company_bank.bank_id.l10n_mx_edi_vat if acc_receiver_ok else None,
-            'pay_account_receiver': (company_bank.acc_number or '').replace(
-                ' ', '') if acc_receiver_ok else None,
         }
 
+    @api.multi
     def _l10n_mx_edi_sign(self):
         """Call the sign service with records that can be signed."""
         records = self.search([
@@ -560,6 +531,7 @@ class AccountPayment(models.Model):
             ('id', 'in', self.ids)])
         records._l10n_mx_edi_call_service('sign')
 
+    @api.multi
     def _l10n_mx_edi_post_cancel_process(self, cancelled, code=None, msg=None):
         '''Post process the results of the cancel service.
 
@@ -583,7 +555,7 @@ class AccountPayment(models.Model):
                 amount of one peso.</p>
                 <p><a href="http://www.sat.gob.mx/informacion_fiscal/factura_electronica/Documents/Complementoscfdi/Guia_comple_pagos.pdf">
                 For more information here (Pag. 5)</a></p>''')
-            self.message_post(body=legal)
+            self.message_post(body=legal, message_type='notification')
         else:
             body_msg = _('The cancel service requested failed')
         post_msg = []
@@ -595,12 +567,13 @@ class AccountPayment(models.Model):
             body=body_msg + account_invoice.create_list_html(post_msg))
 
     @run_after_commit
+    @api.multi
     def _l10n_mx_edi_call_service(self, service_type):
         """Call the right method according to the pac_name, it's info returned
         by the '_l10n_mx_edi_%s_info' % pac_name'
         method and the service_type passed as parameter.
         :param service_type: sign or cancel"""
-        invoice_obj = self.env['account.move']
+        invoice_obj = self.env['account.invoice']
         # Regroup the invoices by company (= by pac)
         comp_x_records = groupby(self, lambda r: r.company_id)
         for company_id, records in comp_x_records:
@@ -620,28 +593,29 @@ class AccountPayment(models.Model):
     # SAT/PAC service methods
     # -------------------------------------------------------------------------
 
+    @api.multi
     def _l10n_mx_edi_get_payment_write_off(self):
         self.ensure_one()
+        writeoff_move_line = self.move_line_ids.filtered(lambda l: l.account_id == self.writeoff_account_id and l.name == self.writeoff_label)
         res = {}
-        for invoice in self.invoice_ids:
-            foreign_currency = invoice.currency_id if invoice.currency_id != invoice.company_id.currency_id else False
-
-            pay_term_line_ids = invoice.line_ids.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable'))
-            partials = pay_term_line_ids.mapped('matched_debit_ids') + pay_term_line_ids.mapped('matched_credit_ids')
-            for partial in partials:
-                counterpart_lines = partial.debit_move_id + partial.credit_move_id
-                counterpart_line = counterpart_lines.filtered(lambda line: line not in invoice.line_ids)
-                if counterpart_line.journal_id != invoice.company_id.currency_exchange_journal_id:
-                    continue
-
-                if foreign_currency and partial.currency_id == foreign_currency:
-                    amount = partial.amount_currency
-                else:
-                    amount = partial.company_currency_id._convert(partial.amount, invoice.currency_id, invoice.company_id, invoice.date)
-
-                if float_is_zero(amount, precision_rounding=invoice.currency_id.rounding):
-                    continue
-                res[invoice.id] = amount
+        if writeoff_move_line and self.invoice_ids:
+            # get the writeoff value in invoice currency
+            last_invoice = self.invoice_ids[-1]
+            # if the invoice has the same currency as the company, use the balance
+            if last_invoice.currency_id == last_invoice.company_currency_id:
+                write_off_invoice_currency = writeoff_move_line.balance
+            # if the invoice has the same currency as the payment, use the amount_currency
+            elif last_invoice.currency_id == writeoff_move_line.currency_id:
+                write_off_invoice_currency = writeoff_move_line.amount_currency
+            # if the invoice don't have the same currency as the company or as the payment
+            # convert the write_off from the currency of the payment, to the currency of the invoice
+            else:
+                write_off_invoice_currency = writeoff_move_line.currency_id._convert(
+                    writeoff_move_line.amount_currency or writeoff_move_line.balance, last_invoice.currency_id,
+                    last_invoice.company_id, last_invoice.date
+                )
+            if write_off_invoice_currency > 0:
+                res[last_invoice.id] = write_off_invoice_currency
         return res
 
     @api.model
@@ -658,6 +632,7 @@ class AccountPayment(models.Model):
             'password': 'timbrado.SF.16672' if test else password,
         }
 
+    @api.multi
     def _l10n_mx_edi_solfact_sign(self, pac_info):
         '''SIGN for Solucion Factible.
         '''
@@ -665,10 +640,9 @@ class AccountPayment(models.Model):
         username = pac_info['username']
         password = pac_info['password']
         for rec in self:
-            cfdi = base64.decodebytes(rec.l10n_mx_edi_cfdi)
+            cfdi = rec.l10n_mx_edi_cfdi.decode('UTF-8')
             try:
-                transport = Transport(timeout=20)
-                client = Client(url, transport=transport)
+                client = Client(url, timeout=20)
                 response = client.service.timbrar(username, password, cfdi, False)
             except Exception as e:
                 rec.l10n_mx_edi_log_error(str(e))
@@ -676,11 +650,9 @@ class AccountPayment(models.Model):
             msg = getattr(response.resultados[0], 'mensaje', None)
             code = getattr(response.resultados[0], 'status', None)
             xml_signed = getattr(response.resultados[0], 'cfdiTimbrado', None)
-            if xml_signed:
-                xml_signed = base64.b64encode(xml_signed)
-            rec._l10n_mx_edi_post_sign_process(
-                xml_signed if xml_signed else None, code, msg)
+            rec._l10n_mx_edi_post_sign_process(xml_signed, code, msg)
 
+    @api.multi
     def _l10n_mx_edi_solfact_cancel(self, pac_info):
         '''CANCEL for Solucion Factible.
         '''
@@ -688,21 +660,17 @@ class AccountPayment(models.Model):
         username = pac_info['username']
         password = pac_info['password']
         for rec in self:
-            uuid_replace = rec.l10n_mx_edi_cancel_invoice_id.l10n_mx_edi_cfdi_uuid
-            motivo = "01" if uuid_replace else "02"
-            uuid = rec.l10n_mx_edi_cfdi_uuid + "|" + motivo + "|"
-            if uuid_replace:
-                uuid = uuid + uuid_replace
+            uuids = [rec.l10n_mx_edi_cfdi_uuid]
             certificate_ids = rec.company_id.l10n_mx_edi_certificate_ids
             certificate_id = certificate_ids.sudo().get_valid_certificate()
-            cer_pem = certificate_id.get_pem_cer(certificate_id.content)
-            key_pem = certificate_id.get_pem_key(
-                certificate_id.key, certificate_id.password)
+            cer_pem = base64.encodestring(certificate_id.get_pem_cer(
+                certificate_id.content)).decode('UTF-8')
+            key_pem = base64.encodestring(certificate_id.get_pem_key(
+                certificate_id.key, certificate_id.password)).decode('UTF-8')
             key_password = certificate_id.password
             try:
-                transport = Transport(timeout=20)
-                client = Client(url, transport=transport)
-                response = client.service.cancelar(username, password, uuid, cer_pem, key_pem, key_password)
+                client = Client(url, timeout=20)
+                response = client.service.cancelar(username, password, uuids, cer_pem, key_pem, key_password)
             except Exception as e:
                 rec.l10n_mx_edi_log_error(str(e))
                 continue
@@ -713,6 +681,7 @@ class AccountPayment(models.Model):
             code = '' if cancelled else code
             rec._l10n_mx_edi_post_cancel_process(cancelled, code, msg)
 
+    @api.multi
     def _l10n_mx_edi_finkok_sign(self, pac_info):
         """SIGN for Finkok."""
         # TODO - Duplicated with the invoice one
@@ -720,10 +689,9 @@ class AccountPayment(models.Model):
         username = pac_info['username']
         password = pac_info['password']
         for rec in self:
-            cfdi = base64.decodebytes(rec.l10n_mx_edi_cfdi)
+            cfdi = [rec.l10n_mx_edi_cfdi.decode('UTF-8')]
             try:
-                transport = Transport(timeout=20)
-                client = Client(url, transport=transport)
+                client = Client(url, timeout=20)
                 response = client.service.stamp(cfdi, username, password)
             except Exception as e:
                 rec.l10n_mx_edi_log_error(str(e))
@@ -731,13 +699,14 @@ class AccountPayment(models.Model):
             code = 0
             msg = None
             if response.Incidencias:
-                code = getattr(response.Incidencias.Incidencia[0], 'CodigoError', None)
-                msg = getattr(response.Incidencias.Incidencia[0], 'MensajeIncidencia', None)
+                code = getattr(response.Incidencias[0][0], 'CodigoError', None)
+                msg = getattr(response.Incidencias[0][0], 'MensajeIncidencia', None)
             xml_signed = getattr(response, 'xml', None)
             if xml_signed:
                 xml_signed = base64.b64encode(xml_signed.encode('utf-8'))
             rec._l10n_mx_edi_post_sign_process(xml_signed, code, msg)
 
+    @api.multi
     def _l10n_mx_edi_finkok_cancel(self, pac_info):
         '''CANCEL for Finkok.
         '''
@@ -749,36 +718,32 @@ class AccountPayment(models.Model):
             certificate_ids = inv.company_id.l10n_mx_edi_certificate_ids
             certificate_id = certificate_ids.sudo().get_valid_certificate()
             company_id = self.company_id
-            cer_pem = certificate_id.get_pem_cer(certificate_id.content)
-            key_pem = certificate_id.get_pem_key(
-                certificate_id.key, certificate_id.password)
+            cer_pem = base64.encodestring(certificate_id.get_pem_cer(
+                certificate_id.content)).decode('UTF-8')
+            key_pem = base64.encodestring(certificate_id.get_pem_key(
+                certificate_id.key, certificate_id.password)).decode('UTF-8')
             cancelled = False
             code = False
             try:
-                transport = Transport(timeout=20)
-                client = Client(url, transport=transport)
-                uuid_replace = inv.l10n_mx_edi_cancel_invoice_id.l10n_mx_edi_cfdi_uuid
-                factory = client.type_factory('apps.services.soap.core.views')
-                uuid_type = factory.UUID()
-                uuid_type.UUID = uuid
-                uuid_type.Motivo = "01" if uuid_replace else "02"
-                if uuid_replace:
-                    uuid_type.FolioSustitucion = uuid_replace.l10n_mx_edi
-                invoices_list = factory.UUIDArray(uuid_type)
-                response = client.service.cancel(invoices_list, username, password, company_id.vat, cer_pem, key_pem)
+                client = Client(url, timeout=20)
+                invoices_list = client.factory.create("UUIDS")
+                invoices_list.uuids.string = [uuid]
+                response = client.service.cancel(invoices_list, username, password, company_id.vat, cer_pem.replace(
+                    '\n', ''), key_pem)
             except Exception as e:
                 inv.l10n_mx_edi_log_error(str(e))
                 continue
-            if not (hasattr(response, 'Folios') and response.Folios):
+            if not hasattr(response, 'Folios'):
                 msg = _('A delay of 2 hours has to be respected before to cancel')
             else:
-                code = getattr(response.Folios.Folio[0], 'EstatusUUID', None)
+                code = getattr(response.Folios[0][0], 'EstatusUUID', None)
                 cancelled = code in ('201', '202')  # cancelled or previously cancelled
                 # no show code and response message if cancel was success
                 code = '' if cancelled else code
                 msg = '' if cancelled else _("Cancelling got an error")
             inv._l10n_mx_edi_post_cancel_process(cancelled, code, msg)
 
+    @api.multi
     def _l10n_mx_edi_post_sign_process(self, xml_signed, code=None, msg=None):
         """Post process the results of the sign service.
 
@@ -810,6 +775,7 @@ class AccountPayment(models.Model):
         self.message_post(
             body=body_msg + account_invoice.create_list_html(post_msg))
 
+    @api.multi
     def l10n_mx_edi_update_pac_status(self):
         """Synchronize both systems: Odoo & PAC if the invoices need to be
         signed or cancelled."""
@@ -822,6 +788,7 @@ class AccountPayment(models.Model):
             elif record.l10n_mx_edi_pac_status == 'retry':
                 record._l10n_mx_edi_retry()
 
+    @api.multi
     def l10n_mx_edi_update_sat_status(self):
         """Synchronize both systems: Odoo & SAT to make sure the invoice is valid.
         """
@@ -860,28 +827,13 @@ class AccountPayment(models.Model):
             rec.l10n_mx_edi_sat_status = CFDI_SAT_QR_STATE.get(
                 status[0] if status else '', 'none')
 
+    @api.multi
     def l10n_mx_edi_force_payment_complement(self):
         '''Allow force the CFDI generation when the complement is not required
         '''
         self.with_context(force_ref=True)._l10n_mx_edi_retry()
 
-    def _l10n_mx_edi_sat_synchronously(self, batch_size=10):
-        """Update the SAT status synchronously
-
-        This method Calls :meth:`~.l10n_mx_edi_update_sat_status` by batches,
-        ensuring changes are committed after processing each batch. This is
-        intended to be able to process a lot of records on a safely manner,
-        avoiding a possible sistematic failure withoud any payment updated.
-
-        This is especially useful when running crons.
-
-        :param batch_size: the number of payments to process by batch
-        :type batch_size: int
-        """
-        for idx in range(0, len(self), batch_size):
-            with self.env.cr.savepoint():
-                self[idx:idx+batch_size].l10n_mx_edi_update_sat_status()
-
+    @api.multi
     def _set_cfdi_origin(self, uuid):
         """Try to write the origin in of the CFDI, it is important in order
         to have a centralized way to manage this elements due to the fact
@@ -895,17 +847,14 @@ class AccountPayment(models.Model):
         self.update({'l10n_mx_edi_origin': origin})
         return origin
 
+    @api.multi
     def action_draft(self):
-        for record in self.filtered(lambda payment: payment.l10n_mx_edi_cfdi_uuid and payment.state == 'cancelled'):
-            record.write({
-                'l10n_mx_edi_expedition_date': False,
-                'l10n_mx_edi_pac_status': 'none',
-                'l10n_mx_edi_time_payment': False,
-                'l10n_mx_edi_origin': record._set_cfdi_origin(
-                    record.l10n_mx_edi_cfdi_uuid),
-            })
+        for record in self.filtered('l10n_mx_edi_cfdi_uuid'):
+            record.l10n_mx_edi_origin = record._set_cfdi_origin(record.l10n_mx_edi_cfdi_uuid)
+            record.l10n_mx_edi_pac_status = 'none'
         return super(AccountPayment, self).action_draft()
 
+    @api.multi
     def unlink(self):
         mx_payment = self.filtered(lambda r: r.l10n_mx_edi_is_required() and r.l10n_mx_edi_cfdi)
         mx_payment.with_context(disable_after_commit=True)._l10n_mx_edi_cancel()
@@ -919,30 +868,20 @@ class AccountPayment(models.Model):
                               'cancel it in the SAT system.'))
         return super(AccountPayment, self).unlink()
 
-    @api.onchange('partner_id')
-    def _l10n_mx_onchange_partner_bank_id(self):
-        self.l10n_mx_edi_partner_bank_id = False
-        if len(self.partner_id.commercial_partner_id.bank_ids) == 1:
-            self.l10n_mx_edi_partner_bank_id = self.partner_id.commercial_partner_id.bank_ids  # noqa
 
-
-class AccountPaymentRegister(models.TransientModel):
-    _inherit = 'account.payment.register'
+class AccountRegisterPayments(models.TransientModel):
+    _inherit = 'account.register.payments'
 
     l10n_mx_edi_payment_method_id = fields.Many2one(
         'l10n_mx_edi.payment.method',
         string='Payment Way',
         help='Indicates the way the payment was/will be received, where the '
         'options could be: Cash, Nominal Check, Credit Card, etc.')
-    l10n_mx_edi_partner_bank_id = fields.Many2one(
-        'res.partner.bank', 'Partner Bank', help='If the payment was made '
-        'with a financial institution define the bank account used in this '
-        'payment.')
 
-    def _prepare_payment_vals(self, invoice):
-        res = super(AccountPaymentRegister, self)._prepare_payment_vals(invoice)
+    def _prepare_payment_vals(self, invoices):
+        res = super(AccountRegisterPayments, self)._prepare_payment_vals(
+            invoices)
         res.update({
             'l10n_mx_edi_payment_method_id': self.l10n_mx_edi_payment_method_id.id,
-            'l10n_mx_edi_partner_bank_id': self.l10n_mx_edi_partner_bank_id.id,
         })
         return res

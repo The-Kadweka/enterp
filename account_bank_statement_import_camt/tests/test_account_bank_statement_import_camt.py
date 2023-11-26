@@ -3,32 +3,18 @@
 import base64
 
 from odoo.exceptions import UserError
-from odoo.addons.account.tests.account_test_savepoint import AccountTestInvoicingCommon
+from odoo.tests.common import TransactionCase
 from odoo.modules.module import get_module_resource
 from odoo.addons.account_bank_statement_import_camt.wizard.account_bank_statement_import_camt import _logger as camt_wizard_logger
 
 
-NORMAL_AMOUNTS = [100, 150, 250]
-LARGE_AMOUNTS = [10000, 15000, 25000]
-
-class TestCamtFile(AccountTestInvoicingCommon):
-
+class TestCamtFile(TransactionCase):
     """ Tests for import bank statement CAMT file format (account.bank.statement.import) """
-    @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
-        # Setup a partner with the same bank accounts found in the camt file
-        cls.partner_id = cls.env['res.partner'].create({'name': 'Foo'})
-        cls.env['res.partner.bank'].create({
-            'acc_number': '10987654322',
-            'partner_id': cls.partner_id.id
-        })
-        cls.env['res.partner.bank'].create({
-            'acc_number': 'BE68539007547034',
-            'partner_id': cls.partner_id.id
-        })
-        cls.eur_company = cls.env['res.company'].create({'name': "SuperCompany EUR", 'currency_id': cls.env.ref('base.EUR').id})
-        cls.usd_company = cls.env['res.company'].create({'name': "SuperCompany USD", 'currency_id': cls.env.ref('base.USD').id})
+    def setUp(self):
+        super(TestCamtFile, self).setUp()
+        self.env['res.users'].browse([1]).lang = False
+        self.eur_company = self.env['res.company'].create({'name': "SuperCompany EUR", 'currency_id': self.env.ref('base.EUR').id})
+        self.usd_company = self.env['res.company'].create({'name': "SuperCompany USD", 'currency_id': self.env.ref('base.USD').id})
 
     def test_camt_file_import(self):
         # Get CAMT file content
@@ -43,21 +29,19 @@ class TestCamtFile(AccountTestInvoicingCommon):
             bank_journal.write({'currency_id': self.env.ref("base.USD").id})
 
         # Use an import wizard to process the file
-        self.env['account.bank.statement.import'].with_context(journal_id=bank_journal.id).create({'attachment_ids': [(0, 0, {
-            'name': 'test file',
-            'datas': camt_file,
-        })]}).import_file()
+        import_wizard = self.env['account.bank.statement.import'].with_context(journal_id=bank_journal_id).create({'data_file': camt_file})
+        import_wizard.import_file()
 
         # Check the imported bank statement
         bank_st_record = self.env['account.bank.statement'].search([('name', '=', '0574908765.2015-12-05')], limit=1)
         self.assertEqual(bank_st_record.balance_start, 8998.20, "Start balance not matched.")
-        self.assertAlmostEqual(bank_st_record.balance_end_real, 2661.49, 2, "End balance not matched.")
+        self.assertEqual(bank_st_record.balance_end_real, 2661.49, "End balance not matched.")
 
         # Check an imported bank statement line
         line = bank_st_record.line_ids.filtered(lambda r: r.ref == 'INNDNL2U20150105000217200000708')
         self.assertEqual(line.partner_name, 'Deco Addict')
         self.assertEqual(line.amount, 1636.88)
-        self.assertEqual(line.partner_id.id, self.partner_id.id)
+        self.assertEqual(line.partner_id.id, self.ref('base.res_partner_2'))
 
     def test_minimal_camt_file_import(self):
         """
@@ -81,7 +65,6 @@ class TestCamtFile(AccountTestInvoicingCommon):
         """
         This test aims at importing a file with amounts expressed in EUR and USD.
         The company's currency is USD.
-        The exchange rate is provided and the company's currency is set in the source currency.
         """
         usd_currency = self.env.ref('base.USD')
         self.env.user.write({'company_id': self.usd_company.id})
@@ -98,47 +81,12 @@ class TestCamtFile(AccountTestInvoicingCommon):
 
     def test_minimal_and_multicurrency_camt_file_import_04(self):
         """
-        This test aims at importing a file with amounts expressed in EUR and USD.
+        This test aims at importing a file with amounts expressed in EUR and USD but with no rate provided.
         The company's currency is USD.
-        This is the same test than test_minimal_and_multicurrency_camt_file_import_02,
-        except that the company's currency is set in the target currency.
         """
         usd_currency = self.env.ref('base.USD')
         self.env.user.write({'company_id': self.usd_company.id})
         self._test_minimal_camt_file_import('camt_053_minimal_and_multicurrency_04.xml', usd_currency)
-
-    def test_minimal_and_multicurrency_camt_file_import_05(self):
-        """
-        This test aims at importing a file with amounts expressed in EUR and USD.
-        The company's currency is USD.
-        This is the same test than test_minimal_and_multicurrency_camt_file_import_04,
-        except that the exchange rate is inverted.
-        """
-        usd_currency = self.env.ref('base.USD')
-        self.env.user.write({'company_id': self.usd_company.id})
-        self._test_minimal_camt_file_import('camt_053_minimal_and_multicurrency_05.xml', usd_currency)
-
-    def test_minimal_and_multicurrency_camt_file_import_06(self):
-        """
-        This test aims at importing a file with amounts expressed in EUR and USD.
-        The company's currency is USD.
-        This is the same test than test_minimal_and_multicurrency_camt_file_import_02,
-        except that the exchange rate is leading to a rounding difference.
-        """
-        usd_currency = self.env.ref('base.USD')
-        self.env.user.write({'company_id': self.usd_company.id})
-        self._test_minimal_camt_file_import('camt_053_minimal_and_multicurrency_06.xml', usd_currency)
-
-    def test_minimal_and_multicurrency_camt_file_import_07(self):
-        """
-        This test aims at importing a file with amounts expressed in EUR and USD.
-        The company's currency is USD.
-        This is the same test than test_minimal_and_multicurrency_camt_file_import,
-        except that the exchange rate is rounded to 4 digits.
-        """
-        usd_currency = self.env.ref('base.USD')
-        self.env.user.write({'company_id': self.usd_company.id})
-        self._test_minimal_camt_file_import('camt_053_minimal_and_multicurrency_07.xml', usd_currency)
 
     def test_several_minimal_stmt_different_currency(self):
         """
@@ -188,10 +136,9 @@ class TestCamtFile(AccountTestInvoicingCommon):
         )
         with open(camt_file_path, 'rb') as fd:
             camt_file = base64.b64encode(fd.read())
-        self.env['account.bank.statement.import'].with_context(journal_id=bank_journal.id).create({'attachment_ids': [(0, 0, {
-            'name': 'test file',
-            'datas': camt_file,
-        })]}).import_file()
+        self.env['account.bank.statement.import'].with_context(
+            journal_id=bank_journal.id
+        ).create({'data_file': camt_file}).import_file()
 
     def _test_minimal_camt_file_import(self, camt_file_name, currency, start_balance=1000, end_balance=1500):
         # Create a bank account and journal corresponding to the CAMT
@@ -212,20 +159,18 @@ class TestCamtFile(AccountTestInvoicingCommon):
         line = bank_st_record.line_ids.ensure_one()
         self.assertEqual(line.amount, end_balance - start_balance, "Transaction not matched")
 
-    def _test_camt_with_several_tx_details(self, filename, expected_amounts=None):
-        if expected_amounts is None:
-            expected_amounts = NORMAL_AMOUNTS
+    def _test_camt_with_several_tx_details(self, filename):
         usd_currency = self.env.ref('base.USD')
         self.env.user.write({'company_id': self.usd_company.id})
         self._import_camt_file(filename, usd_currency)
         imported_statement = self.env['account.bank.statement'].search([('company_id', '=', self.usd_company.id)], order='id desc', limit=1)
         self.assertEqual(len(imported_statement.line_ids), 3)
         self.assertEqual(imported_statement.line_ids[0].name, 'label01')
-        self.assertEqual(imported_statement.line_ids[0].amount, expected_amounts[0])
+        self.assertEqual(imported_statement.line_ids[0].amount, 100)
         self.assertEqual(imported_statement.line_ids[1].name, 'label02')
-        self.assertEqual(imported_statement.line_ids[1].amount, expected_amounts[1])
+        self.assertEqual(imported_statement.line_ids[1].amount, 150)
         self.assertEqual(imported_statement.line_ids[2].name, 'label03')
-        self.assertEqual(imported_statement.line_ids[2].amount, expected_amounts[2])
+        self.assertEqual(imported_statement.line_ids[2].amount, 250)
 
     def test_camt_with_several_tx_details(self):
         self._test_camt_with_several_tx_details('camt_053_several_tx_details.xml')
@@ -233,24 +178,8 @@ class TestCamtFile(AccountTestInvoicingCommon):
     def test_camt_with_several_tx_details_and_instructed_amount(self):
         self._test_camt_with_several_tx_details('camt_053_several_tx_details_and_instructed_amount.xml')
 
-    def test_camt_with_several_tx_details_and_instructed_amount_02(self):
-        self._test_camt_with_several_tx_details('camt_053_several_tx_details_and_instructed_amount_02.xml')
-
-    def test_camt_with_several_tx_details_and_multicurrency_01(self):
-        self._test_camt_with_several_tx_details('camt_053_several_tx_details_and_multicurrency_01.xml')
-
-    def test_camt_with_several_tx_details_and_multicurrency_02(self):
-        self._test_camt_with_several_tx_details('camt_053_several_tx_details_and_multicurrency_02.xml')
-
-    def test_camt_with_several_tx_details_and_multicurrency_03(self):
-        self._test_camt_with_several_tx_details('camt_053_several_tx_details_and_multicurrency_03.xml')
-
-    def test_camt_with_several_tx_details_and_multicurrency_04(self):
-        self._test_camt_with_several_tx_details('camt_053_several_tx_details_and_multicurrency_04.xml',
-            expected_amounts=LARGE_AMOUNTS)
-
-    def test_camt_with_several_tx_details_and_charges(self):
-        self._test_camt_with_several_tx_details('camt_053_several_tx_details_and_charges.xml')
+    def test_camt_with_several_tx_details_and_multicurrency(self):
+        self._test_camt_with_several_tx_details('camt_053_several_tx_details_and_multicurrency.xml')
 
     def test_several_ibans_match_journal_camt_file_import(self):
         # Create a bank account and journal corresponding to the CAMT
@@ -274,10 +203,9 @@ class TestCamtFile(AccountTestInvoicingCommon):
         with open(camt_file_path, 'rb') as fd:
             camt_file = base64.b64encode(fd.read())
 
-        wizard = self.env['account.bank.statement.import'].with_context(journal_id=bank_journal.id).create({'attachment_ids': [(0, 0, {
-            'name': 'test file',
-            'datas': camt_file,
-        })]})
+        wizard = self.env['account.bank.statement.import'].with_context(
+            journal_id=bank_journal.id
+        ).create({'data_file': camt_file})
 
         with self.assertLogs(level="WARNING") as log_catcher:
             wizard.import_file()
@@ -323,10 +251,9 @@ class TestCamtFile(AccountTestInvoicingCommon):
         with open(camt_file_path, 'rb') as fd:
             camt_file = base64.b64encode(fd.read())
 
-        wizard = self.env['account.bank.statement.import'].with_context(journal_id=bank_journal.id).create({'attachment_ids': [(0, 0, {
-            'name': 'test file',
-            'datas': camt_file,
-        })]})
+        wizard = self.env['account.bank.statement.import'].with_context(
+            journal_id=bank_journal.id
+        ).create({'data_file': camt_file})
 
         with self.assertLogs(camt_wizard_logger, level="WARNING") as log_catcher:
             with self.assertRaises(UserError) as error_catcher:
@@ -336,10 +263,8 @@ class TestCamtFile(AccountTestInvoicingCommon):
         self.assertIn("The following statements will not be imported", log_catcher.output[0],
             "The logged warning warns about non-imported statements")
 
-        self.assertIn("Please check the currency on your bank journal.\n"
-                      "No statements in currency {} were found in this CAMT file."\
-                        .format((bank_journal.currency_id or bank_journal.company_id.currency_id).name),
-            error_catcher.exception.args[0])
+        self.assertEqual(error_catcher.exception.args[0],
+            "This file doesn't contain any statement.")
 
 
     def test_several_ibans_missing_journal_id_camt_file_import(self):
@@ -363,10 +288,9 @@ class TestCamtFile(AccountTestInvoicingCommon):
         with open(camt_file_path, 'rb') as fd:
             camt_file = base64.b64encode(fd.read())
 
-        wizard = self.env['account.bank.statement.import'].with_context(journal_id=bank_journal.id).create({'attachment_ids': [(0, 0, {
-            'name': 'test file',
-            'datas': camt_file,
-        })]})
+        wizard = self.env['account.bank.statement.import'].with_context(
+            journal_id=bank_journal.id
+        ).create({'data_file': camt_file})
 
         with self.assertLogs(camt_wizard_logger, level="WARNING") as log_catcher:
             with self.assertRaises(UserError) as error_catcher:
@@ -399,18 +323,7 @@ class TestCamtFile(AccountTestInvoicingCommon):
 
     def test_charges_camt_file_import(self):
         """
-        This test aims to import a statement having transactions including charges in their
-        total amount. In that case, we need to check that the retrieved amount is correct.
         """
         usd_currency = self.env.ref('base.USD')
         self.env.user.write({'company_id': self.usd_company.id})
         self._test_minimal_camt_file_import('camt_053_minimal_charges.xml', usd_currency)
-
-    def test_charges_camt_file_import_02(self):
-        """
-        This test aims to import a statement having transactions including charges in their
-        total amount. In that case, we need to check that the retrieved amount is correct.
-        """
-        usd_currency = self.env.ref('base.USD')
-        self.env.user.write({'company_id': self.usd_company.id})
-        self._test_minimal_camt_file_import('camt_053_minimal_charges_02.xml', usd_currency)

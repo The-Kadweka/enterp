@@ -13,7 +13,6 @@
         <field name="component_id" ref="mrp.product_product_computer_desk_head"/>
         <field name="worksheet">scroll</field>
         <field name="worksheet_page">1</field>
-        <field name="sequence">2</field>
     </record>
 
     <record id="quality_point_text" model="quality.point">
@@ -21,12 +20,11 @@
         <field name="product_tmpl_id" ref="mrp.product_product_computer_desk_product_template"/>
         <field name="picking_type_id" model="stock.warehouse" eval="obj().env.ref('stock.warehouse0').manu_type_id.id"/>
         <field name="operation_id" ref="mrp.mrp_routing_workcenter_5"/>
-        <field name="test_type_id" ref="quality.test_type_text"/>
+        <field name="test_type_id" ref="test_type_text"/>
         <field name="note">Please ensure you are using the new SRX679 screwdriver.</field>
         <field name="title">Choice of screwdriver</field>
         <field name="worksheet">scroll</field>
         <field name="worksheet_page">1</field>
-        <field name="sequence">3</field>
     </record>
 
     <record id="quality_point_component_registration_2" model="quality.point">
@@ -40,7 +38,6 @@
         <field name="component_id" ref="mrp.product_product_computer_desk_leg"/>
         <field name="worksheet">scroll</field>
         <field name="worksheet_page">4</field>
-        <field name="sequence">7</field>
     </record>
 
     <record id="quality_point_text_2" model="quality.point">
@@ -48,12 +45,11 @@
         <field name="product_tmpl_id" ref="mrp.product_product_computer_desk_product_template"/>
         <field name="picking_type_id" model="stock.warehouse" eval="obj().env.ref('stock.warehouse0').manu_type_id.id"/>
         <field name="operation_id" ref="mrp.mrp_routing_workcenter_5"/>
-        <field name="test_type_id" ref="quality.test_type_text"/>
+        <field name="test_type_id" ref="test_type_text"/>
         <field name="note">Please attach the legs to the table as shown below.</field>
         <field name="title">Table Legs</field>
         <field name="worksheet">scroll</field>
         <field name="worksheet_page">4</field>
-        <field name="sequence">6</field>
     </record>
 
     <record id="quality_point_print_labels" model="quality.point">
@@ -63,8 +59,6 @@
         <field name="operation_id" ref="mrp.mrp_routing_workcenter_5"/>
         <field name="test_type_id" ref="mrp_workorder.test_type_print_label"/>
         <field name="title">Print Labels</field>
-        <field name="worksheet_page">0</field>
-        <field name="sequence">8</field>
     </record>
 
     <!-- Quality Control From WorkOrder -->
@@ -77,7 +71,7 @@
     </record>
 
     <record id="base.group_user" model="res.groups">
-        <field name="implied_ids" eval="[(4, ref('mrp.group_mrp_routings')), (4, ref('mrp_workorder.group_mrp_wo_tablet_timer'))]"/>
+        <field name="implied_ids" eval="[(4, ref('mrp.group_mrp_routings'))]"/>
     </record>
 
 

@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, models
-from odoo.http import request
+
 
 class IrUiMenu(models.Model):
     _name = 'ir.ui.menu'
@@ -13,14 +13,8 @@ class IrUiMenu(models.Model):
     def load_menus(self, debug):
         menu_root = super(IrUiMenu, self).load_menus(debug)
 
-        cids = request and request.httprequest.cookies.get('cids')
-        if cids:
-            cids = [int(cid) for cid in cids.split(',')]
-        company = self.env['res.company'].browse(cids[0]) \
-            if cids and all([cid in self.env.user.company_ids.ids for cid in cids]) \
-            else self.env.user.company_id
-
-        menu_root['background_image'] = bool(company.background_image)
+        if self.env.user.company_id.background_image:
+            menu_root['background_image'] = True
 
         return menu_root
 

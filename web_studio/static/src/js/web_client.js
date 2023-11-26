@@ -1,7 +1,6 @@
 odoo.define('web_studio.WebClient', function (require) {
 "use strict";
 
-var ajax = require('web.ajax');
 var core = require('web.core');
 var session = require('web.session');
 var WebClient = require('web.WebClient');
@@ -17,7 +16,6 @@ WebClient.include({
         'reload_menu_data': '_onReloadMenuData',
         'studio_icon_clicked': '_onStudioIconClicked',
         'studio_history_back': '_onStudioHistoryBack',
-        'switch_studio_view': '_onSwitchStudioView',
     }),
 
     /**
@@ -56,9 +54,7 @@ WebClient.include({
         return this._super.apply(this, arguments).then(function() {
             if (self.studioMode === 'main') {
                 var action = self.action_manager.getCurrentStudioAction();
-                if (action) {
-                    return self.menu.renderStudioMenu(action);
-                }
+                return self.menu.renderStudioMenu(action);
             }
         });
     },
@@ -70,7 +66,7 @@ WebClient.include({
             // Wizards in the app creator can be opened (ex: Import wizard)
             // TODO: what if we modify target = 'curent' to modify it?
             this.do_warn("Studio", _t("Wizards are not editable with Studio."));
-            return Promise.reject();
+            return $.Deferred().reject();
         }
 
         var blockPushState = this.studioMode && !action.studioNavigation;
@@ -80,15 +76,13 @@ WebClient.include({
             options = options || {};
             options.pushState = false;
         }
-        var prom =  this._super(action, options)
-        prom.then(function (action) {
+        return this._super(action, options).done(function (action) {
             if (blockPushState) {
                 // pushState is reset to true in action_manager (see @doAction)
                 // but we never want the state to be updated in Studio
                 action.pushState = false;
             }
         });
-        return prom;
     },
     /**
      * @override
@@ -101,14 +95,14 @@ WebClient.include({
         }
         return this._super.apply(this, arguments).then(function () {
             // this is normally done by _on_app_clicked_done but should also be
-            // done if the promise is rejected
+            // done if the deferred is rejected
             self.openingMenu = false;
         });
     },
     /**
      * Opens the App Creator action.
      *
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     openAppCreator: function () {
         var self = this;
@@ -121,17 +115,13 @@ WebClient.include({
      */
     show_application: function () {
         var self = this;
-        var qs = $.deparam.querystring();
-        self.studioMode = _.contains(['main', 'app_creator'], qs.studio) ? qs.studio : false;
-        var def = self.studioMode ? ajax.loadLibs({assetLibs: this._studioAssets}) : Promise.resolve();
-        var _super = this._super;
-        return def.then(function () {
-            return _super.apply(self, arguments).then(function () {
-                if (self.studioMode) {
-                    self._updateContext();
-                    return self._openStudio();
-                }
-            });
+        return this._super.apply(this, arguments).then(function () {
+            var qs = $.deparam.querystring();
+            self.studioMode = _.contains(['main', 'app_creator'], qs.studio) ? qs.studio : false;
+            if (self.studioMode) {
+                self._updateContext();
+                return self._openStudio();
+            }
         });
     },
     /**
@@ -180,7 +170,7 @@ WebClient.include({
      * Closes Studio.
      *
      * @private
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _closeStudio: function () {
         var self = this;
@@ -201,7 +191,7 @@ WebClient.include({
             def = this.action_manager.restoreStudioAction();
         }
 
-        return Promise.resolve(def).then(function () {
+        return $.when(def).then(function () {
             self._toggleStudioMode();
             self.$el.toggleClass('o_in_studio', !!self.studioMode);
         });
@@ -220,7 +210,7 @@ WebClient.include({
                && action.res_model
                // we don't want to edit Settings as it is a special case of form view
                // this is a heuristic to determine if the action is Settings
-               && (action.res_model.indexOf('settings') === -1 || action.res_model.indexOf('x_') === 0)
+               && action.res_model.indexOf('settings') === -1
                // we don't want to edit Dashboard views
                && action.res_model !== 'board.board'
                ? true : false;
@@ -230,14 +220,15 @@ WebClient.include({
      *
      * @private
      * @param {string} [viewType]
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _navigateInStudio: function (viewType) {
         var self = this;
         // the action has been processed by the AM
-        var action = this.action_manager.getLastAction();
+        var action = this.action_manager.getCurrentAction();
         var options = {
             action: action,
+            studio_clear_breadcrumbs: true,  // see @_pushController in AM
             viewType: viewType,
         };
         return this._openStudioMain(options).then(function () {
@@ -252,7 +243,7 @@ WebClient.include({
         if (this.studioMode) {
             if (!this._isStudioEditable(action)) {
                 this.do_warn("Studio", _t("This action is not editable by Studio"));
-                return Promise.reject();
+                return $.Deferred().reject();
             }
             // tag the action for the actionManager
             action.studioNavigation = true;
@@ -265,30 +256,26 @@ WebClient.include({
     },
     /**
      * @private
-     * @returns {Promise}
+     * @returns {Deferred}
      */
-     _studioAssets: ['web_editor.compiled_assets_wysiwyg', 'web_studio.compiled_assets_studio'],
     _openStudio: function () {
         var self = this;
-        var def = ajax.loadLibs({assetLibs: this._studioAssets});
+        var def;
 
         if (this.studioMode === 'main') {
             var action = this.action_manager.getCurrentAction();
             var controller = this.action_manager.getCurrentController();
-            def = def.then(this._openStudioMain.bind(this, {
+            def = this._openStudioMain({
                 action: action,
-                controllerState: controller.widget.exportState(),
                 viewType: controller.viewType,
-            }));
-        } else {
-            def.then(function() {
-                // the app creator is not opened here, it's opened by clicking on
-                // the "New App" icon, when the HomeMenu is in `studio` mode.
-                self.menu.toggle_mode(true, false);  // hide the back button
             });
+        } else {
+            // the app creator is not opened here, it's opened by clicking on
+            // the "New App" icon, when the HomeMenu is in `studio` mode.
+            this.menu.toggle_mode(true, false);  // hide the back button
         }
 
-        return Promise.resolve(def).then(function () {
+        return $.when(def).then(function () {
             self.$el.toggleClass('o_in_studio', !!self.studioMode);
             self._toggleStudioMode();
         });
@@ -300,28 +287,10 @@ WebClient.include({
      * @param {Object} options
      * @param {Object} options.action
      * @param {string} options.action.res_model
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _openStudioMain: function (options) {
         return this.do_action('action_web_studio_action_editor', options);
-    },
-    /**
-     * @private
-     * @returns {Promise}
-     */
-    _redrawMenuWidgets: function () {
-        var self = this;
-        var oldHomeMenu = this.home_menu;
-        var oldMenu = this.menu;
-        return this.instanciate_menu_widgets().then(function () {
-            if (oldHomeMenu) {
-                oldHomeMenu.destroy();
-            }
-            if (oldMenu) {
-                oldMenu.destroy();
-            }
-            self.menu.$el.prependTo(self.$el);
-        });
     },
     /**
      * @private
@@ -384,7 +353,7 @@ WebClient.include({
      */
     _onNewAppCreated: function (ev) {
         var self = this;
-        this._redrawMenuWidgets().then(function () {
+        this.instanciate_menu_widgets().then(function () {
             self.on_app_clicked({
                 data: {
                     menu_id: ev.data.menu_id,
@@ -406,8 +375,7 @@ WebClient.include({
         var self = this;
 
         var current_primary_menu = this.menu.current_primary_menu;
-        core.bus.trigger('clear_cache'); // invalidate cache
-        this._redrawMenuWidgets().then(function () {
+        this.instanciate_menu_widgets().then(function () {
             // reload previous state
             self.menu.toggle_mode(self.home_menu_displayed);
             self.menu.change_menu_section(current_primary_menu); // entering the current menu
@@ -441,22 +409,6 @@ WebClient.include({
         } else {
             this._closeStudio();
         }
-    },
-    /**
-     * @private
-     * @param {OdooEvent} ev
-     */
-    _onSwitchStudioView: function (ev) {
-        var action = this.action_manager.getCurrentStudioAction();
-        var controller = this.action_manager.getCurrentStudioController();
-        var params = _.extend({}, ev.data, {
-            action: action,
-        });
-        if (controller.widget) {
-            // not always the case in case of navigation
-            params.controllerState = controller.widget.exportState();
-        }
-        this._openStudioMain(params);
     },
 });
 

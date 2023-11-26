@@ -2,11 +2,11 @@
 
 import base64
 import logging
+from os.path import join
 import requests
 
 from lxml import etree, objectify
 from werkzeug import url_quote
-from os.path import join
 
 from odoo import api, fields, models, tools, SUPERUSER_ID
 
@@ -41,51 +41,8 @@ class ResCompany(models.Model):
         help='The password used to request the seal from the PAC')
     l10n_mx_edi_certificate_ids = fields.Many2many('l10n_mx_edi.certificate',
         string='Certificates')
-    l10n_mx_edi_num_exporter = fields.Char(
-        'Number of Reliable Exporter',
-        help='Indicates the number of reliable exporter in accordance '
-        'with Article 22 of Annex 1 of the Free Trade Agreement with the '
-        'European Association and the Decision of the European Community. '
-        'Used in External Trade in the attribute "NumeroExportadorConfiable".')
-    l10n_mx_edi_locality_id = fields.Many2one(
-        'l10n_mx_edi.res.locality', string='Locality',
-        related='partner_id.l10n_mx_edi_locality_id', readonly=False,
-        help='Municipality configured for this company')
-    l10n_mx_edi_colony_code = fields.Char(
-        string='Colony Code',
-        compute='_compute_l10n_mx_edi_colony_code',
-        inverse='_inverse_l10n_mx_edi_colony_code',
-        help='Colony Code configured for this company. It is used in the '
-        'external trade complement to define the colony where the domicile '
-        'is located.')
-    l10n_mx_edi_fiscal_regime = fields.Selection(
-        [('601', 'General de Ley Personas Morales'),
-         ('603', 'Personas Morales con Fines no Lucrativos'),
-         ('605', 'Sueldos y Salarios e Ingresos Asimilados a Salarios'),
-         ('606', 'Arrendamiento'),
-         ('607', 'Régimen de Enajenación o Adquisición de Bienes'),
-         ('608', 'Demás ingresos'),
-         ('609', 'Consolidación'),
-         ('610', 'Residentes en el Extranjero sin Establecimiento Permanente en México'),
-         ('611', 'Ingresos por Dividendos (socios y accionistas)'),
-         ('612', 'Personas Físicas con Actividades Empresariales y Profesionales'),
-         ('614', 'Ingresos por intereses'),
-         ('615', 'Régimen de los ingresos por obtención de premios'),
-         ('616', 'Sin obligaciones fiscales'),
-         ('620', 'Sociedades Cooperativas de Producción que optan por diferir sus ingresos'),
-         ('621', 'Incorporación Fiscal'),
-         ('622', 'Actividades Agrícolas, Ganaderas, Silvícolas y Pesqueras'),
-         ('623', 'Opcional para Grupos de Sociedades'),
-         ('624', 'Coordinados'),
-         ('625', 'Régimen de las Actividades Empresariales con ingresos a través de Plataformas Tecnológicas'),
-         ('626', 'Régimen Simplificado de Confianza - RESICO'),
-         ('628', 'Hidrocarburos'),
-         ('629', 'De los Regímenes Fiscales Preferentes y de las Empresas Multinacionales'),
-         ('630', 'Enajenación de acciones en bolsa de valores')],
-        string="Fiscal Regime",
-        help="It is used to fill Mexican XML CFDI required field "
-        "Comprobante.Emisor.RegimenFiscal.")
 
+    @api.multi
     def _compute_l10n_mx_edi_address(self):
         for company in self:
             address_data = company.partner_id.sudo().address_get(adr_pref=['contact'])
@@ -94,27 +51,15 @@ class ResCompany(models.Model):
                 company.l10n_mx_edi_colony = partner.l10n_mx_edi_colony
                 company.l10n_mx_edi_locality = partner.l10n_mx_edi_locality
 
+    @api.multi
     def _inverse_l10n_mx_edi_colony(self):
         for company in self:
             company.partner_id.l10n_mx_edi_colony = company.l10n_mx_edi_colony
 
+    @api.multi
     def _inverse_l10n_mx_edi_locality(self):
         for company in self:
             company.partner_id.l10n_mx_edi_locality = company.l10n_mx_edi_locality
-
-    def _compute_l10n_mx_edi_colony_code(self):
-        for company in self:
-            address_data = company.partner_id.sudo().address_get(
-                adr_pref=['contact'])
-            if address_data['contact']:
-                partner = company.partner_id.browse(address_data['contact'])
-                company.l10n_mx_edi_colony_code = (
-                    partner.l10n_mx_edi_colony_code)
-
-    def _inverse_l10n_mx_edi_colony_code(self):
-        for company in self:
-            company.partner_id.l10n_mx_edi_colony_code = (
-                company.l10n_mx_edi_colony_code)
 
     @api.model
     def _load_xsd_attachments(self):
@@ -166,7 +111,7 @@ class ResCompany(models.Model):
             return join(filestore, attachment.store_fname)
         attachment = env['ir.attachment'].create({
             'name': xsd_fname,
-            'datas': base64.encodebytes(xsd_string),
+            'datas': base64.encodestring(xsd_string),
         })
         # Forcing the triggering of the store_fname
         attachment._inverse_datas()

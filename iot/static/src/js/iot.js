@@ -9,13 +9,11 @@ var Dialog = require('web.Dialog');
 var ActionManager = require('web.ActionManager');
 var basic_fields = require('web.basic_fields');
 var BusService = require('bus.BusService');
-var IoTScan = require('iot.scan');
 
 var _t = core._t;
-var QWeb = core.qweb;
 
 ActionManager.include({
-    _executeReportAction: function (action) {
+    _executeReportAction: function (action, options) {
         if (action.device_id) {
             // Call new route that sends you report to send to printer
             var self = this;
@@ -25,12 +23,15 @@ ActionManager.include({
                 method: 'iot_render',
                 args: [action.id, action.context.active_ids, {'device_id': action.device_id}]
             }).then(function (result) {
-                var iot_device = new DeviceProxy({ iot_ip: result[0], identifier: result[1] });
-                iot_device.add_listener(self._onValueChange.bind(self));
-                iot_device.action({'document': result[2]})
-                    .then(function(data) {
-                        self._onIoTActionResult.call(self, data);
-                    }).guardedCatch(self._onIoTActionFail.bind(self, result[0]));
+                self.call(
+                    'iot_longpolling',
+                    'action',
+                    result[0],
+                    result[1],
+                    {'document': result[2]},
+                    self._onActionSuccess.bind(self),
+                    self._onActionFail.bind(self)
+                );
             });
         }
         else {
@@ -38,22 +39,22 @@ ActionManager.include({
         }
     },
 
-    _onIoTActionResult: function (data){
-        if (data.result === true) {
+    _onActionSuccess: function (data){
+        if (data.result) {
             this.do_notify(_t('Successfully sent to printer!'));
         } else {
             this.do_warn(_t('Connection to Printer failed'), _t('Please check if the printer is still connected.'));
         }
     },
 
-    _onIoTActionFail: function (ip){
-        // Display the generic warning message when the connection to the IoT box failed.
-        this.call('iot_longpolling', '_doWarnFail', ip);
+    _onActionFail: function (data){
+        var $content = $('<p/>').text(_t('Please check if the IoT Box is still connected.'));
+        var dialog = new Dialog(this, {
+            title: _t('Connection to IoT Box failed'),
+            $content: $content,
+        });
+        dialog.open();
     },
-
-    _onValueChange: function (data) {
-        this.do_notify("Printer " + data.status);
-    }
 });
 
 var IotScanButton = Widget.extend({
@@ -62,112 +63,174 @@ var IotScanButton = Widget.extend({
     events: {
         'click': '_onButtonClick',
     },
-
-    /**
-    * @override
-    */
     init: function (parent, record) {
         this._super.apply(this, arguments);
-        IoTScan.box_connect = '/hw_drivers/box/connect?token=' + btoa(record.data.token);
+        this.token = record.data.token;
+        this.protocol = window.location.protocol;
+        this.controlImage = '/iot.jpg';
+        this.box_connect = '/hw_drivers/box/connect?token=' + btoa(this.token);
     },
 
-    /**
-    * @override
-    */
     start: function () {
+        this._super.apply(this, arguments);
+        this.$el.text(_t('SCAN'));
+    },
+
+    _getUserIP: function (onNewIP) {
+        //  onNewIp - your listener function for new IPs
+        //compatibility for firefox and chrome
+        var MyPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
+
+        if (MyPeerConnection) {
+            var pc = new MyPeerConnection({
+                iceServers: []
+            });
+            var noop = function () {};
+            var localIPs = {};
+            var ipRegex = /([0-9]{1,3}(\.[0-9]{1,3}){3}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7})/g;
+
+            var iterateIP = function (ip) {
+                if (!localIPs[ip]){
+                    if (ip.length < 16){
+                        localIPs[ip] = true;
+                        onNewIP(ip);
+                    }
+                }
+            };
+
+            if (typeof pc.createDataChannel !== "undefined") {
+                //create a bogus data channel
+                pc.createDataChannel('');
+
+                // create offer and set local description
+                pc.createOffer().then(function (sdp) {
+                    sdp.sdp.split('\n').forEach(function (line) {
+                        if (line.indexOf('candidate') < 0) return;
+                        line.match(ipRegex).forEach(iterateIP);
+                    });
+
+                    pc.setLocalDescription(sdp, noop, noop);
+                });
+
+                //listen for candidate events
+                pc.onicecandidate = function (ice) {
+                    if (!ice || !ice.candidate || !ice.candidate.candidate || !ice.candidate.candidate.match(ipRegex)) {
+                        onNewIP();
+                        return;
+                    }
+                    ice.candidate.candidate.match(ipRegex).forEach(iterateIP);
+                };
+            } else {
+                onNewIP();
+            }
+        } else {
+            onNewIP();
+        }
+    },
+
+    _scanRange: function (urls, range) { 
         var self = this;
-        return this._super.apply(this, arguments).then(function() {
-            self.$el.text(_t('SCAN'));
-            IoTScan._getLocalIP();
-        });
+        var img = new Image();
+        var url = urls.shift();
+        if (url){
+            $.ajax({
+                url: url + '/hw_proxy/hello',
+                method: 'GET',
+                timeout: 400,
+            }).done(function () {
+                self._addIOT(url);
+                self._connectToIOT(url);
+            }).fail(function (jqXHR, textStatus) {
+                // * If the request to /hw_proxy/hello returns an error while we contacted it in https,
+                // * it could mean the server certificate is not yet accepted by the client.
+                // * To know if it is really the case, we try to fetch an image on the http port of the server.
+                // * If it loads successfully, we put informations of connection in parameter of image.
+                if (textStatus === 'error' && self.protocol === 'https:') {
+                    var imgSrc = url + self.controlImage;
+                    img.src = imgSrc.replace('https://', 'http://');
+                    img.onload = function(XHR) {
+                        self._addIOT(url);
+                        self._connectToIOT(url);
+                    };
+                }
+            }).always(function () {
+                self._scanRange(urls, range);
+                self._updateRangeProgress(range);
+            });
+        }
     },
 
-    /**
-    * @override
-    */
-    destroy: function (){
-        IoTScan.reset();
-        this._super.apply(this, arguments);
-    },
+    _addIPRange: function (range){
+        var ipPerRange = 256;
 
-    /**
-    * @private
-    */
-    _onButtonClick: function (e) {
-        IoTScan.findIOTs();
-    },
-});
+        var $range = $('<li/>').addClass('list-group-item').append('<b>' + range + '*' + '</b>');
+        var $progress = $('<div class="progress"/>');
+        var $bar = $('<div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"/>').css('width', '0%').text('0%');
 
-widget_registry.add('iot_detect_button', IotScanButton);
+        $progress.append($bar);
+        $range.append($progress);
 
-
-
-var IotScanProgress = Widget.extend({
-    tagName: 'div',
-    className: 'scan_progress',
-    events: {
-        'click .add_scan_range': '_onClickAddScanRange',
-        'click .add_scan_range_ip': '_onClickAddScanRangeIp',
-    },
-
-    /**
-    * @override
-    */
-    init: function () {
-        this._super.apply(this, arguments);
-
-        IoTScan.reset();
-
-        this.eventListeners = {
-            '_onAddRange': this._onAddRange.bind(this),
-            '_updateRangeProgress': this._updateRangeProgress.bind(this),
-            '_addIOTProgress': this._addIOTProgress.bind(this),
-            '_updateIOTProgress': this._updateIOTProgress.bind(this),
-            '_clearIOTProgress': this._clearIOTProgress.bind(this),
+        this.ranges[range] = {
+            $range: $range,
+            $bar: $bar,
+            urls: [],
+            current: 0,
+            total: ipPerRange,
         };
+        this.$progressRanges.append($range);
 
-        _.each(this.eventListeners, function (listener, event) {
-            window.addEventListener(event, listener);
+        for (var i = 0; i < ipPerRange; i++) {
+            var port = '';
+            if (this.protocol === 'http:') {
+                port = ':8069';
+            }
+            this.ranges[range].urls.push(this.protocol + '//' + (range + i) + port);
+        }
+    },
+
+    _processIRRange: function (range){
+        for (var i = 0; i < 6; i++) {
+            this._scanRange(range.urls, range);
+        }
+    },
+
+    _updateRangeProgress: function (range) {
+        range.current ++;
+        var percent = Math.round(range.current / range.total * 100);
+        range.$bar.css('width', percent + '%').attr('aria-valuenow', percent).text(percent + '%');
+    },
+
+    _findIOTs: function (options) {
+        options = options || {};
+        var self = this;
+        var range;
+
+        this._getUserIP(function (ip) {
+            if (ip) {
+                self._initProgress();
+                range = ip.substring(0, ip.lastIndexOf('.') + 1);
+                self._addIPRange(range);
+            } else if (!self.ranges) {
+                self._initProgress();
+                self._addIPRange('192.168.0.');
+                self._addIPRange('192.168.1.');
+                self._addIPRange('10.0.0.');
+            }
+
+            _.each(self.ranges, self._processIRRange, self);
         });
     },
 
-    /**
-    * @override
-    */
-    start: function () {
-        this._super.apply(this, arguments);
-        this.$el.html(QWeb.render('iot.scan_progress_template'));
+    _initProgress: function (){
+        this.$progressBlock = $('.scan_progress').show();
+        this.$progressRanges = this.$progressBlock.find('.scan_ranges').empty();
+        this.$progressFound = this.$progressBlock.find('.found_devices').empty();
 
-        this.$progressRanges = this.$('.scan_ranges');
-        this.$scanNetwork = this.$('.scan_network');
-        this.$progressFound = this.$('.found_devices');
-        this.$addRange = this.$('.add_scan_range');
-        this.$addRangeInput = this.$('.add_scan_range_ip');
-        this.$progressIotFound = this.$('.iot_box_found');
-
-
+        this.ranges = {};
+        this.iots = {};
     },
 
-    /**
-     * @override
-     */
-    destroy: function () {
-        this._super.apply(this, arguments);
-        _.each(this.eventListeners, function (listener, event) {
-            window.removeEventListener(event, listener);
-        });
-    },
-
-    /**
-    * Add an IoT to the progress bar UI
-    *
-    * @param {Object} event
-    * @param {string} event.url
-    * @private
-    */
-    _addIOTProgress: function (event) {
-        var url = event.detail;
-        this.$progressIotFound.text(_t('Found IoT Box(s)'));
+    _addIOT: function (url){
         var $iot = $('<li/>')
             .addClass('list-group-item')
             .appendTo(this.$progressFound);
@@ -181,81 +244,18 @@ var IotScanProgress = Widget.extend({
         $iot.append('<i class="iot-scan-status-icon"/>')
             .append('<div class="iot-scan-status-msg"/>');
 
-        IoTScan.iots[url] = $iot;
+        this.iots[url] = $iot;
         this.$progressFound.append($iot);
     },
 
-    /**
-    * Clear all IoT
-    *
-    * @private
-    */
-    _clearIOTProgress: function () {
-        this.$progressRanges.empty();
-        this.$progressFound.empty();
-        this.$progressIotFound.empty();
-    },
-
-    /**
-    * Validate IP range format
-    * ex: xxx.xxx.xxx.* or xxx.xxx.xxx.xxx
-    *
-    * @param {string} range
-    * @return {Object}
-    * @private
-    */
-    _getNetworkId: function (range) {
-        var rangeLength = (range.match(/\./g) || []).length;
-        var pattern = new RegExp(['^([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.',
-            '([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.',
-            '([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.',
-            '.*$'].join(''));
-        if (rangeLength === 3) {
-            return range.substring(0, range.lastIndexOf('.') + 1).match(pattern);
-        } else if (rangeLength === 2) {
-            return (range + '.').match(pattern);
-        } else {
-            return false;
-        }
-    },
-
-    /**
-    * start range scan status
-    *
-    * @private
-    */
-    _RangeProgress: function () {
-        this.$scanNetwork.text(_t('Scanning Network'));
-        this.$scanNetwork.append('<i class="fa pull-right iot-scan-status-icon mt-1 fa-spinner fa-spin"/>');
-    },
-
-    /**
-    * start range scan status
-    *
-    * @private
-    */
-    _RangeProgressDone: function () {
-        this.$scanNetwork.text(_t('Scanning Network'));
-        this.$scanNetwork.append('<i class="fa pull-right iot-scan-status-icon mt-1 fa-check text-success"/>');
-    },
-
-    /**
-    * Update IoT progress
-    *
-    * @param {Object} event
-    * @param {string} event.url
-    * @param {string} event.status
-    * @param {string} event.message
-    * @private
-    */
-    _updateIOTProgress: function (event) {
-        if (IoTScan.iots[event.detail.url]) {
-            var $iot = IoTScan.iots[event.detail.url];
+    _updateIOT: function (url, status, message){
+        if (this.iots[url]) {
+            var $iot = this.iots[url];
             var $icon = $iot.find('.iot-scan-status-icon');
             var $msg = $iot.find('.iot-scan-status-msg');
 
             var icon = 'fa pull-right iot-scan-status-icon mt-1 ';
-            switch (event.detail.status) {
+            switch (status) {
                 case "loading":
                     icon += 'fa-spinner fa-spin';
                     break;
@@ -266,86 +266,33 @@ var IotScanProgress = Widget.extend({
                     icon += "fa-exclamation-triangle text-danger";
             }
             $icon.removeClass().addClass(icon);
-            $msg.empty().append(event.detail.message);
+            $msg.empty().append(message);
         }
     },
 
-    /**
-    * Update range scan status
-    *
-    * @param {Object} event
-    * @param {Object} event.range
-    * @private
-    */
-    _updateRangeProgress: function (event) {
-        var range = event.detail;
-        this._RangeProgress();
-        range.current ++;
-        var percent = Math.round(range.current / range.total * 100);
-        range.$bar.css('width', percent + '%').attr('aria-valuenow', percent).text(percent + '%');
-        if (percent === 100) {
-            this._RangeProgressDone();
-            range.$bar.text(_t('Done'));
-            if (_.isEmpty(IoTScan.iots)) {
-                this.$progressIotFound.text(_t('No IoT Box(s) found'));
+    _connectToIOT: function (url){
+        var img = new Image();
+        var self = this;
+        img.src = url.replace('https://', 'http://') + self.box_connect;
+        img.onload = function(jqXHR) {
+            if (img.height === 10){
+                self._updateIOT(url, 'success', _t('IoTBox connected'));
+            } else {
+                self._updateIOT(url, 'error', _t('This IoTBox has already connected'));
             }
-        }
+        };
+        img.onerror = function(jqXHR) {
+            self._updateIOT(url, 'error', _t('Connection failed'));
+        };
     },
 
-    /**
-    * Add range to scan in list-group
-    *
-    * @param {Object} event
-    * @param {Object} event.range
-    * @return {Object}
-    * @private
-    */
-    _onAddRange: function (event){
-        var range = event.detail;
-        var $range = $('<li/>')
-            .addClass('list-group-item')
-            .append('<b>' + range.range + '*' + '</b>')
-            .appendTo(this.$progressRanges);
-
-        var $progress = $('<div class="progress"/>').appendTo($range);
-        var $bar = $('<div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"/>')
-            .css('width', '0%')
-            .text('0%')
-            .appendTo($progress);
-
-        range.$range = $range;
-        range.$bar = $bar;
-
-        return range;
-    },
-
-    /**
-    * Click to add a network ID to scan
-    * With this function it is possible to scan a specific range
-    * 1 - get the typed ip address
-    * 2 - check its validity
-    * 3 - extract the /24 subnet id
-    * 4 - perform a scan of this subnet
-    */
-    _onClickAddScanRange: function () {
-        var range = this.$addRangeInput.removeClass('is-invalid').val().trim();
-        var networkId = this._getNetworkId(range);
-        if (networkId && !_.keys(IoTScan.ranges).includes(networkId[0])) {
-            IoTScan._addIPRange(networkId[0]);
-            this.$addRangeInput[0].value = '';
-        } else {
-            this.$addRangeInput.addClass('is-invalid');
-        }
-    },
-
-    /**
-    */
-    _onClickAddScanRangeIp: function () {
-        this.$addRangeInput.removeClass('is-invalid').val().trim();
+    _onButtonClick: function (e) {
+        this.$el.attr('disabled', true);
+        this._findIOTs();
     },
 });
 
-widget_registry.add('iot_scan_progress', IotScanProgress);
+widget_registry.add('iot_detect_button', IotScanButton);
 
 var IoTLongpolling = BusService.extend({
     // constants
@@ -382,10 +329,9 @@ var IoTLongpolling = BusService.extend({
     addListener: function (iot_ip, devices, callback) {
         if (!this._listeners[iot_ip]) {
             this._listeners[iot_ip] = {
-                last_event: 0,
-                devices: {},
-                session_id: this._session_id,
-                rpc: false,
+            devices: {},
+            session_id: this._session_id,
+            rpc: false,
             };
         }
         for (var device in devices) {
@@ -396,15 +342,6 @@ var IoTLongpolling = BusService.extend({
         }
         this.stopPolling(iot_ip);
         this.startPolling(iot_ip);
-        return Promise.resolve();
-    },
-    /**
-     * Stop listening to iot device with id `device_id`
-     * @param {string} iot_ip 
-     * @param {string} device_id 
-     */
-    removeListener: function(iot_ip, device_id) {
-        delete this._listeners[iot_ip].devices[device_id];
     },
     /**
      * Execute a action on device_id
@@ -413,8 +350,10 @@ var IoTLongpolling = BusService.extend({
      * @param {String} iot_ip
      * @param {String} device_id
      * @param {Object} data contains the information needed to perform an action on this device_id
+     * @param {Callback} callback_success
+     * @param {Callback} callback_fail
      */
-    action: function (iot_ip, device_id, data) {
+    action: function (iot_ip, device_id, data, callback_success, callback_fail) {
         this.protocol = window.location.protocol;
         var self = this;
         var data = {
@@ -427,12 +366,8 @@ var IoTLongpolling = BusService.extend({
         var options = {
             timeout: this.ACTION_TIMEOUT,
         };
-        var prom = new Promise(function(resolve, reject) {
-            self._rpcIoT(iot_ip, self.ACTION_ROUTE, data, options)
-                .then(resolve)
-                .fail(reject);
-        });
-        return prom;
+        return this._rpcIoT(iot_ip, this.ACTION_ROUTE, data, options
+            ).fail(callback_fail).then(callback_success);
     },
 
     /**
@@ -539,12 +474,12 @@ var IoTLongpolling = BusService.extend({
                     if (self._session_id === result.result.session_id) {
                         self._onSuccess(iot_ip, result.result);
                     }
-                } else if (!_.isEmpty(self._listeners[iot_ip].devices)) {
+                } else {
                     self._poll(iot_ip);
                 }
             }).fail(function (jqXHR, textStatus) {
-                if (textStatus === 'error') {
-                    self._doWarnFail(iot_ip);
+                if (textStatus === 'error' && self.protocol === 'https:') {
+                    self._doWarnCertificate(iot_ip);
                 } else {
                     self._onError();
                 }
@@ -552,15 +487,12 @@ var IoTLongpolling = BusService.extend({
     },
 
     _onSuccess: function (iot_ip, result){
-        this._listeners[iot_ip].last_event = result.time;
-
+        var self = this;
         var devices = this._listeners[iot_ip].devices;
         if (devices[result.device_id]) {
             devices[result.device_id].callback(result);
         }
-        if (!_.isEmpty(devices)) {
-            this._poll(iot_ip);
-        }
+        self._poll(iot_ip);
     },
 
     _onError: function (){
@@ -568,11 +500,8 @@ var IoTLongpolling = BusService.extend({
         this._delayedStartPolling(Math.min(this.RPC_DELAY * this._retries, this.MAX_RPC_DELAY));
     },
 
-    _doWarnFail: function (url){
+    _doWarnCertificate: function (url){
         var $content = $('<div/>')
-            .append($('<p/>').text(_t('Odoo cannot reach the IoT Box.')))
-            .append($('<span/>').text(_t('Please check if the IoT Box is still connected.')))
-            .append($('<p/>').text(_t('If you are on a secure server (HTTPS) check if you accepted the certificate:')))
             .append($('<p/>').html(_.str.sprintf('<a href="https://%s" target="_blank"><i class="fa fa-external-link"/>' + _t('Click here to open your IoT Homepage') + '</a>', url)))
             .append($('<li/>').text(_t('Please accept the certificate of your IoT Box (procedure depends on your browser) :')))
             .append($('<li/>').text(_t('Click on Advanced/Show Details/Details/More information')))
@@ -581,7 +510,7 @@ var IoTLongpolling = BusService.extend({
             .append($('<li/>').text(_t('Close this window and try again')));
 
         var dialog = new Dialog(this, {
-            title: _t('Connection to IoT Box failed'),
+            title: _t('Connection to device failed'),
             $content: $content,
             buttons: [
                 {
@@ -600,58 +529,42 @@ core.serviceRegistry.add('iot_longpolling', IoTLongpolling);
 
 var IotValueFieldMixin = {
 
-    /**
-     * @returns {Promise}
-     */
     willStart: function() {
-        this.iot_device = null; // the attribute to which the device proxy created with ``_getDeviceInfo`` will be assigned.
-        return Promise.all([this._super(), this._getDeviceInfo()]);
+        return $.when(this._super(), this._getDeviceInfo());
     },
 
+    /**
+     * @override
+     */
     start: function() {
         this._super.apply(this, arguments);
-        if (this.iot_device) {
-            this.iot_device.add_listener(this._onValueChange.bind(this));
+        var self = this;
+        if (self.ip && self.identifier) {
+            var devices = [ self.identifier ];
+            self.call('iot_longpolling', 'addListener', self.ip, devices, self._onValueChange.bind(self));
         }
     },
 
     /**
-     * To implement
-     * @abstract
      * @private
      */
-    _getDeviceInfo: function() {},
-
-    /**
-     * To implement
-     * @abstract
-     * @private
-     */
-    _onValueChange: function (data){},
-     /**
-     * After a request to make action on device and this call don't return true in the result
-     * this means that the IoT Box can't connect to device
-     *
-     * @param {Object} data.result
-     */
-    _onIoTActionResult: function (data) {
-        if (data.result !== true) {
-            var $content = $('<p/>').text(_t('Please check if the device is still connected.'));
-            var dialog = new Dialog(this, {
-                title: _t('Connection to device failed'),
-                $content: $content,
-            });
-            dialog.open();
-          }
+    _getDeviceInfo: function() {
+        this.ip = this.record.data.ip;
+        this.identifier = this.record.data.identifier;
+        return Promise.resolve();
     },
 
     /**
-     * After a request to make action on device and this call fail
-     * this means that the customer browser can't connect to IoT Box
+     * @private
      */
-    _onIoTActionFail: function () {
-        // Display the generic warning message when the connection to the IoT box failed.
-        this.call('iot_longpolling', '_doWarnFail', this.ip);
+    _onValueChange: function (data){
+        var self = this;
+        this._setValue(data.value)
+            .done(function() {
+                if (!self.isDestroyed()) {
+                    self._render();
+                }
+            });
     },
 };
 
@@ -661,9 +574,10 @@ var IotRealTimeValue = basic_fields.InputField.extend(IotValueFieldMixin, {
      * @private
      */
     _getDeviceInfo: function() {
-        var record_data = this.record.data;
-        if (record_data.test_type === 'measure' && record_data.identifier) {
-            this.iot_device = new DeviceProxy({ iot_ip: record_data.ip, identifier: record_data.identifier });            
+        this.test_type = this.record.data.test_type;
+        if (this.test_type === 'measure') {
+            this.ip = this.record.data.ip;
+            this.identifier = this.record.data.identifier;
         }
         return Promise.resolve();
     },
@@ -674,7 +588,7 @@ var IotRealTimeValue = basic_fields.InputField.extend(IotValueFieldMixin, {
     _onValueChange: function (data){
         var self = this;
         this._setValue(data.value.toString())
-            .then(function() {
+            .done(function() {
                 if (!self.isDestroyed()) {
                     self._render();
                 }
@@ -688,7 +602,7 @@ var IotDeviceValueDisplay = Widget.extend(IotValueFieldMixin, {
     init: function (parent, params) {
         this._super.apply(this, arguments);
         this.identifier = params.data.identifier;
-        this.iot_ip = params.data.iot_ip;
+        this.iot_id = params.data.iot_id.data.id;
     },
     /**
      * @override
@@ -696,8 +610,15 @@ var IotDeviceValueDisplay = Widget.extend(IotValueFieldMixin, {
      */
     _getDeviceInfo: function() {
         var self = this;
-        self.iot_device = new DeviceProxy({ identifier: this.identifier, iot_ip:this.iot_ip });
-        return Promise.resolve();
+        var iot_id = this.iot_id;
+        return this._rpc({
+            model: 'iot.box',
+            method: 'search_read',
+            fields: ['id', 'ip'],
+            domain: [['id', '=', iot_id]]
+        }).then(function (iot_box) {
+            self.ip = iot_box[0].ip;
+        });
     },
 
     /**
@@ -712,58 +633,40 @@ var IotDeviceValueDisplay = Widget.extend(IotValueFieldMixin, {
 
 });
 
+var IotTakeMeasureButton = Widget.extend({
+
+    start: function () {
+        var $content = $('<div/>')
+            .append($('<p/>').text(_t('Some improvements have been made on the IoT App that require some manual actions from your side:')))
+            .append($('<p/>').text(_t('1. To upgrade the IoT and Manufacturing modules, go in Apps, search for the App and click on Upgrade')))
+            .append($('<p/>').text(_t('2. To update the image, go on the IoT Box\'s homepage and click on Update (you may also need to reload the drivers)')))
+            .append($('<p/>').text(_t('Thank you for your understanding.')))
+            .append($('<p/>').text(_t('Have a great day!')));
+
+        var dialog = new Dialog(this, {
+            title: _t('Update IoT App.'),
+            $content: $content,
+            buttons: [
+                {
+                    text: _t('Close'),
+                    classes: 'btn-secondary o_form_button_cancel',
+                    close: true,
+                }
+            ],
+        });
+        dialog.open();
+    },
+});
 
 field_registry.add('iot_realtime_value', IotRealTimeValue);
 widget_registry.add('iot_device_value_display', IotDeviceValueDisplay);
-
-var _iot_longpolling = new IoTLongpolling();
-
-/**
- * Frontend interface to iot devices
- */
-var DeviceProxy = core.Class.extend({
-    /**
-     * @param {Object} iot_device - Representation of an iot device
-     * @param {string} iot_device.iot_ip - The ip address of the iot box the device is connected to
-     * @param {string} iot_device.identifier - The device's unique identifier
-     */
-    init: function(iot_device) {
-        this._iot_longpolling = _iot_longpolling;
-        this._iot_ip = iot_device.iot_ip;
-        this._identifier = iot_device.identifier;
-        this.manufacturer = iot_device.manufacturer;
-    },
-
-    /**
-     * Call actions on the device
-     * @param {Object} data
-     * @returns {Promise}
-     */
-    action: function(data) {
-        return this._iot_longpolling.action(this._iot_ip, this._identifier, data);
-    },
-
-    /**
-     * Add `callback` to the listeners callbacks list it gets called everytime the device's value is updated.
-     * @param {function} callback
-     * @returns {Promise}
-     */
-    add_listener: function(callback) {
-        return this._iot_longpolling.addListener(this._iot_ip, [this._identifier, ], callback);
-    },
-    /**
-     * Stop listening the device
-     */
-    remove_listener: function() {
-        return this._iot_longpolling.removeListener(this._iot_ip, this._identifier);
-    },
-});
+widget_registry.add('iot_take_measure_button', IotTakeMeasureButton);
 
 return {
     IotValueFieldMixin: IotValueFieldMixin,
     IotRealTimeValue: IotRealTimeValue,
+    IotTakeMeasureButton: IotTakeMeasureButton,
     IotDeviceValueDisplay: IotDeviceValueDisplay,
     IoTLongpolling: IoTLongpolling,
-    DeviceProxy: DeviceProxy
 };
 });

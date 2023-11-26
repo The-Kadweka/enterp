@@ -4,4 +4,3 @@
 from . import controllers
 from . import models
 from . import wizard
-from . import PYPDF2_MonkeyPatch

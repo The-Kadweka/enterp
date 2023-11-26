@@ -7,7 +7,7 @@ from werkzeug.urls import url_join
 
 from odoo import _
 from odoo.exceptions import UserError
-from odoo.tools.float_utils import float_round, float_is_zero, float_repr
+from odoo.tools.float_utils import float_round, float_is_zero
 
 API_BASE_URL = 'https://api.easypost.com/v2/'
 NON_BLOCKING_MESSAGES = ['rate_message']
@@ -18,7 +18,6 @@ class EasypostRequest():
     def __init__(self, api_key, debug_logger):
         self.api_key = api_key
         self.debug_logger = debug_logger
-        self.is_domestic_shipping = None
 
     def _make_api_request(self, endpoint, request_type='get', data=None):
         """make an api call, return response"""
@@ -33,11 +32,7 @@ class EasypostRequest():
             response = response.json()
             # check for any error in response
             if 'error' in response:
-                error_message = response['error'].get('message')
-                error_detail = response['error'].get('errors')
-                if error_detail:
-                    error_message += ''.join(['\n - %s: %s' % (err.get('field', 'Unspecified field'), err.get('message', 'Unknown error')) for err in error_detail])
-                raise UserError(_('Easypost returned an error: %s' % (error_message)))
+                raise UserError(_('Easypost returned an error: ') + response['error'].get('message'))
             return response
         except Exception as e:
             raise e
@@ -138,7 +133,7 @@ class EasypostRequest():
         # Max weight for carrier default package
         max_weight = carrier._easypost_convert_weight(carrier.easypost_default_packaging_id.max_weight)
         # Order weight
-        total_weight = carrier._easypost_convert_weight(sum([(line.product_id.weight * line.product_uom_qty) for line in order.order_line if not line.display_type]))
+        total_weight = carrier._easypost_convert_weight(sum([(line.product_id.weight * line.product_uom_qty) for line in order.order_line]))
 
         # Create shipments
         shipments = {}
@@ -158,7 +153,7 @@ class EasypostRequest():
             shipments.update(self._options(0, carrier))
         return shipments
 
-    def _prepare_picking_shipments(self, carrier, picking, is_return=False):
+    def _prepare_picking_shipments(self, carrier, picking):
         """ Prepare easypost order's shipments with the real
         value used in the picking. It will put everything in
         a single package if no packages are used in the picking.
@@ -177,10 +172,7 @@ class EasypostRequest():
             # that he put everything inside a single package.
             # The user still able to reorganise its packages if a
             # mistake happens.
-            if picking.picking_type_code == 'incoming':
-                weight = sum([ml.product_id.weight * ml.product_uom_id._compute_quantity(ml.product_qty, ml.product_id.uom_id, rounding_method='HALF-UP') for ml in move_lines_without_package])
-            else:
-                weight = sum([ml.product_id.weight * ml.product_uom_id._compute_quantity(ml.qty_done, ml.product_id.uom_id, rounding_method='HALF-UP') for ml in move_lines_without_package])
+            weight = sum([ml.product_id.weight * ml.product_uom_id._compute_quantity(ml.qty_done, ml.product_id.uom_id, rounding_method='HALF-UP') for ml in move_lines_without_package])
             weight = carrier._easypost_convert_weight(weight)
             shipment.update(self._prepare_parcel(0, carrier.easypost_default_packaging_id, weight, carrier.easypost_label_file_type))
             # Add customs info for this package.
@@ -192,10 +184,7 @@ class EasypostRequest():
             for package in picking.package_ids:
                 # compute move line weight in package
                 move_lines = picking.move_line_ids.filtered(lambda ml: ml.result_package_id == package)
-                if picking.picking_type_code == 'incoming':
-                    weight = sum([ml.product_id.weight * ml.product_uom_id._compute_quantity(ml.product_qty, ml.product_id.uom_id, rounding_method='HALF-UP') for ml in move_lines])
-                else:
-                    weight = package.shipping_weight
+                weight = package.shipping_weight
                 weight = carrier._easypost_convert_weight(weight)
                 # Prepare an easypost parcel with same info than package.
                 shipment.update(self._prepare_parcel(shipment_id, package.packaging_id, weight=weight, label_format=carrier.easypost_label_file_type))
@@ -203,8 +192,6 @@ class EasypostRequest():
                 shipment.update(self._customs_info(shipment_id, move_lines))
                 shipment.update(self._options(shipment_id, carrier))
                 shipment_id += 1
-        if is_return:
-            shipment.update({'order[is_return]': True})
         return shipment
 
     def _prepare_parcel(self, shipment_id, package, weight=False, label_format='pdf'):
@@ -250,27 +237,18 @@ class EasypostRequest():
         - Total weight in ounces.
         - Original country code(warehouse)
         """
-        # Customs information should be given only for international deliveries
-        if self.is_domestic_shipping:
-            return {}
-
         customs_info = {}
         customs_item_id = 0
         for line in lines:
             # skip service
             if line.product_id.type not in ['product', 'consu']:
                 continue
-            if line.picking_id.picking_type_code == 'incoming':
-                unit_quantity = line.product_uom_id._compute_quantity(line.product_qty, line.product_id.uom_id, rounding_method='HALF-UP')
-            else:
-                unit_quantity = line.product_uom_id._compute_quantity(line.qty_done, line.product_id.uom_id, rounding_method='HALF-UP')
-            rounded_qty = max(1, float_round(unit_quantity, precision_digits=0, rounding_method='HALF-UP'))
-            rounded_qty = float_repr(rounded_qty, precision_digits=0)
-            hs_code = line.product_id.hs_code or ''
+            unit_quantity = line.product_uom_id._compute_quantity(line.qty_done, line.product_id.uom_id, rounding_method='HALF-UP')
+            hs_code = getattr(line.product_id, 'hs_code', False) or ''
             price_unit = line.move_id.sale_line_id.price_reduce_taxinc if line.move_id.sale_line_id else line.product_id.list_price
             customs_info.update({
                 'order[shipments][%d][customs_info][customs_items][%d][description]' % (shipment_id, customs_item_id): line.product_id.name,
-                'order[shipments][%d][customs_info][customs_items][%d][quantity]' % (shipment_id, customs_item_id): rounded_qty,
+                'order[shipments][%d][customs_info][customs_items][%d][quantity]' % (shipment_id, customs_item_id): unit_quantity,
                 'order[shipments][%d][customs_info][customs_items][%d][value]' % (shipment_id, customs_item_id): unit_quantity * price_unit,
                 'order[shipments][%d][customs_info][customs_items][%d][currency]' % (shipment_id, customs_item_id): line.picking_id.company_id.currency_id.name,
                 'order[shipments][%d][customs_info][customs_items][%d][weight]' % (shipment_id, customs_item_id): line.env['delivery.carrier']._easypost_convert_weight(line.product_id.weight * unit_quantity),
@@ -288,7 +266,7 @@ class EasypostRequest():
                 options['order[shipments][%d][options][%s]' % (shipment_id, option_name)] = option_value
         return options
 
-    def rate_request(self, carrier, recipient, shipper, order=False, picking=False, is_return=False):
+    def rate_request(self, carrier, recipient, shipper, order=False, picking=False):
         """ Create an easypost order in order to proccess
         all package at once.
         https://www.easypost.com/docs/api.html#orders
@@ -315,9 +293,6 @@ class EasypostRequest():
         # order to create an easypost object
         order_payload = {}
 
-        # reference field to track Odoo customers that use easypost for postage/shipping.
-        order_payload['order[reference]'] = 'odoo'
-
         # Add current carrier type
         order_payload['order[carrier_accounts][id]'] = carrier.easypost_delivery_type_id
 
@@ -326,12 +301,11 @@ class EasypostRequest():
         order_payload.update(self._prepare_address('from_address', shipper))
         if carrier.easypost_default_service_id._require_residential_address():
             order_payload['order[to_address][residential]'] = True
-        # The request differ depending on if it is a domestic shipping or an international one
-        self.is_domestic_shipping = order_payload["order[from_address][country]"] == order_payload["order[to_address][country]"]
+
         # if picking then count total_weight of picking move lines, else count on order
         # easypost always takes weight in ounces(oz)
         if picking:
-            order_payload.update(self._prepare_picking_shipments(carrier, picking, is_return=is_return))
+            order_payload.update(self._prepare_picking_shipments(carrier, picking))
         else:
             order_payload.update(self._prepare_order_shipments(carrier, order))
 
@@ -384,7 +358,7 @@ class EasypostRequest():
 
         return response
 
-    def send_shipping(self, carrier, recipient, shipper, picking, is_return=False):
+    def send_shipping(self, carrier, recipient, shipper, picking):
         """ In order to ship an easypost order:
         - prepare an order by asking a rate request with correct parcel
         and customs info.
@@ -400,7 +374,7 @@ class EasypostRequest():
         - tracking URL
         """
         # create an order
-        result = self.rate_request(carrier, recipient, shipper, picking=picking, is_return=is_return)
+        result = self.rate_request(carrier, recipient, shipper, picking=picking)
         # check for error in result
         if result.get('error_message'):
             return result

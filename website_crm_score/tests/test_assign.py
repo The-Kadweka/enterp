@@ -14,10 +14,15 @@ class test_assign(TestScoring):
         # scoring
         self.website_crm_score.assign_scores_to_leads()
 
+        [l0] = self.crm_lead.browse(self.lead0).read(['score'])
+        [l1] = self.crm_lead.browse(self.lead1).read(['score'])
         [l2] = self.crm_lead.browse(self.lead2).read(['score', 'active'])
         [l3] = self.crm_lead.browse(self.lead3).with_context(dict(test_active=False)).read(['score', 'active'])
 
+        self.assertEqual(l0['score'], 1000, 'scoring failed')
+        self.assertEqual(l1['score'], 900, 'scoring failed')
         self.assertEqual(l2['score'], 0, 'scoring failed')
+        self.assertEqual(l3['score'], 900, 'scoring failed')
         self.assertEqual(l2['active'], True, ' should NOT be archived')
         self.assertEqual(l3['active'], False, ' should be archived')
 

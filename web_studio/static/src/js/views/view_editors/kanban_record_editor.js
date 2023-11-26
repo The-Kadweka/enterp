@@ -8,7 +8,6 @@ var KanbanRecord = require('web.KanbanRecord');
 var utils = require('web.utils');
 
 var EditorMixin = require('web_studio.EditorMixin');
-var FieldSelectorDialog = require('web_studio.FieldSelectorDialog');
 
 var _t = core._t;
 
@@ -96,14 +95,11 @@ var KanbanRecordEditor = KanbanRecord.extend(EditorMixin, {
 
         var $nearest_form_hook = this.$('.o_web_studio_hook')
             .touching({
-                    x: position.pageX - this.nearest_hook_tolerance,
-                    y: position.pageY - this.nearest_hook_tolerance,
-                    w: this.nearest_hook_tolerance*2,
-                    h: this.nearest_hook_tolerance*2
-                },{
-                    container: document.body
-                }
-            ).nearest({x: position.pageX, y: position.pageY}, {container: document.body}).eq(0);
+                x: position.pageX - this.nearest_hook_tolerance,
+                y: position.pageY - this.nearest_hook_tolerance,
+                w: this.nearest_hook_tolerance*2,
+                h: this.nearest_hook_tolerance*2})
+            .nearest({x: position.pageX, y: position.pageY}).eq(0);
         if ($nearest_form_hook.length) {
             $nearest_form_hook.addClass('o_web_studio_nearest_hook');
             return true;
@@ -148,7 +144,7 @@ var KanbanRecordEditor = KanbanRecord.extend(EditorMixin, {
                     Dialog.alert(self, _t('You first need to create a many2many field in the form view.'));
                     return;
                 }
-                var dialog = new FieldSelectorDialog(self, compatible_fields, false);
+                var dialog = new NewKanbanHelperDialog(self, compatible_fields, false);
                 dialog.open();
                 dialog.on('confirm', self, function (field_name) {
                     self.trigger_up('view_change', {
@@ -177,10 +173,7 @@ var KanbanRecordEditor = KanbanRecord.extend(EditorMixin, {
             this.setSelectable($dropdown);
             $dropdown.click(function () {
                 self.selected_node_id = $dropdown.data('node-id');
-                self.trigger_up('node_clicked', {
-                    node: node,
-                    $node: $dropdown,
-                });
+                self.trigger_up('node_clicked', {node: node});
             });
         } else {
             var $top_left_hook = $('<div>')
@@ -206,11 +199,7 @@ var KanbanRecordEditor = KanbanRecord.extend(EditorMixin, {
         }
 
         // add the priority hook
-        var priorityWidget = this._findNodeWithWidget({
-            tag: 'field',
-            widget: 'priority',
-        });
-        if (_.isUndefined(priorityWidget)) {
+        if (!this.$('.o_priority').length) {
             var $priority_hook = $('<div>')
                 .addClass('o_web_studio_add_priority oe_kanban_bottom_left')
                 .append($('<span>', {
@@ -221,7 +210,7 @@ var KanbanRecordEditor = KanbanRecord.extend(EditorMixin, {
                 var compatible_fields = _.pick(self.state.fields, function (e) {
                     return e.type === 'selection';
                 });
-                var dialog = new FieldSelectorDialog(self, compatible_fields, true).open();
+                var dialog = new NewKanbanHelperDialog(self, compatible_fields, true).open();
                 dialog.on('confirm', self, function (field) {
                     self.trigger_up('view_change', {
                         structure: 'kanban_priority',
@@ -232,24 +221,7 @@ var KanbanRecordEditor = KanbanRecord.extend(EditorMixin, {
         }
 
         // add the image hook
-        var $image = this.$('img.oe_kanban_avatar');
-        if ($image.length) {
-            $image.attr('data-node-id', this.node_id++);
-            // find image node from the arch
-            var imgNode = this._findNodeWithClass({
-                tag: 'img',
-                class: 'oe_kanban_avatar',
-            });
-            // bind handler on image clicked to be able to remove it
-            this.setSelectable($image);
-            $image.click(function () {
-                self.selected_node_id = $image.data('node-id');
-                self.trigger_up('node_clicked', {
-                    node: imgNode,
-                    $node: $image,
-                });
-            });
-        } else {
+        if (!this.$('.oe_kanban_bottom_right').length) {
             var $kanban_image_hook = $('<div>')
                 .addClass('o_web_studio_add_kanban_image oe_kanban_bottom_right')
                 .append($('<span>', {
@@ -264,7 +236,7 @@ var KanbanRecordEditor = KanbanRecord.extend(EditorMixin, {
                     Dialog.alert(self, _t('You first need to create a many2one field to Partner or User in the form view.'));
                     return;
                 }
-                var dialog = new FieldSelectorDialog(self, compatible_fields, false).open();
+                var dialog = new NewKanbanHelperDialog(self, compatible_fields, false).open();
                 dialog.on('confirm', self, function (field) {
                     self.trigger_up('view_change', {
                         structure: 'kanban_image',
@@ -272,39 +244,6 @@ var KanbanRecordEditor = KanbanRecord.extend(EditorMixin, {
                     });
                 });
             });
-        }
-    },
-    /**
-     * @private
-     * @param {jQueryElement} $node
-     * @param {String} fieldName
-     */
-    _bindHandler: function ($node, fieldName) {
-        var self = this;
-
-        var node = {
-            tag: 'field',
-            attrs: { name: fieldName }
-        };
-
-        this.setSelectable($node);
-        $node.click(function (ev) {
-            ev.preventDefault();
-            ev.stopPropagation();
-            self.selected_node_id = $node.data('node-id');
-            self.trigger_up('node_clicked', {
-                node: node,
-                $node: $node,
-            });
-        });
-
-        // insert a hook to add new fields
-        var $hook = this._renderHook(node);
-        $hook.insertAfter($node);
-
-        var invisibleModifier = this.fieldsInfo[fieldName].modifiers.invisible;
-        if (invisibleModifier && this._computeDomain(invisibleModifier)) {
-            $node.addClass('o_web_studio_show_invisible');
         }
     },
     /**
@@ -321,23 +260,6 @@ var KanbanRecordEditor = KanbanRecord.extend(EditorMixin, {
                     foundNode = node;
                     return false;
                 }
-            }
-            return true;
-        });
-        return foundNode;
-    },
-    /**
-     * @private
-     * @param {string} [attrs.tag] - node tag
-     * @param {string} [attrs.widget] - node widget
-     * @returns {Object|undefined} found node in the arch
-     */
-    _findNodeWithWidget: function (attrs) {
-        var foundNode;
-        utils.traverse(this.viewArch, function(node) {
-            if (_.isObject(node) && node.tag === attrs.tag && node.attrs.widget === attrs.widget) {
-                    foundNode = node;
-                    return false;
             }
             return true;
         });
@@ -370,6 +292,7 @@ var KanbanRecordEditor = KanbanRecord.extend(EditorMixin, {
      * @override
      */
     _processField: function ($field, field_name) {
+        var self = this;
         $field = this._super.apply(this, arguments);
 
         var field = this.record[field_name];
@@ -381,12 +304,21 @@ var KanbanRecordEditor = KanbanRecord.extend(EditorMixin, {
         $field.attr('data-node-id', this.node_id++);
 
         // bind handler on field clicked to edit field's attributes
-        this._bindHandler($field, field_name);
+        var node = {
+            tag: 'field',
+            attrs: {name: field_name}
+        };
+        this.setSelectable($field);
+        $field.click(function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            self.selected_node_id = $field.data('node-id');
+            self.trigger_up('node_clicked', {node: node});
+        });
 
-        var invisibleModifier = this.fieldsInfo[field_name].modifiers.invisible;
-        if (invisibleModifier && this._computeDomain(invisibleModifier)) {
-            $field.addClass('o_web_studio_show_invisible');
-        }
+        // insert a hook to add new fields
+        var $hook = this._renderHook(node);
+        $hook.insertAfter($field);
 
         return $field;
     },
@@ -395,16 +327,16 @@ var KanbanRecordEditor = KanbanRecord.extend(EditorMixin, {
      */
     _processWidget: function ($field, field_name) {
         var self = this;
-        // '_processWidget' in KanbanRecord adds a promise to this.defs only if
+        // '_processWidget' in KanbanRecord adds a deferred to this.defs only if
         // the widget is async. Here, we need to hook on this def to access the
         // widget's $el (it doesn't exist until the def is resolved). As calling
-        // '_super' may or may not push a promise in this.defs, we store the
+        // '_super' may or may not push a deferred in this.defs, we store the
         // length of this.defs as index before calling '_super'. Note that if
-        // it doesn't push a promise, this.defs[currentDefIndex] is undefined.
+        // it doesn't push a deferred, this.defs[currentDefIndex] is undefined.
         // FIXME: get rid of this hack in master with a small refactoring
         var currentDefIndex = this.defs.length;
         var widget = this._super.apply(this, arguments);
-        Promise.resolve(this.defs[currentDefIndex]).then(function () {
+        $.when(this.defs[currentDefIndex]).then(function () {
             widget.$el.off();
 
             // make empty widgets appear
@@ -415,7 +347,21 @@ var KanbanRecordEditor = KanbanRecord.extend(EditorMixin, {
             widget.$el.attr('data-node-id', self.node_id++);
 
             // bind handler on field clicked to edit field's attributes
-            self._bindHandler(widget.$el, field_name);
+            var node = {
+                tag: 'field',
+                attrs: {name: field_name}
+            };
+            self.setSelectable(widget.$el);
+            widget.$el.click(function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                self.selected_node_id = widget.$el.data('node-id');
+                self.trigger_up('node_clicked', {node: node});
+            });
+
+            // insert a hook to add new fields
+            var $hook = self._renderHook(node);
+            $hook.insertAfter(widget.$el);
         });
 
         return widget;
@@ -439,18 +385,52 @@ var KanbanRecordEditor = KanbanRecord.extend(EditorMixin, {
         });
         return $hook;
     },
-    /**
-     * @override
-     */
-    _setState: function () {
-        this._super.apply(this, arguments);
+});
 
-        if (this.options.showInvisible) {
-            this.qweb_context.kanban_compute_domain = function () {
-                // always consider a domain falsy to see invisible elements
-                return false;
-            };
-        }
+var NewKanbanHelperDialog = Dialog.extend({
+    template: 'web_studio.NewKanbanHelperDialog',
+    /**
+     * @constructor
+     * @param {Widget} parent
+     * @param {Object} fields
+     * @param {Boolean} show_new
+     */
+    init: function (parent, fields, show_new) {
+        // set the field name because they key will be lost when sorting dict
+        this.orderered_fields = _.sortBy(
+            _.mapObject(fields, function (attrs, fieldName) {
+                return {
+                    name: fieldName,
+                    string: attrs.string
+                };
+            }), 'string');
+        this.show_new = show_new;
+        this.debug = config.debug;
+
+        var options = {
+            title: _t('Select a Field'),
+            buttons: [{
+                text: _t("Confirm"),
+                classes: 'btn-primary',
+                click: this._onConfirm.bind(this)
+            }, {
+                text: _t("Cancel"), close: true
+            }],
+        };
+        this._super(parent, options);
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * @
+     * @returns {[type]} [description]
+     */
+    _onConfirm: function () {
+        var selected_field = this.$('select[name="field"]').val();
+        this.trigger('confirm', selected_field);
     },
 });
 

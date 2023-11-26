@@ -1,25 +1,22 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* sale_ebay
+# * sale_ebay
 # 
 # Translators:
+# 老窦 北京 <2662059195@qq.com>, 2018
+# liAnGjiA <liangjia@qq.com>, 2018
+# Jeffery CHEN <jeffery9@gmail.com>, 2018
+# inspur qiuguodong <qiuguodong@inspur.com>, 2018
 # Martin Trigaux, 2019
-# liAnGjiA <liangjia@qq.com>, 2019
-# zpq001 <zpq001@live.com>, 2019
-# guohuadeng <guohuadeng@hotmail.com>, 2019
 # Felix Yuen <fyu@odoo.com>, 2019
-# 敬雲 林 <chingyun@yuanchih-consult.com>, 2019
-# inspur qiuguodong <qiuguodong@inspur.com>, 2019
-# Jeffery CHEN <jeffery9@gmail.com>, 2020
-# 山西清水欧度(QQ:54773801) <54773801@qq.com>, 2022
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~12.5+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-23 11:39+0000\n"
-"PO-Revision-Date: 2019-08-26 09:38+0000\n"
-"Last-Translator: 山西清水欧度(QQ:54773801) <54773801@qq.com>, 2022\n"
+"POT-Creation-Date: 2019-11-14 07:50+0000\n"
+"PO-Revision-Date: 2018-08-24 11:48+0000\n"
+"Last-Translator: Felix Yuen <fyu@odoo.com>, 2019\n"
 "Language-Team: Chinese (China) (https://www.transifex.com/odoo/teams/41243/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -28,7 +25,22 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
+#: model:mail.template,body_html:sale_ebay.ebay_desciption_default
+msgid ""
+"\n"
+"                  \n"
+"          ${object.ebay_description | safe}\n"
+"        \n"
+"      "
+msgstr ""
+"\n"
+"                  \n"
+"          ${object.ebay_description | safe}\n"
+"        \n"
+"      "
+
+#. module: sale_ebay
+#: code:addons/sale_ebay/models/product.py:383
 #, python-format
 msgid ""
 " If you want to set quantity to 0, the Out Of Stock option should be enabled"
@@ -38,44 +50,44 @@ msgstr ""
 "如果要将数量设置为0，则应启用缺货选项，并且设置列表持续时间直到取消"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
+#: code:addons/sale_ebay/models/product.py:386
 #, python-format
 msgid ""
 " You need to have at least 2 variations selected for a multi-variations listing.\n"
 " Or if you try to delete a variation, you cannot do it by unselecting it. Setting the quantity to 0 is the safest method to make a variation unavailable."
 msgstr ""
-"你必须至少选择2个产品变体。对于多产品变体清单.否则如果你尝试删除一个产品变体，你将不能选择它。\n"
-"设置数量为0，是使一个产品变体无效的安全方法。"
+"你必须至少选择2个变体。对于多变体清单.否则如果你尝试删除一个变体，你将不能选择它。\n"
+"设置数量为0，是使一个变体无效的安全方法。"
 
 #. module: sale_ebay
-#: model:ir.model.fields.selection,name:sale_ebay.selection__product_template__ebay_listing_duration__days_10
+#: selection:product.template,ebay_listing_duration:0
 msgid "10 Days"
 msgstr "10 天"
 
 #. module: sale_ebay
-#: model:ir.model.fields.selection,name:sale_ebay.selection__product_template__ebay_listing_duration__days_3
+#: selection:product.template,ebay_listing_duration:0
 msgid "3 Days"
 msgstr "3 天"
 
 #. module: sale_ebay
-#: model:ir.model.fields.selection,name:sale_ebay.selection__product_template__ebay_listing_duration__days_30
+#: selection:product.template,ebay_listing_duration:0
 msgid "30 Days (only for fixed price)"
 msgstr "30天 (仅固定价格)"
 
 #. module: sale_ebay
-#: model:ir.model.fields.selection,name:sale_ebay.selection__product_template__ebay_listing_duration__days_5
+#: selection:product.template,ebay_listing_duration:0
 msgid "5 Days"
 msgstr "5天"
 
 #. module: sale_ebay
-#: model:ir.model.fields.selection,name:sale_ebay.selection__product_template__ebay_listing_duration__days_7
+#: selection:product.template,ebay_listing_duration:0
 msgid "7 Days"
 msgstr "7天"
 
 #. module: sale_ebay
 #: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
-msgid "<span class=\"o_form_label\">Sales Team</span>"
-msgstr "<span class=\"o_form_label\">销售团队</span>"
+msgid "<span class=\"o_form_label\">Sales Channel</span>"
+msgstr "<span class=\"o_form_label\">销售渠道</span>"
 
 #. module: sale_ebay
 #: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
@@ -98,17 +110,7 @@ msgid "<span class=\"o_form_label\">eBay Options</span>"
 msgstr "<span class=\"o_form_label\">eBay 选项</span>"
 
 #. module: sale_ebay
-#: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
-msgid "Activate Other Currencies"
-msgstr "激活其他货币"
-
-#. module: sale_ebay
-#: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
-msgid "Add other countries"
-msgstr "添加其他国家"
-
-#. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
+#: code:addons/sale_ebay/models/product.py:259
 #, python-format
 msgid ""
 "All the quantities must be greater than 0 or you need to enable the Out Of "
@@ -122,9 +124,15 @@ msgid "Allow Best Offer"
 msgstr "允许议价"
 
 #. module: sale_ebay
-#: model:ir.model.fields.selection,name:sale_ebay.selection__product_template__ebay_listing_type__chinese
+#: selection:product.template,ebay_listing_type:0
 msgid "Auction"
 msgstr "拍卖"
+
+#. module: sale_ebay
+#: model:ir.model.fields,field_description:sale_ebay.field_res_country__ebay_available
+#: model:ir.model.fields,field_description:sale_ebay.field_res_currency__ebay_available
+msgid "Availability To Use For eBay API"
+msgstr "可以使用eBAY 借口"
 
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_product_product__ebay_buy_it_now_price
@@ -167,15 +175,15 @@ msgstr "类别类型"
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_ebay_item_condition__code
 msgid "Code"
-msgstr "代码"
+msgstr "代号"
 
 #. module: sale_ebay
 #: model:ir.model,name:sale_ebay.model_res_config_settings
 msgid "Config Settings"
-msgstr "配置设置"
+msgstr "配置设定"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
+#: code:addons/sale_ebay/models/product.py:352
 #, python-format
 msgid "Configure The eBay Integrator Now"
 msgstr "现在配置eBay集成"
@@ -186,11 +194,6 @@ msgid "Contact"
 msgstr "联系人"
 
 #. module: sale_ebay
-#: model:ir.actions.act_window,name:sale_ebay.action_country_all_form
-msgid "Countries"
-msgstr "国家/地区"
-
-#. module: sale_ebay
 #: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
 msgid "Countries & Currencies"
 msgstr "国家与货币"
@@ -199,7 +202,7 @@ msgstr "国家与货币"
 #: model:ir.model,name:sale_ebay.model_res_country
 #: model:ir.model.fields,field_description:sale_ebay.field_res_config_settings__ebay_country
 msgid "Country"
-msgstr "国家/地区"
+msgstr "国家"
 
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_ebay_category__create_uid
@@ -208,7 +211,7 @@ msgstr "国家/地区"
 #: model:ir.model.fields,field_description:sale_ebay.field_ebay_policy__create_uid
 #: model:ir.model.fields,field_description:sale_ebay.field_ebay_site__create_uid
 msgid "Created by"
-msgstr "创建者"
+msgstr "创建人"
 
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_ebay_category__create_date
@@ -226,7 +229,7 @@ msgid "Currency"
 msgstr "币种"
 
 #. module: sale_ebay
-#: model:ir.model.fields.selection,name:sale_ebay.selection__ebay_category__category_type__store
+#: selection:ebay.category,category_type:0
 msgid "Custom Store Category"
 msgstr "自定义店铺类别"
 
@@ -259,10 +262,10 @@ msgstr "显示名称"
 #: model:ir.model.fields,field_description:sale_ebay.field_product_product__ebay_listing_duration
 #: model:ir.model.fields,field_description:sale_ebay.field_product_template__ebay_listing_duration
 msgid "Duration"
-msgstr "时长"
+msgstr "有效期"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/sale_order.py:0
+#: code:addons/sale_ebay/models/sale_order.py:305
 #, python-format
 msgid ""
 "Ebay Synchronisation could not confirm because of the following error:\n"
@@ -272,7 +275,7 @@ msgstr ""
 "%s"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/sale_order.py:0
+#: code:addons/sale_ebay/models/sale_order.py:26
 #, python-format
 msgid ""
 "Ebay could not synchronize order:\n"
@@ -280,6 +283,31 @@ msgid ""
 msgstr ""
 "易趣无法同步订单：\n"
 "%s"
+
+#. module: sale_ebay
+#: model:ir.actions.server,name:sale_ebay.action_end_items_listings
+msgid "Ebay: End Product Templates Listings on eBay"
+msgstr "易趣网：易趣网上的最终产品模板列表"
+
+#. module: sale_ebay
+#: model:ir.actions.server,name:sale_ebay.action_list_items
+msgid "Ebay: List Product Templates on eBay"
+msgstr "易趣网：在易趣网上列出产品模板"
+
+#. module: sale_ebay
+#: model:ir.actions.server,name:sale_ebay.action_relist_items
+msgid "Ebay: Relist Product Templates on eBay"
+msgstr "易趣网：将易趣网产品模板"
+
+#. module: sale_ebay
+#: model:ir.actions.server,name:sale_ebay.action_revise_items
+msgid "Ebay: Revise Product Templates on eBay"
+msgstr "易趣网：在易趣网上修改产品模板"
+
+#. module: sale_ebay
+#: model:ir.actions.server,name:sale_ebay.action_unlink_items_listings
+msgid "Ebay: Unlink eBay Product Templates Listings"
+msgstr "易趣网：断开易趣网产品模板列表"
 
 #. module: sale_ebay
 #: model:ir.actions.server,name:sale_ebay.ir_cron_sale_ebay_orders_sync_ir_actions_server
@@ -323,17 +351,17 @@ msgid "End Item's Listing"
 msgstr "终止物品的上市"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
+#: code:addons/sale_ebay/models/product.py:245
 #, python-format
 msgid ""
 "Error Encountered.\n"
 " No Variant Set To Be Listed On eBay."
 msgstr ""
 "遇到问题.\n"
-" eBay 上的产品没有设置产品变体."
+" eBay 上的产品没有设置变体."
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
+#: code:addons/sale_ebay/models/product.py:389
 #, python-format
 msgid ""
 "Error Encountered.\n"
@@ -348,7 +376,7 @@ msgid "Fixed Price"
 msgstr "固定价格"
 
 #. module: sale_ebay
-#: model:ir.model.fields.selection,name:sale_ebay.selection__product_template__ebay_listing_type__fixedpriceitem
+#: selection:product.template,ebay_listing_type:0
 msgid "Fixed price"
 msgstr "固定价格"
 
@@ -363,7 +391,7 @@ msgid "Gallery Plus"
 msgstr "画廊加"
 
 #. module: sale_ebay
-#: model:ir.model.fields.selection,name:sale_ebay.selection__product_template__ebay_listing_duration__gtc
+#: selection:product.template,ebay_listing_duration:0
 msgid "Good 'Til Cancelled (only for fixed price)"
 msgstr "货物直到取消(仅对固定价)"
 
@@ -377,24 +405,18 @@ msgid "ID"
 msgstr "ID"
 
 #. module: sale_ebay
-#: model:ir.model.fields,help:sale_ebay.field_res_country__ebay_available
-#: model:ir.model.fields,help:sale_ebay.field_res_currency__ebay_available
-msgid "If activated, can be used for eBay."
-msgstr "如果激活，可用于eBay。"
-
-#. module: sale_ebay
 #: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
 msgid "Import eBay config data and sync transactions"
 msgstr "导入易趣网配置数据和同步事务"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
+#: code:addons/sale_ebay/models/product.py:381
 #, python-format
 msgid ""
 "Impossible to revise a listing into a multi-variations listing.\n"
 " Create a new listing."
 msgstr ""
-"不能把一个产品修改成多产品变体产品.\n"
+"不能把一个产品修改成多变体产品.\n"
 " 创建一个新产品."
 
 #. module: sale_ebay
@@ -410,7 +432,7 @@ msgstr "物品条件"
 #: model:ir.model.fields,field_description:sale_ebay.field_ebay_policy____last_update
 #: model:ir.model.fields,field_description:sale_ebay.field_ebay_site____last_update
 msgid "Last Modified on"
-msgstr "最后更改日"
+msgstr "最后修改日"
 
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_ebay_category__write_uid
@@ -419,7 +441,7 @@ msgstr "最后更改日"
 #: model:ir.model.fields,field_description:sale_ebay.field_ebay_policy__write_uid
 #: model:ir.model.fields,field_description:sale_ebay.field_ebay_site__write_uid
 msgid "Last Updated by"
-msgstr "最后更新者"
+msgstr "最后更新人"
 
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_ebay_category__write_date
@@ -428,7 +450,7 @@ msgstr "最后更新者"
 #: model:ir.model.fields,field_description:sale_ebay.field_ebay_policy__write_date
 #: model:ir.model.fields,field_description:sale_ebay.field_ebay_site__write_date
 msgid "Last Updated on"
-msgstr "更新时间"
+msgstr "最后更新时间"
 
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_product_product__ebay_last_sync
@@ -475,7 +497,7 @@ msgstr "上市类型"
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_res_config_settings__ebay_location
 msgid "Location"
-msgstr "位置"
+msgstr "地点"
 
 #. module: sale_ebay
 #: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
@@ -496,24 +518,24 @@ msgid "Name"
 msgstr "名称"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/sale_ebay.py:0
+#: code:addons/sale_ebay/models/sale_ebay.py:199
 #, python-format
 msgid "No Business Policies"
 msgstr "没有商业政策"
 
 #. module: sale_ebay
-#: model:ir.model.fields.selection,name:sale_ebay.selection__ebay_category__category_type__ebay
+#: selection:ebay.category,category_type:0
 msgid "Official eBay Category"
 msgstr "eBay官方分类"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
+#: code:addons/sale_ebay/models/product.py:351
 #, python-format
 msgid "One parameter is missing."
 msgstr "缺少一个参数"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
+#: code:addons/sale_ebay/models/product.py:377
 #, python-format
 msgid "Or the condition is not compatible with the category."
 msgstr "或者条件和类别不匹配"
@@ -528,6 +550,11 @@ msgstr "缺货"
 #: model:ir.model.fields,field_description:sale_ebay.field_product_template__ebay_seller_payment_policy_id
 msgid "Payment Policy"
 msgstr "付款政策"
+
+#. module: sale_ebay
+#: selection:crm.team,team_type:0
+msgid "Point of Sale"
+msgstr "POS"
 
 #. module: sale_ebay
 #: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
@@ -561,13 +588,13 @@ msgid "Product Template"
 msgstr "产品模板"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/sale_order.py:0
+#: code:addons/sale_ebay/models/sale_order.py:214
 #, python-format
 msgid "Product created from eBay transaction %s"
 msgstr "从eBay交易创建的产品%s"
 
 #. module: sale_ebay
-#: model:ir.model.fields.selection,name:sale_ebay.selection__res_config_settings__ebay_domain__prod
+#: selection:res.config.settings,ebay_domain:0
 msgid "Production"
 msgstr "生产"
 
@@ -626,21 +653,31 @@ msgstr "修订物品"
 
 #. module: sale_ebay
 #: model:ir.model,name:sale_ebay.model_sale_order
-msgid "Sales Order"
+msgid "Sale Order"
 msgstr "销售订单"
 
 #. module: sale_ebay
-#: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
-msgid "Sales Team"
-msgstr "销售团队"
+#: selection:crm.team,team_type:0
+msgid "Sales"
+msgstr "销售"
 
 #. module: sale_ebay
 #: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
-msgid "Sales Team to manage eBay sales"
-msgstr "销售团队管理eBay销售"
+msgid "Sales Channel"
+msgstr "销售渠道"
 
 #. module: sale_ebay
-#: model:ir.model.fields.selection,name:sale_ebay.selection__res_config_settings__ebay_domain__sand
+#: model:ir.model,name:sale_ebay.model_crm_team
+msgid "Sales Channels"
+msgstr "销售渠道"
+
+#. module: sale_ebay
+#: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
+msgid "Sales channel to manage eBay sales"
+msgstr "销售渠道管理易趣网销售"
+
+#. module: sale_ebay
+#: selection:res.config.settings,ebay_domain:0
 msgid "Sandbox"
 msgstr "沙箱"
 
@@ -716,16 +753,19 @@ msgid "Sync now"
 msgstr "现在同步"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
-#: code:addons/sale_ebay/models/sale_order.py:0
+#: model:ir.model.fields,field_description:sale_ebay.field_crm_team__team_type
+msgid "Team Type"
+msgstr "团队类型"
+
+#. module: sale_ebay
+#: code:addons/sale_ebay/models/product.py:719
 #, python-format
 msgid "The Buyer Chose The Following Delivery Method :\n"
 msgstr "购买者选择了如下送货方式 :\n"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
-#: code:addons/sale_ebay/models/product.py:0
-#: code:addons/sale_ebay/models/sale_order.py:0
+#: code:addons/sale_ebay/models/product.py:715
+#: code:addons/sale_ebay/models/product.py:716
 #, python-format
 msgid "The Buyer Posted :\n"
 msgstr "买方发布 :\n"
@@ -745,6 +785,12 @@ msgid "The title is restricted to 80 characters"
 msgstr "标题支持80个字符"
 
 #. module: sale_ebay
+#: model:ir.model.fields,help:sale_ebay.field_crm_team__team_type
+msgid ""
+"The type of this channel, it will define the resources this channel uses."
+msgstr "此渠道的类型，它将定义此渠道使用的资源。"
+
+#. module: sale_ebay
 #: model:ir.model.fields,help:sale_ebay.field_product_product__ebay_category_2_id
 #: model:ir.model.fields,help:sale_ebay.field_product_template__ebay_category_2_id
 msgid ""
@@ -753,7 +799,7 @@ msgid ""
 msgstr "eBay 不支持免费使用第二分类，此功能要收费。"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
+#: code:addons/sale_ebay/models/product.py:668
 #, python-format
 msgid ""
 "There is no last synchronization date in your System Parameters. Create a "
@@ -774,17 +820,22 @@ msgstr "此字段包含将要使用的模板。"
 #: model:ir.model.fields,field_description:sale_ebay.field_product_product__ebay_title
 #: model:ir.model.fields,field_description:sale_ebay.field_product_template__ebay_title
 msgid "Title"
-msgstr "标题"
+msgstr "称谓"
 
 #. module: sale_ebay
 #: model:ir.model,name:sale_ebay.model_stock_picking
 msgid "Transfer"
-msgstr "调拨"
+msgstr "转账"
 
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_ebay_policy__policy_type
 msgid "Type"
 msgstr "类型"
+
+#. module: sale_ebay
+#: model:ir.actions.server,name:sale_ebay.action_ebay_update_carrier
+msgid "Update eBay Carrier Information"
+msgstr "更新eBay 承运人信息"
 
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_product_product__ebay_sync_stock
@@ -798,15 +849,14 @@ msgid "Use eBay"
 msgstr "使用eBay"
 
 #. module: sale_ebay
-#: model:ir.model.fields,field_description:sale_ebay.field_res_country__ebay_available
-#: model:ir.model.fields,field_description:sale_ebay.field_res_currency__ebay_available
-msgid "Use on eBay"
-msgstr "在eBay上使用"
-
-#. module: sale_ebay
 #: model_terms:ir.ui.view,arch_db:sale_ebay.product_template_sale_ebay_form_view
 msgid "Variants"
-msgstr "产品变体"
+msgstr "变体"
+
+#. module: sale_ebay
+#: selection:crm.team,team_type:0
+msgid "Website"
+msgstr "网站"
 
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_res_config_settings__ebay_zip_code
@@ -814,6 +864,8 @@ msgid "Zip"
 msgstr "邮政编码"
 
 #. module: sale_ebay
+#: model:crm.team,name:sale_ebay.ebay_sales_team
+#: selection:crm.team,team_type:0
 #: model_terms:ir.ui.view,arch_db:sale_ebay.product_template_sale_ebay_form_view
 #: model_terms:ir.ui.view,arch_db:sale_ebay.res_config_settings_view_form
 msgid "eBay"
@@ -823,6 +875,11 @@ msgstr "eBay"
 #: model:ir.model,name:sale_ebay.model_ebay_category
 msgid "eBay Category"
 msgstr "eBay 类别"
+
+#. module: sale_ebay
+#: model:product.category,name:sale_ebay.product_category_ebay
+msgid "eBay Delivery Services"
+msgstr "eBay 发货服务"
 
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_product_product__ebay_description
@@ -888,7 +945,7 @@ msgstr "eBay 用户 ID"
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_product_product__ebay_variant_url
 msgid "eBay Variant URL"
-msgstr "eBay 产品变体网址"
+msgstr "eBay 变体网址"
 
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_res_config_settings__ebay_site
@@ -896,7 +953,7 @@ msgid "eBay Website"
 msgstr "易趣网的网站"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/sale_ebay.py:0
+#: code:addons/sale_ebay/models/sale_ebay.py:54
 #, python-format
 msgid ""
 "eBay error: Impossible to synchronize the categories. \n"
@@ -906,8 +963,8 @@ msgstr ""
 "'%s'"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
-#: code:addons/sale_ebay/models/product.py:0
+#: code:addons/sale_ebay/models/product.py:483
+#: code:addons/sale_ebay/models/product.py:556
 #, python-format
 msgid ""
 "eBay error: Impossible to synchronize the products. \n"
@@ -917,7 +974,7 @@ msgstr ""
 "'%s'"
 
 #. module: sale_ebay
-#: code:addons/sale_ebay/models/product.py:0
+#: code:addons/sale_ebay/models/product.py:379
 #, python-format
 msgid "eBay is unreachable. Please try again later."
 msgstr "eBay 无法访问. 请再试."
@@ -934,41 +991,11 @@ msgid "eBay url"
 msgstr "eBay 网址"
 
 #. module: sale_ebay
-#: model:ir.actions.server,name:sale_ebay.action_end_items_listings
-msgid "eBay: End product listings"
-msgstr "eBay: 最终产品列表"
-
-#. module: sale_ebay
-#: model:ir.actions.server,name:sale_ebay.action_list_items
-msgid "eBay: List products"
-msgstr "eBay: 产品上市"
-
-#. module: sale_ebay
-#: model:ir.actions.server,name:sale_ebay.action_relist_items
-msgid "eBay: Relist products"
-msgstr "eBay: 修改产品"
-
-#. module: sale_ebay
-#: model:ir.actions.server,name:sale_ebay.action_revise_items
-msgid "eBay: Revise products"
-msgstr "eBay: 修改产品"
-
-#. module: sale_ebay
-#: model:ir.actions.server,name:sale_ebay.action_unlink_items_listings
-msgid "eBay: Unlink product listings"
-msgstr "eBay: 断开产品列表"
-
-#. module: sale_ebay
-#: model:ir.actions.server,name:sale_ebay.action_ebay_update_carrier
-msgid "eBay: Update carrier information"
-msgstr "eBay: 更新承运商信息"
-
-#. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_res_config_settings__ebay_currency
 msgid "ebay Currency"
 msgstr "ebay 货币"
 
 #. module: sale_ebay
 #: model:ir.model.fields,field_description:sale_ebay.field_res_config_settings__ebay_sales_team
-msgid "ebay Sales Team"
-msgstr "ebay 销售团队"
+msgid "ebay Sales Channel"
+msgstr "ebay 销售渠道"

@@ -4,13 +4,15 @@
 # 
 # Translators:
 # Sengtha Chay <sengtha@gmail.com>, 2018
+# Lux Sok <sok.lux@gmail.com>, 2019
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~11.5+e\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-09-21 14:06+0000\n"
-"PO-Revision-Date: 2018-09-21 14:06+0000\n"
-"Last-Translator: Sengtha Chay <sengtha@gmail.com>, 2018\n"
+"PO-Revision-Date: 2018-08-24 11:38+0000\n"
+"Last-Translator: Lux Sok <sok.lux@gmail.com>, 2019\n"
 "Language-Team: Khmer (https://www.transifex.com/odoo/teams/41243/km/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -27,7 +29,7 @@ msgstr "វិកិយប័ត្រ"
 #. module: inter_company_rules
 #: model_terms:ir.ui.view,arch_db:inter_company_rules.res_config_settings_view_form
 msgid ", generate a"
-msgstr ""
+msgstr "បង្កើតមួយ"
 
 #. module: inter_company_rules
 #: model_terms:ir.ui.view,arch_db:inter_company_rules.view_company_inter_change_inherit_form
@@ -38,6 +40,11 @@ msgid ""
 "                                    <span attrs=\"{'invisible':[('applicable_on','!=', 'sale_purchase')]}\" class=\"ml4\"> Sale and Purchase Order</span>\n"
 "                                </strong> using"
 msgstr ""
+"<strong>\n"
+"                                    <span attrs=\"{'invisible': [('applicable_on','!=', 'purchase')]}\" class=\"ml4\">ការបញ្ជាលក់</span>\n"
+"                                    <span attrs=\"{'invisible': [('applicable_on','!=', 'sale')]}\" class=\"ml4\">ការបញ្ជាទិញ</span>\n"
+"                                    <span attrs=\"{'invisible':[('applicable_on','!=', 'sale_purchase')]}\" class=\"ml4\"> ការលក់ និងការបញ្ជាទិញ</span>\n"
+"                                </strong> កំពុងប្រើប្រាស់"
 
 #. module: inter_company_rules
 #: model_terms:ir.ui.view,arch_db:inter_company_rules.res_config_settings_view_form
@@ -49,33 +56,39 @@ msgid ""
 "                            </strong>\n"
 "                            using"
 msgstr ""
+"<strong>\n"
+"                                <span attrs=\"{'invisible': [('applicable_on','!=', 'purchase')]}\" class=\"ml8\">ការបញ្ជាលក់ </span>\n"
+"                                <span attrs=\"{'invisible': [('applicable_on','!=', 'sale')]}\" class=\"ml8\">ការបញ្ជាទិញ </span>\n"
+"                                <span attrs=\"{'invisible': [('applicable_on','!=', 'sale_purchase')]}\" class=\"ml8\"> ការលក់ និងការបញ្ជាទិញ </span>\n"
+"                            </strong>\n"
+"                            កំពុងប្រើប្រាស់"
 
 #. module: inter_company_rules
 #: model:ir.model.fields,field_description:inter_company_rules.field_res_company__applicable_on
 #: model:ir.model.fields,field_description:inter_company_rules.field_res_config_settings__applicable_on
 msgid "Applicable On"
-msgstr ""
+msgstr "អាចប្រើបាននៅលើ"
 
 #. module: inter_company_rules
 #: model:ir.model.fields,field_description:inter_company_rules.field_account_invoice__auto_generated
 msgid "Auto Generated Document"
-msgstr ""
+msgstr "ការបង្កើតឯកសារដោយស្វ័យប្រវត្តិ"
 
 #. module: inter_company_rules
 #: model:ir.model.fields,field_description:inter_company_rules.field_purchase_order__auto_generated
 msgid "Auto Generated Purchase Order"
-msgstr ""
+msgstr "ការបង្កើតការបញ្ជាទិញដោយស្វ័យប្រវត្តិ"
 
 #. module: inter_company_rules
 #: model:ir.model.fields,field_description:inter_company_rules.field_sale_order__auto_generated
 msgid "Auto Generated Sales Order"
-msgstr ""
+msgstr "ការបង្កើតការបញ្ជាលក់ដោយស្វ័យប្រវត្តិ"
 
 #. module: inter_company_rules
 #: model:ir.model.fields,field_description:inter_company_rules.field_res_company__auto_validation
 #: model:ir.model.fields,field_description:inter_company_rules.field_res_config_settings__auto_validation
 msgid "Auto Validation"
-msgstr ""
+msgstr "សុពលភាពដោយស្វ័យប្រវត្តិ"
 
 #. module: inter_company_rules
 #: model:ir.model,name:inter_company_rules.model_res_company
@@ -85,7 +98,7 @@ msgstr "ក្រុមហ៊ុន"
 #. module: inter_company_rules
 #: model:ir.model,name:inter_company_rules.model_res_config_settings
 msgid "Config Settings"
-msgstr ""
+msgstr "កំណត់រចនាសម្ព័ន្ធ"
 
 #. module: inter_company_rules
 #: code:addons/inter_company_rules/models/purchase_order.py:82
@@ -95,6 +108,8 @@ msgid ""
 "Configure correct warehouse for company(%s) from Menu: "
 "Settings/Users/Companies"
 msgstr ""
+"កំណត់រចនាសម្ព័ន្ធឃ្លាំងត្រឹមត្រូវសម្រាប់ក្រុមហ៊ុន(%s) ពីម៉ឺនុយ៖ ការកំណត់ / "
+"អ្នកប្រើប្រាស់ / ក្រុមហ៊ុន"
 
 #. module: inter_company_rules
 #: model:ir.model.fields,help:inter_company_rules.field_res_config_settings__warehouse_id
@@ -102,6 +117,7 @@ msgid ""
 "Default value to set on Purchase Orders that will be created based on Sales "
 "Orders made to this company."
 msgstr ""
+"តម្លៃលំនាំដើមដើម្បីកំណត់លើការបញ្ជាទិញការទិញដែលនឹងត្រូវបានបង្កើតដោយផ្អែកលើការបញ្ជាទិញដែលបានលក់ទៅឱ្យក្រុមហ៊ុននេះ។"
 
 #. module: inter_company_rules
 #: model:ir.model.fields,help:inter_company_rules.field_res_company__warehouse_id
@@ -109,11 +125,14 @@ msgid ""
 "Default value to set on Purchase(Sales) Orders that will be created based on"
 " Sale(Purchase) Orders made to this company"
 msgstr ""
+"តម្លៃលំនាំដើមដើម្បីកំណត់លើការទិញ (ការលក់) "
+"ការបញ្ជាទិញដែលនឹងត្រូវបានបង្កើតឡើងផ្អែកលើការលក់ (ការទិញ) "
+"ការបញ្ជាទិញដែលបានធ្វើឡើងចំពោះក្រុមហ៊ុននេះ"
 
 #. module: inter_company_rules
 #: model:ir.model.fields,field_description:inter_company_rules.field_res_company__intercompany_user_id
 msgid "Inter Company User"
-msgstr ""
+msgstr "អ្នកប្រើប្រាស់ក្រុមហ៊ុនអន្តរក្រុមហ៊ុន"
 
 #. module: inter_company_rules
 #: code:addons/inter_company_rules/models/purchase_order.py:42
@@ -121,11 +140,12 @@ msgstr ""
 #, python-format
 msgid "Inter company user of company %s doesn't have enough access rights"
 msgstr ""
+"អ្នកប្រើប្រាស់ក្រុមហ៊ុនអន្តក្រុមហ៊ុន%sមិនមានសិទ្ធិចូលដំណើរការគ្រប់គ្រាន់ទេ"
 
 #. module: inter_company_rules
 #: model_terms:ir.ui.view,arch_db:inter_company_rules.view_company_inter_change_inherit_form
 msgid "Inter-Company Rules"
-msgstr ""
+msgstr "វិធានអន្តរក្រុមហ៊ុន"
 
 #. module: inter_company_rules
 #: model:ir.model,name:inter_company_rules.model_account_invoice
@@ -133,9 +153,21 @@ msgid "Invoice"
 msgstr "វិកិយប័ត្រ"
 
 #. module: inter_company_rules
+#: code:addons/inter_company_rules/models/purchase_order.py:54
+#, python-format
+msgid "Partner:"
+msgstr ""
+
+#. module: inter_company_rules
 #: code:addons/inter_company_rules/models/account_invoice.py:81
 #, python-format
 msgid "Please define %s journal for this company: \"%s\" (id:%d)."
+msgstr "សូមកំណត់ %s ទិនានុប្បវត្តិសម្រាប់ក្រុមហ៊ុននេះ: \"%s\" (id:%d)."
+
+#. module: inter_company_rules
+#: code:addons/inter_company_rules/models/purchase_order.py:53
+#, python-format
+msgid "Pricelist:"
 msgstr ""
 
 #. module: inter_company_rules
@@ -143,31 +175,38 @@ msgstr ""
 #, python-format
 msgid "Provide at least one user for inter company relation for % "
 msgstr ""
+"ផ្តល់យ៉ាងហោចណាស់អ្នកប្រើប្រាស់ម្នាក់សម្រាប់ទំនាក់ទំនងក្រុមហ៊ុនសម្រាប់%"
 
 #. module: inter_company_rules
 #: code:addons/inter_company_rules/models/account_invoice.py:44
 #: code:addons/inter_company_rules/models/sale_order.py:43
 #, python-format
 msgid "Provide one user for intercompany relation for % "
-msgstr ""
+msgstr "ផ្តល់អ្នកប្រើប្រាស់ម្នាក់សម្រាប់ទំនាក់ទំនងដែលទាក់ទងគ្នាសម្រាប់%"
 
 #. module: inter_company_rules
 #: model:ir.model,name:inter_company_rules.model_purchase_order
 #: selection:res.company,applicable_on:0
 #: selection:res.config.settings,applicable_on:0
 msgid "Purchase Order"
-msgstr ""
+msgstr "ការការម៉ង់ទិញ"
 
 #. module: inter_company_rules
 #: model:ir.model.fields,help:inter_company_rules.field_res_company__intercompany_user_id
 msgid ""
 "Responsible user for creation of documents triggered by intercompany rules."
-msgstr ""
+msgstr "អ្នកប្រើដែលទទួលខុសត្រូវចំពោះការបង្កើតឯកសារដែលបង្កឡើងដោយវិធានអន្តរ។"
 
 #. module: inter_company_rules
 #: model:ir.model.fields,field_description:inter_company_rules.field_res_company__rule_type
 #: model:ir.model.fields,field_description:inter_company_rules.field_res_config_settings__rule_type
 msgid "Rule Type"
+msgstr "ប្រភេទច្បាប់"
+
+#. module: inter_company_rules
+#: code:addons/inter_company_rules/models/purchase_order.py:52
+#, python-format
+msgid "SO currency:"
 msgstr ""
 
 #. module: inter_company_rules
@@ -175,70 +214,79 @@ msgstr ""
 #: selection:res.company,applicable_on:0
 #: selection:res.config.settings,applicable_on:0
 msgid "Sale Order"
-msgstr ""
+msgstr "លក់តាមការម៉ង់"
 
 #. module: inter_company_rules
 #: selection:res.company,applicable_on:0
 #: selection:res.config.settings,applicable_on:0
 msgid "Sale and Purchase Order"
-msgstr ""
+msgstr "ការលក់និងការបញ្ជាទិញ"
 
 #. module: inter_company_rules
 #: model:ir.model.fields,field_description:inter_company_rules.field_res_config_settings__rules_company_id
 msgid "Select Company"
-msgstr ""
+msgstr "ជ្រើសរើសក្រុមហ៊ុន"
 
 #. module: inter_company_rules
 #: model:ir.model.fields,help:inter_company_rules.field_res_config_settings__rules_company_id
 msgid "Select company to setup Inter company rules."
-msgstr ""
+msgstr "ជ្រើសរើសក្រុមហ៊ុនដើម្បីរៀបចំវិធានរបស់ក្រុមហ៊ុនអ៊ីនធឺណេត"
 
 #. module: inter_company_rules
 #: model:ir.model.fields,help:inter_company_rules.field_res_company__rule_type
 #: model:ir.model.fields,help:inter_company_rules.field_res_config_settings__rule_type
 msgid "Select the type to setup inter company rules in selected company."
 msgstr ""
+"ជ្រើសរើសប្រភេទដើម្បីរៀបចំវិធានរបស់ក្រុមហ៊ុនក្នុងក្រុមហ៊ុនដែលបានជ្រើសរើស។"
 
 #. module: inter_company_rules
 #: model:ir.model.fields,field_description:inter_company_rules.field_account_invoice__auto_invoice_id
 msgid "Source Invoice"
-msgstr ""
+msgstr "​ប្រភពវិក្ក័យបត្រ"
 
 #. module: inter_company_rules
 #: model:ir.model.fields,field_description:inter_company_rules.field_sale_order__auto_purchase_order_id
 msgid "Source Purchase Order"
-msgstr ""
+msgstr "​ប្រភពនៃការបញ្ជាទិញ"
 
 #. module: inter_company_rules
 #: model:ir.model.fields,field_description:inter_company_rules.field_purchase_order__auto_sale_order_id
 msgid "Source Sales Order"
-msgstr ""
+msgstr "ប្រភពនៃការបញ្ជាទិញ"
 
 #. module: inter_company_rules
 #: selection:res.company,rule_type:0 selection:res.config.settings,rule_type:0
 msgid "Synchronize Invoices & Bills"
-msgstr ""
+msgstr "ធ្វើវិក្ក័យបត្រវិក្កយបត្រនិងវិក័្កយបត្រ"
 
 #. module: inter_company_rules
 #: selection:res.company,rule_type:0 selection:res.config.settings,rule_type:0
 msgid "Synchronize Sales & Purchase Orders"
+msgstr "ធ្វើអោយមានការលក់ និងការបញ្ជាទិញ"
+
+#. module: inter_company_rules
+#: code:addons/inter_company_rules/models/purchase_order.py:50
+#, python-format
+msgid ""
+"The currency of the SO is obtained from the pricelist of the company "
+"partner."
 msgstr ""
 
 #. module: inter_company_rules
 #: model:ir.model.fields,field_description:inter_company_rules.field_res_company__warehouse_id
 msgid "Warehouse"
-msgstr ""
+msgstr "ឃ្លាំង"
 
 #. module: inter_company_rules
 #: model:ir.model.fields,field_description:inter_company_rules.field_res_config_settings__warehouse_id
 msgid "Warehouse For Purchase Orders"
-msgstr ""
+msgstr "ឃ្លាំងសម្រាប់ការបញ្ជាទិញ"
 
 #. module: inter_company_rules
 #: model_terms:ir.ui.view,arch_db:inter_company_rules.res_config_settings_view_form
 #: model_terms:ir.ui.view,arch_db:inter_company_rules.view_company_inter_change_inherit_form
 msgid "When a company validates a"
-msgstr ""
+msgstr "នៅពេលដែលក្រុមហ៊ុនមានសុពលភាព"
 
 #. module: inter_company_rules
 #: code:addons/inter_company_rules/models/purchase_order.py:47
@@ -247,6 +295,7 @@ msgid ""
 "You cannot create SO from PO because sale price list currency is different "
 "than purchase price list currency."
 msgstr ""
+"អ្នកមិនអាចបង្កើតសូអេពីភីអូបានទេពីព្រោះរូបិយប័ណ្ណបញ្ជីតម្លៃលក់ខុសគ្នាពីរូបិយប័ណ្ណបញ្ជីតម្លៃទិញ"
 
 #. module: inter_company_rules
 #: code:addons/inter_company_rules/models/res_company.py:37
@@ -256,30 +305,33 @@ msgid ""
 "                    simultaneously with another option ('Create Sales Orders when buying to this\n"
 "                    company' or 'Create Purchase Orders when selling to this company')!"
 msgstr ""
+"អ្នកមិនអាចជ្រើសរើសដើម្បីបង្កើតវិក័យប័ត្រដោយផ្អែកលើវិក័យប័ត្រផ្សេងទៀត។\n"
+"                    ក្នុងពេលដំណាលគ្នាជាមួយនឹងជម្រើសមួយផ្សេងទៀត ('បង្កើតការបញ្ជាទិញការលក់នៅពេលទិញវា។\n"
+"                    ក្រុមហ៊ុន 'ឬ' បង្កើតការបញ្ជាទិញទិញនៅពេលលក់ទៅឱ្យក្រុមហ៊ុននេះ ')!"
 
 #. module: inter_company_rules
 #: selection:res.company,auto_validation:0
 #: selection:res.config.settings,auto_validation:0
 msgid "draft"
-msgstr ""
+msgstr "ពង្រាង"
 
 #. module: inter_company_rules
 #: model_terms:ir.ui.view,arch_db:inter_company_rules.view_company_inter_change_inherit_form
 msgid "generate a"
-msgstr ""
+msgstr "បង្កើតមួយ"
 
 #. module: inter_company_rules
 #: model_terms:ir.ui.view,arch_db:inter_company_rules.res_config_settings_view_form
 msgid "to"
-msgstr ""
+msgstr "ដល់"
 
 #. module: inter_company_rules
 #: model_terms:ir.ui.view,arch_db:inter_company_rules.view_company_inter_change_inherit_form
 msgid "to this company,"
-msgstr ""
+msgstr "ទៅក្រុមហ៊ុននេះ,"
 
 #. module: inter_company_rules
 #: selection:res.company,auto_validation:0
 #: selection:res.config.settings,auto_validation:0
 msgid "validated"
-msgstr ""
+msgstr "សុពលភាព"

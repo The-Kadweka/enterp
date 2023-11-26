@@ -9,5 +9,5 @@ class AccountChartTemplate(models.Model):
     def _create_bank_journals(self, company, acc_template_ref):
         bank_journals = super(AccountChartTemplate, self)._create_bank_journals(company, acc_template_ref)
         if company.country_id.code in self.get_countries_posting_at_bank_rec():
-            bank_journals.write({'post_at': 'bank_rec'})
+            bank_journals.write({'post_at_bank_rec': True})
         return bank_journals

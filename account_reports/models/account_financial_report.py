@@ -7,9 +7,11 @@ from odoo import models, fields, api, _
 from odoo.tools.safe_eval import safe_eval
 from odoo.tools.misc import formatLang
 from odoo.tools import float_is_zero, ustr
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
+from odoo.tools.pycompat import izip
 
 
 class ReportAccountFinancialReport(models.Model):
@@ -22,6 +24,7 @@ class ReportAccountFinancialReport(models.Model):
     line_ids = fields.One2many('account.financial.html.report.line', 'financial_report_id', string='Lines')
     date_range = fields.Boolean('Based on date ranges', default=True, help='specify if the report use date_range or single date')
     comparison = fields.Boolean('Allow comparison', default=True, help='display the comparison filter')
+    cash_basis = fields.Boolean('Allow cash basis mode', help='display the option to switch to cash basis mode')
     analytic = fields.Boolean('Allow analytic filters', help='display the analytic filters')
     hierarchy_option = fields.Boolean('Enable the hierarchy option', help='Display the hierarchy choice in the report options')
     show_journal_filter = fields.Boolean('Allow filtering by journals', help='display the journal filter in the report')
@@ -34,33 +37,14 @@ class ReportAccountFinancialReport(models.Model):
     parent_id = fields.Many2one('ir.ui.menu', related="generated_menu_id.parent_id", readonly=False)
     tax_report = fields.Boolean('Tax Report', help="Set to True to automatically filter out journal items that have the boolean field 'tax_exigible' set to False")
     applicable_filters_ids = fields.Many2many('ir.filters', domain="[('model_id', '=', 'account.move.line')]",
-                                              help='Filters that can be used to filter and group lines in this report. This uses saved filters on journal items.')
-
-    @api.model
-    def _init_filter_ir_filters(self, options, previous_options=None):
-        if self.filter_ir_filters is None:
-            return
-
-        if previous_options and previous_options.get('ir_filters'):
-            filters_map = dict((opt['id'], opt['selected']) for opt in previous_options['ir_filters'])
-        else:
-            filters_map = {}
-        options['ir_filters'] = []
-        for ir_filter in self.applicable_filters_ids:
-            options['ir_filters'].append({
-                'id': ir_filter.id,
-                'name': ir_filter.name,
-                'domain': ast.literal_eval(ir_filter.domain),
-                'groupby': (ir_filter.context and ast.literal_eval(ir_filter.context) or {}).get('group_by', []),
-                'selected': filters_map.get(ir_filter.id, False),
-            })
+                                              help='Filters that can be used to filter and group lines in this report.')
 
     def _get_column_name(self, field_content, field):
         comodel_name = self.env['account.move.line']._fields[field].comodel_name
         if not comodel_name:
             return field_content
         grouping_record = self.env[comodel_name].browse(field_content)
-        return grouping_record.display_name if grouping_record and grouping_record.exists() else _('Undefined')
+        return grouping_record.name_get()[0][1] if grouping_record and grouping_record.exists() else _('Undefined')
 
     def _get_columns_name_hierarchy(self, options):
         '''Calculates a hierarchy of column headers meant to be easily used in QWeb.
@@ -156,11 +140,6 @@ class ReportAccountFinancialReport(models.Model):
         columns = [{'name': ''}]
         if self.debit_credit and not options.get('comparison', {}).get('periods', False):
             columns += [{'name': _('Debit'), 'class': 'number'}, {'name': _('Credit'), 'class': 'number'}]
-        if not self.filter_date:
-            if self.date_range:
-                self.filter_date = {'mode': 'range', 'filter': 'this_year'}
-            else:
-                self.filter_date = {'mode': 'single', 'filter': 'today'}
         columns += [{'name': self.format_date(options), 'class': 'number'}]
         if options.get('comparison') and options['comparison'].get('periods'):
             for period in options['comparison']['periods']:
@@ -181,15 +160,47 @@ class ReportAccountFinancialReport(models.Model):
 
         return columns
 
-    def _with_correct_filters(self):
+    def _get_filter_journals(self):
+        if self == self.env.ref('account_reports.account_financial_report_cashsummary0'):
+            return self.env['account.journal'].search([('company_id', 'in', self.env.user.company_ids.ids or [self.env.user.company_id.id]), ('type', 'in', ['bank', 'cash'])], order="company_id, name")
+        return super(ReportAccountFinancialReport, self)._get_filter_journals()
+
+    def _build_options(self, previous_options=None):
+        options = super(ReportAccountFinancialReport, self)._build_options(previous_options=previous_options)
+
+        if self.filter_ir_filters:
+            options['ir_filters'] = []
+
+            previously_selected_id = False
+            if previous_options and previous_options.get('ir_filters'):
+                previously_selected_id = [f for f in previous_options['ir_filters'] if f.get('selected')]
+                if previously_selected_id:
+                    previously_selected_id = previously_selected_id[0]['id']
+                else:
+                    previously_selected_id = False
+
+            for ir_filter in self.filter_ir_filters:
+                options['ir_filters'].append({
+                    'id': ir_filter.id,
+                    'name': ir_filter.name,
+                    'domain': ir_filter.domain,
+                    'context': ir_filter.context,
+                    'selected': ir_filter.id == previously_selected_id,
+                })
+
+        return options
+
+    @api.model
+    def _get_options(self, previous_options=None):
         if self.date_range:
-            self.filter_date = {'mode': 'range', 'filter': 'this_year'}
+            self.filter_date = {'date_from': '', 'date_to': '', 'filter': 'this_year'}
             if self.comparison:
                 self.filter_comparison = {'date_from': '', 'date_to': '', 'filter': 'no_comparison', 'number_period': 1}
         else:
-            self.filter_date = {'mode': 'single', 'filter': 'today'}
+            self.filter_date = {'date': '', 'filter': 'today'}
             if self.comparison:
-                self.filter_comparison = {'date_from': '', 'date_to': '', 'filter': 'no_comparison', 'number_period': 1}
+                self.filter_comparison = {'date': '', 'filter': 'no_comparison', 'number_period': 1}
+        self.filter_cash_basis = False if self.cash_basis else None
         if self.unfold_all_filter:
             self.filter_unfold_all = False
         if self.show_journal_filter:
@@ -197,17 +208,14 @@ class ReportAccountFinancialReport(models.Model):
         self.filter_all_entries = False
         self.filter_analytic = self.analytic or None
         if self.analytic:
-            enable_filter_analytic_accounts = self.env.user.id in self.env.ref('analytic.group_analytic_accounting').users.ids
-            enable_filter_analytic_tags = self.env.user.id in self.env.ref('analytic.group_analytic_tags').users.ids
+            self.filter_analytic_accounts = [] if self.env.user.id in self.env.ref('analytic.group_analytic_accounting').users.ids else None
+            self.filter_analytic_tags = [] if self.env.user.id in self.env.ref('analytic.group_analytic_tags').users.ids else None
             #don't display the analytic filtering options if no option would be shown
-            if not enable_filter_analytic_accounts and not enable_filter_analytic_tags:
+            if self.filter_analytic_accounts is None and self.filter_analytic_tags is None:
                 self.filter_analytic = None
         self.filter_hierarchy = True if self.hierarchy_option else None
         self.filter_ir_filters = self.applicable_filters_ids or None
-        return self
 
-    @api.model
-    def _get_options(self, previous_options=None):
         rslt = super(ReportAccountFinancialReport, self)._get_options(previous_options)
 
         # If manual values were stored in the context, we store them as options.
@@ -218,9 +226,6 @@ class ReportAccountFinancialReport(models.Model):
             rslt['financial_report_line_values'] = self.env.context['financial_report_line_values']
 
         return rslt
-
-    def get_report_informations(self, options):
-        return super(ReportAccountFinancialReport, self._with_correct_filters()).get_report_informations(options)
 
     def _set_context(self, options):
         ctx = super(ReportAccountFinancialReport, self)._set_context(options)
@@ -268,6 +273,7 @@ class ReportAccountFinancialReport(models.Model):
         res._create_action_and_menu(parent_id)
         return res
 
+    @api.multi
     def write(self, vals):
         parent_id = vals.pop('parent_id', False)
         res = super(ReportAccountFinancialReport, self).write(vals)
@@ -277,6 +283,7 @@ class ReportAccountFinancialReport(models.Model):
                 report._create_action_and_menu(parent_id)
         return res
 
+    @api.multi
     def unlink(self):
         for report in self:
             menu = report.generated_menu_id
@@ -287,7 +294,7 @@ class ReportAccountFinancialReport(models.Model):
         return super(ReportAccountFinancialReport, self).unlink()
 
     def _get_currency_table(self):
-        used_currency = self.env.company.currency_id.with_context(company_id=self.env.company.id)
+        used_currency = self.env.user.company_id.currency_id.with_context(company_id=self.env.user.company_id.id)
         currency_table = {}
         for company in self.env['res.company'].search([]):
             if company.currency_id != used_currency:
@@ -319,7 +326,7 @@ class ReportAccountFinancialReport(models.Model):
         return self.env.cr.fetchall()
 
     def _get_filter_info(self, options):
-        if not options.get('ir_filters'):
+        if not options['ir_filters']:
             return False, False
 
         selected_ir_filter = [f for f in options['ir_filters'] if f.get('selected')]
@@ -328,8 +335,11 @@ class ReportAccountFinancialReport(models.Model):
         else:
             return False, False
 
-        return selected_ir_filter['domain'], selected_ir_filter['groupby']
+        domain = ast.literal_eval(selected_ir_filter['domain'])
+        group_by = ast.literal_eval(selected_ir_filter['context']).get('group_by', [])
+        return domain, group_by
 
+    @api.multi
     def _get_lines(self, options, line_id=None):
         line_obj = self.line_ids
         if line_id:
@@ -352,6 +362,7 @@ class ReportAccountFinancialReport(models.Model):
         linesDicts = [[{} for _ in range(0, amount_of_group_ids)] for _ in range(0, amount_of_periods)]
 
         res = line_obj.with_context(
+            cash_basis=options.get('cash_basis'),
             filter_domain=domain,
         )._get_lines(self, currency_table, options, linesDicts)
         return res
@@ -359,6 +370,7 @@ class ReportAccountFinancialReport(models.Model):
     def _get_report_name(self):
         return self.name
 
+    @api.multi
     def _get_copied_name(self):
         '''Return a copied name of the account.financial.html.report record by adding the suffix (copy) at the end
         until the name is unique.
@@ -371,6 +383,7 @@ class ReportAccountFinancialReport(models.Model):
             name += ' ' + _('(copy)')
         return name
 
+    @api.multi
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
         '''Copy the whole financial report hierarchy by duplicating each line recursively.
@@ -383,16 +396,15 @@ class ReportAccountFinancialReport(models.Model):
             default = {}
         default.update({'name': self._get_copied_name()})
         copied_report_id = super(ReportAccountFinancialReport, self).copy(default=default)
-        code_mapping = {}
         for line in self.line_ids:
-            line._copy_hierarchy(report_id=self, copied_report_id=copied_report_id, code_mapping=code_mapping)
+            line._copy_hierarchy(report_id=self, copied_report_id=copied_report_id)
         return copied_report_id
 
 
 class AccountFinancialReportLine(models.Model):
     _name = "account.financial.html.report.line"
     _description = "Account Report (HTML Line)"
-    _order = "sequence, id"
+    _order = "sequence"
     _parent_store = True
 
     name = fields.Char('Section Name', translate=True)
@@ -420,18 +432,17 @@ class AccountFinancialReportLine(models.Model):
     ], default='normal')
     show_domain = fields.Selection([('always', 'Always'), ('never', 'Never'), ('foldable', 'Foldable')], default='foldable')
     hide_if_zero = fields.Boolean(default=False)
-    hide_if_empty = fields.Boolean(default=False)
     action_id = fields.Many2one('ir.actions.actions')
 
     _sql_constraints = [
         ('code_uniq', 'unique (code)', "A report line with the same code already exists."),
     ]
 
+    @api.one
     @api.constrains('code')
     def _code_constrains(self):
-        for rec in self:
-            if rec.code and rec.code.strip().lower() in __builtins__.keys():
-                raise ValidationError('The code "%s" is invalid on line with name "%s"' % (rec.code, rec.name))
+        if self.code and self.code.strip().lower() in __builtins__.keys():
+            raise ValidationError('The code "%s" is invalid on line with name "%s"' % (self.code, self.name))
 
     @api.constrains('domain')
     def _validate_domain(self):
@@ -443,6 +454,7 @@ class AccountFinancialReportLine(models.Model):
             except Exception as e:
                 raise ValidationError(error_format % (record.name, str(e)))
 
+    @api.multi
     def _get_copied_code(self):
         '''Look for an unique copied code.
 
@@ -454,6 +466,7 @@ class AccountFinancialReportLine(models.Model):
             code += '_COPY'
         return code
 
+    @api.multi
     def _copy_hierarchy(self, report_id=None, copied_report_id=None, parent_id=None, code_mapping=None):
         ''' Copy the whole hierarchy from this line by copying each line children recursively and adapting the
         formulas with the new copied codes.
@@ -499,7 +512,6 @@ class AccountFinancialReportLine(models.Model):
                 compared to the current user's company currency
             @returns: the string and parameters to use for the SELECT
         """
-        decimal_places = self.env.company.currency_id.decimal_places
         extra_params = []
         select = '''
             COALESCE(SUM(\"account_move_line\".balance), 0) AS balance,
@@ -510,23 +522,277 @@ class AccountFinancialReportLine(models.Model):
         if currency_table:
             select = 'COALESCE(SUM(CASE '
             for currency_id, rate in currency_table.items():
-                extra_params += [currency_id, rate, decimal_places]
-                select += 'WHEN \"account_move_line\".company_currency_id = %s THEN ROUND(\"account_move_line\".balance * %s, %s) '
+                extra_params += [currency_id, rate]
+                select += 'WHEN \"account_move_line\".company_currency_id = %s THEN \"account_move_line\".balance * %s '
             select += 'ELSE \"account_move_line\".balance END), 0) AS balance, COALESCE(SUM(CASE '
             for currency_id, rate in currency_table.items():
-                extra_params += [currency_id, rate, decimal_places]
-                select += 'WHEN \"account_move_line\".company_currency_id = %s THEN ROUND(\"account_move_line\".amount_residual * %s, %s) '
+                extra_params += [currency_id, rate]
+                select += 'WHEN \"account_move_line\".company_currency_id = %s THEN \"account_move_line\".amount_residual * %s '
             select += 'ELSE \"account_move_line\".amount_residual END), 0) AS amount_residual, COALESCE(SUM(CASE '
             for currency_id, rate in currency_table.items():
-                extra_params += [currency_id, rate, decimal_places]
-                select += 'WHEN \"account_move_line\".company_currency_id = %s THEN ROUND(\"account_move_line\".debit * %s, %s) '
+                extra_params += [currency_id, rate]
+                select += 'WHEN \"account_move_line\".company_currency_id = %s THEN \"account_move_line\".debit * %s '
             select += 'ELSE \"account_move_line\".debit END), 0) AS debit, COALESCE(SUM(CASE '
             for currency_id, rate in currency_table.items():
-                extra_params += [currency_id, rate, decimal_places]
-                select += 'WHEN \"account_move_line\".company_currency_id = %s THEN ROUND(\"account_move_line\".credit * %s, %s) '
+                extra_params += [currency_id, rate]
+                select += 'WHEN \"account_move_line\".company_currency_id = %s THEN \"account_move_line\".credit * %s '
             select += 'ELSE \"account_move_line\".credit END), 0) AS credit'
 
+        if self.env.context.get('cash_basis'):
+            for field in ['debit', 'credit', 'balance']:
+                #replace the columns selected but not the final column name (... AS <field>)
+                number_of_occurence = len(select.split(field)) - 1
+                select = select.replace(field, field + '_cash_basis', number_of_occurence - 1)
         return select, extra_params
+
+    def _get_with_statement(self, financial_report):
+        """ This function allow to define a WITH statement as prologue to the usual queries returned by query_get().
+            It is useful if you need to shadow a table entirely and let the query_get work normally although you're
+            fetching rows from your temporary table (built in the WITH statement) instead of the regular tables.
+
+            @returns: the WITH statement to prepend to the sql query and the parameters used in that WITH statement
+            @rtype: tuple(char, list)
+        """
+        sql = ''
+        params = []
+
+        #Cashflow Statement
+        #------------------
+        #The cash flow statement has a dedicated query because because we want to make a complex selection of account.move.line,
+        #but keep simple to configure the financial report lines.
+        if financial_report == self.env.ref('account_reports.account_financial_report_cashsummary0'):
+            # Get all available fields from account_move_line, to build the 'select' part of the query
+            replace_columns = {
+                'date': 'ref.date',
+                'debit': 'CASE WHEN \"account_move_line\".debit > 0 THEN ref.matched_percentage * \"account_move_line\".debit ELSE 0 END AS debit',
+                'credit': 'CASE WHEN \"account_move_line\".credit > 0 THEN ref.matched_percentage * \"account_move_line\".credit ELSE 0 END AS credit',
+                'balance': 'ref.matched_percentage * \"account_move_line\".balance AS balance'
+            }
+            columns = []
+            columns_2 = []
+            for name, field in self.env['account.move.line']._fields.items():
+                if not(field.store and field.type not in ('one2many', 'many2many')):
+                    continue
+                columns.append('\"account_move_line\".\"%s\"' % name)
+                if name in replace_columns:
+                    columns_2.append(replace_columns.get(name))
+                else:
+                    columns_2.append('\"account_move_line\".\"%s\"' % name)
+            select_clause_1 = ', '.join(columns)
+            select_clause_2 = ', '.join(columns_2)
+
+            # Get moves having a line using a bank account in one of the selected journals.
+            if self.env.context.get('journal_ids'):
+                bank_journals = self.env['account.journal'].browse(self.env.context.get('journal_ids'))
+            else:
+                bank_journals = self.env['account.journal'].search([('type', 'in', ('bank', 'cash'))])
+            bank_accounts = bank_journals.mapped('default_debit_account_id') + bank_journals.mapped('default_credit_account_id')
+
+            if not bank_accounts:
+                raise UserError(
+                    _('No bank account found. Please set Default Debit and Default Credit accounts in journal(s): %s.') % ", ".join(str(b.name) for b in bank_journals)
+                )
+            self._cr.execute('SELECT DISTINCT(move_id) FROM account_move_line WHERE account_id IN %s', [tuple(bank_accounts.ids)])
+            bank_move_ids = tuple([r[0] for r in self.env.cr.fetchall()])
+
+            # Avoid crash if there's no bank moves to consider
+            if not bank_move_ids:
+                return '''
+                WITH account_move_line AS (
+                    SELECT ''' + select_clause_1 + '''
+                    FROM account_move_line
+                    WHERE False)''', []
+
+            # Fake domain to always get the join to the account_move_line__move_id table.
+            fake_domain = [('move_id.id', '!=', None)]
+            sub_tables, sub_where_clause, sub_where_params = self.env['account.move.line']._query_get(domain=fake_domain)
+
+            # Get moves having a line using a bank account.
+            bank_journals = self.env['account.journal'].search([('type', 'in', ('bank', 'cash'))])
+            bank_accounts = bank_journals.mapped('default_debit_account_id') + bank_journals.mapped('default_credit_account_id')
+            bank_moves_query = '''SELECT DISTINCT(\"account_move_line\".move_id)
+                    FROM ''' + sub_tables + '''
+                    WHERE account_id IN %s
+                    AND ''' + sub_where_clause
+            bank_move_params = [tuple(bank_accounts.ids)] + sub_where_params
+            self._cr.execute(bank_moves_query, bank_move_params)
+            bank_move_ids = tuple([r[0] for r in self.env.cr.fetchall()])
+
+            # Only consider accounts related to a bank/cash journal, not all liquidity accounts
+            if self.code in ('CASHEND', 'CASHSTART'):
+                journal_ids_filter = ''
+                journal_ids_params = []
+                journal_ids = self.env.context.get('journal_ids')
+                if journal_ids:
+                    journal_ids_filter = ' AND journal_id in %s'
+                    journal_ids_params = [tuple(journal_ids)]
+                return '''
+                WITH account_move_line AS (
+                    SELECT ''' + select_clause_1 + '''
+                    FROM account_move_line
+                    WHERE account_id in %s
+                    ''' + journal_ids_filter + ''')''', \
+                    [tuple(bank_accounts.ids)] + journal_ids_params
+
+            # Avoid crash if there's no bank moves to consider
+            if not bank_move_ids:
+                return '''
+                WITH account_move_line AS (
+                    SELECT ''' + select_clause_1 + '''
+                    FROM account_move_line
+                    WHERE False)''', []
+
+            # The following query is aliasing the account.move.line table to consider only the journal entries where, at least,
+            # one line is touching a liquidity account. Counterparts are either shown directly if they're not reconciled (or
+            # not reconciliable), either replaced by the accounts of the entries they're reconciled with.
+            sql = '''
+                WITH account_move_line AS (
+
+                    -- Part for the reconciled journal items
+                    -- payment_table will give the reconciliation rate per account per move to consider
+                    -- (so that an invoice with multiple payment terms would correctly display the income
+                    -- accounts at the prorata of what hass really been paid)
+                    WITH payment_table AS (
+                        SELECT
+                            aml2.move_id AS matching_move_id,
+                            aml2.account_id,
+                            aml.date AS date,
+                            SUM(CASE WHEN (aml.balance = 0 OR sub.total_per_account = 0)
+                                THEN 0
+                                ELSE part.amount / sub.total_per_account
+                            END) AS matched_percentage
+                        FROM account_partial_reconcile part
+                        LEFT JOIN account_move_line aml ON aml.id = part.debit_move_id
+                        LEFT JOIN account_move_line aml2 ON aml2.id = part.credit_move_id
+                        LEFT JOIN (SELECT move_id, account_id, ABS(SUM(balance)) AS total_per_account FROM account_move_line GROUP BY move_id, account_id) sub ON (aml2.account_id = sub.account_id AND sub.move_id=aml2.move_id)
+                        LEFT JOIN account_account acc ON aml.account_id = acc.id
+                        WHERE part.credit_move_id = aml2.id
+                        AND acc.reconcile
+                        AND aml.move_id IN (''' + bank_moves_query + ''')
+                        GROUP BY aml2.move_id, aml2.account_id, aml.date
+
+                        UNION ALL
+
+                        SELECT
+                            aml2.move_id AS matching_move_id,
+                            aml2.account_id,
+                            aml.date AS date,
+                            SUM(CASE WHEN (aml.balance = 0 OR sub.total_per_account = 0)
+                                THEN 0
+                                ELSE part.amount / sub.total_per_account
+                            END) AS matched_percentage
+                        FROM account_partial_reconcile part
+                        LEFT JOIN account_move_line aml ON aml.id = part.credit_move_id
+                        LEFT JOIN account_move_line aml2 ON aml2.id = part.debit_move_id
+                        LEFT JOIN (SELECT move_id, account_id, ABS(SUM(balance)) AS total_per_account FROM account_move_line GROUP BY move_id, account_id) sub ON (aml2.account_id = sub.account_id AND sub.move_id=aml2.move_id)
+                        LEFT JOIN account_account acc ON aml.account_id = acc.id
+                        WHERE part.debit_move_id = aml2.id
+                        AND acc.reconcile
+                        AND aml.move_id IN (''' + bank_moves_query + ''')
+                        GROUP BY aml2.move_id, aml2.account_id, aml.date
+                    )
+
+                    SELECT ''' + select_clause_2 + '''
+                    FROM account_move_line "account_move_line"
+                    RIGHT JOIN payment_table ref ON ("account_move_line".move_id = ref.matching_move_id)
+                    WHERE "account_move_line".account_id NOT IN (SELECT account_id FROM payment_table)
+                    AND "account_move_line".move_id NOT IN (''' + bank_moves_query + ''')
+
+                    UNION ALL
+
+                    -- Part for the unreconciled journal items.
+                    -- Using amount_residual if the account is reconciliable is needed in case of partial reconciliation
+
+                    SELECT ''' + select_clause_1.replace('"account_move_line"."balance_cash_basis"', 'CASE WHEN acc.reconcile THEN  "account_move_line".amount_residual ELSE "account_move_line".balance END AS balance_cash_basis') + '''
+                    FROM account_move_line "account_move_line"
+                    LEFT JOIN account_account acc ON "account_move_line".account_id = acc.id
+                    WHERE "account_move_line".move_id IN (''' + bank_moves_query + ''')
+                    AND "account_move_line".account_id NOT IN %s
+                )
+            '''
+            params = bank_move_params + bank_move_params + bank_move_params + bank_move_params + [tuple(bank_accounts.ids)]
+        elif self.env.context.get('cash_basis'):
+            #Cash basis option
+            #-----------------
+            #In cash basis, we need to show amount on income/expense accounts, but only when they're paid AND under the payment date in the reporting, so
+            #we have to make a complex query to join aml from the invoice (for the account), aml from the payments (for the date) and partial reconciliation
+            #(for the reconciled amount).
+            user_types = self.env['account.account.type'].search([('type', 'in', ('receivable', 'payable'))])
+            if not user_types:
+                return sql, params
+
+            # Get all columns from account_move_line using the psql metadata table in order to make sure all columns from the account.move.line model
+            # are present in the shadowed table.
+            sql = "SELECT column_name FROM information_schema.columns WHERE table_name='account_move_line'"
+            self.env.cr.execute(sql)
+            columns = []
+            columns_2 = []
+            replace_columns = {'date': 'ref.date',
+                                'debit_cash_basis': 'CASE WHEN aml.debit > 0 THEN ref.matched_percentage * aml.debit ELSE 0 END AS debit_cash_basis',
+                                'credit_cash_basis': 'CASE WHEN aml.credit > 0 THEN ref.matched_percentage * aml.credit ELSE 0 END AS credit_cash_basis',
+                                'balance_cash_basis': 'ref.matched_percentage * aml.balance AS balance_cash_basis'}
+            for field in self.env.cr.fetchall():
+                field = field[0]
+                columns.append("\"account_move_line\".\"%s\"" % (field,))
+                if field in replace_columns:
+                    columns_2.append(replace_columns.get(field))
+                else:
+                    columns_2.append('aml.\"%s\"' % (field,))
+            select_clause_1 = ', '.join(columns)
+            select_clause_2 = ', '.join(columns_2)
+
+            #we use query_get() to filter out unrelevant journal items to have a shadowed table as small as possible
+            tables, where_clause, where_params = self.env['account.move.line']._query_get()
+            sql = """WITH account_move_line AS (
+              SELECT """ + select_clause_1 + """
+               FROM """ + tables + """
+               WHERE (\"account_move_line\".journal_id IN (SELECT id FROM account_journal WHERE type in ('cash', 'bank'))
+                 OR \"account_move_line\".move_id NOT IN (SELECT DISTINCT move_id FROM account_move_line WHERE user_type_id IN %s))
+                 AND """ + where_clause + """
+              UNION ALL
+              (
+               WITH payment_table AS (
+                 SELECT aml.move_id, \"account_move_line\".date,
+                        CASE WHEN (aml.balance = 0 OR sub_aml.total_per_account = 0)
+                            THEN 0
+                            ELSE part.amount / ABS(sub_aml.total_per_account)
+                        END as matched_percentage
+                   FROM account_partial_reconcile part
+                   LEFT JOIN account_move_line aml ON aml.id = part.debit_move_id
+                   LEFT JOIN (SELECT move_id, account_id, ABS(SUM(balance)) AS total_per_account
+                                FROM account_move_line
+                                GROUP BY move_id, account_id) sub_aml
+                            ON (aml.account_id = sub_aml.account_id AND sub_aml.move_id=aml.move_id)
+                   LEFT JOIN account_move am ON aml.move_id = am.id, """ + tables + """
+                   WHERE part.credit_move_id = "account_move_line".id
+                    AND "account_move_line".user_type_id IN %s
+                    AND """ + where_clause + """
+                 UNION ALL
+                 SELECT aml.move_id, \"account_move_line\".date,
+                        CASE WHEN (aml.balance = 0 OR sub_aml.total_per_account = 0)
+                            THEN 0
+                            ELSE part.amount / ABS(sub_aml.total_per_account)
+                        END as matched_percentage
+                   FROM account_partial_reconcile part
+                   LEFT JOIN account_move_line aml ON aml.id = part.credit_move_id
+                   LEFT JOIN (SELECT move_id, account_id, ABS(SUM(balance)) AS total_per_account
+                                FROM account_move_line
+                                GROUP BY move_id, account_id) sub_aml
+                            ON (aml.account_id = sub_aml.account_id AND sub_aml.move_id=aml.move_id)
+                   LEFT JOIN account_move am ON aml.move_id = am.id, """ + tables + """
+                   WHERE part.debit_move_id = "account_move_line".id
+                    AND "account_move_line".user_type_id IN %s
+                    AND """ + where_clause + """
+               )
+               SELECT """ + select_clause_2 + """
+                FROM account_move_line aml
+                RIGHT JOIN payment_table ref ON aml.move_id = ref.move_id
+                WHERE journal_id NOT IN (SELECT id FROM account_journal WHERE type in ('cash', 'bank'))
+                  AND aml.move_id IN (SELECT DISTINCT move_id FROM account_move_line WHERE user_type_id IN %s)
+              )
+            ) """
+            params = [tuple(user_types.ids)] + where_params + [tuple(user_types.ids)] + where_params + [tuple(user_types.ids)] + where_params + [tuple(user_types.ids)]
+        return sql, params
 
     def _compute_line(self, currency_table, financial_report, group_by=None, domain=[]):
         """ Computes the sum that appeas on report lines when they aren't unfolded. It is using _query_get() function
@@ -548,6 +814,11 @@ class AccountFinancialReportLine(models.Model):
                 taxes = self.env['account.tax'].with_context(active_test=False).search([new_condition])
                 domain[index] = ('tax_ids', 'in', taxes.ids)
         aml_obj = self.env['account.move.line']
+        if financial_report == self.env.ref('account_reports.account_financial_report_cashsummary0'):
+            # Cash Flow statement has already applied the journal_ids filters in the WITH statements
+            # For lines which are not CASHSTART and CASHEND, we want to include reconcilied move lines
+            # even if they are linked to a different journal.
+            aml_obj = aml_obj.with_context(journal_ids=False)
         tables, where_clause, where_params = aml_obj._query_get(domain=self._get_aml_domain())
         if financial_report.tax_report:
             where_clause += ''' AND "account_move_line".tax_exigible = 't' '''
@@ -555,24 +826,26 @@ class AccountFinancialReportLine(models.Model):
         line = self
         financial_report = self._get_financial_report()
 
+        sql, params = self._get_with_statement(financial_report)
+
         select, select_params = self._query_get_select_sum(currency_table)
-        where_params = select_params + where_params
+        where_params = params + select_params + where_params
 
         if (self.env.context.get('sum_if_pos') or self.env.context.get('sum_if_neg')) and group_by:
-            sql = "SELECT account_move_line." + group_by + " as " + group_by + "," + select + " FROM " + tables + " WHERE " + where_clause + " GROUP BY account_move_line." + group_by
+            sql = sql + "SELECT account_move_line." + group_by + " as " + group_by + "," + select + " FROM " + tables + " WHERE " + where_clause + " GROUP BY account_move_line." + group_by
             self.env.cr.execute(sql, where_params)
             res = {'balance': 0, 'debit': 0, 'credit': 0, 'amount_residual': 0}
             for row in self.env.cr.dictfetchall():
                 if (row['balance'] > 0 and self.env.context.get('sum_if_pos')) or (row['balance'] < 0 and self.env.context.get('sum_if_neg')):
                     for field in ['debit', 'credit', 'balance', 'amount_residual']:
                         res[field] += row[field]
-            res['currency_id'] = self.env.company.currency_id.id
+            res['currency_id'] = self.env.user.company_id.currency_id.id
             return res
 
-        sql, params = self._build_query_compute_line(select, tables, where_clause, where_params)
-        self.env.cr.execute(sql, params)
+        sql = sql + "SELECT " + select + " FROM " + tables + " WHERE " + where_clause
+        self.env.cr.execute(sql, where_params)
         results = self.env.cr.dictfetchall()[0]
-        results['currency_id'] = self.env.company.currency_id.id
+        results['currency_id'] = self.env.user.company_id.currency_id.id
         return results
 
     def _get_financial_report(self):
@@ -588,10 +861,7 @@ class AccountFinancialReportLine(models.Model):
 
         return False
 
-    def _build_query_compute_line(self, select, tables, where_clause, params):
-        """Beware of SQL injections when inheriting this."""
-        return "SELECT " + select + " FROM " + tables + " WHERE " + where_clause, params
-
+    @api.multi
     def _compute_date_range(self):
         '''Compute the current report line date range according to the dates passed through the context
         and its specified special_date_changer.
@@ -610,11 +880,12 @@ class AccountFinancialReportLine(models.Model):
             date_from = False
         if self.special_date_changer == 'from_fiscalyear' and date_to:
             date_tmp = fields.Date.from_string(date_to)
-            date_tmp = self.env.company.compute_fiscalyear_dates(date_tmp)['date_from']
+            date_tmp = self.env.user.company_id.compute_fiscalyear_dates(date_tmp)['date_from']
             date_from = date_tmp.strftime('%Y-%m-%d')
             strict_range = True
         return date_from, date_to, strict_range
 
+    @api.multi
     def report_move_lines_action(self):
         domain = ast.literal_eval(self.domain)
         if 'date_from' in self.env.context.get('context', {}):
@@ -633,11 +904,11 @@ class AccountFinancialReportLine(models.Model):
                 'domain': domain,
                 }
 
+    @api.one
     @api.constrains('groupby')
     def _check_same_journal(self):
-        for rec in self:
-            if rec.groupby and rec.groupby not in self.env['account.move.line']:
-                raise ValidationError(_("Groupby should be a journal item field"))
+        if self.groupby and self.groupby not in self.env['account.move.line']:
+            raise ValidationError(_("Groupby should be a journal item field"))
 
     def _get_sum(self, currency_table, financial_report, field_names=None):
         ''' Returns the sum of the amls in the domain '''
@@ -650,47 +921,41 @@ class AccountFinancialReportLine(models.Model):
             res = self.with_context(strict_range=strict_range, date_from=date_from, date_to=date_to, active_test=False)._compute_line(currency_table, financial_report, group_by=self.groupby, domain=self._get_aml_domain())
         return res
 
+    @api.one
     def _get_balance(self, linesDict, currency_table, financial_report, field_names=None):
-        results = []
-
         if not field_names:
             field_names = ['debit', 'credit', 'balance']
-
-        for rec in self:
-            res = dict((fn, 0.0) for fn in field_names)
-            c = FormulaContext(self.env['account.financial.html.report.line'],
-                    linesDict, currency_table, financial_report, rec)
-            if rec.formulas:
-                for f in rec.formulas.split(';'):
-                    [field, formula] = f.split('=')
-                    field = field.strip()
-                    if field in field_names:
-                        try:
-                            res[field] = safe_eval(formula, c, nocopy=True)
-                        except ValueError as err:
-                            if 'division by zero' in err.args[0]:
-                                res[field] = 0
-                            else:
-                                raise err
-            results.append(res)
-        return results
+        res = dict((fn, 0.0) for fn in field_names)
+        c = FormulaContext(self.env['account.financial.html.report.line'], linesDict, currency_table, financial_report, self)
+        if self.formulas:
+            for f in self.formulas.split(';'):
+                [field, formula] = f.split('=')
+                field = field.strip()
+                if field in field_names:
+                    try:
+                        res[field] = safe_eval(formula, c, nocopy=True)
+                    except ValueError as err:
+                        if 'division by zero' in err.args[0]:
+                            res[field] = 0
+                        else:
+                            raise err
+        return res
 
     def _get_rows_count(self):
         groupby = self.groupby or 'id'
         if groupby not in self.env['account.move.line']:
             raise ValueError(_('Groupby should be a field from account.move.line'))
 
+        with_sql, with_params = self._get_with_statement(self._get_financial_report())
+
         date_from, date_to, strict_range = self._compute_date_range()
         tables, where_clause, where_params = self.env['account.move.line'].with_context(strict_range=strict_range,
                                                                                         date_from=date_from,
                                                                                         date_to=date_to)._query_get(domain=self._get_aml_domain())
 
-        query, params = self._build_query_rows_count(groupby, tables, where_clause, where_params)
-        self.env.cr.execute(query, params)
-        return self.env.cr.dictfetchone()['count']
-
-    def _build_query_rows_count(self, groupby, tables, where_clause, params):
-        return 'SELECT count(distinct(account_move_line.' + groupby + ')) FROM ' + tables + 'WHERE' + where_clause, params
+        query = with_sql + ' SELECT count(distinct(account_move_line.' + groupby + ')) FROM ' + tables + 'WHERE' + where_clause
+        self.env.cr.execute(query, with_params + where_params)
+        return self.env.cr.dictfetchall()[0]['count']
 
     def _get_value_from_context(self):
         if self.env.context.get('financial_report_line_values'):
@@ -702,7 +967,7 @@ class AccountFinancialReportLine(models.Model):
             return value
         value['no_format_name'] = value['name']
         if self.figure_type == 'float':
-            currency_id = self.env.company.currency_id
+            currency_id = self.env.user.company_id.currency_id
             if currency_id.is_zero(value['name']):
                 # don't print -0.0 in reports
                 value['name'] = abs(value['name'])
@@ -719,15 +984,12 @@ class AccountFinancialReportLine(models.Model):
         if self.groupby and self.env['account.move.line']._fields[self.groupby].relational:
             relation = self.env['account.move.line']._fields[self.groupby].comodel_name
             gb = self.env[relation].browse(gb_id)
-            return gb.display_name if gb and gb.exists() else _('Undefined')
+            return gb.name_get()[0][1] if gb and gb.exists() else _('Undefined')
         return gb_id
 
     def _build_cmp(self, balance, comp):
         if comp != 0:
             res = round((balance - comp) / comp * 100, 1)
-            # Avoid displaying '-0.0%'.
-            if float_is_zero(res, precision_rounding=0.1):
-                res = 0.0
             # In case the comparison is made on a negative figure, the color should be the other
             # way around. For example:
             #                       2018         2017           %
@@ -755,13 +1017,13 @@ class AccountFinancialReportLine(models.Model):
         return (safe_eval(self.domain) or []) + (self._context.get('filter_domain') or []) + (self._context.get('group_domain') or [])
 
     def _get_group_domain(self, group, groups):
-        return [(field, '=', grp) for field, grp in zip(groups['fields'], group)]
+        return [(field, '=', grp) for field, grp in izip(groups['fields'], group)]
 
     def _eval_formula(self, financial_report, debit_credit, currency_table, linesDict_per_group, groups=False):
         groups = groups or {'fields': [], 'ids': [()]}
         debit_credit = debit_credit and financial_report.debit_credit
         formulas = self._split_formulas()
-        currency = self.env.company.currency_id
+        currency = self.env.user.company_id.currency_id
 
         line_res_per_group = []
 
@@ -808,14 +1070,21 @@ class AccountFinancialReportLine(models.Model):
             groupby = ', '.join(['"account_move_line".%s' % field for field in groupby])
 
             aml_obj = self.env['account.move.line']
+            if financial_report == self.env.ref('account_reports.account_financial_report_cashsummary0'):
+                # Cash Flow statement has already applied the journal_ids filters in the WITH statements
+                # For lines which are not CASHSTART and CASHEND, we want to include reconcilied move lines
+                # even if they are linked to a different journal.
+                aml_obj = aml_obj.with_context(journal_ids=False)
             tables, where_clause, where_params = aml_obj._query_get(domain=self._get_aml_domain())
+            sql, params = self._get_with_statement(financial_report)
             if financial_report.tax_report:
                 where_clause += ''' AND "account_move_line".tax_exigible = 't' '''
 
-            select, params = self._query_get_select_sum(currency_table)
-            params += where_params
+            select, select_params = self._query_get_select_sum(currency_table)
+            params += select_params
+            sql = sql + "SELECT " + groupby + ", " + select + " FROM " + tables + " WHERE " + where_clause + " GROUP BY " + groupby + " ORDER BY " + groupby
 
-            sql, params = self._build_query_eval_formula(groupby, select, tables, where_clause, params)
+            params += where_params
             self.env.cr.execute(sql, params)
             results = self.env.cr.fetchall()
             for group_index, group in enumerate(groups['ids']):
@@ -838,7 +1107,7 @@ class AccountFinancialReportLine(models.Model):
                                     results_for_group[key][col] = safe_eval(formula, c, nocopy=True)
                     to_del = []
                     for key in results_for_group:
-                        if self.env.company.currency_id.is_zero(results_for_group[key]['balance']):
+                        if self.env.user.company_id.currency_id.is_zero(results_for_group[key]['balance']):
                             to_del.append(key)
                     for key in to_del:
                         del results_for_group[key]
@@ -851,10 +1120,6 @@ class AccountFinancialReportLine(models.Model):
                     columns.append({'line': res_vals})
 
         return columns or [{'line': res} for res in line_res_per_group]
-
-    def _build_query_eval_formula(self, groupby, select, tables, where_clause, params):
-        """Beware of SQL injections when inheriting this."""
-        return "SELECT " + groupby + ", " + select + " FROM " + tables + " WHERE " + where_clause + " GROUP BY " + groupby + " ORDER BY " + groupby, params
 
     def _put_columns_together(self, data, domain_ids):
         res = dict((domain_id, []) for domain_id in domain_ids)
@@ -889,11 +1154,12 @@ class AccountFinancialReportLine(models.Model):
         }
         return [line1, line2]
 
+    @api.multi
     def _get_lines(self, financial_report, currency_table, options, linesDicts):
         final_result_table = []
         comparison_table = [options.get('date')]
         comparison_table += options.get('comparison') and options['comparison'].get('periods', []) or []
-        currency_precision = self.env.company.currency_id.rounding
+        currency_precision = self.env.user.company_id.currency_id.rounding
 
         # build comparison table
         for line in self:
@@ -922,8 +1188,7 @@ class AccountFinancialReportLine(models.Model):
 
             res = line._put_columns_together(res, domain_ids)
 
-            are_all_columns_zero = all(float_is_zero(k, precision_rounding=currency_precision) for k in res['line'])
-            if line.hide_if_zero and are_all_columns_zero and line.formulas:
+            if line.hide_if_zero and all([float_is_zero(k, precision_rounding=currency_precision) for k in res['line']]):
                 continue
 
             # Post-processing ; creating line dictionnary, building comparison, computing total for extended, formatting
@@ -931,7 +1196,7 @@ class AccountFinancialReportLine(models.Model):
                 'id': line.id,
                 'name': line.name,
                 'level': line.level,
-                'class': 'o_account_reports_totals_below_sections' if self.env.company.totals_below_sections else '',
+                'class': 'o_account_reports_totals_below_sections' if self.env.user.company_id.totals_below_sections else '',
                 'columns': [{'name': l} for l in res['line']],
                 'unfoldable': len(domain_ids) > 1 and line.show_domain != 'always',
                 'unfolded': line.id in options.get('unfolded_lines', []) or line.show_domain == 'always',
@@ -954,7 +1219,7 @@ class AccountFinancialReportLine(models.Model):
                     if not self.env.context.get('print_mode') or not self.env.context.get('no_format'):
                         name = name[:40] + '...' if name and len(name) >= 45 else name
                     vals = {
-                        'id': 'financial_report_group_%s_%s' % (line.id, domain_id),
+                        'id': domain_id,
                         'name': name,
                         'level': line.level,
                         'parent_id': line.id,
@@ -965,7 +1230,7 @@ class AccountFinancialReportLine(models.Model):
                     if line.financial_report_id.name == 'Aged Receivable':
                         vals['trust'] = self.env['res.partner'].browse([domain_id]).trust
                     lines.append(vals)
-                if domain_ids and self.env.company.totals_below_sections:
+                if domain_ids and self.env.user.company_id.totals_below_sections:
                     lines.append({
                         'id': 'total_' + str(line.id),
                         'name': _('Total') + ' ' + line.name,
@@ -987,24 +1252,13 @@ class AccountFinancialReportLine(models.Model):
 
             if len(lines) == 1:
                 new_lines = line.children_ids._get_lines(financial_report, currency_table, options, linesDicts)
-                # Manage 'hide_if_zero' field without formulas.
-                # If a line hi 'hide_if_zero' and has no formulas, we have to check the sum of all the columns from its children
-                # If all sums are zero, we hide the line
-                if line.hide_if_zero and not line.formulas:
-                    amounts_by_line = [[col['no_format_name'] for col in new_line['columns']] for new_line in new_lines]
-                    amounts_by_column = zip(*amounts_by_line)
-                    all_columns_have_children_zero = all(float_is_zero(sum(col), precision_rounding=currency_precision) for col in amounts_by_column)
-                    if all_columns_have_children_zero:
-                        continue
                 if new_lines and line.formulas:
-                    if self.env.company.totals_below_sections:
+                    if self.env.user.company_id.totals_below_sections:
                         divided_lines = self._divide_line(lines[0])
                         result = [divided_lines[0]] + new_lines + [divided_lines[-1]]
                     else:
                         result = [lines[0]] + new_lines
                 else:
-                    if not new_lines and not lines[0]['unfoldable'] and line.hide_if_empty:
-                        lines = []
                     result = lines + new_lines
             else:
                 result = lines
@@ -1102,6 +1356,7 @@ class FormulaContext(dict):
 class IrModuleModule(models.Model):
     _inherit = "ir.module.module"
 
+    @api.multi
     def _update_translations(self, filter_lang=None):
         """ Create missing translations after loading the one of account.financial.html.report
 

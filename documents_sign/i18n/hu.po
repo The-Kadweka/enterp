@@ -1,18 +1,20 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* documents_sign
+# * documents_sign
 # 
 # Translators:
-# gezza <geza.nagy@oregional.hu>, 2019
+# Tamás Dombos, 2018
+# Martin Trigaux, 2018
+# gezza <geza.nagy@oregional.hu>, 2018
 # Ákos Nagy <akos.nagy@oregional.hu>, 2019
 # Tamás Németh <ntomasz81@gmail.com>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-27 09:32+0000\n"
-"PO-Revision-Date: 2019-08-26 09:35+0000\n"
+"POT-Creation-Date: 2019-11-14 07:49+0000\n"
+"PO-Revision-Date: 2018-08-24 11:37+0000\n"
 "Last-Translator: Tamás Németh <ntomasz81@gmail.com>, 2019\n"
 "Language-Team: Hungarian (https://www.transifex.com/odoo/teams/41243/hu/)\n"
 "MIME-Version: 1.0\n"
@@ -31,20 +33,31 @@ msgstr ""
 "mellékletnél elérhető"
 
 #. module: documents_sign
+#: model:ir.model.fields,field_description:documents_sign.field_sign_request__folder_id
+#: model:ir.model.fields,field_description:documents_sign.field_sign_template__folder_id
+msgid "Attachment Folder"
+msgstr ""
+
+#. module: documents_sign
+#: model:ir.model.fields,field_description:documents_sign.field_sign_request__documents_tag_ids
+#: model:ir.model.fields,field_description:documents_sign.field_sign_template__documents_tag_ids
+msgid "Attachment Tags"
+msgstr ""
+
+#. module: documents_sign
 #: model:ir.model.fields,field_description:documents_sign.field_documents_workflow_rule__create_model
 msgid "Create"
 msgstr "Létrehozás"
 
 #. module: documents_sign
-#: model:ir.model.fields.selection,name:documents_sign.selection__documents_workflow_rule__create_model__sign_template_new
-msgid "Create signature request"
-msgstr "Aláírási kérelem létrehozása"
+#: selection:documents.workflow.rule,create_model:0
+msgid "Credit note"
+msgstr "Fizetési emlékeztető"
 
 #. module: documents_sign
-#: model:documents.workflow.rule,name:documents_sign.documents_sign_rule_sign_request
-#: model:documents.workflow.rule,name:documents_sign.documents_sign_rule_sign_request_finance
-msgid "Create signature template(s)"
-msgstr "Aláírási sablon(ok) létrehozása"
+#: model:ir.model,name:documents_sign.model_ir_attachment
+msgid "Document"
+msgstr "Dokumentum"
 
 #. module: documents_sign
 #: model:ir.model.fields,field_description:documents_sign.field_documents_workflow_rule__has_business_option
@@ -52,20 +65,14 @@ msgid "Has Business Option"
 msgstr "Üzleti lehetősége van"
 
 #. module: documents_sign
-#: code:addons/documents_sign/models/workflow.py:0
-#, python-format
-msgid "New templates"
-msgstr "Új sablonok"
+#: selection:documents.workflow.rule,create_model:0
+msgid "Product template"
+msgstr "Termék sablon"
 
 #. module: documents_sign
-#: model:documents.workflow.rule,name:documents_sign.documents_sign_rule_sign_directly
-msgid "Request a signature and sign directly"
-msgstr "Aláírás kérése és közvetlen aláírás"
-
-#. module: documents_sign
-#: model:ir.model.fields.selection,name:documents_sign.selection__documents_workflow_rule__create_model__sign_template_direct
-msgid "Sign directly"
-msgstr "Közvetlen aláírás"
+#: model:documents.workflow.rule,name:documents_sign.Sign_rule
+msgid "Request a Signature"
+msgstr "Aláírás kérése"
 
 #. module: documents_sign
 #: model:ir.model,name:documents_sign.model_sign_request
@@ -75,14 +82,24 @@ msgstr "Aláírási kérés"
 #. module: documents_sign
 #: model:ir.model,name:documents_sign.model_sign_template
 msgid "Signature Template"
-msgstr "Aláírás sablon"
+msgstr "Aláírási sablon"
 
 #. module: documents_sign
-#: model:ir.model.fields,field_description:documents_sign.field_sign_template__documents_tag_ids
-msgid "Signed Document Tags"
-msgstr "Aláírt dokumentum címkék"
+#: selection:documents.workflow.rule,create_model:0
+msgid "Signature template"
+msgstr "Aláírási sablon"
 
 #. module: documents_sign
-#: model:ir.model.fields,field_description:documents_sign.field_sign_template__folder_id
-msgid "Signed Document Workspace"
-msgstr "Aláírt dokumentum munkaterület"
+#: selection:documents.workflow.rule,create_model:0
+msgid "Task"
+msgstr "Feladat"
+
+#. module: documents_sign
+#: selection:documents.workflow.rule,create_model:0
+msgid "Vendor Credit Note"
+msgstr "Beszállítói jóváírás"
+
+#. module: documents_sign
+#: selection:documents.workflow.rule,create_model:0
+msgid "Vendor bill"
+msgstr "Beszállítói számla"

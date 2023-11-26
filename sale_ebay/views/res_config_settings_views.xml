@@ -69,8 +69,6 @@
                                 <div class="row">
                                     <label for="ebay_currency" string="Currency" class="col-lg-4 o_light_label"/>
                                     <field name="ebay_currency" class="col-lg-8 oe_inline"/>
-                                    <button name="%(base.action_currency_all_form)d" icon="fa-arrow-right" type="action"
-                                            string="Activate Other Currencies" style="margin-left: 150px;" class="btn-link"/>
                                 </div>
                                 <div class="row">
                                     <label for="ebay_out_of_stock" class="col-lg-4 o_light_label"/>
@@ -93,8 +91,6 @@
                                 <div class="row mt16">
                                     <label for="ebay_country" class="col-lg-4 o_light_label"/>
                                     <field name="ebay_country" class="col-lg-8 oe_inline" options="{'no_create': True, 'no_open': True}"/>
-                                    <button name="%(sale_ebay.action_country_all_form)d" icon="fa-arrow-right" type="action"
-                                            string="Add other countries" style="margin-left: 150px;" class="btn-link"/>
                                 </div>
                                 <div class="row">
                                     <label for="ebay_zip_code" class="col-lg-4 o_light_label"/>
@@ -114,7 +110,7 @@
                                 Import eBay config data and sync transactions
                             </div>
                             <div class="content-group">
-                                <div class="row mt8">
+                                <div class="row mt16">
                                     <div class="col-lg-6" title="Sync now"> 
                                         <button name="sync_ebay_details" icon="fa-lg fa-refresh" type="object" string="Countries &amp; Currencies" class="btn-link"></button>
                                     </div>
@@ -122,7 +118,7 @@
                                         <button name="button_sync_categories" icon="fa-lg fa-refresh" type="object" string="Product Categories" class="btn-link"></button>
                                     </div>
                                 </div>
-                                <div class="row mt8">
+                                <div class="row">
                                     <div class="col-lg-6" title="Sync now">
                                         <button name="sync_policies" icon="fa-lg fa-refresh" type="object" string="Policies" class="btn-link"></button>
                                     </div>
@@ -135,14 +131,14 @@
                     </div>
                     <div class="col-12 col-lg-6 o_setting_box">
                         <div class="o_setting_right_pane">
-                            <span class="o_form_label">Sales Team</span>
+                            <span class="o_form_label">Sales Channel</span>
                             <div class="text-muted">
-                                Sales Team to manage eBay sales
+                                Sales channel to manage eBay sales
                             </div>
                             <div class="content-group">
                                 <div class="row mt16">
-                                    <label for="ebay_sales_team" string="Sales Team" class="col-lg-4 o_light_label"/>
-                                    <field name="ebay_sales_team" class="col-lg-8 oe_inline" kanban_view_ref="%(sales_team.crm_team_view_kanban)s"/>
+                                    <label for="ebay_sales_team" string="Sales Channel" class="col-lg-4 o_light_label"/>
+                                    <field name="ebay_sales_team" class="col-lg-8 oe_inline" context="{'default_team_type': 'ebay'}"/>
                                 </div>
                             </div>
                         </div>

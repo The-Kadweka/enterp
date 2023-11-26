@@ -1,28 +1,26 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_budget
+# * account_budget
 # 
 # Translators:
-# Martin Trigaux, 2019
-# UAB "Draugiški sprendimai" <transifex@draugiskisprendimai.lt>, 2019
-# Anatolij, 2019
-# Audrius Palenskis <audrius.palenskis@gmail.com>, 2019
-# Rolandas <info@paninfo.lt>, 2019
-# digitouch UAB <digitouchagencyeur@gmail.com>, 2019
-# Edgaras Kriukonis <edgaras@focusate.eu>, 2019
-# Eimantas <eimantas@focusate.eu>, 2019
+# Martin Trigaux, 2018
+# UAB "Draugiški sprendimai" <transifex@draugiskisprendimai.lt>, 2018
+# Anatolij, 2018
+# Audrius Palenskis <audrius.palenskis@gmail.com>, 2018
+# Rolandas <info@paninfo.lt>, 2018
+# Antanas Muliuolis <an.muliuolis@gmail.com>, 2018
+# digitouch UAB <digitouchagencyeur@gmail.com>, 2018
+# Edgaras Kriukonis <edgaras@focusate.eu>, 2018
+# Eimantas <eimantas@focusate.eu>, 2018
 # Linas Versada <linaskrisiukenas@gmail.com>, 2019
-# Arunas Vaitekunas <vaitekunas@gmail.com>, 2020
-# grupoda2 <dmitrijus.ivanovas@gmail.com>, 2020
-# Jonas Zinkevicius <jozi@odoo.com>, 2021
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-27 09:32+0000\n"
-"PO-Revision-Date: 2019-08-26 09:34+0000\n"
-"Last-Translator: Jonas Zinkevicius <jozi@odoo.com>, 2021\n"
+"POT-Creation-Date: 2019-01-15 15:18+0000\n"
+"PO-Revision-Date: 2018-08-24 09:15+0000\n"
+"Last-Translator: Linas Versada <linaskrisiukenas@gmail.com>, 2019\n"
 "Language-Team: Lithuanian (https://www.transifex.com/odoo/teams/41243/lt/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -31,7 +29,7 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);\n"
 
 #. module: account_budget
-#: code:addons/account_budget/models/account_budget.py:0
+#: code:addons/account_budget/models/account_budget.py:279
 #, python-format
 msgid ""
 "\"End Date\" of the budget line should be included in the Period of the "
@@ -41,7 +39,7 @@ msgstr ""
 "laikotarpį"
 
 #. module: account_budget
-#: code:addons/account_budget/models/account_budget.py:0
+#: code:addons/account_budget/models/account_budget.py:274
 #, python-format
 msgid ""
 "\"Start Date\" of the budget line should be included in the Period of the "
@@ -69,22 +67,7 @@ msgstr "Pasiekimas"
 #. module: account_budget
 #: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__message_needaction
 msgid "Action Needed"
-msgstr "Reikia veiksmo"
-
-#. module: account_budget
-#: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__activity_ids
-msgid "Activities"
-msgstr "Veiklos"
-
-#. module: account_budget
-#: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__activity_exception_decoration
-msgid "Activity Exception Decoration"
-msgstr "Veiklos Išimties Dekoravimas"
-
-#. module: account_budget
-#: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__activity_state
-msgid "Activity State"
-msgstr "Veiklos būsena"
+msgstr "Reikia atlikti veiksmą"
 
 #. module: account_budget
 #: model:ir.model.fields,help:account_budget.field_crossovered_budget_lines__practical_amount
@@ -131,7 +114,6 @@ msgstr "Prisegtukų skaičius"
 #: model:ir.model.fields,field_description:account_budget.field_crossovered_budget_lines__crossovered_budget_id
 #: model_terms:ir.ui.view,arch_db:account_budget.crossovered_budget_view_form
 #: model_terms:ir.ui.view,arch_db:account_budget.crossovered_budget_view_tree
-#: model_terms:ir.ui.view,arch_db:account_budget.view_account_analytic_account_form_inherit_budget
 #: model_terms:ir.ui.view,arch_db:account_budget.view_crossovered_budget_search
 msgid "Budget"
 msgstr "Biudžetas"
@@ -182,6 +164,7 @@ msgstr "Biudžeto pozicija"
 #. module: account_budget
 #: model:ir.actions.act_window,name:account_budget.open_budget_post_form
 #: model:ir.ui.menu,name:account_budget.menu_budget_post_form
+#: model_terms:ir.ui.view,arch_db:account_budget.res_config_settings_view_form
 msgid "Budgetary Positions"
 msgstr "Biudžetinės pozicijos"
 
@@ -204,7 +187,7 @@ msgid "Cancel Budget"
 msgstr "Atšaukti biudžetą"
 
 #. module: account_budget
-#: model:ir.model.fields.selection,name:account_budget.selection__crossovered_budget__state__cancel
+#: selection:crossovered.budget,state:0
 msgid "Cancelled"
 msgstr "Atšauktas"
 
@@ -235,9 +218,9 @@ msgid "Confirm"
 msgstr "Patvirtinti"
 
 #. module: account_budget
-#: model:ir.model.fields.selection,name:account_budget.selection__crossovered_budget__state__confirm
+#: selection:crossovered.budget,state:0
 msgid "Confirmed"
-msgstr "Patvirtinti"
+msgstr "Patvirtinta"
 
 #. module: account_budget
 #: model:ir.model.fields,field_description:account_budget.field_account_budget_post__create_uid
@@ -266,13 +249,13 @@ msgid "Display Name"
 msgstr "Rodomas pavadinimas"
 
 #. module: account_budget
-#: model:ir.model.fields.selection,name:account_budget.selection__crossovered_budget__state__done
+#: selection:crossovered.budget,state:0
 #: model_terms:ir.ui.view,arch_db:account_budget.crossovered_budget_view_form
 msgid "Done"
 msgstr "Atlikta"
 
 #. module: account_budget
-#: model:ir.model.fields.selection,name:account_budget.selection__crossovered_budget__state__draft
+#: selection:crossovered.budget,state:0
 #: model_terms:ir.ui.view,arch_db:account_budget.view_crossovered_budget_search
 msgid "Draft"
 msgstr "Juodraštis"
@@ -309,11 +292,6 @@ msgid "Followers (Partners)"
 msgstr "Sekėjai (partneriai)"
 
 #. module: account_budget
-#: model_terms:ir.ui.view,arch_db:account_budget.view_crossovered_budget_search
-msgid "Future Activities"
-msgstr "Būsimos veiklos"
-
-#. module: account_budget
 #: model_terms:ir.ui.view,arch_db:account_budget.view_crossovered_budget_line_search
 msgid "Group By"
 msgstr "Grupuoti pagal"
@@ -326,24 +304,17 @@ msgid "ID"
 msgstr "ID"
 
 #. module: account_budget
-#: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__activity_exception_icon
-msgid "Icon"
-msgstr "Piktograma"
-
-#. module: account_budget
-#: model:ir.model.fields,help:account_budget.field_crossovered_budget__activity_exception_icon
-msgid "Icon to indicate an exception activity."
-msgstr "Išimties veiklą žyminti piktograma."
+#: model:ir.model.fields,help:account_budget.field_crossovered_budget__message_unread
+msgid "If checked new messages require your attention."
+msgstr "Jeigu pažymėta, naujiems pranešimams reikės jūsų dėmesio."
 
 #. module: account_budget
 #: model:ir.model.fields,help:account_budget.field_crossovered_budget__message_needaction
-#: model:ir.model.fields,help:account_budget.field_crossovered_budget__message_unread
 msgid "If checked, new messages require your attention."
 msgstr "Jeigu pažymėta, naujiems pranešimams reikės jūsų dėmesio."
 
 #. module: account_budget
 #: model:ir.model.fields,help:account_budget.field_crossovered_budget__message_has_error
-#: model:ir.model.fields,help:account_budget.field_crossovered_budget__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr "Jei pažymėta, yra žinučių, turinčių pristatymo klaidų."
 
@@ -379,11 +350,6 @@ msgid "Last Updated on"
 msgstr "Paskutinį kartą atnaujinta"
 
 #. module: account_budget
-#: model_terms:ir.ui.view,arch_db:account_budget.view_crossovered_budget_search
-msgid "Late Activities"
-msgstr "Vėluojančios veiklos"
-
-#. module: account_budget
 #: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__message_main_attachment_id
 msgid "Main Attachment"
 msgstr "Pagrindinis prisegtukas"
@@ -402,22 +368,7 @@ msgstr "Žinutės"
 #: model:ir.model.fields,field_description:account_budget.field_account_budget_post__name
 #: model:ir.model.fields,field_description:account_budget.field_crossovered_budget_lines__name
 msgid "Name"
-msgstr "Vardas"
-
-#. module: account_budget
-#: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__activity_date_deadline
-msgid "Next Activity Deadline"
-msgstr "Kito veiksmo terminas"
-
-#. module: account_budget
-#: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__activity_summary
-msgid "Next Activity Summary"
-msgstr "Kito veiksmo santrauka"
-
-#. module: account_budget
-#: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__activity_type_id
-msgid "Next Activity Type"
-msgstr "Kito veiksmo tipas"
+msgstr "Pavadinimas"
 
 #. module: account_budget
 #: model_terms:ir.ui.view,arch_db:account_budget.view_crossovered_budget_line_search
@@ -431,8 +382,8 @@ msgstr "Veiksmų skaičius"
 
 #. module: account_budget
 #: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__message_has_error_counter
-msgid "Number of errors"
-msgstr "Klaidų kiekis"
+msgid "Number of error"
+msgstr "Klaidų skaičius"
 
 #. module: account_budget
 #: model:ir.model.fields,help:account_budget.field_crossovered_budget__message_needaction_counter
@@ -495,22 +446,6 @@ msgid "Responsible"
 msgstr "Atsakingas"
 
 #. module: account_budget
-#: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__activity_user_id
-msgid "Responsible User"
-msgstr "Atsakingas vartotojas"
-
-#. module: account_budget
-#: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__message_has_sms_error
-msgid "SMS Delivery error"
-msgstr "SMS pristatymo klaida"
-
-#. module: account_budget
-#: model_terms:ir.ui.view,arch_db:account_budget.view_crossovered_budget_search
-msgid "Show all records which has next action date is before today"
-msgstr ""
-"Rodyti visus įrašus, kurių sekančio veiksmo data yra ankstesnė nei šiandiena"
-
-#. module: account_budget
 #: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__date_from
 #: model:ir.model.fields,field_description:account_budget.field_crossovered_budget_lines__date_from
 msgid "Start Date"
@@ -522,20 +457,7 @@ msgid "Status"
 msgstr "Būsena"
 
 #. module: account_budget
-#: model:ir.model.fields,help:account_budget.field_crossovered_budget__activity_state
-msgid ""
-"Status based on activities\n"
-"Overdue: Due date is already passed\n"
-"Today: Activity date is today\n"
-"Planned: Future activities."
-msgstr ""
-"Būsena, paremta veiklomis\n"
-"Vėluojantis: Termino data jau praėjo\n"
-"Šiandien: Veikla turi būti baigta šiandien\n"
-"Suplanuotas: Ateities veiklos."
-
-#. module: account_budget
-#: code:addons/account_budget/models/account_budget.py:0
+#: code:addons/account_budget/models/account_budget.py:29
 #, python-format
 msgid "The budget must have at least one account."
 msgstr "Biudžetas turi turėti bent vieną sąskaitą."
@@ -560,22 +482,12 @@ msgstr "Teorinė suma"
 #. module: account_budget
 #: model_terms:ir.ui.view,arch_db:account_budget.view_crossovered_budget_search
 msgid "To Approve"
-msgstr "Reikia patvirtinti"
+msgstr "Patvirtinti"
 
 #. module: account_budget
 #: model_terms:ir.ui.view,arch_db:account_budget.view_crossovered_budget_search
 msgid "To Approve Budgets"
 msgstr "Patvirtinti biudžetus"
-
-#. module: account_budget
-#: model_terms:ir.ui.view,arch_db:account_budget.view_crossovered_budget_search
-msgid "Today Activities"
-msgstr "Šiandienos veiklos"
-
-#. module: account_budget
-#: model:ir.model.fields,help:account_budget.field_crossovered_budget__activity_exception_decoration
-msgid "Type of the exception activity on record."
-msgstr "Įrašytos išimties veiklos tipas."
 
 #. module: account_budget
 #: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__message_unread
@@ -585,7 +497,7 @@ msgstr "Neperskaitytos žinutės"
 #. module: account_budget
 #: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__message_unread_counter
 msgid "Unread Messages Counter"
-msgstr "Neperskaitytų žinučių skaičiavimas"
+msgstr "Neperskaitytų žinučių skaičiuoklis"
 
 #. module: account_budget
 #: model_terms:ir.actions.act_window,help:account_budget.act_crossovered_budget_view
@@ -595,22 +507,22 @@ msgstr ""
 "realiomis"
 
 #. module: account_budget
-#: model:ir.model.fields.selection,name:account_budget.selection__crossovered_budget__state__validate
+#: selection:crossovered.budget,state:0
 msgid "Validated"
 msgstr "Patvirtinta"
 
 #. module: account_budget
 #: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__website_message_ids
 msgid "Website Messages"
-msgstr "Interneto svetainės žinutės"
+msgstr "Interneto svetainės pranešimai"
 
 #. module: account_budget
 #: model:ir.model.fields,help:account_budget.field_crossovered_budget__website_message_ids
 msgid "Website communication history"
-msgstr "Svetainės komunikacijos istorija"
+msgstr "Interneto svetainės komunikacijos istorija"
 
 #. module: account_budget
-#: code:addons/account_budget/models/account_budget.py:0
+#: code:addons/account_budget/models/account_budget.py:241
 #, python-format
 msgid ""
 "You have to enter at least a budgetary position or analytic account on a "

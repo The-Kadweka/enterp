@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from base64 import b64encode
 
-from odoo import api, fields, models, _
+from odoo import fields, models, _
 from odoo.exceptions import UserError
 
 from .bpost_request import BpostRequest
@@ -36,18 +36,9 @@ class ProviderBpost(models.Model):
     bpost_saturday = fields.Boolean(string="Delivery on Saturday", help="Allow deliveries on Saturday (extra charges apply)")
     bpost_default_packaging_id = fields.Many2one('product.packaging', string='bpost Default Packaging Type')
 
-    def _compute_can_generate_return(self):
-        super(ProviderBpost, self)._compute_can_generate_return()
-        for carrier in self:
-            if carrier.delivery_type == 'bpost':
-                if carrier.bpost_delivery_nature == 'International':
-                    carrier.can_generate_return = False
-                else:
-                    carrier.can_generate_return = True
-
     def bpost_rate_shipment(self, order):
         bpost = BpostRequest(self.prod_environment, self.log_xml)
-        check_value = bpost.check_required_value(order.partner_shipping_id, self.bpost_delivery_nature, order.warehouse_id.partner_id, order=order)
+        check_value = bpost.check_required_value(order.partner_shipping_id, order.carrier_id.bpost_delivery_nature, order.warehouse_id.partner_id, order=order)
         if check_value:
             return {'success': False,
                     'price': 0.0,
@@ -75,64 +66,36 @@ class ProviderBpost(models.Model):
             check_value = bpost.check_required_value(picking.partner_id, picking.carrier_id.bpost_delivery_nature, picking.picking_type_id.warehouse_id.partner_id, picking=picking)
             if check_value:
                 raise UserError(check_value)
-            shipping = bpost.send_shipping(picking, self, self.return_label_on_delivery)
+            shipping = bpost.send_shipping(picking, self)
             order = picking.sale_id
-            company = order.company_id or picking.company_id or self.env.company
+            company = order.company_id or picking.company_id or self.env.user.company_id
             order_currency = picking.sale_id.currency_id or picking.company_id.currency_id
             if order_currency.name == "EUR":
                 carrier_price = shipping['price']
             else:
                 quote_currency = self.env['res.currency'].search([('name', '=', 'EUR')], limit=1)
                 carrier_price = quote_currency._convert(shipping['price'], order_currency, company, order.date_order or fields.Date.today())
-            carrier_tracking_ref = shipping['main_label']['tracking_code']
+            carrier_tracking_ref = shipping['tracking_code']
             # bpost does not seem to handle multipackage
             logmessage = (_("Shipment created into bpost <br/> <b>Tracking Number : </b>%s") % (carrier_tracking_ref))
-            picking.message_post(body=logmessage, attachments=[('Label-bpost-%s.%s' % (carrier_tracking_ref, self.bpost_label_format), shipping['main_label']['label'])])
-
-            if shipping['return_label']:
-                carrier_return_label_ref = shipping['main_label']['tracking_code']
-                logmessage = (_("Return shipment created into bpost <br/> <b>Tracking Number : </b>%s") % (carrier_return_label_ref))
-                picking.message_post(body=logmessage, attachments=[('%s-%s-%s.%s' % (self.get_return_label_prefix(), carrier_return_label_ref, 1, self.bpost_label_format), shipping['return_label']['label'])])
-
+            picking.message_post(body=logmessage, attachments=[('Label-bpost-%s.%s' % (carrier_tracking_ref, "A6"), shipping['label'])])
             shipping_data = {'exact_price': carrier_price,
                              'tracking_number': carrier_tracking_ref}
             res = res + [shipping_data]
         return res
 
     def bpost_get_tracking_link(self, picking):
-        return 'http://track.bpost.be/btr/web/#/search?itemCode=%s&lang=en&postalCode=%s' % (picking.carrier_tracking_ref, picking.partner_id.zip)
+        return 'http://track.bpost.be/btr/web/#/search?itemCode=%s&lang=en' % picking.carrier_tracking_ref
 
     def bpost_cancel_shipment(self, picking):
-        picking.message_post(body=_(u'Shipment N° %s has been cancelled' % picking.carrier_tracking_ref))
-        picking.write({'carrier_tracking_ref': '',
-                       'carrier_price': 0.0})
+        raise UserError(_("You can not cancel a bpost shipment when a shipping label has already been generated."))
 
     def _bpost_passphrase(self):
         self.ensure_one()
-        if self.delivery_type != 'bpost':
+        if any(c.delivery_type != 'bpost' for c in self):
             raise UserError(_("You cannot compute a passphrase for non-bpost carriers."))
         return b64encode(("%s:%s" % (self.bpost_account_number, self.bpost_developer_password)).encode()).decode()
 
     def _bpost_convert_weight(self, weight):
         weight_uom_id = self.env['product.template']._get_weight_uom_id_from_ir_config_parameter()
         return weight_uom_id._compute_quantity(weight, self.env.ref('uom.product_uom_kgm'), round=False)
-
-    @api.model
-    def bpost_get_return_label(self, pickings, tracking_number=None, origin_date=None):
-        bpost = BpostRequest(self.prod_environment, self.log_xml)
-        check_value = bpost.check_required_value(pickings.partner_id, pickings.carrier_id.bpost_delivery_nature, pickings.picking_type_id.warehouse_id.partner_id, picking=pickings)
-        if check_value:
-            raise UserError(check_value)
-        shipping = bpost.send_shipping(pickings, self, False, is_return_label=True)
-        order = pickings.sale_id
-        company = order.company_id or pickings.company_id or self.env.company
-        order_currency = pickings.sale_id.currency_id or pickings.company_id.currency_id
-        if order_currency.name == "EUR":
-            carrier_price = shipping['price']
-        else:
-            quote_currency = self.env['res.currency'].search([('name', '=', 'EUR')], limit=1)
-            carrier_price = quote_currency._convert(shipping['price'], order_currency, company, order.date_order or fields.Date.today())
-        carrier_tracking_ref = shipping['main_label']['tracking_code']
-        # bpost does not seem to handle multipackage
-        logmessage = (_("Return shipment created into bpost <br/> <b>Tracking Number : </b>%s") % (carrier_tracking_ref))
-        pickings.message_post(body=logmessage, attachments=[('%s-%s-%s.%s' % (self.get_return_label_prefix(), carrier_tracking_ref, 1, self.bpost_label_format), shipping['main_label']['label'])])

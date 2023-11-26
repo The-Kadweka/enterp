@@ -142,7 +142,7 @@ var DashboardModel = BasicModel.extend({
 
             defs.push(self._readGroup({
                 domain: self._getReadGroupDomain(domain, self.dataPoint.timeRange),
-                fields: fields,
+                fields: fields, 
             }).then(function (result) {
                 _.extend(self.dataPoint.data, _.pick(result, aggregateNames));
             }));
@@ -156,7 +156,7 @@ var DashboardModel = BasicModel.extend({
             }
         });
 
-        return Promise.all(defs).then(function () {
+        return $.when.apply($, defs).then(function () {
             self._evaluateFormulas(dataPoint);
             if (dataPoint.compare) {
                 var value, comparisonValue;
@@ -189,7 +189,7 @@ var DashboardModel = BasicModel.extend({
     },
     /**
      * @param  {Object} args
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _readGroup: function (args) {
         var readGroupArgs = _.extend({

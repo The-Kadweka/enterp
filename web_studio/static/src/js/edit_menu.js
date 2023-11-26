@@ -223,23 +223,15 @@ var EditMenuDialog = Dialog.extend({
      */
     _onSave: function () {
         var self = this;
-        if (
-            !_.isEmpty(this.to_move) ||
-            !_.isEmpty(this.to_delete)
-        ) {
-            // do not make an rpc (and then reload menu) if there is nothing to save
-            this._saveChanges().then(function () {
-                self._reloadMenuData();
-            });
-        } else {
-            this.close();
-        }
+        this._saveChanges().then(function () {
+            self._reloadMenuData();
+        });
     },
     /**
      * Save the current changes (in `to_move` and `to_delete`).
      *
      * @private
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _saveChanges: function () {
         return this._rpc({
@@ -268,8 +260,7 @@ var EditMenuMany2One = Many2One.extend({
     _quickCreate: function () {
         this.trigger_up('edit_menu_disable_save');
         var def = this._super.apply(this, arguments);
-        Promise.resolve(def).then(this.trigger_up.bind(this, 'edit_menu_enable_save'),
-                                  this.trigger_up.bind(this, 'edit_menu_enable_save'));
+        $.when(def).always(this.trigger_up.bind(this, 'edit_menu_enable_save'));
 
     },
 });
@@ -335,11 +326,11 @@ var NewMenuDialog = Dialog.extend(StandaloneFieldManagerMixin, {
             };
             var record = self.model.get(recordID);
             self.many2one = new EditMenuMany2One(self, 'model', record, options);
-            self.many2one.nodeOptions.no_create_edit = !config.isDebug();
+            self.many2one.nodeOptions.no_create_edit = !config.debug;
             self._registerWidget(recordID, 'model', self.many2one);
             self.many2one.appendTo(self.$('.js_model'));
         }));
-        return Promise.all(defs);
+        return $.when.apply($, defs);
     },
 
     //--------------------------------------------------------------------------
@@ -351,7 +342,7 @@ var NewMenuDialog = Dialog.extend(StandaloneFieldManagerMixin, {
      * @param {String} menu_name
      * @param {Integer} parent_id
      * @param {Integer} model_id
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _createNewMenu: function (menu_name, parent_id, model_id) {
         core.bus.trigger('clear_cache');
@@ -386,7 +377,7 @@ var NewMenuDialog = Dialog.extend(StandaloneFieldManagerMixin, {
         var def = this._createNewMenu(name, this.parent_id, model_id);
         def.then(function () {
             self.on_saved();
-        }).guardedCatch(function () {
+        }).fail(function () {
             self.$footer.find('.confirm_button').removeClass('disabled');
         });
     },

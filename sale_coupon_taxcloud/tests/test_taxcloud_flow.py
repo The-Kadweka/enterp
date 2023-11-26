@@ -83,7 +83,7 @@ class TestSaleCouponTaxCloudFlow(common.TestSaleCouponTaxCloudCommon):
         self.order.validate_taxes_on_sales_order()
 
         self.assertEqual(self.order.amount_untaxed, 144, "Untaxed amount did not change")
-        self.assertAlmostEqual(self.order.amount_tax, 12.78, 4, "Taxes have been reduced by 10%")
+        self.assertEqual(self.order.amount_tax, 12.78, "Taxes have been reduced by 10%")
         for line in self.order.order_line.filtered(lambda l: not l.coupon_program_id):
             self.assertEqual(line.price_taxcloud, line.price_unit * .9,
                              "The discount should have been applied evenly.")

@@ -1,6 +1,7 @@
 # coding: utf-8
 import pytz
-import requests
+
+from suds.transport import TransportError
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
@@ -13,8 +14,8 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-class AccountMove(models.Model):
-    _inherit = 'account.move'
+class AccountInvoice(models.Model):
+    _inherit = 'account.invoice'
 
     l10n_co_edi_datetime_invoice = fields.Datetime(help='Technical field used to store the time of invoice validation.', copy=False)
     l10n_co_edi_type = fields.Selection([
@@ -38,9 +39,10 @@ class AccountMove(models.Model):
                                              help='''Will be included in electronic invoice and can point to
                                              e.g. a ZIP containing additional information about the invoice.''', copy=False)
 
+    @api.multi
     def l10n_co_edi_generate_electronic_invoice_xml(self):
         self.ensure_one()
-        if self.state != 'posted':
+        if self.state not in ('open', 'paid'):
             raise UserError(_('Can not generate electronic invoice for %s (id: %s) because it is not validated.') % (self.partner_id.display_name, self.id))
         return self._l10n_co_edi_generate_xml()
 
@@ -71,16 +73,14 @@ class AccountMove(models.Model):
                                                                            int(invoice_number))
         return self.l10n_co_edi_invoice_name
 
+    @api.model
     def _l10n_co_edi_create_carvajal_request(self):
-        self.ensure_one()
         company = self.company_id
-        l10n_co_edi_account = company.l10n_co_edi_account or ''
-        if self.type in ('in_refund', 'in_invoice') and len(l10n_co_edi_account.split('_')) == 2:
-            l10n_co_edi_account = l10n_co_edi_account.split('_')[0] + "_DS" + l10n_co_edi_account.split('_')[1]
         return CarvajalRequest(company.l10n_co_edi_username, company.l10n_co_edi_password,
-                               company.l10n_co_edi_company, l10n_co_edi_account,
+                               company.l10n_co_edi_company, company.l10n_co_edi_account,
                                company.l10n_co_edi_test_mode)
 
+    @api.multi
     def l10n_co_edi_upload_electronic_invoice(self):
         '''Main function that prepares the XML, uploads it to Carvajal and
         deals with the output. This output is posted as chatter
@@ -88,31 +88,33 @@ class AccountMove(models.Model):
         '''
         for invoice in self:
             try:
+                request = self._l10n_co_edi_create_carvajal_request()
                 xml_filename = invoice._l10n_co_edi_generate_electronic_invoice_filename()
                 xml = invoice.l10n_co_edi_generate_electronic_invoice_xml()
-                request = invoice._l10n_co_edi_create_carvajal_request()
                 response = request.upload(xml_filename, xml)
             except CarvajalException as e:
                 invoice.message_post(body=_('Electronic invoice submission failed. Message from Carvajal:<br/>%s') % e,
                                      attachments=[(xml_filename, xml)])
-            except requests.HTTPError as e:
-                if e.response.status_code == 503:
-                    raise UserError(_("The invoice wasn't sent to Carvajal as their service is probably not available."))
-                raise UserError(e)
-            except (requests.ConnectionError, requests.Timeout) as e:
-                raise UserError(_("The invoice can not be validated as Carvajal servers are not available. Please contact Carvajal's support if this happens unexpectedly."))
+            except TransportError as e:
+                raise UserError(_("The invoice wasn't sent to Carvajal as their service is probably not available."))
             else:
                 invoice.message_post(body=_('Electronic invoice submission succeeded. Message from Carvajal:<br/>%s') % response['message'],
                                      attachments=[(xml_filename, xml)])
                 invoice.l10n_co_edi_transaction = response['transactionId']
                 invoice.l10n_co_edi_invoice_status = 'processing'
 
-    def _l10n_co_edi_get_carvajal_type(self):
+    @api.multi
+    def l10n_co_edi_download_electronic_invoice(self):
+        '''Downloads a ZIP containing an official XML and signed PDF
+        document. This will only be available for invoices that have
+        been successfully validated by Carvajal and the government.
+        '''
+        carvajal_type = False
         if self.type == 'out_refund':
-            return 'NC'
+            carvajal_type = 'NC'
         elif self.type == 'out_invoice':
-            if self.l10n_co_edi_debit_note or self.l10n_co_edi_operation_type in ['30', '32', '33']:
-                return 'ND'
+            if self.journal_id.l10n_co_edi_debit_note or self.l10n_co_edi_operation_type in ['30', '32', '33']:
+                carvajal_type = 'ND'
             else:
                 odoo_type_to_carvajal_type = {
                     '1': 'FV',
@@ -120,15 +122,8 @@ class AccountMove(models.Model):
                     '3': 'FC',
                     '4': 'FC',
                 }
-                return odoo_type_to_carvajal_type[self.l10n_co_edi_type]
-        return False
+                carvajal_type = odoo_type_to_carvajal_type[self.l10n_co_edi_type]
 
-    def l10n_co_edi_download_electronic_invoice(self):
-        '''Downloads a ZIP containing an official XML and signed PDF
-        document. This will only be available for invoices that have
-        been successfully validated by Carvajal and the government.
-        '''
-        carvajal_type = self._l10n_co_edi_get_carvajal_type()
         prefix = self.journal_id.sequence_id.prefix
         if self.type == 'out_invoice' and self.journal_id.l10n_co_edi_debit_note:
             prefix = 'ND'
@@ -136,12 +131,13 @@ class AccountMove(models.Model):
             prefix = self.journal_id.refund_sequence_id.prefix
         try:
             request = self._l10n_co_edi_create_carvajal_request()
-            response = request.download(prefix, self.name, carvajal_type)
+            response = request.download(prefix, self.number, carvajal_type)
         except CarvajalException as e:
             return _('Electronic invoice download failed. Message from Carvajal:<br/>%s') % e, []
         else:
-            return _('Electronic invoice download succeeded. Message from Carvajal:<br/>%s') % response['message'], [('%s.zip' % self.name, response['zip_b64'])]
+            return _('Electronic invoice download succeeded. Message from Carvajal:<br/>%s') % response['message'], [('%s.zip' % self.number, response['zip_b64'])]
 
+    @api.multi
     def l10n_co_edi_check_status_electronic_invoice(self):
         '''This checks the current status of an uploaded XML with Carvajal. It
         posts the results in the invoice chatter and also attempts to
@@ -214,31 +210,31 @@ class AccountMove(models.Model):
 
     def _l10n_co_edi_get_total_units(self):
         '''Units have to be reported as units (not e.g. boxes of 12).'''
-        lines = self.invoice_line_ids.filtered(lambda line: line.product_uom_id.category_id == self.env.ref('uom.product_uom_categ_unit'))
+        lines = self.invoice_line_ids.filtered(lambda line: line.uom_id.category_id == self.env.ref('uom.product_uom_categ_unit'))
         units = 0
 
         for line in lines:
-            units += line.product_uom_id._compute_quantity(line.quantity, self.env.ref('uom.product_uom_unit'))
+            units += line.uom_id._compute_quantity(line.quantity, self.env.ref('uom.product_uom_unit'))
 
         return int(units)
 
     def _l10n_co_edi_get_total_weight(self):
         '''Weight has to be reported in kg (not e.g. g).'''
-        lines = self.invoice_line_ids.filtered(lambda line: line.product_uom_id.category_id == self.env.ref('uom.product_uom_categ_kgm'))
+        lines = self.invoice_line_ids.filtered(lambda line: line.uom_id.category_id == self.env.ref('uom.product_uom_categ_kgm'))
         kg = 0
 
         for line in lines:
-            kg += line.product_uom_id._compute_quantity(line.quantity, self.env.ref('uom.product_uom_kgm'))
+            kg += line.uom_id._compute_quantity(line.quantity, self.env.ref('uom.product_uom_kgm'))
 
         return int(kg)
 
     def _l10n_co_edi_get_total_volume(self):
         '''Volume has to be reported in l (not e.g. ml).'''
-        lines = self.invoice_line_ids.filtered(lambda line: line.product_uom_id.category_id == self.env.ref('uom.product_uom_categ_vol'))
+        lines = self.invoice_line_ids.filtered(lambda line: line.uom_id.category_id == self.env.ref('uom.product_uom_categ_vol'))
         l = 0
 
         for line in lines:
-            l += line.product_uom_id._compute_quantity(line.quantity, self.env.ref('uom.product_uom_litre'))
+            l += line.uom_id._compute_quantity(line.quantity, self.env.ref('uom.product_uom_litre'))
 
         return int(l)
 
@@ -254,10 +250,9 @@ class AccountMove(models.Model):
         instead of some extra simple XML tags but such questions are best
         left to philosophers, not dumb developers like myself.
         '''
-        withholding_amount = self.amount_untaxed + sum(self.line_ids.filtered(lambda move: move.tax_line_id and not move.tax_line_id.l10n_co_edi_type.retention).mapped('price_total'))
+        withholding_amount = self.amount_untaxed + sum(self.tax_line_ids.filtered(lambda t: not t.tax_id.l10n_co_edi_type.retention).mapped('amount'))
         amount_in_words = self.currency_id.with_context(lang=self.partner_id.lang or 'es_ES').amount_to_text(withholding_amount)
-        shipping_partner = self.env['res.partner'].browse(self._get_invoice_delivery_partner_id())
-        narration = ((self.narration and self.narration + ' ' or '') +  (self.invoice_origin or ''))
+        shipping_partner = self.env['res.partner'].browse(self.get_delivery_partner_id())
         notas = [
             '1.-%s|%s|%s|%s|%s|%s' % (self.company_id.l10n_co_edi_header_gran_contribuyente or '',
                                       self.company_id.l10n_co_edi_header_tipo_de_regimen or '',
@@ -266,11 +261,11 @@ class AccountMove(models.Model):
                                       self.company_id.l10n_co_edi_header_resolucion_aplicable or '',
                                       self.company_id.l10n_co_edi_header_actividad_economica or ''),
             '2.-%s' % (self.company_id.l10n_co_edi_header_bank_information or '').replace('\n', '|'),
-            ('3.- %s' % (narration or 'N/A'))[:500],
-            '6.- %s|%s' % (self.invoice_payment_term_id.note, amount_in_words),
+            '3.- %s' % (self.comment or 'N/A'),
+            '6.- %s|%s' % (self.payment_term_id.note, amount_in_words),
             '7.- "%s" "- "%s"' % (self.company_id.website, self.company_id.phone),
-            '8.-%s|%s|%s' % (self.partner_id.commercial_partner_id._get_vat_without_verification_code() or '', shipping_partner.phone or '', self.invoice_origin and self.invoice_origin.split(',')[0] or ''),
-            '10.- | | | |%s' % (self.invoice_origin and self.invoice_origin.split(',')[0] or 'N/A'),
+            '8.-%s|%s|%s' % (self.partner_id.commercial_partner_id._get_vat_without_verification_code() or '', shipping_partner.phone or '', self.origin or ''),
+            '10.- | | | |%s' % (self.origin or 'N/A'),
             '11.- |%s| |%s|%s' % (self._l10n_co_edi_get_total_units(), self._l10n_co_edi_get_total_weight(), self._l10n_co_edi_get_total_volume())
         ]
 
@@ -292,7 +287,7 @@ class AccountMove(models.Model):
             'id_document': '',
             'id_card': '12',
             'passport': '41',
-            'foreign_id_card': '42',
+            'foreign_id_card': '22',
             'external_id': '50',
             'residence_document': 'O-99',
             'civil_registration': '11',
@@ -316,11 +311,11 @@ class AccountMove(models.Model):
             self.env.ref('l10n_co_edi.tax_type_2') |\
             self.env.ref('l10n_co_edi.tax_type_3') |\
             self.env.ref('l10n_co_edi.tax_type_4')
-        tax_lines_with_type = self.line_ids.filtered(lambda line: line.tax_line_id).filtered(lambda tax: tax.tax_line_id.l10n_co_edi_type in imp_taxes)
-        retention_taxes = tax_lines_with_type.filtered(lambda tax: tax.tax_line_id.l10n_co_edi_type.retention)
+        tax_lines_with_type = self.tax_line_ids.filtered(lambda tax: tax.tax_id.l10n_co_edi_type in imp_taxes)
+        retention_taxes = tax_lines_with_type.filtered(lambda tax: tax.tax_id.l10n_co_edi_type.retention)
         regular_taxes = tax_lines_with_type - retention_taxes
         ovt_tax_codes = ('01C', '02C', '03C')
-        ovt_taxes = self.line_ids.filtered(lambda line: line.tax_line_id).filtered(lambda tax: tax.tax_line_id.l10n_co_edi_type.code in ovt_tax_codes)
+        ovt_taxes = self.tax_line_ids.filtered(lambda tax: tax.tax_id.l10n_co_edi_type.code in ovt_tax_codes)
         invoice_type_to_ref_1 = {
             'out_invoice': 'IV',
             'in_invoice': 'IV',
@@ -331,11 +326,11 @@ class AccountMove(models.Model):
         return self.env.ref('l10n_co_edi.electronic_invoice_xml').render({
             'invoice': self,
             'company_partner': self.company_id.partner_id,
-            'sales_partner': self.invoice_user_id,
+            'sales_partner': self.user_id,
             'invoice_partner': self.partner_id.commercial_partner_id,
             'retention_taxes': retention_taxes,
             'regular_taxes': regular_taxes,
-            'shipping_partner': self.env['res.partner'].browse(self._get_invoice_delivery_partner_id()),
+            'shipping_partner': self.env['res.partner'].browse(self.get_delivery_partner_id()),
             'invoice_type_to_ref_1': invoice_type_to_ref_1,
             'ovt_taxes': ovt_taxes,
             'float_compare': float_compare,
@@ -346,12 +341,9 @@ class AccountMove(models.Model):
         self.ensure_one()
         return self.type in ('out_invoice', 'out_refund') and self.company_id.country_id == self.env.ref('base.co')
 
-    def post(self):
-        # OVERRIDE to generate the e-invoice for the Colombian Localization.
-        res = super(AccountMove, self).post()
-
-        to_process = self.filtered(lambda move: move._l10n_co_edi_is_l10n_co_edi_required())
-        if to_process:
-            to_process.write({'l10n_co_edi_datetime_invoice': fields.Datetime.now()})
-            to_process.l10n_co_edi_upload_electronic_invoice()
+    @api.multi
+    def action_invoice_open(self):
+        res = super(AccountInvoice, self).action_invoice_open()
+        self.write({'l10n_co_edi_datetime_invoice': fields.Datetime.now()})
+        self.filtered(lambda inv: inv._l10n_co_edi_is_l10n_co_edi_required()).l10n_co_edi_upload_electronic_invoice()
         return res

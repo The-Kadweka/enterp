@@ -1,32 +1,87 @@
-odoo.define('account_asset.AssetFormView', function(require) {
+odoo.define('account_asset.widget', function(require) {
 "use strict";
 
-var FormRenderer = require('web.FormRenderer');
-var FormView = require('web.FormView');
+/**
+ * The purpose of this widget is to shows a toggle button on depreciation and
+ * installment lines for posted/unposted line. When clicked, it calls the method
+ * create_move on the object account.asset.depreciation.line.
+ * Note that this widget can only work on the account.asset.depreciation.line
+ * model as some of its fields are harcoded.
+ */
+
+var AbstractField = require('web.AbstractField');
 var core = require('web.core');
-var viewRegistry = require('web.view_registry');
+var registry = require('web.field_registry');
 
 var _t = core._t;
 
-var AccountAssetFormRenderer = FormRenderer.extend({
-    events: _.extend({}, FormRenderer.prototype.events, {
-        'click .add_original_move_line': '_onAddOriginalMoveLine',
+var AccountAssetWidget = AbstractField.extend({
+    events: _.extend({}, AbstractField.prototype.events, {
+        'click': '_onClick',
     }),
-    /*
-     * Open the m2o item selection from another button
+    description: "",
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
      */
-    _onAddOriginalMoveLine: function(ev) {
-        _.find(this.allFieldWidgets[this.state.id], x => x['name'] == 'original_move_line_ids').onAddRecordOpenDialog();
+    isSet: function () {
+        return true; // it should always be displayed, whatever its value
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     * @private
+     */
+    _render: function () {
+        var className = '';
+        var disabled = true;
+        var title;
+        if (this.recordData.move_posted_check) {
+            className = 'o_is_posted';
+            title = _t('Posted');
+        } else if (this.recordData.move_check) {
+            className = 'o_unposted';
+            title = _t('Accounting entries waiting for manual verification');
+        } else {
+            disabled = false;
+            title = _t('Unposted');
+        }
+        var $button = $('<button/>', {
+            type: 'button',
+            title: title,
+            disabled: disabled,
+        }).addClass('btn btn-link fa fa-circle o_deprec_lines_toggler ' + className);
+        this.$el.html($button);
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     * @param {MouseEvent} event
+     */
+    _onClick: function (event) {
+        event.stopPropagation();
+        this.trigger_up('button_clicked', {
+            attrs: {
+                name: 'create_move',
+                type: 'object',
+            },
+            record: this.record,
+        });
     },
 });
 
-var AssetFormView = FormView.extend({
-    config: _.extend({}, FormView.prototype.config, {
-        Renderer: AccountAssetFormRenderer,
-    }),
-});
-
-viewRegistry.add("asset_form", AssetFormView);
-return AssetFormView;
+registry.add("deprec_lines_toggler", AccountAssetWidget);
 
 });

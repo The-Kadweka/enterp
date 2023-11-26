@@ -16,21 +16,20 @@ class SaleOrder(models.Model):
 
     @api.model
     def _process_order(self, order):
-        for transaction in order['TransactionArray']['Transaction']:
-            so = self.env['sale.order'].search(
-                [('client_order_ref', '=', transaction['OrderLineItemID'])], limit=1)
-            try:
-                if not so:
-                    so = self._process_order_new(order, transaction)
-                    so._process_order_update(order)
-            except Exception as e:
-                message = _("Ebay could not synchronize order:\n%s") % str(e)
-                path = str(order)
-                product._log_logging(self.env, message, "_process_order", path)
-                _logger.exception(message)
+        so = self.env['sale.order'].search(
+            [('client_order_ref', '=', order['OrderID'])], limit=1)
+        try:
+            if not so:
+                so = self._process_order_new(order)
+                so._process_order_update(order)
+        except Exception as e:
+            message = _("Ebay could not synchronize order:\n%s") % str(e)
+            path = str(order)
+            product._log_logging(self.env, message, "_process_order", path)
+            _logger.exception(message)
 
     @api.model
-    def _process_order_new(self, order, transaction):
+    def _process_order_new(self, order):
         (partner, shipping_partner) = self._process_order_new_find_partners(order)
         fp_id = self.env['account.fiscal.position'].get_fiscal_position(partner.id, delivery_id=shipping_partner.id)
         if fp_id:
@@ -39,10 +38,10 @@ class SaleOrder(models.Model):
             'partner_id': partner.id,
             'partner_shipping_id': shipping_partner.id,
             'state': 'draft',
-            'client_order_ref': transaction['OrderLineItemID'],
-            'origin': 'eBay' + transaction['OrderLineItemID'],
+            'client_order_ref': order['OrderID'],
+            'origin': 'eBay' + order['OrderID'],
             'fiscal_position_id': fp_id if fp_id else False,
-            'date_order': product._ebay_parse_date(order['PaidTime']),
+            'date_order': order['PaidTime'],
         }
         if self.env['ir.config_parameter'].sudo().get_param('ebay_sales_team'):
             create_values['team_id'] = int(
@@ -50,7 +49,8 @@ class SaleOrder(models.Model):
 
         sale_order = self.env['sale.order'].create(create_values)
 
-        sale_order._process_order_new_transaction(transaction)
+        for transaction in order['TransactionArray']['Transaction']:
+            sale_order._process_order_new_transaction(transaction)
 
         sale_order._process_order_shipping(order)
 
@@ -131,7 +131,7 @@ class SaleOrder(models.Model):
            We ignore 0% taxes to avoid useless clutter,
            but that could be changed if their presence is required.
         """
-        company = self.env.company
+        company = self.env.user.company_id
         tax = False
         if amount > 0 and rate > 0:
             tax = self.env['account.tax'].with_context(active_test=False).sudo().search([
@@ -182,7 +182,7 @@ class SaleOrder(models.Model):
                     'amount': tax_amount,
                     'amount_type': 'fixed',
                     'type_tax_use': 'sale',
-                    'company_id': self.env.company.id,
+                    'company_id': self.env.user.company_id.id,
                     'active': False,
                 })
 
@@ -228,7 +228,14 @@ class SaleOrder(models.Model):
                 if not isinstance(name_value_list, list):
                     name_value_list = [name_value_list]
                 # get only the item specific in the value list
-                variant = product._get_variant_from_ebay_specs([n for n in name_value_list if n['Source'] == 'ItemSpecific'])
+                attrs = []
+                # get the attribute.value ids in order to get the variant listed on ebay
+                for spec in (n for n in name_value_list if n['Source'] == 'ItemSpecific'):
+                    attr = product.env['product.attribute.value'].search(
+                        [('name', '=', spec['Value'])])
+                    attrs.append(('attribute_value_ids', '=', attr.id))
+                domain = expression.AND(attrs, [('product_tmpl_id', '=', product.id)])
+                variant = product.env['product.product'].search(domain)
         else:
             variant = product.product_variant_ids[0]
         variant.ebay_quantity_sold = variant.ebay_quantity_sold + int(transaction['QuantityPurchased'])
@@ -288,7 +295,7 @@ class SaleOrder(models.Model):
             if (not no_confirm and self.state in ['draft', 'sent']):
                 self.action_confirm()
             if not no_confirm and can_be_invoiced:
-                self._create_invoices()
+                self.action_invoice_create()
             shipping_name = order['ShippingServiceSelected']['ShippingService']
             if self.picking_ids and shipping_name:
                 self.picking_ids[-1].message_post(

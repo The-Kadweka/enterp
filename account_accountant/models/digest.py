@@ -20,8 +20,8 @@ class Digest(models.Model):
                 ('date', '>=', start),
                 ('date', '<', end),
                 ('journal_id.type', 'in', ['cash', 'bank']),
-                ('company_id', '=', company.id)], ['journal_id', 'amount_total'], ['journal_id'])
-            record.kpi_account_bank_cash_value = sum([account_move['amount_total'] for account_move in account_moves])
+                ('company_id', '=', company.id)], ['journal_id', 'amount'], ['journal_id'])
+            record.kpi_account_bank_cash_value = sum([account_move['amount'] for account_move in account_moves])
 
     def compute_kpis_actions(self, company, user):
         res = super(Digest, self).compute_kpis_actions(company, user)

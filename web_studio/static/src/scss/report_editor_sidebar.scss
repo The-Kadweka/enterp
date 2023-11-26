@@ -1,4 +1,8 @@
 .o_web_studio_sidebar.o_web_studio_report_sidebar {
+    .o_web_studio_properties.active, .o_web_studio_sidebar_content_properties {
+        background-color: lighten($o-web-studio-bg-medium, 7%);
+    }
+
     .o_web_studio_sidebar_content {
         &.o_web_studio_sidebar_content_properties {
             padding-top: 0px;
@@ -31,6 +35,7 @@
                 @include o-hover-text-color(lighten($o-brand-primary, 5%), $o-brand-primary);
             }
             .card {
+                background: $o-web-studio-bg-medium;
                 position: relative;
                 border: none;
                 margin-top: 0;
@@ -45,15 +50,23 @@
                     }
                 }
                 &.o_web_studio_active {
+                    margin-bottom: 15px;
+                    border-top: 1px solid transparentize($o-web-studio-bg-light, 0.7);
+
                     .card-header {
+                        padding-left: 0!important;
+
+                        &:before, &:after {
+                            content: none;
+                        }
+
                         i.fa-angle-left {
                             transform: rotate(-90deg);
                         }
                     }
-                    &:last-child {
-                        .card-header:before {
-                            bottom: 0;
-                        }
+
+                    &:not(:first-child) {
+                        margin-top: 5px;
                     }
                 }
                 .collapsing {
@@ -105,8 +118,11 @@
                     border: none;
                     border-top: 1px solid $o-web-studio-bg-dark;
                     padding-top: 8px;
-                    @include o-bg-color($o-web-studio-bg-medium);
 
+                    &:last-child() {
+                        padding: 9px 15px 37px;
+                        background: transparentize($o-web-studio-bg-dark, 0.8);
+                    }
                     .row {
                         margin-bottom: 8px;
                     }
@@ -129,23 +145,12 @@
                         display: inline-block;
                         width: 21%;
                     }
-                    .o_web_studio_text_decoration, .o_web_studio_text_alignment, .o_web_studio_font_size {
-                        > button , button.dropdown-toggle {
-                            @include o-web-studio-btn;
-                            padding: 2px 7px;
-                            font-size: 13px;
-                            &.active {
-                                border-color: lighten($o-brand-primary, 5%) !important;
-                            }
-                        }
-                    }
-                    .o_web_studio_font_size {
-                        .dropdown-item-text {
-                            cursor: pointer;
-
-                            &.active {
-                                background-color: $o-brand-primary;
-                            }
+                    .o_web_studio_text_decoration > button {
+                        @include o-web-studio-btn;
+                        padding: 2px 7px;
+                        font-size: 13px;
+                        &.active {
+                            border-color: lighten($o-brand-primary, 5%) !important;
                         }
                     }
                     .o_web_studio_size > input,
@@ -199,19 +204,15 @@
                                 &, &:hover, &:active, &:focus {
                                     background-color: $o-web-studio-bg-darker;
                                 }
-                                > button {
-                                    @include o-web-studio-btn;
-                                    @include o-web-studio-btn-variation($o-web-studio-bg-medium, $o-web-studio-bg-dark);
-                                }
                             }
-                            .o_web_studio_color_palette {
-                                .o_web_studio_color_row {
-                                    height: 20px;
-                                }
-                                button {
+                            .o_web_studio_reset_color {
+                                @include o-web-studio-btn;
+                                @include o-web-studio-btn-variation($o-web-studio-bg-medium, $o-web-studio-bg-dark);
+                            }
+                            .note-color-palette {
+                                .note-color-row button {
                                     @include size(20px, 18px);
                                     border: 0px solid black;
-                                    margin: 0 1px;
 
                                     &:hover {
                                         box-shadow: inset 0 0 0 2px white;
@@ -227,7 +228,7 @@
                             }
                         }
                     }
-                    .o_web_studio_toption_options:first-child {
+                    .o_web_studio_toption_options:first-child() {
                         margin-top: 12px;
                     }
                     .o_web_studio_text .btn-sm {
@@ -241,8 +242,8 @@
                     }
                 }
             }
-            @for $i from 1 through 30 {
-                .card:nth-child(#{$i}) .card-header {
+            @for $i from 1 through 10 {
+                .card:nth-child(#{$i}):not(.o_web_studio_active) .card-header {
                     padding-left:  3px * $i;
 
                     &:after {
@@ -251,13 +252,10 @@
                     }
                 }
             }
-            .card.o_web_studio_active .card-header:after {
-                top: 15px; // middle of the header
-            }
-            .card:first-child .card-header:before {
+            .card:first-child() .card-header:before {
                 top: 50%;
             }
-            .card:last-child .card-header:before {
+            .card:last-child() .card-header:before {
                 bottom: 50%;
             }
         }

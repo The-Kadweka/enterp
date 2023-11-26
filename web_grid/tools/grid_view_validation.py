@@ -10,10 +10,8 @@ from odoo.tools import misc, view_validation
 _logger = logging.getLogger(__name__)
 
 _grid_validator = None
-
-
 @view_validation.validate('grid')
-def schema_grid(arch, **kwargs):
+def schema_grid(arch):
     """ Check the grid view against its schema
 
     :type arch: etree._Element
@@ -31,15 +29,14 @@ def schema_grid(arch, **kwargs):
         _logger.error(ustr(error))
     return False
 
-
 @view_validation.validate('grid')
-def valid_field_types(arch, **kwargs):
+def valid_field_types(arch):
     """ Each of the row, col and measure <field>s must appear once and only
     once in a grid view
 
     :type arch: etree._Element
     """
-    types = {'col', 'measure', 'readonly'}
+    types = {'col', 'measure'}
     for f in arch.iterdescendants('field'):
         field_type = f.get('type')
         if field_type == 'row':

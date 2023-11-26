@@ -18,15 +18,17 @@ class CustomerPortal(CustomerPortal):
             ('partner_id.id', 'in', [partner.id, partner.commercial_partner_id.id]),
         ]
 
-    def _prepare_home_portal_values(self):
+    def _prepare_portal_layout_values(self):
         """ Add subscription details to main account page """
-        values = super(CustomerPortal, self)._prepare_home_portal_values()
+        values = super(CustomerPortal, self)._prepare_portal_layout_values()
         partner = request.env.user.partner_id
-        values['subscription_count'] = (
-            request.env['sale.subscription'].search_count(self._get_subscription_domain(partner))
+        sub_ids = (
+            request.env['sale.subscription'].search(self._get_subscription_domain(partner)).ids
             if request.env['sale.subscription'].check_access_rights('read', raise_exception=False)
-            else 0
+            else []
         )
+        values['subscription_count'] = len(sub_ids)
+        values['sub_ids'] = sub_ids
         return values
 
     @http.route(['/my/subscription', '/my/subscription/page/<int:page>'], type='http', auth="user", website=True)
@@ -37,7 +39,7 @@ class CustomerPortal(CustomerPortal):
 
         domain = self._get_subscription_domain(partner)
 
-        archive_groups = self._get_archive_groups('sale.subscription', domain) if values.get('my_details') else []
+        archive_groups = self._get_archive_groups('sale.subscription', domain)
         if date_begin and date_end:
             domain += [('create_date', '>', date_begin), ('create_date', '<=', date_end)]
 
@@ -60,6 +62,7 @@ class CustomerPortal(CustomerPortal):
         if not filterby:
             filterby = 'all'
         domain += searchbar_filters[filterby]['domain']
+        domain += [('id', 'in', values['sub_ids'])]
 
         # pager
         account_count = SaleSubscription.sudo().search_count(domain)
@@ -102,13 +105,12 @@ class sale_subscription(http.Controller):
         else:
             account = account_res.browse(account_id)
 
-        acquirers = request.env['payment.acquirer'].search([
-            ('state', 'in', ['enabled', 'test']),
+        acquirers = list(request.env['payment.acquirer'].search([
+            ('website_published', '=', True),
             ('registration_view_template_id', '!=', False),
-            ('token_implemented', '=', True),
-            ('company_id', '=', account.company_id.id)])
+            ('token_implemented', '=', True)]))
         acc_pm = account.payment_token_id
-        part_pms = account.partner_id.payment_token_ids.filtered(lambda pms: pms.acquirer_id.company_id == account.company_id)
+        part_pms = account.partner_id.payment_token_ids
         display_close = account.template_id.sudo().user_closable and account.in_progress
         is_follower = request.env.user.partner_id.id in [follower.partner_id.id for follower in account.message_follower_ids]
         active_plan = account.template_id.sudo()
@@ -129,10 +131,10 @@ class sale_subscription(http.Controller):
             'missing_periods': missing_periods,
             'payment_mode': active_plan.payment_mode,
             'user': request.env.user,
-            'acquirers': list(acquirers),
+            'acquirers': acquirers,
             'acc_pm': acc_pm,
             'part_pms': part_pms,
-            'is_salesman': request.env['res.users'].with_user(request.uid).has_group('sales_team.group_sale_salesman'),
+            'is_salesman': request.env['res.users'].sudo(request.uid).has_group('sales_team.group_sale_salesman'),
             'action': action,
             'message': message,
             'message_class': message_class,
@@ -146,8 +148,6 @@ class sale_subscription(http.Controller):
 
         history = request.session.get('my_subscriptions_history', [])
         values.update(get_records_pager(history, account))
-        values['acq_extra_fees'] = acquirers.get_acquirer_extra_fees(account.recurring_amount_total, account.currency_id, account.partner_id.country_id)
-
         return request.render("sale_subscription.subscription", values)
 
     payment_succes_msg = 'message=Thank you, your payment has been validated.&message_class=alert-success'
@@ -157,7 +157,7 @@ class sale_subscription(http.Controller):
                  '/my/subscription/payment/<int:account_id>/<string:uuid>'], type='http', auth="public", methods=['POST'], website=True)
     def payment(self, account_id, uuid=None, **kw):
         account_res = request.env['sale.subscription']
-        invoice_res = request.env['account.move']
+        invoice_res = request.env['account.invoice']
         get_param = ''
         if uuid:
             account = account_res.sudo().browse(account_id)
@@ -180,12 +180,17 @@ class sale_subscription(http.Controller):
         if payment_token:
             invoice_values = account.sudo()._prepare_invoice()
             new_invoice = invoice_res.sudo().create(invoice_values)
+            new_invoice.compute_taxes()
+            # the customer is in front of their computer, we are not 'off_session' for payments
             tx = account.sudo().with_context(off_session=False)._do_payment(payment_token, new_invoice)[0]
             PaymentProcessing.add_payment_transaction(tx)
             if tx.html_3ds:
                 return tx.html_3ds
-            get_param = self.payment_succes_msg if tx.renewal_allowed else self.payment_fail_msg
-            if not tx.renewal_allowed and tx.state != 'pending':
+            if tx.state in ['done', 'authorized']:
+                account.send_success_mail(tx, new_invoice)
+                msg_body = 'Manual payment succeeded. Payment reference: <a href=# data-oe-model=payment.transaction data-oe-id=%d>%s</a>; Amount: %s. Invoice <a href=# data-oe-model=account.invoice data-oe-id=%d>View Invoice</a>.' % (tx.id, tx.reference, tx.amount, new_invoice.id)
+                account.message_post(body=msg_body)
+            elif tx.state != 'pending':
                 # a pending status might indicate that the customer has to authenticate, keep the invoice for post-processing
                 # NOTE: this might cause a lot of draft invoices to stay alive; i'm afraid this can't be helped
                 #       since the payment flow is divided in 2 in that case and the draft invoice must survive after the request
@@ -207,7 +212,7 @@ class sale_subscription(http.Controller):
 
         tx.form_feedback(kw, tx.acquirer_id.provider)
 
-        get_param = self.payment_succes_msg if tx.renewal_allowed else self.payment_fail_msg
+        get_param = self.payment_succes_msg if tx.state in ['done', 'authorized'] else self.payment_fail_msg
 
         return request.redirect('/my/subscription/%s/%s?%s' % (subscription.id, sub_uuid, get_param))
 

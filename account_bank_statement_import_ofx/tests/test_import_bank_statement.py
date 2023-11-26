@@ -17,16 +17,12 @@ class TestOfxFile(TransactionCase):
         # Create a bank account and journal corresponding to the OFX file (same currency and account number)
         bank_journal = self.env['account.journal'].create({'name': 'Bank 123456', 'code': 'BNK67', 'type': 'bank',
             'bank_acc_number': '123456'})
+        bank_journal_id = bank_journal.id
         if bank_journal.company_id.currency_id != self.env.ref("base.USD"):
             bank_journal.write({'currency_id': self.env.ref("base.USD").id})
 
         # Use an import wizard to process the file
-        import_wizard = self.env['account.bank.statement.import'].with_context(journal_id=bank_journal.id).create({
-            'attachment_ids': [(0, 0, {
-                'name': 'test_ofx.ofx',
-                'datas': ofx_file,
-            })],
-        })
+        import_wizard = self.env['account.bank.statement.import'].with_context(journal_id=bank_journal_id).create({'data_file': ofx_file, 'filename': 'test_ofx.ofx'})
         import_wizard.import_file()
 
         # Check the imported bank statement
@@ -35,7 +31,7 @@ class TestOfxFile(TransactionCase):
         self.assertEqual(bank_st_record.balance_end_real, 2156.56)
 
         # Check an imported bank statement line
-        line = bank_st_record.line_ids.filtered(lambda r: r.unique_import_id == '123456-'+str(bank_journal.id)+'-219378')
+        line = bank_st_record.line_ids.filtered(lambda r: r.unique_import_id == '123456-'+str(bank_journal_id)+'-219378')
         self.assertEqual(line.name, 'Deco Addict')
         self.assertEqual(line.amount, -80)
         self.assertEqual(line.partner_id.id, self.ref('base.res_partner_2'))

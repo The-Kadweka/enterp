@@ -8,8 +8,8 @@ class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
     intrastat_id = fields.Many2one('account.intrastat.code', string='Commodity Code', domain="[('type', '=', 'commodity')]")
-    intrastat_origin_country_id = fields.Many2one('res.country', string='Country of Origin')
 
+    @api.multi
     def search_intrastat_code(self):
         self.ensure_one()
         return self.intrastat_id or self.categ_id.search_intrastat_code()
@@ -20,6 +20,7 @@ class ProductCategory(models.Model):
 
     intrastat_id = fields.Many2one('account.intrastat.code', string='Commodity Code', domain=[('type', '=', 'commodity')])
 
+    @api.multi
     def search_intrastat_code(self):
         self.ensure_one()
         return self.intrastat_id or (self.parent_id and self.parent_id.search_intrastat_code()) or self.intrastat_id

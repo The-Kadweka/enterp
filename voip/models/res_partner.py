@@ -29,7 +29,7 @@ except ImportError:
 
 class Contact(models.Model):
     _name = 'res.partner'
-    _inherit = ['res.partner', 'phone.validation.mixin', 'voip.queue.mixin']
+    _inherit = ['res.partner', 'phone.validation.mixin']
 
     sanitized_phone = fields.Char("Phone number sanitized", compute='_compute_sanitized_phone', store=True)
     sanitized_mobile = fields.Char("Mobile number sanitized", compute='_compute_sanitized_mobile', store=True)
@@ -44,17 +44,21 @@ class Contact(models.Model):
                 return number
             if not phonenumbers.is_possible_number(phone_nbr) or not phonenumbers.is_valid_number(phone_nbr):
                 return number
-            phone_fmt = phonenumbers.PhoneNumberFormat.E164
-            return phonenumbers.format_number(phone_nbr, phone_fmt)
+            phone_fmt = phonenumbers.PhoneNumberFormat.INTERNATIONAL
+            return phonenumbers.format_number(phone_nbr, phone_fmt).replace(' ', '')
         else:
             return number
 
+    @api.multi
     @api.depends('phone', 'country_id')
     def _compute_sanitized_phone(self):
-        for partner in self.with_context(prefetch_fields=False):
-            partner.sanitized_phone = partner.phone and partner._voip_sanitization(partner.phone) or ''
+        for partner in self:
+            if partner.phone:
+                partner.sanitized_phone = partner._voip_sanitization(partner.phone)
 
+    @api.multi
     @api.depends('mobile', 'country_id')
     def _compute_sanitized_mobile(self):
-        for partner in self.with_context(prefetch_fields=False):
-            partner.sanitized_mobile = partner.mobile and partner._voip_sanitization(partner.mobile) or ''
+        for partner in self:
+            if partner.mobile:
+                partner.sanitized_mobile = partner._voip_sanitization(partner.mobile)

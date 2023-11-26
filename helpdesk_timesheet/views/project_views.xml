@@ -15,6 +15,7 @@
     <record id="project_project_action_view_helpdesk_tickets" model="ir.actions.act_window">
         <field name="name">Project Tickets</field>
         <field name="res_model">helpdesk.ticket</field>
+        <field name="view_type">form</field>
         <field name="view_mode">kanban,tree,form,pivot,graph</field>
         <field name="search_view_id" ref="helpdesk_ticket_view_search_inherit_helpdesk_timesheet"/>
         <field name="context">{'search_default_project_id': active_id, 'default_project_id': active_id}</field>
@@ -32,7 +33,6 @@
                     </a>
                 </xpath>
             </field>
-            <field name="groups_id" eval="[(4, ref('helpdesk.group_helpdesk_user'))]"/>
         </record>
 
    <record id="project_project_view_form_inherit_helpdesk_timesheet" model="ir.ui.view">
@@ -40,19 +40,19 @@
         <field name="model">project.project</field>
         <field name="inherit_id" ref="project.edit_project"/>
         <field name="arch" type="xml">
-            <div name="button_box" position="inside">
+            <xpath expr="//button[@name='toggle_active']" position="before">
                 <button
                     class="oe_stat_button"
                     type="action"
                     name="%(project_project_action_view_helpdesk_tickets)d"
                     context="{'search_default_project_id': [active_id], 'default_project_id': active_id}"
                     icon="fa-life-ring"
-                    attrs="{'invisible': [('ticket_count', '=', 0)]}">
+                    attrs="{'invisible': [('ticket_count', '=', 0)]}"
+                    groups="helpdesk.group_helpdesk_user">
                     <field name="ticket_count" string="Tickets" widget="statinfo"/>
                 </button>
-            </div>
+            </xpath>
         </field>
-        <field name="groups_id" eval="[(4, ref('helpdesk.group_helpdesk_user'))]"/>
    </record>
 
 </odoo>

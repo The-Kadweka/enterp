@@ -1,22 +1,22 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* helpdesk_timesheet
+# * helpdesk_timesheet
 # 
 # Translators:
-# Martin Trigaux, 2019
 # Davor Bojkić <davor.bojkic@storm.hr>, 2019
 # Vladimir Olujić <olujic.vladimir@storm.hr>, 2019
 # Đurđica Žarković <durdica.zarkovic@storm.hr>, 2019
 # Karolina Tonković <karolina.tonkovic@storm.hr>, 2019
 # Tina Milas, 2019
+# Martin Trigaux, 2019
 # Bole <bole@dajmi5.com>, 2020
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~12.5+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-26 08:05+0000\n"
-"PO-Revision-Date: 2019-08-26 09:36+0000\n"
+"POT-Creation-Date: 2019-11-14 07:50+0000\n"
+"PO-Revision-Date: 2018-08-24 11:38+0000\n"
 "Last-Translator: Bole <bole@dajmi5.com>, 2020\n"
 "Language-Team: Croatian (https://www.transifex.com/odoo/teams/41243/hr/)\n"
 "MIME-Version: 1.0\n"
@@ -31,7 +31,7 @@ msgid "# Tickets"
 msgstr ""
 
 #. module: helpdesk_timesheet
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
+#: code:addons/helpdesk_timesheet/models/helpdesk.py:71
 #, python-format
 msgid ""
 "All timesheet hours will be assigned to the selected task on save. Discard "
@@ -44,8 +44,8 @@ msgid "Analytic Line"
 msgstr "Analitičke stavke"
 
 #. module: helpdesk_timesheet
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
+#: code:addons/helpdesk_timesheet/models/helpdesk.py:19
+#: code:addons/helpdesk_timesheet/models/helpdesk.py:34
 #, python-format
 msgid "Closed"
 msgstr "Zatvoren"
@@ -82,8 +82,8 @@ msgid "Helpdesk Ticket"
 msgstr "Prijava podrške"
 
 #. module: helpdesk_timesheet
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
+#: code:addons/helpdesk_timesheet/models/helpdesk.py:18
+#: code:addons/helpdesk_timesheet/models/helpdesk.py:33
 #, python-format
 msgid "In Progress"
 msgstr "U tijeku"
@@ -99,6 +99,11 @@ msgid "Is Task Active"
 msgstr "Je aktivni zadatak"
 
 #. module: helpdesk_timesheet
+#: model:ir.model.fields,field_description:helpdesk_timesheet.field_project_task_type__is_closed
+msgid "Is a close stage"
+msgstr "U završnoj fazi"
+
+#. module: helpdesk_timesheet
 #: model:ir.model,name:helpdesk_timesheet.model_project_project
 #: model:ir.model.fields,field_description:helpdesk_timesheet.field_helpdesk_team__project_id
 #: model:ir.model.fields,field_description:helpdesk_timesheet.field_helpdesk_ticket__project_id
@@ -111,32 +116,20 @@ msgid "Project Tickets"
 msgstr "Prijave na projektu"
 
 #. module: helpdesk_timesheet
-#: model:ir.model.fields,help:helpdesk_timesheet.field_helpdesk_team__project_id
-msgid ""
-"Project to which the tickets (and the timesheets) will be linked by default."
-msgstr ""
-
-#. module: helpdesk_timesheet
 #: model:ir.model.fields,field_description:helpdesk_timesheet.field_helpdesk_ticket__task_id
 msgid "Task"
 msgstr "Zadatak"
 
 #. module: helpdesk_timesheet
+#: model:ir.model,name:helpdesk_timesheet.model_project_task_type
+msgid "Task Stage"
+msgstr "Faza zadatka"
+
+#. module: helpdesk_timesheet
 #: model:ir.model.fields,help:helpdesk_timesheet.field_helpdesk_ticket__is_closed
+#: model:ir.model.fields,help:helpdesk_timesheet.field_project_task_type__is_closed
 msgid "Tasks in this stage are considered as closed."
 msgstr "Zadaci se u ovoj fazi smatraju zatvorenima."
-
-#. module: helpdesk_timesheet
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
-#, python-format
-msgid "The project is required to track time on ticket."
-msgstr ""
-
-#. module: helpdesk_timesheet
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
-#, python-format
-msgid "The task must be in ticket's project."
-msgstr ""
 
 #. module: helpdesk_timesheet
 #: model:ir.model.fields,help:helpdesk_timesheet.field_helpdesk_ticket__task_id
@@ -166,7 +159,7 @@ msgid "Timesheet activated on Team"
 msgstr "Evidencija aktivirana na timu"
 
 #. module: helpdesk_timesheet
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
+#: code:addons/helpdesk_timesheet/models/helpdesk.py:73
 #, python-format
 msgid ""
 "Timesheet hours will not be assigned to a customer task. Set a task to "
@@ -190,7 +183,7 @@ msgid "View task."
 msgstr "Vidi zadatak."
 
 #. module: helpdesk_timesheet
-#: code:addons/helpdesk_timesheet/models/helpdesk.py:0
+#: code:addons/helpdesk_timesheet/models/helpdesk.py:76
 #, python-format
 msgid "Warning"
 msgstr "Upozorenje"

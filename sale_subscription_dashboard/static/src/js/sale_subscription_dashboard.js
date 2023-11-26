@@ -2,33 +2,19 @@ odoo.define('sale_subscription_dashboard.dashboard', function (require) {
 'use strict';
 
 var AbstractAction = require('web.AbstractAction');
+var ajax = require('web.ajax');
+var ControlPanelMixin = require('web.ControlPanelMixin');
 var core = require('web.core');
 var datepicker = require('web.datepicker');
 var Dialog = require('web.Dialog');
 var field_utils = require('web.field_utils');
 var session = require('web.session');
-var time = require('web.time');
 var utils = require('web.utils');
 var web_client = require('web.web_client');
 var Widget = require('web.Widget');
 
 var _t = core._t;
 var QWeb = core.qweb;
-
-var DATE_FORMAT = time.getLangDateFormat();
-var FORMAT_OPTIONS = {
-    // allow to decide if utils.human_number should be used
-    humanReadable: function (value) {
-        return Math.abs(value) >= 1000;
-    },
-    // with the choices below, 1236 is represented by 1.24k
-    minDigits: 1,
-    decimals: 2,
-    // avoid comma separators for thousands in numbers when human_number is used
-    formatterCallback: function (str) {
-        return str;
-    },
-};
 
 function dateToServer (date, fieldType) {
     date = date.clone().locale('en');
@@ -52,11 +38,24 @@ because of the calculation and is then rendered separately.
 */
 
 // Abstract widget with common methods
-var sale_subscription_dashboard_abstract = AbstractAction.extend({
-    jsLibs: [
-        '/web/static/lib/Chart/Chart.js',
+var sale_subscription_dashboard_abstract = AbstractAction.extend(ControlPanelMixin, {
+    cssLibs: [
+        '/web/static/lib/nvd3/nv.d3.css'
     ],
-    hasControlPanel: true,
+    jsLibs: [
+        '/web/static/lib/nvd3/d3.v3.js',
+        '/web/static/lib/nvd3/nv.d3.js',
+        '/web/static/src/js/libs/nvd3.js'
+    ],
+
+    /**
+     * Loads the libraries listed in this.jsLibs and this.cssLibs
+     *
+     * @override
+     */
+    willStart: function () {
+        return $.when(ajax.loadLibs(this), this._super.apply(this, arguments));
+    },
 
     start: function() {
         var self = this;
@@ -109,7 +108,7 @@ var sale_subscription_dashboard_abstract = AbstractAction.extend({
                 if (response.result === true) {
                     self.currency_id = response.currency_id;
                     self.filters.company_ids = company_ids;
-                    self.$('.o_content').empty();
+                    self.$el.empty();
                     self.render_dashboard();
                 } else {
                     Dialog.alert(self, response.error_message, {
@@ -180,8 +179,8 @@ var sale_subscription_dashboard_abstract = AbstractAction.extend({
             this.render_filters();
         }
 
-        Promise.resolve(def).then(function() {
-            self.updateControlPanel({
+        $.when(def).then(function() {
+            self.update_control_panel({
                 cp_content: {
                     $searchview: self.$searchview,
                     $searchview_buttons: self.$searchview_buttons,
@@ -199,7 +198,7 @@ var sale_subscription_dashboard_abstract = AbstractAction.extend({
         var def2 = this.end_picker.insertAfter($sep);
 
         var self = this;
-        return Promise.all([def1, def2]).then(function() {
+        return $.when(def1, def2).then(function() {
             self.start_picker.on('datetime_changed', self, function() {
                 if (this.start_picker.getValue()) {
                     this.end_picker.minDate(moment(this.start_picker.getValue()));
@@ -238,10 +237,10 @@ var sale_subscription_dashboard_main = sale_subscription_dashboard_abstract.exte
         'click .on_demo_templates': 'on_demo_templates',
     },
 
-    init: function(parent, action) {
-        this._super.apply(this, arguments);
+    init: function(parent, context) {
+        this._super(parent);
 
-        this.main_dashboard_action_id = action.id;
+        this.main_dashboard_action_id = context.id;
         this.start_date = moment().subtract(1, 'M').startOf('month');
         this.end_date = moment().subtract(1, 'M').endOf('month');
 
@@ -259,7 +258,7 @@ var sale_subscription_dashboard_main = sale_subscription_dashboard_abstract.exte
     willStart: function() {
         var self = this;
         return this._super().then(function() {
-            return Promise.resolve(self.fetch_data());
+            return $.when(self.fetch_data());
         });
     },
 
@@ -305,6 +304,7 @@ var sale_subscription_dashboard_main = sale_subscription_dashboard_abstract.exte
                 self.tags = result.tags;
                 self.companies = result.companies;
                 self.has_mrr = result.has_mrr;
+                self.has_def_revenues = result.has_def_revenues;
                 self.has_template = result.has_template;
                 self.sales_team = result.sales_team;
         });
@@ -314,12 +314,13 @@ var sale_subscription_dashboard_main = sale_subscription_dashboard_abstract.exte
         this.$main_dashboard = $(QWeb.render("sale_subscription_dashboard.dashboard", {
             has_mrr: this.has_mrr,
             has_template: this.has_template,
+            has_def_revenues: this.has_def_revenues,
             stat_types: _.sortBy(_.values(this.stat_types), 'prior'),
             forecast_stat_types:  _.sortBy(_.values(this.forecast_stat_types), 'prior'),
             start_date: this.start_date,
             end_date: this.end_date,
         }));
-        this.$('.o_content').append(this.$main_dashboard);
+        this.$el.append(this.$main_dashboard);
 
         var stat_boxes = this.$main_dashboard.find('.o_stat_box');
         var forecast_boxes = this.$main_dashboard.find('.o_forecast_box');
@@ -358,7 +359,7 @@ var sale_subscription_dashboard_main = sale_subscription_dashboard_abstract.exte
         this.unresolved_defs_vals = [];
         var self = this;
         _.each(this.defs, function(v, k){
-            if (v && v.state !== "resolved"){
+            if (v && v.state() !== "resolved"){
                 self.unresolved_defs_vals.push(k);
             }
         });
@@ -422,8 +423,8 @@ var sale_subscription_dashboard_detailed = sale_subscription_dashboard_abstract.
         'click .o_detailed_analysis': 'on_detailed_analysis',
     },
 
-    init: function(parent, action, options) {
-        this._super.apply(this, arguments);
+    init: function(parent, context, options) {
+        this._super(parent);
 
         this.main_dashboard_action_id = options.main_dashboard_action_id;
         this.stat_types = options.stat_types;
@@ -444,7 +445,7 @@ var sale_subscription_dashboard_detailed = sale_subscription_dashboard_abstract.
     fetch_computed_stat: function() {
 
         var self = this;
-        var rpcProm = self._rpc({
+        return self._rpc({
                 route: '/sale_subscription_dashboard/compute_stat',
                 params: {
                     stat_type: this.selected_stat,
@@ -452,20 +453,19 @@ var sale_subscription_dashboard_detailed = sale_subscription_dashboard_abstract.
                     end_date: dateToServer(this.end_date, 'date'),
                     filters: this.filters,
                 },
-            });
-        rpcProm.then(function(result) {
+            }).done(function(result) {
                 self.value = result;
         });
-        return rpcProm;
     },
 
     render_dashboard: function() {
-        var self = this;
-        Promise.resolve(
-            this.fetch_computed_stat()
-        ).then(function(){
 
-            self.$('.o_content').append(QWeb.render("sale_subscription_dashboard.detailed_dashboard", {
+        var self = this;
+        $.when(
+            this.fetch_computed_stat()
+        ).done(function(){
+
+            self.$el.append(QWeb.render("sale_subscription_dashboard.detailed_dashboard", {
                 selected_stat_values: _.findWhere(self.stat_types, {code: self.selected_stat}),
                 start_date: self.start_date,
                 end_date: self.end_date,
@@ -599,11 +599,11 @@ var sale_subscription_dashboard_detailed = sale_subscription_dashboard_abstract.
         // To get the same numbers as in the dashboard, we need to give the filters to the backend
         if (this.selected_stat === 'mrr') {
             additional_context = {
-                'search_default_subscription_end_date': moment(this.end_date).toDate(),
-                'search_default_subscription_start_date': moment(this.start_date).toDate(),
+                'search_default_asset_end_date': moment(this.end_date).toDate(),
+                'search_default_asset_start_date': moment(this.start_date).toDate(),
                 // TODO: add contract_ids as another filter
             };
-            view_xmlid = "sale_subscription_dashboard.action_move_line_entries_report";
+            view_xmlid = "sale_subscription_dashboard.action_invoice_line_entries_report";
         }
         else if (this.selected_stat === 'nrr' || this.selected_stat  === 'net_revenue') {
             // TODO: add filters
@@ -618,84 +618,66 @@ var sale_subscription_dashboard_detailed = sale_subscription_dashboard_abstract.
         if (!result.new_mrr) {
             return;  // no data, no graph, no crash
         }
-
-        var labels = result.new_mrr.map(function (point) {
-            return moment(point[0], "YYYY-MM-DD", 'en');
-        });
-        var datasets = [
+        var data_chart = [
             {
-                label: _t('New MRR'),
-                data: result.new_mrr.map(getValue),
-                borderColor: '#26b548',
-                fill: false,
+                values: result.new_mrr,
+                key: _t('New MRR'),
+                color: '#26b548',
             },
             {
-                label: _t('Churned MRR'),
-                data: result.churned_mrr.map(getValue),
-                borderColor: '#df2e28',
-                fill: false,
+                values: result.churned_mrr,
+                key: _t('Churned MRR'),
+                color: '#df2e28',
             },
             {
-                label: _t('Expansion MRR'),
-                data: result.expansion_mrr.map(getValue),
-                borderColor: '#fed049',
-                fill: false,
+                values: result.expansion_mrr,
+                key: _t('Expansion MRR'),
+                color: '#fed049',
             },
             {
-                label: _t('Down MRR'),
-                data: result.down_mrr.map(getValue),
-                borderColor: '#ffa500',
-                fill: false,
+                values: result.down_mrr,
+                key: _t('Down MRR'),
+                color: '#ffa500',
             },
             {
-                label: _t('Net New MRR'),
-                data: result.net_new_mrr.map(getValue),
-                borderColor: '#2693d5',
-                fill: false,
+                values: result.net_new_mrr,
+                key: _t('Net New MRR'),
+                color: '#2693d5',
             }
         ];
 
-        var $div_to_display = $(div_to_display).css({position: 'relative', height: '20em'});
-        $div_to_display.empty();
-        var $canvas = $('<canvas/>');
-        $div_to_display.append($canvas);
+        nv.addGraph(function() {
+            var chart = nv.models.lineChart()
+                .interpolate("monotone")
+                .x(function(d) { return getDate(d); })
+                .y(function(d) { return getValue(d); })
+                .margin({left: 100})
+                .useInteractiveGuideline(true)
+                .duration(350)
+                .showLegend(true)
+                .showYAxis(true)
+                .showXAxis(true);
 
-        var ctx = $canvas.get(0).getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: datasets,
-            },
-            options: {
-                layout: {
-                    padding: {bottom: 30},
-                },
-                maintainAspectRatio: false,
-                tooltips: {
-                    mode: 'index',
-                    intersect: false,
-                },
-                scales: {
-                    yAxes: [{
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'MRR',
-                        },
-                        type: 'linear',
-                        ticks: {
-                            callback: formatValue,
-                        },
-                    }],
-                    xAxes: [{
-                        ticks: {
-                            callback:  function (value) {
-                                return moment(value).format(DATE_FORMAT);
-                            }
-                        },
-                    }],
-                },
-            }
+            var tick_values = getPrunedTickValues(data_chart[0].values, 10);
+
+            chart.xAxis
+                .tickFormat(function(d) { return d3.time.format("%m/%d/%y")(new Date(d)); })
+                .tickValues(_.map(tick_values, function(d) {return getDate(d); }))
+                .rotateLabels(-30);
+
+            chart.yAxis
+                .axisLabel('MRR')
+                .tickFormat(function(d) { return field_utils.format.float(d);});
+
+            var svg = d3.select(div_to_display)
+                .append("svg")
+                .attr("height", '20em');
+            svg
+                .datum(data_chart)
+                .call(chart);
+            nv.utils.windowResize(chart.update);
+            return chart;
+
         });
     },
 });
@@ -707,8 +689,8 @@ var sale_subscription_dashboard_forecast = sale_subscription_dashboard_abstract.
         'change input.growth_type': 'on_growth_type_change',
     },
 
-    init: function(parent, action, options) {
-        this._super.apply(this, arguments);
+    init: function(parent, context, options) {
+        this._super(parent);
 
         this.main_dashboard_action_id = options.main_dashboard_action_id;
         this.start_date = options.start_date;
@@ -726,15 +708,15 @@ var sale_subscription_dashboard_forecast = sale_subscription_dashboard_abstract.
     willStart: function() {
         var self = this;
         return this._super().then(function() {
-            return Promise.all([
+            return $.when(
                 self.fetch_default_values_forecast('mrr'),
                 self.fetch_default_values_forecast('contracts')
-            ]);
+            );
         });
     },
 
     render_dashboard: function() {
-        this.$('.o_content').append(QWeb.render("sale_subscription_dashboard.forecast", {
+        this.$el.append(QWeb.render("sale_subscription_dashboard.forecast", {
             start_date: this.start_date,
             end_date: this.end_date,
             values: this.values,
@@ -818,64 +800,54 @@ var sale_subscription_dashboard_forecast = sale_subscription_dashboard_abstract.
     },
 
     load_chart_forecast: function(div_to_display, values) {
-        var labels = values.map(function (point) {
-            return point[0];
-        });
-        var datasets = [{
-            data: values.map(getValue),
-            backgroundColor: 'rgba(38,147,213,0.2)',
-            borderColor: 'rgba(38,147,213,0.2)',
-            borderWidth: 3,
-            pointBorderWidth: 1,
-            cubicInterpolationMode: 'monotone',
-            fill: 'origin',
-        }];
+        this.$(div_to_display).empty();
 
-        var $div_to_display = this.$(div_to_display).css({position: 'relative', height: '20em'});
-        $div_to_display.empty();
-        var $canvas = $('<canvas/>');
-        $div_to_display.append($canvas);
+        var data_chart = [
+        {
+            values: values,
+            color: '#2693d5',
+            area: true
+        },
+        ];
+        nv.addGraph(function() {
+            var chart = nv.models.lineChart()
+                .interpolate("monotone")
+                .x(function(d) { return getDate(d); })
+                .y(function(d) { return getValue(d); })
+                .forceY([0]);
+            chart
+                .margin({left: 100})
+                .useInteractiveGuideline(true)
+                .duration(350)
+                .showLegend(false)
+                .showYAxis(true)
+                .showXAxis(true);
 
-        var ctx = $canvas.get(0).getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: datasets,
-            },
-            options: {
-                layout: {
-                    padding: {bottom: 30},
-                },
-                legend: {
-                    display: false,
-                },
-                maintainAspectRatio: false,
-                tooltips: {
-                    mode: 'index',
-                    intersect: false,
-                },
-                scales: {
-                    yAxes: [{
-                        type: 'linear',
-                        ticks: {
-                            callback: formatValue,
-                        },
-                    }],
-                    xAxes: [{
-                        ticks: {
-                            callback:  function (value) {
-                                return moment(value).format(DATE_FORMAT);
-                            }
-                        },
-                    }],
-                },
-            }
+            var tick_values = getPrunedTickValues(data_chart[0].values, 10);
+
+            chart.xAxis
+                .tickFormat(function(d) { return d3.time.format("%m/%d/%y")(new Date(d)); })
+                .tickValues(_.map(tick_values, function(d) { return getDate(d); }))
+                .rotateLabels(-30);
+
+            chart.yAxis
+                .tickFormat(function(d) { return field_utils.format.float(d);});
+
+            var svg = d3.select(div_to_display)
+                .append("svg");
+
+            svg.attr("height", '20em');
+
+            svg
+                .datum(data_chart)
+                .call(chart);
+            nv.utils.windowResize(chart.update);
+            return chart;
         });
     },
 
     update_cp: function() { // Redefinition to not show anything in controlpanel for forecast dashboard
-        this.updateControlPanel({});
+        this.update_control_panel({});
     },
 });
 
@@ -917,7 +889,7 @@ var SaleSubscriptionDashboardStatBox = Widget.extend({
     willStart: function() {
         var self = this;
         return this._super().then(function() {
-            return Promise.resolve(self.compute_graph());
+            return $.when(self.compute_graph());
         });
     },
 
@@ -987,7 +959,7 @@ var SaleSubscriptionDashboardForecastBox = Widget.extend({
     willStart: function() {
         var self = this;
         return this._super().then(function() {
-            return Promise.resolve(
+            return $.when(
                 self.compute_numbers()
             );
         });
@@ -1044,9 +1016,9 @@ var sale_subscription_dashboard_salesman = sale_subscription_dashboard_abstract.
     },
 
     willStart: function() {
-        return Promise.all(
-            [this._super.apply(this, arguments),
-            this.fetch_salesmen()]
+        return $.when(
+            this._super.apply(this, arguments),
+            this.fetch_salesmen()
         );
     },
 
@@ -1063,7 +1035,7 @@ var sale_subscription_dashboard_salesman = sale_subscription_dashboard_abstract.
     },
 
     render_dashboard: function() {
-        this.$('.o_content').empty().append(QWeb.render("sale_subscription_dashboard.salesman", {
+        this.$el.empty().append(QWeb.render("sale_subscription_dashboard.salesman", {
             salesman_ids: this.salesman_ids,
             salesman: this.salesman,
             start_date: this.start_date,
@@ -1131,40 +1103,56 @@ var sale_subscription_dashboard_salesman = sale_subscription_dashboard_abstract.
         });
 
         function load_chart_mrr_salesman(div_to_display, result) {
-
-            var labels = [_t("New MRR"), _t("Churned MRR"), _t("Expansion MRR"),
-                            _t("Down MRR"),  _t("Net New MRR"), _t("NRR")];
-            var datasets = [{
-                label: _t("MRR Growth"),
-                data: [result.new, result.churn, result.up,
-                        result.down, result.net_new, result.nrr],
-                backgroundColor: ["#1f77b4","#ff7f0e","#aec7e8","#ffbb78","#2ca02c","#98df8a"],
+            var data_chart = [{
+                key: _t("MRR Growth"),
+                values: [
+                    {
+                        "label" : _t("New MRR"),
+                        "value" : result.new
+                    } ,
+                    {
+                        "label" : _t("Churned MRR"),
+                        "value" : result.churn
+                    } ,
+                    {
+                        "label" : _t("Expansion MRR"),
+                        "value" : result.up
+                    } ,
+                    {
+                        "label" : _t("Down MRR"),
+                        "value" : result.down
+                    } ,
+                    {
+                        "label" : _t("Net New MRR"),
+                        "value" : result.net_new
+                    } ,
+                    {
+                        "label" : _t("NRR"),
+                        "value" : result.nrr
+                    } ,
+                ]
             }];
 
-            var $div_to_display = $(div_to_display).css({position: 'relative', height: '16em'});
-            $div_to_display.empty();
-            var $canvas = $('<canvas/>');
-            $div_to_display.append($canvas);
+            nv.addGraph(function() {
+                var chart = nv.models.discreteBarChart()
+                    .x(function(d) { return d.label; })
+                    .y(function(d) { return d.value; })
+                    .staggerLabels(true)
+                    .showValues(true)
+                    .duration(350);
 
-            var ctx = $canvas.get(0).getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: datasets,
-                },
-                options: {
-                    layout: {
-                        padding: {bottom: 15},
-                    },
-                    legend: {
-                        display: false,
-                    },
-                    maintainAspectRatio: false,
-                    tooltips: {
-                        enabled: false,
-                    },
-                }
+                chart.tooltip.enabled(false);
+
+                var svg = d3.select(div_to_display)
+                    .append("svg")
+                    .attr("height", '20em');
+                svg
+                    .datum(data_chart)
+                    .call(chart);
+
+                nv.utils.windowResize(chart.update);
+
+                return chart;
             });
         }
     },
@@ -1190,7 +1178,7 @@ var sale_subscription_dashboard_salesman = sale_subscription_dashboard_abstract.
         this.$searchview.on('click', '.o_update_options', this.on_update_options);
 
         this.set_up_datetimepickers();
-        this.updateControlPanel({
+        this.update_control_panel({
             cp_content: {
                 $searchview: this.$searchview,
             },
@@ -1205,12 +1193,21 @@ function addLoader(selector) {
     selector.html("<div class='o_loader'>" + loader + "</div>");
 }
 
-function formatValue (value) {
-    var formatter = field_utils.format.float;
-    return formatter(value, undefined, FORMAT_OPTIONS);
+function getMinY(l) {
+    var min = Math.min.apply(Math,l.map(function(o){return o[1];}));
+    var max = Math.max.apply(Math,l.map(function(o){return o[1];}));
+    return Math.max(0, min - (max-min)/2);
 }
-
+function getDate(d) { return new Date(d[0]); }
 function getValue(d) { return d[1]; }
+function getPrunedTickValues(ticks, nb_desired_ticks) {
+    var nb_values = ticks.length;
+    var keep_one_of = Math.max(1, Math.floor(nb_values / nb_desired_ticks));
+
+    return _.filter(ticks, function(d, i) {
+        return i % keep_one_of === 0;
+    });
+}
 
 function compute_forecast_values(starting_value, projection_time, growth_type, churn, linear_growth, expon_growth) {
     var values = [];
@@ -1299,73 +1296,60 @@ function load_chart(div_to_display, key_name, result, show_legend, show_demo) {
           },
         ];
     }
-
-    var labels = result.map(function (point) {
-        return point[0];
-    });
-
-    var datasets = [{
-        label: key_name,
-        data: result.map(function (point) {
-            return point[1];
-        }),
-        backgroundColor: "rgba(38,147,213,0.2)",
-        borderColor: "rgba(38,147,213,0.8)",
-        borderWidth: 3,
-        pointBorderWidth: 1,
-        cubicInterpolationMode: 'monotone',
-        fill: 'origin',
-    }];
-
-    var $div_to_display = $(div_to_display).css({position: 'relative'});
-    if (show_legend) {
-        $div_to_display.css({height: '20em'});
-    }
-    $div_to_display.empty();
-    var $canvas = $('<canvas/>');
-    $div_to_display.append($canvas);
-
-    var ctx = $canvas.get(0).getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: datasets,
-        },
-        options: {
-            layout: {
-                padding: {bottom: 30},
-            },
-            legend: {
-                display: show_legend,
-            },
-            maintainAspectRatio: false,
-            tooltips: {
-                enabled: show_legend,
-                intersect: false,
-            },
-            scales: {
-                yAxes: [{
-                    scaleLabel: {
-                        display: show_legend,
-                        labelString: show_legend ? key_name : '',
-                    },
-                    display: show_legend,
-                    type: 'linear',
-                    ticks: {
-                        callback: field_utils.format.float,
-                    },
-                }],
-                xAxes: [{
-                    display: show_legend,
-                    ticks: {
-                        callback:  function (value) {
-                            return moment(value).format(DATE_FORMAT);
-                        }
-                    },
-                }],
-            },
+    var data_chart = [
+    {
+        values: result,
+        key: key_name,
+        color: '#2693d5',
+        area: true
+    },
+    ];
+    nv.addGraph(function() {
+        var chart = nv.models.lineChart()
+            .interpolate("monotone")
+            .forceY([getMinY(result)])
+            .x(function(d) { return getDate(d); })
+            .y(function(d) { return getValue(d); });
+        if (show_legend){
+            chart
+            .margin({left: 100})
+            .useInteractiveGuideline(true)
+            .duration(350)
+            .showLegend(true)
+            .showYAxis(true)
+            .showXAxis(true);
         }
+        else {
+            chart
+            .margin({left: 0, top: 0, bottom: 0, right: 0})
+            .useInteractiveGuideline(false)
+            .duration(350)
+            .showLegend(false)
+            .showYAxis(false)
+            .showXAxis(false)
+            .interactive(false);
+        }
+
+        var tick_values = getPrunedTickValues(data_chart[0].values, 10);
+        chart.xAxis
+            .tickFormat(function(d) { return d3.time.format(core._t.database.parameters.date_format)(new Date(d)); })
+            .tickValues(_.map(tick_values, function(d) { return getDate(d); }))
+            .rotateLabels(-30);
+
+        chart.yAxis
+            .axisLabel(key_name)
+            .tickFormat(function(d) { return field_utils.format.float(d);});
+
+        var svg = d3.select(div_to_display).append("svg");
+        if (show_legend){
+            svg.attr("height", '20em');
+        }
+        svg
+        .datum(data_chart)
+        .call(chart);
+
+        nv.utils.windowResize(chart.update);
+        return chart;
     });
 }
 

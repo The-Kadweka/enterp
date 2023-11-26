@@ -5,7 +5,7 @@
         <field name="name">Account batch payment company rule</field>
         <field name="model_id" ref="model_account_batch_payment"/>
         <field name="global" eval="True"/>
-        <field name="domain_force">['|',('journal_id.company_id','=',False),('journal_id.company_id','in', company_ids)]</field>
+        <field name="domain_force">['|',('journal_id.company_id','=',False),('journal_id.company_id','child_of',[user.company_id.id])]</field>
     </record>
 </data>
 </odoo>

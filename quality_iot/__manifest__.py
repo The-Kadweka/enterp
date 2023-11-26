@@ -9,7 +9,7 @@
     'description': """
 This module provides the link between quality steps and IoT devices. 
 """,
-    'depends': ['iot', 'quality'],
+    'depends': ['iot', 'quality_control'],
     'data': [
         'views/iot_views.xml',
     ],

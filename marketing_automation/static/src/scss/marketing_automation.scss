@@ -3,26 +3,36 @@ $o-ma-border-color: gray($o-ma-border-color-gray-value);
 // ------------------------------------------------------------------
 // Campaign Kanban
 // ------------------------------------------------------------------
+.o_ma_campaign_kanban {
+    .o_kanban_record {
+        width: 317px;
+        padding: 0px;
 
-.o_marketing_automation_campaign_kanban {
-    .o_text_brand {
-        color: $o-brand-odoo;
+        .o_ma_header {
+            padding: 4px 0px;
+            border-bottom: 1px solid $o-ma-border-color;
+            .o_ma_title {
+                font-size: 16px;
+                @include o-text-overflow;
+            }
+            .label {
+                margin-top: 2px;
+            }
+        }
+        .o_ma_counter {
+            padding: 10px 0px;
+            [class*=col-]:not(:last-child) {
+                border-right: 1px solid $o-ma-border-color;
+            }
+        }
     }
-    .o_badge_brand {
-        background: $o-brand-odoo;
-    }
-    .o_ma_campaign_header {
-        padding-bottom: 8px;
-        border-bottom: 1px solid $o-ma-border-color;
-    }
-    .o_ma_campaign_item {
-        border-right: 1px solid $o-ma-border-color;
-    }
-    .o_ma_campaign_item:last-child {
-        border-right: none;
+    &.o_kanban_grouped {
+        flex-flow: row wrap;
+        .o_kanban_record {
+            min-width: inherit;
+        }
     }
 }
-
 
 // ------------------------------------------------------------------
 // Abstract Hierarchy
@@ -45,6 +55,18 @@ $o-ma-border-color: gray($o-ma-border-color-gray-value);
     }
     .o_ma_hierarchy_readonly {
         padding: 40px 0px 0px 40px;
+    }
+    .o_ma_hierarchy_editonly {
+        position: relative;
+        background-color: #DCDADA;
+        max-width: 398px;
+        margin: 6px 0px 0px 62px;
+        padding: 3px 0px 10px 23px;
+        &:before {
+            @include o-caret-up(10px);
+            @include o-position-absolute($top: -10px, $bottom: 100%);
+            border-bottom-color: #DCDADA;
+        }
     }
     .o_ma_hierarchy_container {
         // Add new button
@@ -202,7 +224,6 @@ $o-ma-border-color: gray($o-ma-border-color-gray-value);
             }
         }
         .o_pane_graph {
-            overflow: hidden;
             > .row {
                 margin-left: 0px;
                 margin-right: 0px;
@@ -210,12 +231,20 @@ $o-ma-border-color: gray($o-ma-border-color-gray-value);
             .o_ma_graph {
                 padding: 0px;
                 .o_ma_activity_graph {
-                    height: 110px;
                     width: 100%;
-                    .o_graph_canvas_container {
-                        position: relative;
-                        top: 0px;
-                        left: 0px;
+                    height: 110px;
+                    .nvd3.nv-line .nvd3.nv-scatter .nv-groups .nv-point {
+                        stroke-opacity: 1 !important;
+                        fill: $o-ma-color-white !important;
+                        fill-opacity: 1 !important;
+                        &.hover {
+                            stroke-width: 1px !important;
+                            fill: inherit !important;
+                        }
+                    }
+                    // removed cropped circler
+                    clipPath{
+                        display: none;
                     }
                 }
                 .o_ma_chart_time {

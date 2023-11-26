@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo.tests.common import TransactionCase, tagged, Form
+from odoo.tests.common import TransactionCase, tagged
 
 
 @tagged('-standard', 'external')
@@ -28,17 +28,6 @@ class TestDeliveryUPS(TransactionCase):
         self.stock_location = self.env.ref('stock.stock_location_stock')
         self.customer_location = self.env.ref('stock.stock_location_customers')
 
-    def wiz_put_in_pack(self, picking):
-        """ Helper to use the 'choose.delivery.package' wizard
-        in order to call the '_put_in_pack' method.
-        """
-        wiz_action = picking.put_in_pack()
-        self.assertEquals(wiz_action['res_model'], 'choose.delivery.package', 'Wrong wizard returned')
-        wiz = self.env[wiz_action['res_model']].with_context(wiz_action['context']).create({
-            'delivery_packaging_id': picking.carrier_id.ups_default_packaging_id.id
-        })
-        wiz.put_in_pack()
-
     def test_01_ups_basic_flow(self):
         SaleOrder = self.env['sale.order']
 
@@ -57,18 +46,14 @@ class TestDeliveryUPS(TransactionCase):
                                                 'length': '3'})
 
         so_vals = {'partner_id': self.agrolait.id,
+                   'carrier_id': carrier.id,
                    'order_line': [(0, None, sol_vals)]}
 
         sale_order = SaleOrder.create(so_vals)
-        # I add delivery cost in Sales order
-        delivery_wizard = Form(self.env['choose.delivery.carrier'].with_context({
-            'default_order_id': sale_order.id,
-            'default_carrier_id': carrier.id
-        }))
-        choose_delivery_carrier = delivery_wizard.save()
-        choose_delivery_carrier.update_price()
-        self.assertGreater(choose_delivery_carrier.delivery_price, 0.0, "UPS delivery cost for this SO has not been correctly estimated.")
-        choose_delivery_carrier.button_confirm()
+        sale_order.get_delivery_price()
+        self.assertTrue(sale_order.delivery_rating_success, "UPS has not been able to rate this order (%s)" % sale_order.delivery_message)
+        self.assertGreater(sale_order.delivery_price, 0.0, "UPS delivery cost for this SO has not been correctly estimated.")
+        sale_order.set_delivery_line()
 
         sale_order.action_confirm()
         self.assertEquals(len(sale_order.picking_ids), 1, "The Sales Order did not generate a picking.")
@@ -113,18 +98,14 @@ class TestDeliveryUPS(TransactionCase):
                       'price_unit': self.large_desk.lst_price}
 
         so_vals = {'partner_id': self.agrolait.id,
+                   'carrier_id': carrier.id,
                    'order_line': [(0, None, sol_1_vals), (0, None, sol_2_vals)]}
 
         sale_order = SaleOrder.create(so_vals)
-        # I add delivery cost in Sales order
-        delivery_wizard = Form(self.env['choose.delivery.carrier'].with_context({
-            'default_order_id': sale_order.id,
-            'default_carrier_id': carrier.id
-        }))
-        choose_delivery_carrier = delivery_wizard.save()
-        choose_delivery_carrier.update_price()
-        self.assertGreater(choose_delivery_carrier.delivery_price, 0.0, "UPS delivery cost for this SO has not been correctly estimated.")
-        choose_delivery_carrier.button_confirm()
+        sale_order.get_delivery_price()
+        self.assertTrue(sale_order.delivery_rating_success, "UPS has not been able to rate this order (%s)" % sale_order.delivery_message)
+        self.assertGreater(sale_order.delivery_price, 0.0, "UPS delivery cost for this SO has not been correctly estimated.")
+        sale_order.set_delivery_line()
 
         sale_order.action_confirm()
         self.assertEquals(len(sale_order.picking_ids), 1, "The Sales Order did not generate a picking.")
@@ -134,11 +115,13 @@ class TestDeliveryUPS(TransactionCase):
 
         move0 = picking.move_lines[0]
         move0.quantity_done = 1.0
-        self.wiz_put_in_pack(picking)
+        picking._put_in_pack()
         move1 = picking.move_lines[1]
         move1.quantity_done = 1.0
-        self.wiz_put_in_pack(picking)
-        self.assertEquals(len(picking.move_line_ids.mapped('result_package_id')), 2, "2 packages should have been created at this point")
+        picking._put_in_pack()
+        self.assertTrue(all([po.result_package_id is not False for po in picking.move_line_ids]), "Some products have not been put in packages")
+        for p in picking.package_ids:
+            p.shipping_weight = p.with_context({'picking_id': picking.id}).weight  # we mock choose.delivery.package wizard
         self.assertGreater(picking.shipping_weight, 0.0, "Picking weight should be positive.")
 
         picking.action_done()
@@ -153,8 +136,9 @@ class TestDeliveryUPS(TransactionCase):
 
         inventory = self.env['stock.inventory'].create({
             'name': '[A1232] iPad Mini',
-            'location_ids': [(4, self.stock_location.id)],
-            'product_ids': [(4, self.iPadMini.id)],
+            'filter': 'product',
+            'location_id': self.stock_location.id,
+            'product_id': self.iPadMini.id,
         })
 
         # Set service type = 'UPS Worldwide Expedited', which is available between US to BE

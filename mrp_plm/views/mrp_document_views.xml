@@ -28,9 +28,9 @@
         <field name="mode">primary</field>
         <field name="arch" type="xml">
             <xpath expr="//separator" position="after">
-                <filter name="all" string="All" domain="['|', ('active', '=', True), ('active', '=', False)]"/>
+                <filter name="archived" string="Archived" domain="[('active','=',False)]"/>
+                <filter name="all" string="All" domain="['|', ('active','=',True), ('active','=',False)]"/>
                 <separator/>
-                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/> 
             </xpath>
         </field>
     </record>

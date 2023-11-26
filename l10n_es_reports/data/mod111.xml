@@ -34,7 +34,7 @@
             <field name="name">[01] Nº de perceptores</field>
             <field name="code">aeat_mod_111_01</field>
             <field name="parent_id" ref='mod_111_title_2'/>
-            <field name="domain" eval="[('tag_ids', 'in', [ref('l10n_es.mod_111_02'), ref('l10n_es.mod_111_03')])]"/>
+            <field name="domain" eval="[('tax_ids.tag_ids', '=', ref('l10n_es.mod_111_02')), ('tax_ids.tag_ids', '=', ref('l10n_es.mod_111_03'))]"/>
             <field name="formulas">balance = count_rows</field>
             <field name="groupby">partner_id</field>
             <field name="figure_type">no_unit</field>
@@ -47,7 +47,7 @@
             <field name="name">[02] Importe de las percepciones</field>
             <field name="code">aeat_mod_111_02</field>
             <field name="parent_id" ref='mod_111_title_2'/>
-            <field name="domain" eval="[('tag_ids', '=', ref('l10n_es.mod_111_02'))]"/>
+            <field name="domain" eval="[('tax_ids.tag_ids', '=', ref('l10n_es.mod_111_02'))]"/>
             <field name="formulas">balance = sum.balance</field>
             <field name="groupby">account_id</field>
             <field name="sequence" eval="4"/>
@@ -59,7 +59,7 @@
             <field name="name">[03] Importe de las retenciones</field>
             <field name="code">aeat_mod_111_03</field>
             <field name="parent_id" ref='mod_111_title_2'/>
-            <field name="domain" eval="[('tag_ids', '=', ref('l10n_es.mod_111_03'))]"/>
+            <field name="domain" eval="[('tax_line_id.tag_ids', '=', ref('l10n_es.mod_111_03'))]"/>
             <field name="formulas">balance = -sum.balance</field>
             <field name="groupby">account_id</field>
             <field name="sequence" eval="5"/>
@@ -80,7 +80,7 @@
             <field name="name">[04] Nº de perceptores</field>
             <field name="code">aeat_mod_111_04</field>
             <field name="parent_id" ref='mod_111_title_3'/>
-            <field name="domain" eval="[('tag_ids', 'in', [ref('l10n_es.mod_111_05'), ref('l10n_es.mod_111_06')])]"/>
+            <field name="domain" eval="[('tax_ids.tag_ids', '=', ref('l10n_es.mod_111_05')), ('tax_ids.tag_ids', '=', ref('l10n_es.mod_111_06'))]"/>
             <field name="formulas">balance = count_rows</field>
             <field name="figure_type">no_unit</field>
             <field name="groupby">partner_id</field>
@@ -93,7 +93,7 @@
             <field name="name">[05] Valor percepciones en especie</field>
             <field name="code">aeat_mod_111_05</field>
             <field name="parent_id" ref='mod_111_title_3'/>
-            <field name="domain" eval="[('tag_ids', '=', ref('l10n_es.mod_111_05'))]"/>
+            <field name="domain" eval="[('tax_ids.tag_ids', '=', ref('l10n_es.mod_111_05'))]"/>
             <field name="formulas">balance = sum.balance</field>
             <field name="groupby">account_id</field>
             <field name="sequence" eval="8"/>
@@ -105,7 +105,7 @@
             <field name="name">[06] Importe de los ingresos a cuenta</field>
             <field name="code">aeat_mod_111_06</field>
             <field name="parent_id" ref='mod_111_title_3'/>
-            <field name="domain" eval="[('tag_ids', '=', ref('l10n_es.mod_111_06'))]"/>
+            <field name="domain" eval="[('tax_line_id.tag_ids', '=', ref('l10n_es.mod_111_06'))]"/>
             <field name="formulas">balance = -sum.balance</field>
             <field name="groupby">account_id</field>
             <field name="sequence" eval="9"/>
@@ -134,7 +134,7 @@
             <field name="name">[07] Nº de perceptores</field>
             <field name="code">aeat_mod_111_07</field>
             <field name="parent_id" ref='mod_111_title_5'/>
-            <field name="domain" eval="['|', ('tag_ids', '=', ref('l10n_es.mod_111_08')), ('tag_ids', '=', ref('l10n_es.mod_111_09'))]"/>
+            <field name="domain" eval="['|', ('tax_ids.tag_ids', '=', ref('l10n_es.mod_111_08')), ('tax_ids.tag_ids', '=', ref('l10n_es.mod_111_09'))]"/>
             <field name="formulas">balance = count_rows</field>
             <field name="figure_type">no_unit</field>
             <field name="groupby">partner_id</field>
@@ -147,7 +147,7 @@
             <field name="name">[08] Importe de las percepciones</field>
             <field name="code">aeat_mod_111_08</field>
             <field name="parent_id" ref='mod_111_title_5'/>
-            <field name="domain" eval="[('tag_ids', '=', ref('l10n_es.mod_111_08'))]"/>
+            <field name="domain" eval="[('tax_ids.tag_ids', '=', ref('l10n_es.mod_111_08'))]"/>
             <field name="formulas">balance = sum.balance</field>
             <field name="groupby">account_id</field>
             <field name="sequence" eval="13"/>
@@ -159,7 +159,7 @@
             <field name="name">[09] Importe de las retenciones</field>
             <field name="code">aeat_mod_111_09</field>
             <field name="parent_id" ref='mod_111_title_5'/>
-            <field name="domain" eval="[('tag_ids', '=', ref('l10n_es.mod_111_09'))]"/>
+            <field name="domain" eval="[('tax_line_id.tag_ids', '=', ref('l10n_es.mod_111_09'))]"/>
             <field name="formulas">balance = -sum.balance</field>
             <field name="groupby">account_id</field>
             <field name="sequence" eval="14"/>

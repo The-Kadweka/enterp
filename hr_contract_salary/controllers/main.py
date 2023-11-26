@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, http, models, _, SUPERUSER_ID
+from odoo import fields, http, models, _
 
 from odoo.addons.sign.controllers.main import Sign
 from odoo.exceptions import AccessError
 from odoo.http import request
 from odoo.tools import consteq
-from odoo.tools.image import image_data_uri
 
-from werkzeug.exceptions import NotFound
 from werkzeug.wsgi import get_current_url
 
 
@@ -39,36 +37,24 @@ class SignContract(Sign):
         # Only the applicant/employee has signed
         if request_item.sign_request_id.nb_closed == 1:
             contract.active = True
+            if contract.car_id:
+                if contract.origin_contract_id and contract.origin_contract_id.car_id \
+                        and contract.origin_contract_id.car_id != contract.car_id:
+                    contract.origin_contract_id.car_id.driver_id = False
+                contract.car_id.driver_id = contract.employee_id.address_home_id
             contract.access_token_consumed = True
             if contract.applicant_id:
                 contract.applicant_id.access_token = False
-                contract.applicant_id.emp_id = contract.employee_id
-            if contract.car_id and contract.driver_id != contract.employee_id.address_home_id:
-                contract.car_id.future_driver_id = contract.employee_id.address_home_id
         # Both applicant/employee and HR responsible have signed
         if request_item.sign_request_id.nb_closed == 2:
             if contract.employee_id:
                 contract.employee_id.active = True
             if contract.employee_id.address_home_id:
                 contract.employee_id.address_home_id.active = True
-            if contract.new_car:
-                model = contract.new_car_model_id.sudo()
-                contract.car_id = request.env['fleet.vehicle'].sudo().create({
-                    'model_id': model.id,
-                    'state_id': request.env.ref('fleet.fleet_vehicle_state_new_request').id,
-                    'future_driver_id': contract.employee_id.address_home_id.id,
-                    'car_value': model.default_car_value,
-                    'co2': model.default_co2,
-                    'fuel_type': model.default_fuel_type,
-                })
-                vehicle_contract = contract.car_id.log_contracts[0]
-                vehicle_contract.recurring_cost_amount_depreciated = model.default_recurring_cost_amount_depreciated
-                vehicle_contract.cost_generated = model.default_recurring_cost_amount_depreciated
-                vehicle_contract.cost_frequency = 'no'
-                vehicle_contract.purchaser_id = contract.employee_id.address_home_id.id
-                contract.new_car = False
-                contract.new_car_model_id = False
-
+            if contract.car_id:
+                contract.car_id.active = True
+            if contract.car_id.log_contracts:
+                contract.car_id.log_contracts.write({'active': True})
 
 class website_hr_contract_salary(http.Controller):
 
@@ -87,18 +73,11 @@ class website_hr_contract_salary(http.Controller):
         if not contract_sudo.employee_id or contract_sudo.employee_id.user_id == request.env.user:
             return contract_sudo
         try:
-            contract = request.env['hr.contract'].with_context(allowed_company_ids=request.env.user.company_ids.ids).browse(contract_id)
+            contract = request.env['hr.contract'].browse(contract_id)
             contract.check_access_rights('read')
             contract.check_access_rule('read')
-            return contract_sudo
-        except:
+        except AccessError:
             return request.env['hr.contract']
-
-    def _check_access_rights(self, contract_id, token):
-        if token:
-            contract = self._check_token_validity(token)
-        else:
-            contract = self._check_employee_access_right(contract_id)
         return contract
 
     @http.route(['/salary_package/simulation/contract/<int:contract_id>'], type='http', auth="public", website=True)
@@ -112,7 +91,7 @@ class website_hr_contract_salary(http.Controller):
 
         contract = request.env['hr.contract'].sudo().browse(contract_id)
         if not contract.exists():
-            return request.render('http_routing.http_error', {'status_code': 'Oops',
+            return request.render('website.http_error', {'status_code': 'Oops',
                                                          'status_message': 'This contract has been updated, please request an updated link..'})
 
         if not request.env.user.has_group('hr_contract.group_hr_contract_manager'):
@@ -123,22 +102,22 @@ class website_hr_contract_salary(http.Controller):
                         not consteq(applicant.access_token, kw.get('token')) or \
                         applicant.access_token_end_date < fields.Date.today():
                     return request.render(
-                        'http_routing.http_error',
+                        'website.http_error',
                         {'status_code': 'Oops',
                          'status_message': 'This link is invalid. Please contact the HR Responsible to get a new one...'})
-            if contract.employee_id and not contract.employee_id.user_id and not kw.get('applicant_id'):
+            if not contract.employee_id.user_id and not kw.get('applicant_id'):
                 return request.render(
-                    'http_routing.http_error',
+                    'website.http_error',
                     {'status_code': 'Oops',
                      'status_message': 'The employee is not linked to an existing user, please contact the administrator..'})
             if contract.employee_id and contract.employee_id.user_id != request.env.user:
-                raise NotFound()
+                return request.render('website.404')
 
         if kw.get('employee_contract_id'):
             employee_contract = request.env['hr.contract'].sudo().browse(int(kw.get('employee_contract_id')))
             if not request.env.user.has_group('hr_contract.group_hr_contract_manager') and employee_contract.employee_id \
                     and employee_contract.employee_id.user_id != request.env.user:
-                raise NotFound()
+                return request.render('website.404')
 
         contract.sudo().configure_access_token()
         if not contract.employee_id:
@@ -228,29 +207,12 @@ class website_hr_contract_salary(http.Controller):
             'contract_type': contract_type,
             'job_title': job_title,
             'freeze': freeze,
-            'default_mobile': request.env['ir.default'].sudo().get('hr.contract', 'mobile'),
             'original_link': get_current_url(request.httprequest.environ)})
 
-        values.update(self._get_documents_src(contract.employee_id))
         response = request.render("hr_contract_salary.salary_package", values)
         response.flatten()
-        request.env['hr.contract'].flush()
         request.env.cr.execute('ROLLBACK TO SAVEPOINT salary')
         return response
-
-    def _get_documents_src(self, employee):
-        res = {}
-        for field in ['id_card', 'image_1920', 'driving_license', 'mobile_invoice', 'sim_card', 'internet_invoice']:
-            if employee[field]:
-                if employee[field][:7] == b'JVBERi0':
-                    img_src = "data:application/pdf;base64,%s" % (employee[field].decode())
-                else:
-                    img_src = image_data_uri(employee[field])
-                res[field] = img_src
-            else:
-                res[field] = False
-        return res
-
 
     @http.route(['/salary_package/thank_you/<int:contract_id>'], type='http', auth="public", website=True)
     def salary_package_thank_you(self, contract_id=None, **kw):
@@ -265,29 +227,44 @@ class website_hr_contract_salary(http.Controller):
         return {
             'contract': contract,
             'available_cars': request.env['fleet.vehicle'].sudo().search(
-                contract._get_available_cars_domain(contract.employee_id.address_home_id)).sorted(key=lambda car: car.total_depreciated_cost),
+                contract._get_available_cars_domain()).sorted(key=lambda car: car.total_depreciated_cost),
             'can_be_requested_models': request.env['fleet.vehicle.model'].sudo().search(
                 contract._get_possible_model_domain()).sorted(key=lambda model: model.default_total_depreciated_cost),
             'states': request.env['res.country.state'].search([]),
             'countries': request.env['res.country'].search([]),
         }
 
-    def _get_new_contract_values(self, contract, employee, advantages):
-        return {
+    def create_new_contract(self, contract, advantages, no_write=False, **kw):
+        # Generate a new contract with the current modifications
+        personal_info = advantages['personal_info']
+
+        if kw.get('employee'):
+            employee = kw.get('employee')
+        elif contract.employee_id:
+            employee = contract.employee_id
+        else:
+            employee = request.env['hr.employee'].sudo().create({
+                'name': 'Simulation Employee',
+                'active': False
+            })
+        if personal_info:
+            employee.with_context(lang=None).update_personal_info(personal_info, no_name_write=bool(kw.get('employee')))
+        new_contract = request.env['hr.contract'].sudo().new({
             'active': False,
             'name': contract.name if contract.state == 'draft' else "Package Simulation",
             'job_id': contract.job_id.id,
             'company_id': contract.company_id.id,
             'currency_id': contract.company_id.currency_id.id,
             'employee_id': employee.id,
-            'structure_type_id': contract.structure_type_id.id,
+            'struct_id': contract.struct_id.id,
             'company_car_total_depreciated_cost': contract.company_car_total_depreciated_cost,
             'wage': advantages['wage'],
             'resource_calendar_id': contract.resource_calendar_id.id,
             'transport_mode_car': advantages['transport_mode_car'],
             'transport_mode_public': advantages['transport_mode_public'],
-            'transport_mode_private_car': advantages['transport_mode_private_car'],
+            'transport_mode_others': advantages['transport_mode_others'],
             'public_transport_employee_amount': advantages['public_transport_employee_amount'],
+            'others_reimbursed_amount': advantages['others_reimbursed_amount'],
             'eco_checks': advantages['eco_checks'],
             'fuel_card': advantages['fuel_card'],
             'holidays': advantages['holidays'],
@@ -302,37 +279,14 @@ class website_hr_contract_salary(http.Controller):
             'ip_wage_rate': advantages['ip_wage_rate'],
             'contract_type': advantages['contract_type'],
             'internet': advantages['internet'],
-            'date_start': fields.Date.today().replace(day=1),
-        }
-
-    def create_new_contract(self, contract, advantages, no_write=False, **kw):
-        # Generate a new contract with the current modifications
-        personal_info = advantages['personal_info']
-
-        if kw.get('employee'):
-            employee = kw.get('employee')
-        elif contract.employee_id:
-            employee = contract.employee_id
-        else:
-            employee = request.env['hr.employee'].sudo().create({
-                'name': 'Simulation Employee',
-                'active': False,
-                'company_id': contract.company_id.id,
-            })
-        if personal_info:
-            employee.with_context(lang=None).update_personal_info(personal_info, no_name_write=bool(kw.get('employee')))
-        new_contract = request.env['hr.contract'].sudo().new(self._get_new_contract_values(contract, employee, advantages))
-
-        if advantages['has_mobile']:
-            new_contract.mobile = request.env['ir.default'].sudo().get('hr.contract', 'mobile')
-        else:
-            new_contract.mobile = 0.0
+        })
+        new_contract.set_attribute_value('mobile', advantages['has_mobile'])
+        new_contract.set_attribute_value('mobile_plus', advantages['international_communication'])
 
         if advantages['transport_mode_car']:
             if advantages['new_car']:
                 new_contract.new_car = True
                 new_contract.new_car_model_id = advantages['car_id']
-                new_contract.car_id = False
             else:
                 new_contract.new_car = False
                 new_contract.car_id = advantages['car_id']
@@ -343,6 +297,9 @@ class website_hr_contract_salary(http.Controller):
 
         if not advantages['transport_mode_public']:
             new_contract.public_transport_reimbursed_amount = 0.0
+
+        if not advantages['transport_mode_others']:
+            new_contract.others_reimbursed_amount = 0.0
 
         new_contract.wage_with_holidays = advantages['wage']
         new_contract.final_yearly_costs = advantages['final_yearly_costs']
@@ -357,9 +314,6 @@ class website_hr_contract_salary(http.Controller):
         else:
             contract = request.env['hr.contract'].sudo().create(vals)
 
-        if kw.get('no_car_creation', False):
-            return contract
-
         # Create the car after the contract to avoid losing the cache
         if advantages['transport_mode_car'] and advantages['new_car']:
             Fleet = request.env['fleet.vehicle']
@@ -371,14 +325,14 @@ class website_hr_contract_salary(http.Controller):
                 'car_value': model.default_car_value,
                 'co2': model.default_co2,
                 'fuel_type': model.default_fuel_type,
-                'company_id': contract.company_id.id,
+                'active': False,
             })
             vehicle_contract = contract.car_id.log_contracts[0]
             vehicle_contract.recurring_cost_amount_depreciated = model.default_recurring_cost_amount_depreciated
             vehicle_contract.cost_generated = model.default_recurring_cost_amount_depreciated
             vehicle_contract.cost_frequency = 'no'
             vehicle_contract.purchaser_id = employee.address_home_id.id
-
+            vehicle_contract.active = False
         return contract
 
     @http.route(['/salary_package/update_gross/'], type="json", auth="public")
@@ -386,7 +340,10 @@ class website_hr_contract_salary(http.Controller):
 
         result = {}
 
-        contract = self._check_access_rights(contract_id, token)
+        if token:
+            contract = self._check_token_validity(token)
+        else:
+            contract = self._check_employee_access_right(contract_id)
 
         new_contract = self.create_new_contract(contract, advantages)
         new_gross = new_contract._get_gross_from_employer_costs(advantages['final_yearly_costs'])
@@ -400,7 +357,10 @@ class website_hr_contract_salary(http.Controller):
     @http.route(['/salary_package/compute_net/'], type='json', auth='public')
     def compute_net(self, contract_id=None, token=None, advantages=None, **kw):
 
-        contract = self._check_access_rights(contract_id, token)
+        if token:
+            contract = self._check_token_validity(token)
+        else:
+            contract = self._check_employee_access_right(contract_id)
 
         new_contract = self.create_new_contract(contract, advantages)
         #  Update gross to keep a fixed employer cost
@@ -411,16 +371,22 @@ class website_hr_contract_salary(http.Controller):
         payslip = request.env['hr.payslip'].sudo().create({
             'employee_id': new_contract.employee_id.id,
             'contract_id': new_contract.id,
-            'struct_id': new_contract.structure_type_id.default_struct_id.id,
+            'struct_id': new_contract.struct_id.id,
             'company_id': new_contract.employee_id.company_id.id,
             'name': 'Payslip Simulation',
             'date_from': request.env['hr.payslip'].default_get(['date_from'])['date_from'],
             'date_to': request.env['hr.payslip'].default_get(['date_to'])['date_to'],
         })
 
-        payslip.with_context(salary_simulation=True, lang=None).compute_sheet()
+        for worked_days_line_vals in payslip.get_worked_day_lines(new_contract, payslip.date_from, payslip.date_to):
+            payslip.worked_days_line_ids += request.env['hr.payslip.worked_days'].sudo().new(worked_days_line_vals)
+        for inputs_line_vals in payslip.get_inputs(new_contract, payslip.date_from, payslip.date_to):
+            payslip.input_line_ids += request.env['hr.payslip.input'].sudo().new(inputs_line_vals)
+
+        payslip.compute_sheet()
 
         result = self.get_compute_results(new_contract, payslip)
+
         request.env.cr.rollback()
 
         return result
@@ -428,51 +394,58 @@ class website_hr_contract_salary(http.Controller):
     def get_compute_results(self, new_contract, payslip):
         result = {}
         result.update({
-            'BASIC': round(payslip._get_salary_line_total('BASIC'), 2),
-            'SALARY': round(payslip._get_salary_line_total('SALARY'), 2),
-            'ONSS': round(payslip._get_salary_line_total('ONSS'), 2),
-            'EMP.BONUS': round(payslip._get_salary_line_total('EmpBonus.1'), 2) or round(payslip._get_salary_line_total('EmpBonus.2'), 2),
-            'GROSS': round(payslip._get_salary_line_total('GROSS'), 2),
-            'REP.FEES': round(payslip._get_salary_line_total('REP.FEES'), 2),
-            'P.P': round(payslip._get_salary_line_total('P.P'), 2),
-            'M.ONSS': round(payslip._get_salary_line_total('M.ONSS'), 2),
-            'MEAL_V_EMP': round(payslip._get_salary_line_total('MEAL_V_EMP'), 2),
-            'ATN.CAR.2': round(payslip._get_salary_line_total('ATN.CAR.2'), 2),
-            'CAR.PRIV': round(payslip._get_salary_line_total('CAR.PRIV'), 2),
-            'ATN.INT.2': round(payslip._get_salary_line_total('ATN.INT.2'), 2),
-            'ATN.MOB.2': round(payslip._get_salary_line_total('ATN.MOB.2'), 2),
-            'NET': round(payslip._get_salary_line_total('NET'), 2),
+            'BASIC': round(payslip.get_salary_line_total('BASIC'), 2),
+            'SALARY': round(payslip.get_salary_line_total('SALARY'), 2),
+            'ONSS': round(payslip.get_salary_line_total('ONSS'), 2),
+            'EMP.BONUS': round(payslip.get_salary_line_total('EmpBonus.1'), 2) or round(payslip.get_salary_line_total('EmpBonus.2'), 2),
+            'GROSS': round(payslip.get_salary_line_total('GROSS'), 2),
+            'REP.FEES': round(payslip.get_salary_line_total('REP.FEES'), 2),
+            'P.P': round(payslip.get_salary_line_total('P.P'), 2),
+            'PP.RED': round(
+                payslip.get_salary_line_total('Ch.A') +
+                payslip.get_salary_line_total('Red.Iso') +
+                payslip.get_salary_line_total('Red.Iso.Par') +
+                payslip.get_salary_line_total('Red.Dis') +
+                payslip.get_salary_line_total('Red.Seniors') +
+                payslip.get_salary_line_total('Red.Juniors') +
+                payslip.get_salary_line_total('Sp.handicap') +
+                payslip.get_salary_line_total('Red.Spouse.Net') +
+                payslip.get_salary_line_total('Red.Spouse.Oth.Net'), 2),
+            'M.ONSS': round(payslip.get_salary_line_total('M.ONSS.1'), 2) or round(payslip.get_salary_line_total('M.ONSS.2'), 2),
+            'MEAL_V_EMP': round(payslip.get_salary_line_total('MEAL_V_EMP'), 2),
+            'ATN.CAR.2': round(payslip.get_salary_line_total('ATN.CAR.2'), 2),
+            'ATN.INT.2': round(payslip.get_salary_line_total('ATN.INT.2'), 2),
+            'ATN.MOB.2': round(payslip.get_salary_line_total('ATN.MOB.2'), 2),
+            'NET': round(payslip.get_salary_line_total('NET'), 2),
+            'holidays_compensation': round(new_contract.holidays_compensation, 2),
             'wage_with_holidays': round(new_contract.wage_with_holidays, 2),
-            'wage': round(new_contract.wage, 2),
             'company_car_total_depreciated_cost': round(new_contract.company_car_total_depreciated_cost, 2),
-            'thirteen_month': round(new_contract.wage_with_holidays, 2),
-            'double_holidays': round(new_contract.wage_with_holidays * 0.92, 2),
-            'IP': round(payslip._get_salary_line_total('IP'), 2),
-            'IP.DED': round(payslip._get_salary_line_total('IP.DED'), 2),
+            'thirteen_month': round(new_contract.thirteen_month, 2),
+            'double_holidays': round(new_contract.double_holidays, 2),
+            'IP': round(payslip.get_salary_line_total('IP'), 2),
+            'IP.DED': round(payslip.get_salary_line_total('IP.DED'), 2),
             'TAXED': round(
-                payslip._get_salary_line_total('NET') -
-                payslip._get_salary_line_total('IP') -
-                payslip._get_salary_line_total('IP.DED') -
-                payslip._get_salary_line_total('REP.FEES') -
-                payslip._get_salary_line_total('CAR.PRIV'), 2
-            )
+                payslip.get_salary_line_total('NET') -
+                payslip.get_salary_line_total('IP') -
+                payslip.get_salary_line_total('IP.DED') -
+                payslip.get_salary_line_total('REP.FEES'), 2)
         })
 
         transport_advantage = 0.0
         if new_contract.transport_mode_public:
             transport_advantage += new_contract.public_transport_reimbursed_amount
-        elif new_contract.transport_mode_private_car:
-            transport_advantage += new_contract.private_car_reimbursed_amount
+        elif new_contract.transport_mode_others:
+            transport_advantage += new_contract.others_reimbursed_amount
         elif new_contract.transport_mode_car:
             transport_advantage += new_contract.company_car_total_depreciated_cost
 
-        thirteen_month_net = payslip._get_salary_line_total('NET')
-        double_holidays_net = payslip._get_salary_line_total('NET') * 0.92
+        thirteen_month_net = payslip.get_salary_line_total('NET')
+        double_holidays_net = payslip.get_salary_line_total('NET') * 0.92
 
-        monthly_nature = round(transport_advantage + new_contract.internet + new_contract.mobile, 2)
+        monthly_nature = round(transport_advantage + new_contract.internet + new_contract.mobile + new_contract.mobile_plus, 2)
         monthly_cash = round(new_contract.warrant_value_employee / 12.0 + new_contract.meal_voucher_amount * 20.0 + new_contract.fuel_card, 2)
         yearly_cash = round(new_contract.eco_checks + thirteen_month_net + double_holidays_net, 2)
-        monthly_total = round(monthly_nature + monthly_cash + yearly_cash / 12.0 + payslip._get_salary_line_total('NET') - new_contract.representation_fees, 2)
+        monthly_total = round(monthly_nature + monthly_cash + yearly_cash / 12.0 + payslip.get_salary_line_total('NET') - new_contract.representation_fees, 2)
 
         result.update({
             'monthly_nature': monthly_nature,
@@ -485,11 +458,12 @@ class website_hr_contract_salary(http.Controller):
         return result
 
     @http.route(['/salary_package/onchange_mobile/'], type='json', auth='public')
-    def onchange_mobile(self, has_mobile):
-        return request.env['hr.contract'].sudo()._get_mobile_amount(has_mobile)
+    def onchange_mobile(self, contract_id, advantages, **kw):
+        amount = request.env['hr.contract'].sudo()._get_mobile_amount(advantages['has_mobile'], advantages['international_communication'])
+        return {'mobile': amount}
 
     @http.route(['/salary_package/onchange_car/'], type='json', auth='public')
-    def onchange_car(self, car_option, vehicle_id):
+    def onchange_car(self, car_option, vehicle_id, **kw):
         if car_option == "new":
             vehicle = request.env['fleet.vehicle.model'].sudo().browse(vehicle_id)
             co2 = vehicle.default_co2
@@ -505,16 +479,16 @@ class website_hr_contract_salary(http.Controller):
         return {'co2': co2, 'fuel_type': fuel_type, 'door_number': door_number, 'odometer': odometer, 'immatriculation': immatriculation}
 
     @http.route(['/salary_package/onchange_public_transport/'], type='json', auth='public')
-    def onchange_public_transport(self, public_transport_employee_amount):
-        return round(request.env['hr.contract'].sudo()._get_public_transport_reimbursed_amount(public_transport_employee_amount), 2)
-
-    @http.route(['/salary_package/onchange_km_home_work/'], type='json', auth='public')
-    def onchange_home_company_distance(self, distance):
-        return round(request.env['hr.contract']._get_private_car_reimbursed_amount(distance), 2)
+    def onchange_public_transport(self, contract_id, advantages, **kw):
+        amount = request.env['hr.contract'].sudo()._get_public_transport_reimbursed_amount(advantages['public_transport_employee_amount'])
+        return {'amount': round(amount, 2)}
 
     @http.route(['/salary_package/send_email/'], type='json', auth='public')
     def send_email(self, contract_id=None, token=None, advantages=None, **kw):
-        contract = self._check_access_rights(contract_id, token)
+        if token:
+            contract = self._check_token_validity(token)
+        else:
+            contract = self._check_employee_access_right(contract_id)
 
         car_name = model_name = False
         if advantages['transport_mode_car']:
@@ -523,8 +497,8 @@ class website_hr_contract_salary(http.Controller):
             else:
                 model_name = request.env['fleet.vehicle.model'].sudo().browse(advantages['car_id']).name
 
-        if advantages['personal_info']['country_id']:
-            nationality_name = request.env['res.country'].sudo().browse(advantages['personal_info']['country_id']).name
+        if advantages['personal_info']['nationality']:
+            nationality_name = request.env['res.country'].sudo().browse(advantages['personal_info']['nationality']).name
         else:
             nationality_name = ''
 
@@ -532,6 +506,7 @@ class website_hr_contract_salary(http.Controller):
             country_of_birth_name = request.env['res.country'].sudo().browse(advantages['personal_info']['country_of_birth']).name
         else:
             country_of_birth_name = ''
+
         values = {
             'contract': contract,
             'advantages': advantages,
@@ -558,7 +533,6 @@ class website_hr_contract_salary(http.Controller):
                 'subject': '[%s] New salary package request' % (advantages['personal_info']['name']),
                 'body_html': body,
                 'email_from': advantages['personal_info']['email'] or '',
-                'author_id': False,
                 'email_to': contract.hr_responsible_id.email,
             })
 
@@ -566,13 +540,10 @@ class website_hr_contract_salary(http.Controller):
 
     @http.route(['/salary_package/submit/'], type='json', auth='public')
     def submit(self, contract_id=None, token=None, advantages=None, **kw):
-        contract = self._check_access_rights(contract_id, token)
-
-        if advantages['transport_mode_car'] and not advantages['new_car'] and advantages.get('car_id'):
-            car = request.env['fleet.vehicle'].sudo().browse(int(advantages['car_id']))
-            available_cars = request.env['fleet.vehicle'].sudo().search(contract._get_available_cars_domain(contract.employee_id.address_home_id))
-            if car not in available_cars and car.future_driver_id and car.future_driver_id != contract.employee_id.address_home_id:
-                return {'error': 1, 'error_msg': _('Unfortunately the car you have selected is not available anymore. Please choose another one.')}
+        if token:
+            contract = self._check_token_validity(token)
+        else:
+            contract = self._check_employee_access_right(contract_id)
 
         self.send_email(contract_id=contract_id, token=token, advantages=advantages, **kw)
 
@@ -581,7 +552,6 @@ class website_hr_contract_salary(http.Controller):
             if contract.employee_id.user_id == request.env.user:
                 kw['employee'] = contract.employee_id
 
-        kw['no_car_creation'] = True
         new_contract = self.create_new_contract(contract, advantages, no_write=True, **kw)
 
         # Create new car in waiting list if more than max_unused_cars available cars
@@ -590,12 +560,12 @@ class website_hr_contract_salary(http.Controller):
             car = request.env['fleet.vehicle'].sudo().create({
                 'model_id': advantages['waiting_list_model'],
                 'state_id': request.env.ref('hr_contract_salary.fleet_vehicle_state_waiting_list').id,
+                'driver_id': new_contract.employee_id.address_home_id.id,
                 'car_value': model.default_car_value,
                 'co2': model.default_co2,
                 'fuel_type': model.default_fuel_type,
                 'acquisition_date': new_contract.car_id.acquisition_date or fields.Date.today()
             })
-
             vehicle_contract = car.log_contracts[0]
             vehicle_contract.recurring_cost_amount_depreciated = model.default_recurring_cost_amount_depreciated
             vehicle_contract.cost_generated = model.default_recurring_cost_amount_depreciated
@@ -621,16 +591,11 @@ class website_hr_contract_salary(http.Controller):
         if not new_contract.hr_responsible_id:
             return {'error': 1, 'error_msg': _('No HR responsible defined on the job position. Please contact an administrator.')}
 
-        if not request.env.user.email_formatted:
-            sign_request = request.env['sign.request'].with_user(SUPERUSER_ID)
-        else:
-            sign_request = request.env['sign.request'].sudo()
-
-        res = sign_request.initialize_new(
+        res = request.env['sign.request'].sudo().initialize_new(
             sign_template.id,
             [
                 {'role': request.env.ref('sign.sign_item_role_employee').id, 'partner_id': new_contract.employee_id.address_home_id.id},
-                {'role': request.env.ref('hr_contract_sign.sign_item_role_job_responsible').id, 'partner_id': new_contract.hr_responsible_id.partner_id.id}
+                {'role': request.env.ref('hr_contract_salary.sign_item_role_job_responsible').id, 'partner_id': new_contract.hr_responsible_id.partner_id.id}
             ],
             [new_contract.hr_responsible_id.partner_id.id],
             'Signature Request - ' + new_contract.name,
@@ -650,6 +615,8 @@ class website_hr_contract_salary(http.Controller):
                     new_value = new_value[elem]
                 else:
                     new_value = ''
+                if elem == 'holidays':
+                    new_value = new_value - 20.0
                 if elem == 'car' and new_contract.transport_mode_car:
                     if not new_contract.new_car and new_contract.car_id:
                         new_value = new_contract.car_id.model_id.name
@@ -660,15 +627,10 @@ class website_hr_contract_salary(http.Controller):
             if isinstance(new_value, float):
                 new_value = round(new_value, 2)
             if new_value or (new_value == 0.0):
-                sign_request_item_id = http.request.env['sign.request.item'].sudo().search([
-                    ('sign_request_id', '=', res['id']),
-                    ('role_id', '=', item.responsible_id.id)
-                ])
-                request.env['sign.request.item.value'].sudo().create({
+                request.env['sign.item.value'].sudo().create({
                     'sign_item_id': item.id,
                     'sign_request_id': res['id'],
                     'value': new_value,
-                    'sign_request_item_id': sign_request_item_id.id
                 })
 
         sign_request = request.env['sign.request'].browse(res['id']).sudo()

@@ -10,17 +10,12 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
     var Class = require('web.Class');
     var utils = require('web.utils');
     var PosBaseWidget = require('point_of_sale.BaseWidget');
-    var SplitbillScreenWidget = require('pos_restaurant.splitbill').SplitbillScreenWidget;
-    var floors = require('pos_restaurant.floors');
-    var rpc = require('web.rpc');
 
     var _t      = core._t;
     var round_pr = utils.round_precision;
-    var QWeb = core.qweb;
 
     var orderline_super = models.Orderline.prototype;
     models.Orderline = models.Orderline.extend({
-        // Let the user set the quantity of product with UOM different of unit because we can't reduce it without negative quantity.
         // generates a table of the form
         // {..., 'char_to_translate': translation_of_char, ...}
         _generate_translation_table: function () {
@@ -165,38 +160,33 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
             }
         },
 
-       get_vat_letter: function () {
-            if(this.pos.config.blackbox_pos_production_id) {
-                var taxes = this.get_taxes()[0];
-                taxes = this._map_tax_fiscal_position(taxes);
-                var line_name = this.get_product().display_name;
+        get_vat_letter: function () {
+            var taxes = this.get_taxes()[0];
+            taxes = this._map_tax_fiscal_position(taxes);
+            var line_name = this.get_product().display_name;
 
-                 if (!taxes) {
-                    if (this.pos.gui.popup_instances.error) {
-                        this.pos.gui.show_popup("error", {
-                            'title': _t("POS error"),
-                            'body': _t("Product has no tax associated with it."),
-                        });
+            if (! taxes) {
+                this.pos.gui.show_popup("error", {
+                    'title': _t("POS error"),
+                    'body':  _t("Product has no tax associated with it."),
+                });
 
-                         return false;
-                    }
-                }
-
-                var vat_letter = taxes[0].identification_letter;
-                if (!vat_letter) {
-                    if (this.pos.gui.popup_instances.error) {
-                        this.pos.gui.show_popup("error", {
-                            'title': _t("POS error"),
-                            'body': _t("Product has an invalid tax amount. Only 21%, 12%, 6% and 0% are allowed."),
-                        });
-
-                        return false;
-                    }
-                }
+                return false;
             }
 
-         return vat_letter;
-    },
+            var vat_letter = taxes.identification_letter;
+
+            if (! vat_letter) {
+                this.pos.gui.show_popup("error", {
+                    'title': _t("POS error"),
+                    'body':  _t("Product has an invalid tax amount. Only 21%, 12%, 6% and 0% are allowed."),
+                });
+
+                return false;
+            }
+
+            return vat_letter;
+        },
 
         generate_plu_line: function () {
             // |--------+-------------+-------+-----|
@@ -220,11 +210,13 @@ odoo.define('pos_blackbox_be.pos_blackbox_be', function (require) {
 
             return amount + description + price_in_eurocent + vat_letter;
         },
-        can_be_merged_with: function(orderline) {
-            var res = orderline_super.can_be_merged_with.apply(this, arguments);
-            if(this.pos.config.blackbox_pos_production_id && this.blackbox_pro_forma_finalized || this.quantity < 0)
+
+        can_be_merged_with: function (orderline, ignore_blackbox_finalized) {
+            if (! ignore_blackbox_finalized && (this.blackbox_pro_forma_finalized || orderline.blackbox_pro_forma_finalized)) {
                 return false;
-            return res;
+            } else {
+                return orderline_super.can_be_merged_with.apply(this, arguments);
+            }
         },
 
         _show_finalized_error: function () {
@@ -251,12 +243,13 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             }
         },
 
-        set_quantity: function (quantity, keep_price) {
+        set_quantity: function (quantity, no_decrease) {
             var current_quantity = this.get_quantity();
             var future_quantity = parseFloat(quantity) || 0;
-            if (this.pos.config.blackbox_pos_production_id && keep_price && (future_quantity === 0 || future_quantity < current_quantity)) {
+
+            if (no_decrease && (future_quantity === 0 || future_quantity < current_quantity)) {
                 this.pos.gui.show_popup("number", {
-                    'title': _((current_quantity > 0? "Decrease": "Increase") + " the quantity by"),
+                    'title': _t("Decrease the quantity by"),
                     'confirm': function (qty_decrease) {
                         if (qty_decrease) {
                             var order = this.pos.get_order();
@@ -264,10 +257,11 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                             qty_decrease = qty_decrease.replace(_t.database.parameters.decimal_point, '.');
                             qty_decrease = parseFloat(qty_decrease, 10);
 
-                            if(selected_orderline.product.uom_id[1] === "Units")
-                                qty_decrease = parseInt(qty_decrease, 10);
-
-                             var current_total_quantity_remaining = selected_orderline.get_quantity();
+                            // We have to prevent taking back more than what was on the order. The
+                            // right way to do this is by "merging" all the orderlines that we can
+                            // with this one (including previous decreases). Then we can figure out
+                            // how much the POS user can still decrease by.
+                            var current_total_quantity_remaining = selected_orderline.get_quantity();
                             order.get_orderlines().forEach(function (orderline, index, array) {
                                 if (selected_orderline.id != orderline.id &&
                                     selected_orderline.get_product().id === orderline.get_product().id &&
@@ -276,7 +270,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                                 }
                             });
 
-                            if (current_quantity > 0 && qty_decrease > current_total_quantity_remaining) {
+                            if (qty_decrease > current_total_quantity_remaining) {
                                 this.pos.gui.show_popup("error", {
                                     'title': _t("Order error"),
                                     'body':  _t("Not allowed to take back more than was ordered."),
@@ -284,7 +278,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                             } else {
                                 var decrease_line = order.get_selected_orderline().clone();
                                 decrease_line.order = order;
-                                decrease_line.set_quantity(current_quantity > 0? -qty_decrease: qty_decrease);
+                                decrease_line.set_quantity(-qty_decrease);
                                 order.add_orderline(decrease_line);
                             }
                         }
@@ -382,11 +376,11 @@ can no longer be modified. Please create a new line with eg. a negative quantity
 
             if (this.blackbox_pos_receipt_time) {
                 var DEFAULT_SERVER_DATETIME_FORMAT = "YYYY-MM-DD HH:mm:ss";
-                var original_zone = this.blackbox_pos_receipt_time.utcOffset();
+                var original_zone = this.blackbox_pos_receipt_time.zone();
 
-                this.blackbox_pos_receipt_time.utcOffset(0); // server expects UTC
+                this.blackbox_pos_receipt_time.zone(0); // server expects UTC
                 to_return['blackbox_pos_receipt_time'] = this.blackbox_pos_receipt_time.format(DEFAULT_SERVER_DATETIME_FORMAT);
-                this.blackbox_pos_receipt_time.utcOffset(original_zone);
+                this.blackbox_pos_receipt_time.zone(original_zone);
             }
 
             return to_return;
@@ -413,17 +407,22 @@ can no longer be modified. Please create a new line with eg. a negative quantity
 
         // don't allow to add products without a vat letter
         add_product: function (product, options) {
-            if (this.pos.config.blackbox_pos_production_id && !this.pos.check_if_user_clocked() && product !== this.pos.work_in_product) {
+            if (this.pos.pos_session.work_status === 'work_in' && product !== this.pos.work_in_product) {
                 this.pos.gui.show_popup("error", {
                     'title': _t("POS error"),
                     'body':  _t("Session is not initialized yet. Register a Work In event first."),
                 });
-            } else if (this.pos.config.blackbox_pos_production_id && product.taxes_id.length === 0) {
+            } else if (this.pos.pos_session.work_status === 'work_out') {
+                this.pos.gui.show_popup("error", {
+                    'title': _t("POS error"),
+                    'body':  _t("Session has been Worked Out. Open a new session to keep selling."),
+                });
+            } else if (product.taxes_id.length === 0) {
                 this.pos.gui.show_popup("error", {
                     'title': _t("POS error"),
                     'body':  _t("Product has no tax associated with it."),
                 });
-            } else if (this.pos.config.blackbox_pos_production_id && !this.pos.taxes_by_id[product.taxes_id[0]].identification_letter) {
+            } else if (! this.pos.taxes_by_id[product.taxes_id[0]].identification_letter) {
                 this.pos.gui.show_popup("error", {
                     'title': _t("POS error"),
                     'body':  _t("Product has an invalid tax amount. Only 21%, 12%, 6% and 0% are allowed."),
@@ -515,12 +514,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
 
         set_validation_time: function () {
             this.blackbox_pos_receipt_time = moment();
-        },
-        wait_for_push_order: function () {
-            var result = order_model_super.wait_for_push_order.apply(this,arguments);
-            result = Boolean(this.pos.config.blackbox_pos_production_id || result);
-            return result;
-        },
+        }
     });
 
     var FDMPacketField = Class.extend({
@@ -580,7 +574,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
 
     gui.Gui.include({
         show_screen: function(screen_name, params, refresh) {
-            if (screen_name === "receipt") {
+            if (screen_name === "receipt" || screen_name === "bill") {
                 var order = this.pos.get_order();
                 if (order && order.blackbox_signature && order.blackbox_signature.toLowerCase().match(/[a-z]/)) {
                     this._super(screen_name, params, refresh);
@@ -592,17 +586,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
 
         close: function () {
             // send a PS when closing the POS
-            if (this.pos.check_if_user_clocked()) {
-                this.pos.gui.show_popup("error", {
-                    'title': _t("POS error"),
-                    'body':  _t("You need to clock out before closing the POS."),
-                });
-                this.chrome.widget.close_button.$el.removeClass('confirm');
-                this.chrome.widget.close_button.$el.text(_t('Close'));
-                this.chrome.widget.close_button.confirmed = false;
-            } else {
-                this._super();
-            }
+            this.pos._push_pro_forma().always(this._super.bind(this));
         }
     });
 
@@ -808,24 +792,16 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             return amount;
         },
 
-        _get_insz_or_bis_number: function() {
-            var insz = this.pos.user.insz_or_bis_number;
-            if (! insz) {
+        // todo jov: p77
+        _build_fdm_hash_and_sign_request: function (order) {
+            var packet = this.build_request("H");
+            var insz_or_bis_number = this.pos.get_cashier().insz_or_bis_number;
+
+            if (! insz_or_bis_number) {
                 this.pos.gui.show_popup('error',{
                     'title': _t("Fiscal Data Module error"),
                     'body': _t("INSZ or BIS number not set for current cashier."),
                 });
-                return false;
-            }
-            return insz;
-        },
-
-        // todo jov: p77
-        _build_fdm_hash_and_sign_request: function (order) {
-            var packet = this.build_request("H");
-            var insz_or_bis_number = this._get_insz_or_bis_number();
-
-            if (! insz_or_bis_number) {
                 return false;
             }
 
@@ -858,111 +834,98 @@ can no longer be modified. Please create a new line with eg. a negative quantity
 
         _show_could_not_connect_error: function (reason) {
             var body = _t("Could not connect to the Fiscal Data Module.");
-            var self = this;
             if (reason) {
                 body = body + ' ' + reason;
             }
-            setTimeout(function(){self.pos.gui.close()}, 5000);
             this.pos.gui.show_popup("blocking-error", {
                 'title': _t("Fiscal Data Module error"),
                 'body':  body,
             });
         },
 
-        _verify_pin: function (data) {
-            if (!data.value) {
-                this._show_could_not_connect_error();
-            } else {
-                var parsed_response = this.parse_fdm_pin_response(response);
-
-                 // pin being verified will show up as 'error'
-                this._handle_fdm_errors(parsed_response);
-            }
-        },
-
-        _check_and_parse_fdm_identification_response: function (resolve, reject, data) {
-            if (!data.value) {
-                this._show_could_not_connect_error();
-                return "";
-            } else {
-                var parsed_response = this.parse_fdm_identification_response(data.value);
-                if (this._handle_fdm_errors(parsed_response, true)) {
-                    resolve(parsed_response);
-                } else {
-                    reject("");
-                }
-            }
-        },
-
         request_fdm_identification: function () {
             var self = this;
-            var fdm = this.pos.iot_device_proxies.fiscal_data_module;
-            return new Promise(function (resolve, reject) {
-                fdm.add_listener(self._check_and_parse_fdm_identification_response.bind(self, resolve, reject));
-                fdm.action({
-                    action: 'request',
-                    high_level_message: self._build_fdm_identification_request().to_string(),
-                    response_size: 59
-                });
+
+            return this.message('request_blackbox', {
+                'high_level_message': self._build_fdm_identification_request().to_string(),
+                'response_size': 59
+            }, {timeout: 5000}).then(function (response) {
+                if (! response) {
+                    self._show_could_not_connect_error();
+                    return "";
+                } else {
+                    var parsed_response = self.parse_fdm_identification_response(response);
+
+                    if (self._handle_fdm_errors(parsed_response, true)) {
+                        return parsed_response;
+                    } else {
+                        return "";
+                    }
+                }
             });
         },
 
         request_fdm_pin_verification: function (pin) {
             var self = this;
-            var fdm = this.pos.iot_device_proxies.fiscal_data_module;
-            fdm.add_listener(self._verify_pin.bind(self));
-            fdm.action({
-                action: 'request',
-                high_level_message: self._build_fdm_pin_request(pin).to_string(),
-                response_size: 35
-            });
-        },
 
-        _check_and_parse_fdm_hash_and_sign_response: function (resolve, reject, hide_error, data) {
-            if (!data.value) {
-                return this._retry_request_fdm_hash_and_sign(packet, hide_error);
-            } else {
-                var parsed_response = this.parse_fdm_hash_and_sign_response(data.value);
-
-                 // close any blocking-error popup
-                this.pos.gui.close_popup();
-
-                 if (this._handle_fdm_errors(parsed_response)) {
-                    resolve(parsed_response);
+            return this.message('request_blackbox', {
+                'high_level_message': self._build_fdm_pin_request(pin).to_string(),
+                'response_size': 35
+            }, {timeout: 5000}).then(function (response) {
+                if (! response) {
+                    self._show_could_not_connect_error();
                 } else {
-                    reject("");
+                    var parsed_response = self.parse_fdm_pin_response(response);
+
+                    // pin being verified will show up as 'error'
+                    self._handle_fdm_errors(parsed_response);
                 }
-            }
+            });
         },
 
         _retry_request_fdm_hash_and_sign: function (packet, hide_error) {
             var self = this;
 
-            if (!hide_error) {
+            if (! hide_error) {
                 self._show_could_not_connect_error();
             }
 
-            return new Promise(function (resolve, reject) {
-                // rate limit the retries to 1 every 2 sec
-                // because the blackbox freaks out if we send messages too fast
-                setTimeout(function () {
-                    resolve();
-                }, 5000);
-            }).then(function () {
+            var delayed_request_hash_and_sign = new $.Deferred();
+
+            // rate limit the retries to 1 every 2 sec
+            // because the blackbox freaks out if we send messages too fast
+            setTimeout(function () {
+                delayed_request_hash_and_sign.resolve();
+            }, 5000);
+
+            return delayed_request_hash_and_sign.then(function () {
                 return self.request_fdm_hash_and_sign(packet, "hide error");
             });
         },
 
         request_fdm_hash_and_sign: function (packet, hide_error) {
             var self = this;
-            var fdm = this.pos.iot_device_proxies.fiscal_data_module;
-            return new Promise(function (resolve, reject) {
-                fdm.add_listener(self._check_and_parse_fdm_hash_and_sign_response.bind(self, resolve, reject, hide_error));
-                fdm.action({
-                    action: 'request',
-                    high_level_message: packet.to_string(),
-                    response_size: 109
-                });
+
+            return this.message('request_blackbox', {
+                'high_level_message': packet.to_string(),
+                'response_size': 109
+            }, {timeout: 5000}).then(function (response) {
+                if (! response) {
+                    return self._retry_request_fdm_hash_and_sign(packet, hide_error);
+                } else {
+                    var parsed_response = self.parse_fdm_hash_and_sign_response(response);
+
+                    // close any blocking-error popup
+                    self.pos.gui.close_popup();
+
+                    if (self._handle_fdm_errors(parsed_response)) {
+                        return parsed_response;
+                    } else {
+                        return "";
+                    }
+                }
+            }, function () {
+                return self._retry_request_fdm_hash_and_sign(packet, hide_error);
             });
         }
     });
@@ -1106,33 +1069,44 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                 });
 
                 return false;
+            } else if (this.pos_session.forbidden_modules_installed) {
+                this.gui.show_popup("error", {
+                    'title': _t("Fiscal Data Module error"),
+                    'body':  _t("The reprint and discount module are not allowed to be installed with the Fiscal Data Module."),
+                });
+
+                return false;
             }
 
             return true;
         },
 
-        _check_iotbox_serial: function (data) {
+        connect_to_proxy: function () {
             var self = this;
-            if (!data.value) {
-                this.proxy._show_could_not_connect_error(_t("Unreachable FDM"));
-            } else if (data.value != this.config.blackbox_pos_production_id.toUpperCase()) {
-                this.proxy._show_could_not_connect_error(
-                    _t("Incorrect Iot Box certified number") + ' ' + this.config.blackbox_pos_production_id.toUpperCase()
-                );
-            } else {
-                this.chrome.ready.then(function () {
-                    $(self.chrome.$el).find('.placeholder-posVersion').text(' Ver: ' + self.version.server_version + "3101BE_FDM");
-                    var current = $(self.chrome.$el).find('.placeholder-posID').text();
-                    $(self.chrome.$el).find('.placeholder-posID').text(' ID: ' + self.config.blackbox_pos_production_id);
+            return posmodel_super.connect_to_proxy.apply(this, arguments).then(function () {
+                self.proxy.message('request_serial', {}, {timeout: 5000}).then(function (response) {
+                    if (! response) {
+                        self.proxy._show_could_not_connect_error(_t("Unreachable FDM"));
+                    } else if ("BODO001" + response.toUpperCase() != self.config.blackbox_pos_production_id.toUpperCase()) {
+                        self.proxy._show_could_not_connect_error(
+                            _t("Incorrect PosBox serial")+' '+self.config.blackbox_pos_production_id.toUpperCase()
+                        );
+                    } else {
+                        self.chrome.ready.then(function () {
+                            $(self.chrome.$el).find('.placeholder-posVersion').text(' Ver: ' + self.version.server_version + "1807BE_FDM");
+                            var current = $(self.chrome.$el).find('.placeholder-posID').text();
+                            $(self.chrome.$el).find('.placeholder-posID').text(' ID: ' + self.config.blackbox_pos_production_id);
+                        });
+                    }
                 });
-            }
+            });
         },
 
         push_order_to_blackbox: function (order) {
             var self = this;
 
             if (! this._check_validation_constraints()) {
-                return Promise.reject();
+                return new $.Deferred().reject();
             }
 
             order.set_validation_time();
@@ -1141,90 +1115,91 @@ can no longer be modified. Please create a new line with eg. a negative quantity
 
             var packet = this.proxy._build_fdm_hash_and_sign_request(order);
             if (!packet) {
-                return Promise.reject();
+                return new $.Deferred().reject();
             }
-            var prom = this.proxy.request_fdm_hash_and_sign(packet).then(function (parsed_response) {
-                return new Promise(function (resolve, reject) {
-                    if (parsed_response) {
-                        // put fields that we need on tickets on order
-                        order.blackbox_order_name = self.config.name + "/" + self.config.backend_sequence_number;
-                        order.blackbox_date = self._prepare_date_for_ticket(parsed_response.date);
-                        order.blackbox_time = self._prepare_time_for_ticket(parsed_response.time);
-                        order.blackbox_ticket_counters =
+            var def = this.proxy.request_fdm_hash_and_sign(packet).then(function (parsed_response) {
+                var def = new $.Deferred();
+
+                if (parsed_response) {
+                    // put fields that we need on tickets on order
+                    order.blackbox_order_name = self.config.name + "/" + self.config.backend_sequence_number;
+                    order.blackbox_date = self._prepare_date_for_ticket(parsed_response.date);
+                    order.blackbox_time = self._prepare_time_for_ticket(parsed_response.time);
+                    order.blackbox_ticket_counters =
                         self._prepare_ticket_counter_for_ticket(parsed_response.vsc_ticket_counter,
                                                                 parsed_response.vsc_total_ticket_counter,
                                                                 parsed_response.event_label);
-                        order.blackbox_signature = parsed_response.signature;
-                        order.blackbox_vsc_identification_number = parsed_response.vsc_identification_number;
-                        order.blackbox_unique_fdm_production_number = parsed_response.fdm_unique_production_number;
-                        order.blackbox_plu_hash = self._prepare_hash_for_ticket(packet.fields[packet.fields.length - 1].content);
-                        order.blackbox_pos_version = "Odoo " + self.version.server_version + "3101BE_FDM";
-                        order.blackbox_pos_production_id = self.config.blackbox_pos_production_id;
-                        order.blackbox_terminal_id = self.blackbox_terminal_id;
+                    order.blackbox_signature = parsed_response.signature;
+                    order.blackbox_vsc_identification_number = parsed_response.vsc_identification_number;
+                    order.blackbox_unique_fdm_production_number = parsed_response.fdm_unique_production_number;
+                    order.blackbox_plu_hash = self._prepare_hash_for_ticket(packet.fields[packet.fields.length - 1].content);
+                    order.blackbox_pos_version = "Odoo " + self.version.server_version + "1807BE_FDM";
+                    order.blackbox_pos_production_id = self.config.blackbox_pos_production_id;
+                    order.blackbox_terminal_id = self.blackbox_terminal_id;
 
-                        self.config.blackbox_most_recent_hash = self._prepare_hash_for_ticket(Sha1.hash(self.config.blackbox_most_recent_hash + order.blackbox_plu_hash));
-                        order.blackbox_hash_chain = self.config.blackbox_most_recent_hash;
+                    self.config.blackbox_most_recent_hash = self._prepare_hash_for_ticket(Sha1.hash(self.config.blackbox_most_recent_hash + order.blackbox_plu_hash));
+                    order.blackbox_hash_chain = self.config.blackbox_most_recent_hash;
 
-
-                        resolve();
-                    } else {
-                        reject();
+                    if (! order.blackbox_pro_forma) {
+                        self.gui.show_screen('receipt');
                     }
-                });
+
+                    return def.resolve();
+                } else {
+                    return def.reject();
+                }
             });
 
-            return prom;
+            return def;
         },
 
-        push_order: function (order, opts) {
-            if (this.config.blackbox_pos_production_id && order) {
-                var self = this;
-                opts = opts || {};
-                order.blackbox_pro_forma = opts.pro_forma || false;
+        // after_blackbox: function that will be executed when we have
+        // received the response from the blackbox.
+        push_order: function (order, opts, pro_forma, after_blackbox) {
+            var self = this;
+
+            if (order) {
+                order.blackbox_pro_forma = pro_forma || false;
+
+                // split discount lines
+                this._split_discount_lines();
 
                 return this.push_order_to_blackbox(order).then(function () {
-                    order.get_orderlines().forEach(function (current, index, array) {
-                        delete current.blackbox_pro_forma_finalized;
-                    });
+                    if (after_blackbox) {
+                        after_blackbox();
+                    }
 
-                    res = posmodel_super.push_order.apply(self, [order, opts]);
-
-                    order.get_orderlines().forEach(function (current, index, array) {
-                        current.blackbox_pro_forma_finalized = true;
-                        current.trigger('change', current); // force export
-                    });
-                     return res;
+                    return posmodel_super.push_order.apply(self, [order, opts]);
                 }, function () {
-                    return Promise.reject();
+                    return new $.Deferred().reject();
                 });
             } else {
-                return posmodel_super.push_order.apply(this, arguments);
+                return posmodel_super.push_order.apply(self, arguments);
             }
         },
 
-        push_and_invoice_order: async function (order) {
-            if(this.config.blackbox_pos_production_id) {
-                var self = this;
+        push_and_invoice_order: function (order) {
+            var self = this;
+            var invoiced = new $.Deferred();
 
-                // these will never be sent as pro_forma
-                order.blackbox_pro_forma = false;
+            // these will never be sent as pro_forma
+            order.blackbox_pro_forma = false;
 
-                // this is a duplicate test from _super(), it is necessary
-                // because we do not want to send orders to the blackbox
-                // which will not be sent to the backend
-                if(! order.get_client()) {
-                    return Promise.reject({code:400, message:'Missing Customer', data:{}});
-                }
-                try {
-                    await self.push_order_to_blackbox(order);
-                    return await posmodel_super.push_and_invoice_order.apply(self, [order]);
-                } catch(err) {
-                    return err;
-                }
-            } else {
-                return posmodel_super.push_and_invoice_order.apply(this, [order]);
+            // this is a duplicate test from _super(), it is necessary
+            // because we do not want to send orders to the blackbox
+            // which will not be sent to the backend
+            if(! order.get_client()) {
+                invoiced.reject({code:400, message:'Missing Customer', data:{}});
+                return invoiced;
             }
+
+            return this.push_order_to_blackbox(order).then(function () {
+                return posmodel_super.push_and_invoice_order.apply(self, [order]);
+            }, function () {
+                // validation failed
+            });
         },
+
 
         _push_pro_forma: function () {
             var old_order = this.get_order();
@@ -1234,8 +1209,74 @@ can no longer be modified. Please create a new line with eg. a negative quantity
             // false. Because those are 'real orders' that we already
             // handled.
             if (old_order && old_order.get_orderlines().length && old_order.blackbox_pro_forma !== false) {
-                return this.push_order(old_order, {'pro_forma': true});
+                return this.push_order(old_order, undefined, true, function () {
+                    // mark the lines that have been pro forma'd, because we won't allow to change them
+                    old_order.get_orderlines().forEach(function (current, index, array) {
+                        current.blackbox_pro_forma_finalized = true;
+                        current.trigger('change', current); // force export
+                    });
+                });
+            } else {
+                return new $.Deferred().reject();
             }
+        },
+
+        // for pos_loyalty
+        _split_discount_lines: function () {
+            var self = this;
+            var order = this.get_order();
+            var lines_to_delete = [];
+            var lines_to_add = [];
+
+            order.get_orderlines().forEach(function (line) {
+                // discount or resale
+                if (line.reward_id && line.get_price_with_tax() < 0) {
+                    var discount_line = line;
+                    lines_to_delete.push(line);
+
+                    var price_per_tax_letter = order.get_price_in_eurocent_per_tax_letter();
+
+                    // we need to filter out negative orderlines
+                    var order_total = self.get_order().get_total_with_tax_without_discounts();
+                    var discount_percentage_on_order = Math.abs(discount_line.get_price_with_tax() / order_total);
+                    var resale_quantity = discount_line.get_quantity();
+
+                    // 1. delete line
+                    // 2. re-add lines with the same product id but with modified taxes
+                    //    essentially just adding a discount_percentage_on_order% per tax
+
+                    _.forEach(_.pairs(price_per_tax_letter), function (tax) {
+                        tax[1] = tax[1] / 100; // was in eurocents
+                        if (tax[1] > 0.00001) {
+                            var percentage_of_this_tax_in_total = round_pr(tax[1] / order_total, 0.01);
+
+                            // add correct tax on product
+                            var new_line_tax = _.find(self.taxes, function (pos_tax) {
+                                return tax[0] === pos_tax.identification_letter;
+                            });
+
+                            var cloned_product = _.clone(discount_line.product);
+
+                            cloned_product.taxes_id = [new_line_tax.id];
+
+                            lines_to_add.push([cloned_product, {
+                                quantity: resale_quantity * percentage_of_this_tax_in_total,
+                                merge: false,
+                                extras: { reward_id: discount_line.reward_id },
+                            }]);
+                        }
+                    });
+                }
+            });
+
+            _.map(lines_to_delete, function (line) { self.get_order().remove_orderline(line); });
+            _.map(lines_to_add, function (line) { self.get_order().add_product.apply(self.get_order(), line); });
+        },
+
+        add_new_order: function () {
+            this._push_pro_forma();
+
+            return posmodel_super.add_new_order.apply(this, arguments);
         },
 
         set_order: function (order) {
@@ -1250,7 +1291,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
         // the PosDB because it uses a name prefix that allows
         // multiple db's per browser (in theory).
         get_blackbox_terminal_id: function () {
-            if (!localStorage.odoo_pos_blackbox_pos_production_id) {
+            if (! localStorage['odoo_pos_blackbox_pos_production_id']) {
                 // the production id needs to be 14 characters long,
                 // so we can generate a 64 bit id and encode it in
                 // base 36, which gives us a max size of 13.
@@ -1264,43 +1305,23 @@ can no longer be modified. Please create a new line with eg. a negative quantity
                     production_id = "0" + production_id;
                 }
 
-                localStorage.odoo_pos_blackbox_pos_production_id = production_id;
+                localStorage['odoo_pos_blackbox_pos_production_id'] = production_id;
             }
 
-            return localStorage.odoo_pos_blackbox_pos_production_id;
+            return localStorage['odoo_pos_blackbox_pos_production_id'];
         },
 
         after_load_server_data: function () {
             var self = this;
-
-            var fdm = this.iot_device_proxies.fiscal_data_module;
-            fdm.add_listener(self._check_iotbox_serial.bind(self));
-            setTimeout(function () {
-                fdm.action({ action: 'request_serial' });
-            }, 1500);
             // with this module we will always have to connect to the
             // proxy, regardless of user preferences
             this.config.use_proxy = true;
-            this.blackbox_terminal_id = this.get_blackbox_terminal_id() || false;
+            this.blackbox_terminal_id = this.get_blackbox_terminal_id();
 
             this.chrome.ready.then(function () {
                 var current = $(self.chrome.$el).find('.placeholder-terminalID').text();
                 $(self.chrome.$el).find('.placeholder-terminalID').text(' TID: ' + self.blackbox_terminal_id);
             });
-
-            // With pos_cache product.product isn't loaded the normal uncached way.
-            // So there are no products in pos.db when models are loaded and
-            // work_in_product / work_out_product end up unidentified.
-            if (!self.work_in_product) {
-                var products = this.db.product_by_id;
-                for (var id in products) {
-                    if (products[id].display_name === 'WORK IN') {
-                        self.work_in_product = products[id];
-                    } else if (products[id].display_name === 'WORK OUT') {
-                        self.work_out_product = products[id];
-                    }
-                }
-            }
 
             return posmodel_super.after_load_server_data.apply(this, arguments);
         },
@@ -1317,79 +1338,35 @@ can no longer be modified. Please create a new line with eg. a negative quantity
         },
 
         transfer_order_to_different_table: function () {
-            if(this.config.blackbox_pos_production_id) {
-                let currentOrder = this.get_order();
-                let newOrder = this.add_new_order();
+            var self = this;
+            var old_order = this.get_order();
+            var new_order = this.add_new_order();
+            // remove all lines of the previous order and create a new one
+            old_order.get_orderlines().forEach(function (current) {
+                var decrease_line = current.clone();
+                decrease_line.order = old_order;
+                decrease_line.set_quantity(-current.get_quantity());
+                old_order.add_orderline(decrease_line);
 
-                currentOrder.get_orderlines().forEach(currentLine => {
-                    // Add duplicate line
-                    let newLine = currentLine.clone();
-                    newLine.order = newOrder;
-                    newOrder.add_orderline(newLine);
+                var moved_line = current.clone();
+                moved_line.order = new_order;
+                new_order.add_orderline(moved_line);
+            });
 
-                    // Add line with negative quantity
-                    let decreasedLine = newLine.clone();
-                    newOrder.add_orderline(decreasedLine);
-                    decreasedLine.set_quantity(-newLine.get_quantity());
-                });
+            // save the order with canceled lines
+            posmodel_super.set_order.call(this, old_order);
+            this.push_order(old_order).then(function () {
 
-                let self = this;
-                this.push_order(newOrder).then(() => {
-                    newOrder.destroy({'reason':'abandon'});
+                posmodel_super.set_order.call(self, new_order);
+                // disable blackbox_pro_forma to avoid saving a pro forma on set_order(null) call
+                new_order.blackbox_pro_forma = false;
 
-                    self.push_order(currentOrder, {'pro_forma': true}).then(() => {
-                        currentOrder.blackbox_pro_forma = false;
-                        currentOrder.oldTable = currentOrder.table;
+                // show table selection screen
+                posmodel_super.transfer_order_to_different_table.apply(self, arguments);
+                new_order.blackbox_pro_forma = true;
+            });
 
-                        posmodel_super.set_order.call(this, currentOrder);
-                        posmodel_super.transfer_order_to_different_table.bind(this)();
-                    });
-                });
-            } else {
-                posmodel_super.transfer_order_to_different_table.bind(this)();
-            }
-         },
-
-        set_table: function(table) {
-            if(this.config.blackbox_pos_production_id) {
-                if (!table) { // no table ? go back to the floor plan, see ScreenSelector
-                    this.set_order(null);
-                } else if (this.order_to_transfer_to_different_table) {
-                    this.order_to_transfer_to_different_table.table = table;
-                    this.order_to_transfer_to_different_table.save_to_db();
-                    this.order_to_transfer_to_different_table = null;
-
-                    // set this table
-                    this.set_table(table);
-
-                } else {
-                    this.table = table;
-                    var orders = this.get_order_list();
-                    if (orders.length) {
-                        this.set_order(orders[0]); // and go to the first one ...
-                    } else {
-                        this.add_new_order();  // or create a new order with the current table
-                    }
-                }
-            } else {
-                return posmodel_super.set_table.apply(this, table);
-            }
         },
-        check_if_user_clocked: function() {
-            return this.pos_session.users_clocked_ids.find(elem => elem === this.user.id);
-        },
-        get_args_for_clocking: function() {
-            return [this.pos_session.id, this.pos_session.user_id[0]];
-        },
-        set_clock_values: function(values) {
-            this.pos_session.users_clocked_ids = values;
-        },
-        get_method_call_for_clocking: function() {
-            return 'get_user_session_work_status';
-        },
-        set_method_call_for_clocking: function() {
-            return 'set_user_session_work_status';
-        }
     });
 
     DB.include({
@@ -1483,29 +1460,13 @@ can no longer be modified. Please create a new line with eg. a negative quantity
         }
     });
 
-    screens.ReceiptScreenWidget.include({
-        handle_auto_print: function() {
-            if(this.pos.config.blackbox_pos_production_id) {
-                this.print();
-                if (this.should_close_immediately()) {
-                    this.click_next();
-                }
-            } else {
-                this._super(event);
-            }
-        }
-    });
-
     screens.NumpadWidget.include({
         start: function(event) {
             this._super(event);
-            if(this.pos.config.blackbox_pos_production_id) {
-                this.$el.find('.mode-button[data-mode=price]').prop("disabled",true);
-                this.$el.find('.numpad-minus').prop("disabled",true);
-            }
+            this.$el.find('.mode-button[data-mode=price]').prop("disabled",true);
         },
         clickChangeMode: function (event) {
-            if (this.pos.config.blackbox_pos_production_id && event.currentTarget.attributes['data-mode'].nodeValue === "price") {
+            if (event.currentTarget.attributes['data-mode'].nodeValue === "price") {
                 this.gui.show_popup("error", {
                     'title': _t("Fiscal Data Module error"),
                     'body':  _t("Adjusting the price is not allowed."),
@@ -1530,185 +1491,33 @@ can no longer be modified. Please create a new line with eg. a negative quantity
         }
     });
 
-    SplitbillScreenWidget.include({
-        set_line_on_order: function(neworder, split, line) {
-            if( split.quantity && this.pos.config.blackbox_pos_production_id){
-                if ( !split.line ){
-                    split.line = line.clone();
-                    neworder.add_orderline(split.line);
-                }
-                split.line.set_quantity(split.quantity);
-
-            }else if( split.line && this.pos.config.blackbox_pos_production_id) {
-                neworder.remove_orderline(split.line);
-                split.line = null;
-            } else {
-                this._super(neworder, split, line);
-            }
-        },
-
-        set_quantity_on_order: function(splitlines, order) {
-            if(this.pos.config.blackbox_pos_production_id) {
-                for(var id in splitlines){
-                    var split = splitlines[id];
-                    var line  = order.get_orderline(parseInt(id));
-
-                    if(split.quantity) {
-                        var decrease_line = line.clone();
-                        decrease_line.order = order;
-                        decrease_line.set_quantity(-split.quantity);
-                        order.add_orderline(decrease_line);
-                    }
-
-                    delete splitlines[id];
-                }
-            } else {
-                 this._super(splitlines, order);
-            }
-        },
-
-        check_full_pay_order:function(order, splitlines) {
-            // Because of the lines added with negative quantity when we remove product,
-            // we have to check if the sum of the negative and positive lines are equals to the split.
-            if(this.pos.config.blackbox_pos_production_id) {
-                var full = true;
-                var groupedLines = _.groupBy(order.get_orderlines(), line => line.get_product().id);
-
-                Object.keys(groupedLines).forEach(function (lineId) {
-                    var maxQuantity = groupedLines[lineId].reduce(((quantity, line) => quantity + line.get_quantity()), 0);
-                    Object.keys(splitlines).forEach(id => {
-                        var split = splitlines[id];
-                        if(split.quantity && split.line.get_product().id === groupedLines[lineId][0].get_product().id)
-                            maxQuantity -= split.quantity;
-                    });
-                    if(maxQuantity !== 0)
-                        full = false;
-                });
-
-                return full;
-            } else {
-                this._super(order, splitlines);
-            }
-        },
-
-        lineselect: function($el,order,neworder,splitlines,line_id){
-            var split = splitlines[line_id] || {'quantity': 0, line: null};
-            var line  = order.get_orderline(line_id);
-
-            this.split_quantity(split, line, splitlines);
-
-            this.set_line_on_order(neworder, split, line);
-
-            splitlines[line_id] = split;
-            $el.replaceWith($(QWeb.render('SplitOrderline',{
-                widget: this,
-                line: line,
-                selected: split.quantity !== 0,
-                quantity: split.quantity,
-                id: line_id,
-            })));
-            this.$('.order-info .subtotal').text(this.format_currency(neworder.get_subtotal()));
-        },
-
-        split_quantity: function(split, line, splitlines) {
-            if(this.pos.config.blackbox_pos_production_id) {
-                var total_quantity = 0;
-                var splitted = 0;
-                var order = line.order;
-
-                order.get_orderlines().forEach(function(orderLine) {
-                    if(orderLine.get_product().id === line.product.id){
-                        total_quantity += orderLine.get_quantity();
-                        splitted += splitlines[orderLine.id]? splitlines[orderLine.id].quantity: 0;
-                    }
-                });
-
-                if(line.get_quantity() > 0) {
-                    if( !line.get_unit().is_pos_groupable ){
-                        if( split.quantity !== total_quantity){
-                            split.quantity = total_quantity;
-                        }else{
-                            split.quantity = 0;
-                        }
-                    }else{
-                        if( splitted < total_quantity && split.quantity < line.get_quantity()){
-                            split.quantity += line.get_unit().is_pos_groupable ? 1 : line.get_unit().rounding;
-                            if(splitted > total_quantity){
-                                split.quantity = line.get_quantity();
-                            }
-                        }else{
-                            split.quantity = 0;
-                        }
-                    }
-                }
-            } else {
-                this._super(split, line);
-            }
-        },
-        pay: function(order,neworder,splitlines) {
-            this._super(order,neworder,splitlines);
-            if(this.pos.config.blackbox_pos_production_id) {
-                this.pos.push_order(order, {'pro_forma': true});
-            }
-
-        }
-    });
-
     var work_out_button = screens.ActionButtonWidget.extend({
         template: 'WorkOutButton',
         button_click: function () {
             var self = this;
-            if(this.pos.clicked_on_clocked)
+
+            if (this.pos.pos_session.work_status === 'work_in') {
+                this.pos.gui.show_popup("error", {
+                    'title': _t("POS error"),
+                    'body':  _t("Session is not initialized yet. Register a Work In event first."),
+                });
                 return false;
-            this.pos.clicked_on_clocked = true;
-            if(!this.pos._check_validation_constraints())
+            }
+            if (this.pos.pos_session.work_status === 'work_out') {
+                this.pos.gui.show_popup("error", {
+                    'title': _t("POS error"),
+                    'body':  _t("Session has already been Worked Out. Open a new session to keep selling."),
+                });
                 return false;
-            rpc.query({
-                model: 'pos.session',
-                method: this.pos.get_method_call_for_clocking(),
-                args: this.pos.get_args_for_clocking(),
-            })
-            .then(function (clocked){
-                if(clocked) {
-                    var unpaid_tables = self.pos.db.load('unpaid_orders', [])
-                        .filter(function (order) { return order.data.amount_total > 0; })
-                        .map(function (order) { return order.data.table; });
-                    if (unpaid_tables.length) {
-                        self.pos.gui.show_popup('error', {
-                            'title': _t("Fiscal Data Module error"),
-                            'body': _.str.sprintf(_t("Tables %s still have unpaid orders. You will not be able to clock out untill all orders have been paid."), unpaid_tables.sort().join(', ')),
-                        });
-                        self.pos.clicked_on_clocked = false;
-                        return false;
-                    } else {
-                        self.pos.proxy.request_fdm_identification().then(function (parsed_response) {
-                            if (parsed_response) {
-                                self.pos.add_new_order();
-                                self.pos.get_order().add_product(self.pos.work_out_product);
-                                self.pos.get_order().draft = false;
-                                self.pos.push_order(self.pos.get_order()).then(function() {
-                                    self.gui.show_screen('receipt');
-                                    args = self.pos.get_args_for_clocking().concat(false);
-                                    rpc.query({
-                                        model: 'pos.session',
-                                        method: self.pos.set_method_call_for_clocking(),
-                                        args: args,
-                                    })
-                                    .then(function(users_logged) {
-                                        self.pos.clicked_on_clocked = false;
-                                        self.pos.set_clock_values(users_logged);
-                                    })
-                                });
-                            }
-                        });
-                    }
-                } else {
-                    self.pos.gui.show_popup("error", {
-                        'title': _t("POS error"),
-                        'body': _t("Session is not initialized. Register a Work In event first."),
-                    });
-                    self.pos.clicked_on_clocked = false;
-                    return false;
+            }
+
+            self.pos.proxy.request_fdm_identification().then(function (parsed_response) {
+                if (parsed_response) {
+                    self.pos.add_new_order();
+                    self.pos.get_order().add_product(self.pos.work_out_product);
+                    self.pos.push_order(self.pos.get_order());
+                    self.gui.show_screen('receipt');
+                    self.pos.pos_session.work_status = 'work_out';
                 }
             });
         }
@@ -1723,60 +1532,34 @@ can no longer be modified. Please create a new line with eg. a negative quantity
         template: 'WorkInButton',
         button_click: function () {
             var self = this;
-            if(this.pos.clicked_on_clocked)
+
+            if (this.pos.pos_session.work_status === 'valid') {
+                this.pos.gui.show_popup("error", {
+                    'title': _t("POS error"),
+                    'body':  _t("Session has already been initialized Worked In."),
+                });
                 return false;
-            this.pos.clicked_on_clocked = true;
-            if(!this.pos._check_validation_constraints())
+            }
+            if (this.pos.pos_session.work_status === 'work_out') {
+                this.pos.gui.show_popup("error", {
+                    'title': _t("POS error"),
+                    'body':  _t("Session has been Worked Out. Open a new session to keep selling."),
+                });
                 return false;
-            rpc.query({
-                model: 'pos.session',
-                method: this.pos.get_method_call_for_clocking(),
-                args: this.pos.get_args_for_clocking(),
-            })
-            .then(function (clocked){
-                if(!clocked) {
-                    self.pos.proxy.request_fdm_identification().then(function (parsed_response) {
-                        if (parsed_response) {
-                            self.pos.add_new_order();
-                            self.pos.get_order().add_product(self.pos.work_in_product);
-                            self.pos.get_order().draft = false;
-                            self.pos.push_order(self.pos.get_order()).then(function() {
-                                self.gui.show_screen('receipt');
-                                var args = self.pos.get_args_for_clocking().concat(true);
-                                rpc.query({
-                                    model: 'pos.session',
-                                    method: self.pos.set_method_call_for_clocking(),
-                                    args: args,
-                                })
-                                .then(function(users_logged) {
-                                    self.pos.set_clock_values(users_logged);
-                                    self.pos.clicked_on_clocked = false;
-                                })
-                            });
-                        }
-                    });
-                } else {
-                    self.pos.gui.show_popup("error", {
-                        'title': _t("POS error"),
-                        'body':  _t("Session has already been initialized Worked In."),
-                    });
-                    self.pos.clicked_on_clocked = false;
-                    return false;
+            }
+
+            self.pos.proxy.request_fdm_identification().then(function (parsed_response) {
+                if (parsed_response) {
+                    self.pos.add_new_order();
+                    self.pos.get_order().add_product(self.pos.work_in_product);
+                    self.pos.push_order(self.pos.get_order());
+                    self.gui.show_screen('receipt');
+                    self.pos.pos_session.work_status = 'valid';
                 }
             });
         }
     });
 
-    var NumberPopupWidget = popups.include({
-        show: function(options){
-           this._super(options);
-           $(document).off('keydown.productscreen', this.gui.screen_instances.products._onKeypadKeyDown);
-        },
-        close: function(){
-            this._super();
-            $(document).on('keydown.productscreen', this.gui.screen_instances.products._onKeypadKeyDown);
-        },
-    });
     var blocking_error_popup = popups.extend({
         template: 'BlockingErrorPopupWidget',
         show: function (options) {
@@ -1843,7 +1626,7 @@ can no longer be modified. Please create a new line with eg. a negative quantity
     models.load_fields("res.users", "insz_or_bis_number");
     models.load_fields("account.tax", "identification_letter");
     models.load_fields("res.company", "street");
-    models.load_fields("pos.session", "users_clocked_ids");
+    models.load_fields("pos.session", ["forbidden_modules_installed", "work_status"]);
 
     return {
         'FDMPacketField': FDMPacketField,

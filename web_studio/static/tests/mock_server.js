@@ -11,14 +11,11 @@ MockServer.include({
     /**
      * @override
      * @private
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _performRpc: function (route) {
         if (route === '/web_studio/get_default_value') {
-            return Promise.resolve({});
-        }
-        if (route === '/web_studio/activity_allowed') {
-            return Promise.resolve(false);
+            return $.when({});
         }
         return this._super.apply(this, arguments);
     },

@@ -7,7 +7,6 @@
             <field name="model">stock.report</field>
             <field name="arch" type="xml">
                 <search>
-                    <field name="reference"/>
                     <filter string="Done Transfers" name="done" domain="[('state', '=', 'done')]"/>
                     <filter string="Done Deliveries" name="done_deliveries" domain="[('state', '=', 'done'), ('picking_type_code', '=', 'outgoing')]"/>
                     <filter string="Done Receipts" name="done_receipts" domain="[('state', '=', 'done'), ('picking_type_code', '=', 'incoming')]"/>
@@ -49,7 +48,6 @@
                     <field name="creation_date"/>
                     <field name="date_done"/>
                     <field name="state"/>
-                    <field name="company_id" groups="base.group_multi_company"/>
                 </tree>
             </field>
         </record>
@@ -76,11 +74,11 @@
                                 <field name="scheduled_date"/>
                                 <label for="cycle_time" string="Cycle Time"/>
                                 <div class="o_row">
-                                    <field name="cycle_time"/> Days
+                                    <field name="cycle_time"/> Day(s)
                                 </div>
                                 <label for="delay" string="Delay"/>
                                 <div class="o_row">
-                                    <field name="delay"/> Days
+                                    <field name="delay"/> Day(s)
                                 </div>
                             </group>
                         </group>
@@ -101,19 +99,19 @@
                             <aggregate name="delivery_time_avg" string="Deliveries Cycle Time" field="cycle_time" group_operator="avg"
                                 domain="[('picking_type_code', '=', 'outgoing')]" domain_label="Done Deliveries"
                                 help="Time needed to deliver an order (in days). Computed by comparing the creation date of the delivery order and its done date."
-                                value_label="days"/>
+                                value_label="day(s)"/>
                             <aggregate name="receipt_time_avg" string="Receipts Cycle Time" field="cycle_time" group_operator="avg"
                                 domain="[('picking_type_code', '=', 'incoming')]" domain_label="Done Receipts"
                                 help="Time needed to receive an order (in days). Computed by comparing the creation date of the receipt and its done date."
-                                value_label="days"/>
+                                value_label="day(s)"/>
                             <aggregate name="delivery_create_date" string="Deliveries Delay" field="delay" group_operator="avg"
                                 domain="[('picking_type_code', '=', 'outgoing')]" domain_label="Done Deliveries"
                                 help="Delay to deliver an order (in days). Computed by comparing the scheduled date of the delivery order and its effective date."
-                                value_label="days"/>
+                                value_label="day(s)"/>
                             <aggregate name="receipt_create_date" string="Receipts Delay" field="delay" group_operator="avg"
                                 domain="[('picking_type_code', '=', 'incoming')]" domain_label="Done Receipts"
                                 help="Delay to receive an order (in days). Computed by comparing the scheduled date of the receipt and its effective date."
-                                value_label="days"/>
+                                value_label="day(s)"/>
                         </group>
                     </group>
                     <view type="pivot" ref="stock_enterprise.stock_report_pivot_view"/>
@@ -131,7 +129,7 @@
         </record>
 
         <record id="stock_report_dashboard_action" model="ir.actions.act_window">
-            <field name="name">Warehouse Analysis</field>
+            <field name="name">Warehouse Dashboard</field>
             <field name="res_model">stock.report</field>
             <field name="view_mode">dashboard</field>
             <field name="view_id" ref="stock_report_dashboard_view"/>
@@ -142,7 +140,7 @@
 
         <menuitem
             id="stock_dashboard_menuitem"
-            name="Warehouse Analysis"
+            name="Warehouse Dashboard"
             parent="stock.menu_warehouse_report"
             action="stock_report_dashboard_action"/>
     </data>

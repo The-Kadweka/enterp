@@ -12,33 +12,11 @@ var ReportEditorManager = require('web_studio.ReportEditorManager');
 var ReportEditorSidebar = require('web_studio.ReportEditorSidebar');
 var ViewEditorManager = require('web_studio.ViewEditorManager');
 
-var weTestUtils = require('web_editor.test_utils');
-var Wysiwyg = require('web_editor.wysiwyg.root');
-
 /**
  * Test Utils
  *
  * In this module, we define some utility functions to create Studio objects.
  */
-
-var assetsLoaded;
-function loadAssetLib(parent) {
-    if (assetsLoaded) { // avoid flickering when begin to edit
-        return assetsLoaded;
-    }
-    assetsLoaded = new Promise(function (resolve, reject) {
-        var wysiwyg = new Wysiwyg(parent, {
-            recordInfo: {
-                context: {},
-            }
-        });
-        wysiwyg.attachTo($('<textarea>')).then(function () {
-            wysiwyg.destroy();
-            resolve();
-        });
-    });
-    return assetsLoaded;
-}
 
 /**
  * Create a ReportEditorManager widget.
@@ -46,7 +24,7 @@ function loadAssetLib(parent) {
  * @param {Object} params
  * @return {ReportEditorManager}
  */
-function createReportEditor(params) {
+function createReportEditor (params) {
     var Parent = Widget.extend({
         start: function () {
             var self = this;
@@ -61,48 +39,41 @@ function createReportEditor(params) {
         },
     });
     var parent = new Parent();
-    weTestUtils.patch();
-    params.data = weTestUtils.wysiwygData(params.data);
-    testUtils.mock.addMockEnvironment(parent, params);
-
     var selector = params.debug ? 'body' : '#qunit-fixture';
-    return parent.appendTo(selector).then(function () {
-        var editor = new ReportEditor(parent, params);
-        // override 'destroy' of editor so that it calls 'destroy' on the parent
-        // instead
-        editor.destroy = function () {
-            // remove the override to properly destroy editor and its children
-            // when it will be called the second time (by its parent)
-            delete editor.destroy;
-            // TODO: call super?
-            parent.destroy();
-            weTestUtils.unpatch();
-        };
-        return editor.appendTo(parent.$('.o_web_studio_editor_manager')).then(function () {
-            return editor;
-        });
-    });
+    parent.appendTo(selector);
+    testUtils.addMockEnvironment(parent, _.extend(params, {
+        // TODO
+    }));
+
+    var editor = new ReportEditor(parent, params);
+    // override 'destroy' of editor so that it calls 'destroy' on the parent
+    // instead
+    editor.destroy = function () {
+        // remove the override to properly destroy editor and its children
+        // when it will be called the second time (by its parent)
+        delete editor.destroy;
+        // TODO: call super?
+        parent.destroy();
+    };
+    editor.appendTo(parent.$('.o_web_studio_editor_manager'));
+    return editor;
 }
 
 /**
  * Create a ReportEditorManager widget.
  *
  * @param {Object} params
- * @return {Promise<ReportEditorManager>}
+ * @return {ReportEditorManager}
  */
-async function createReportEditorManager(params) {
+function createReportEditorManager (params) {
     var parent = new StudioEnvironment();
-    testUtils.mock.addMockEnvironment(parent, params);
-    weTestUtils.patch();
-    params.data = weTestUtils.wysiwygData(params.data);
+    testUtils.addMockEnvironment(parent, params);
 
-    await loadAssetLib(parent);
     var rem = new ReportEditorManager(parent, params);
     // also destroy to parent widget to avoid memory leak
     rem.destroy = function () {
         delete rem.destroy;
         parent.destroy();
-        weTestUtils.unpatch();
     };
 
     var fragment = document.createDocumentFragment();
@@ -110,14 +81,14 @@ async function createReportEditorManager(params) {
     if (params.debug) {
         $('body').addClass('debug');
     }
-    await parent.prependTo(selector);
-    await rem.appendTo(fragment)
-    // use dom.append to call on_attach_callback
-    dom.append(parent.$('.o_web_studio_client_action'), fragment, {
-        callbacks: [{widget: rem}],
-        in_DOM: true,
+    parent.prependTo(selector);
+    rem.appendTo(fragment).then(function () {
+        // use dom.append to call on_attach_callback
+        dom.append(parent.$('.o_web_studio_client_action'), fragment, {
+            callbacks: [{widget: rem}],
+            in_DOM: true,
+        });
     });
-    await rem.editorIframeDef
     return rem;
 }
 
@@ -125,9 +96,9 @@ async function createReportEditorManager(params) {
  * Create a sidebar widget.
  *
  * @param {Object} params
- * @return {Promise<ReportEditorSidebar>}
+ * @return {ReportEditorSidebar}
  */
-function createSidebar(params) {
+function createSidebar (params) {
     var Parent = Widget.extend({
         start: function () {
             var self = this;
@@ -141,61 +112,54 @@ function createSidebar(params) {
         },
     });
     var parent = new Parent();
-    weTestUtils.patch();
-    params.data = weTestUtils.wysiwygData(params.data);
-    testUtils.mock.addMockEnvironment(parent, params);
+    testUtils.addMockEnvironment(parent, params);
 
-    return loadAssetLib(parent).then(function () {
-        var sidebar = new ReportEditorSidebar(parent, params);
-        sidebar.destroy = function () {
-            // remove the override to properly destroy sidebar and its children
-            // when it will be called the second time (by its parent)
-            delete sidebar.destroy;
-            parent.destroy();
-            weTestUtils.unpatch();
-        };
+    var sidebar = new ReportEditorSidebar(parent, params);
+    sidebar.destroy = function () {
+        // remove the override to properly destroy sidebar and its children
+        // when it will be called the second time (by its parent)
+        delete sidebar.destroy;
+        parent.destroy();
+    };
 
-        var selector = params.debug ? 'body' : '#qunit-fixture';
-        if (params.debug) {
-            $('body').addClass('debug');
-        }
-        parent.appendTo(selector);
+    var selector = params.debug ? 'body' : '#qunit-fixture';
+    if (params.debug) {
+        $('body').addClass('debug');
+    }
+    parent.appendTo(selector);
 
-        var fragment = document.createDocumentFragment();
-        return sidebar.appendTo(fragment).then(function () {
-            sidebar.$el.appendTo(parent.$('.o_web_studio_editor_manager'));
-            return sidebar;
-        });
+    var fragment = document.createDocumentFragment();
+    sidebar.appendTo(fragment).then(function () {
+        sidebar.$el.appendTo(parent.$('.o_web_studio_editor_manager'));
     });
+    return sidebar;
 }
 
 /**
  * Create a ViewEditorManager widget.
  *
  * @param {Object} params
- * @return {Promise<ViewEditorManager>}
+ * @return {ViewEditorManager}
  */
-function createViewEditorManager(params) {
+function createViewEditorManager (params) {
     var parent = new StudioEnvironment();
-    weTestUtils.patch();
-    params.data = weTestUtils.wysiwygData(params.data);
-    var mockServer = testUtils.mock.addMockEnvironment(parent, params);
-    var fieldsView = testUtils.mock.fieldsViewGet(mockServer, params);
+    var mockServer = testUtils.addMockEnvironment(parent, params);
+    var fieldsView = testUtils.fieldsViewGet(mockServer, params);
     if (params.viewID) {
         fieldsView.view_id = params.viewID;
     }
+    var env = {
+        modelName: params.model,
+        ids: 'res_id' in params ? [params.res_id] : undefined,
+        currentId: 'res_id' in params ? params.res_id : undefined,
+        domain: params.domain || [],
+        context: params.context || {},
+        groupBy: params.groupBy || [],
+    };
     var vem = new ViewEditorManager(parent, {
-        action: {
-            context: params.context || {},
-            domain: params.domain || [],
-            res_model: params.model,
-        },
-        controllerState: {
-            currentId: 'res_id' in params ? params.res_id : undefined,
-            resIds: 'res_id' in params ? [params.res_id] : undefined,
-        },
         fields_view: fieldsView,
         viewType: fieldsView.type,
+        env: env,
         studio_view_id: params.studioViewID,
         chatter_allowed: params.chatter_allowed,
     });
@@ -205,7 +169,6 @@ function createViewEditorManager(params) {
     vem.destroy = function () {
         vem.destroy = originalDestroy;
         parent.destroy();
-        weTestUtils.unpatch();
     };
 
     var fragment = document.createDocumentFragment();
@@ -213,15 +176,14 @@ function createViewEditorManager(params) {
     if (params.debug) {
         $('body').addClass('debug');
     }
-    return parent.prependTo(selector).then(function () {
-        return vem.appendTo(fragment).then(function () {
-            dom.append(parent.$('.o_web_studio_client_action'), fragment, {
-                callbacks: [{widget: vem}],
-                in_DOM: true,
-            });
-            return vem;
+    parent.prependTo(selector);
+    vem.appendTo(fragment).then(function () {
+        dom.append(parent.$('.o_web_studio_client_action'), fragment, {
+            callbacks: [{widget: vem}],
+            in_DOM: true,
         });
     });
+    return vem;
 }
 
 /**
@@ -232,7 +194,7 @@ function createViewEditorManager(params) {
  * @param {String} [data.dataOeContext]
  * @returns {string}
  */
-function getReportHTML(templates, data) {
+function getReportHTML (templates, data) {
     _brandTemplates(templates, data && data.dataOeContext);
 
     var qweb = new QWeb();
@@ -251,7 +213,7 @@ function getReportHTML(templates, data) {
  * @param {String} [data.dataOeContext]
  * @returns {Object}
  */
-function getReportViews(templates, data) {
+function getReportViews (templates, data) {
     _brandTemplates(templates, data && data.dataOeContext);
 
     var reportViews = {};
@@ -274,18 +236,18 @@ function getReportViews(templates, data) {
  * @param {Array<Object>} templates
  * @param {String} [dataOeContext]
  */
-function _brandTemplates(templates, dataOeContext) {
+function _brandTemplates (templates, dataOeContext) {
 
     _.each(templates, function (template) {
         brandTemplate(template);
     });
 
-    function brandTemplate(template) {
+    function brandTemplate (template) {
         var doc = $.parseXML(template.arch).documentElement;
         var rootNode = utils.xml_to_json(doc, true);
         brandNode([rootNode], rootNode, '');
 
-        function brandNode(siblings, node, xpath) {
+        function brandNode (siblings, node, xpath) {
             // do not brand already branded nodes
             if (_.isObject(node) && !node.attrs['data-oe-id']) {
                 if (node.tag !== 'kikou') {
@@ -329,11 +291,8 @@ return {
     createReportEditorManager: createReportEditorManager,
     createSidebar: createSidebar,
     createViewEditorManager: createViewEditorManager,
-    getData: weTestUtils.wysiwygData,
     getReportHTML: getReportHTML,
     getReportViews: getReportViews,
-    patch: weTestUtils.patch,
-    unpatch: weTestUtils.unpatch,
 };
 
 });

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding:utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import fields, models
@@ -7,11 +7,6 @@ from odoo import fields, models
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'
 
-    id_card = fields.Binary(string="ID Card Copy", groups="hr_contract.group_hr_contract_manager")
-    driving_license = fields.Binary(string="Driving License", groups="hr_contract.group_hr_contract_manager")
-    mobile_invoice = fields.Binary(string="Mobile Subscription Invoice", groups="hr_contract.group_hr_contract_manager")
-    sim_card = fields.Binary(string="SIM Card Copy", groups="hr_contract.group_hr_contract_manager")
-    internet_invoice = fields.Binary(string="Internet Subscription Invoice", groups="hr_contract.group_hr_contract_manager")
 
     def get_partner_values(self, personal_info):
         return {
@@ -28,21 +23,35 @@ class HrEmployee(models.Model):
         }
 
     def get_employee_values(self, personal_info):
-        fields_list = [
-            'gender', 'disabled', 'marital', 'spouse_fiscal_status', 'spouse_net_revenue',
-            'spouse_other_net_revenue', 'disabled_spouse_bool', 'disabled_children_bool',
-            'children', 'disabled_children_number', 'other_dependent_people',
-            'other_senior_dependent', 'other_disabled_senior_dependent', 'other_juniors_dependent',
-            'other_disabled_juniors_dependent', 'identification_id', 'country_id',
-            'emergency_contact', 'emergency_phone', 'certificate', 'study_field',
-            'study_school', 'country_of_birth', 'place_of_birth', 'spouse_complete_name',
-            'km_home_work', 'job_title',
-        ]
-        result = {field: personal_info[field] for field in fields_list}
-        for field in ['image_1920', 'id_card', 'driving_license', 'mobile_invoice', 'sim_card', 'internet_invoice']:
-            if personal_info.get(field, False):
-                result[field] = personal_info.get(field)
-        return result
+        return {
+            'gender': personal_info['gender'],
+            'disabled': personal_info['disabled'],
+            'marital': personal_info['marital'],
+            'spouse_fiscal_status': personal_info['spouse_fiscal_status'],
+            'spouse_net_revenue': personal_info['spouse_net_revenue'],
+            'spouse_other_net_revenue': personal_info['spouse_other_net_revenue'],
+            'disabled_spouse_bool': personal_info['disabled_spouse_bool'],
+            'children': personal_info['children_count'],
+            'disabled_children_bool': personal_info['disabled_children'],
+            'disabled_children_number': personal_info['disabled_children_count'],
+            'other_dependent_people': personal_info['other_dependent_people'],
+            'other_senior_dependent': personal_info['other_senior_dependent'],
+            'other_disabled_senior_dependent': personal_info['other_disabled_senior_dependent'],
+            'other_juniors_dependent': personal_info['other_juniors_dependent'],
+            'other_disabled_juniors_dependent': personal_info['other_disabled_juniors_dependent'],
+            'identification_id': personal_info['national_number'],
+            'country_id': personal_info['nationality'],
+            'emergency_contact': personal_info['emergency_person'],
+            'emergency_phone': personal_info['emergency_phone_number'],
+            'certificate': personal_info['certificate'],
+            'study_field': personal_info['certificate_name'],
+            'study_school': personal_info['certificate_school'],
+            'country_of_birth': personal_info['country_of_birth'],
+            'place_of_birth': personal_info['place_of_birth'],
+            'spouse_complete_name': personal_info['spouse_complete_name'],
+            'km_home_work': personal_info['km_home_work'],
+            'job_title': personal_info['job_title'],
+        }
 
     def update_personal_info(self, personal_info, no_name_write=False):
         self.ensure_one()
@@ -64,7 +73,7 @@ class HrEmployee(models.Model):
         # Update personal info on the employee
         vals = self.get_employee_values(personal_info)
 
-        existing_bank_account = self.env['res.partner.bank'].search([('acc_number', '=', personal_info['bank_account'])], limit=1)
+        existing_bank_account = self.env['res.partner.bank'].search([('acc_number', '=', personal_info['bank_account'])])
         if existing_bank_account:
             bank_account = existing_bank_account
         else:

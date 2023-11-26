@@ -9,6 +9,7 @@ class MailComposeMessage(models.TransientModel):
 
     marketing_activity_id = fields.Many2one('marketing.activity', string='Marketing Activity')
 
+    @api.multi
     def get_mail_values(self, res_ids):
         """ Override method to link mail automation activity with mail statistics"""
         res = super(MailComposeMessage, self).get_mail_values(res_ids)
@@ -21,9 +22,9 @@ class MailComposeMessage(models.TransientModel):
             # update statistics creation done in mass_mailing to include link between stat and trace
             for res_id in res_ids:
                 mail_values = res[res_id]
-                traces_command = mail_values.get('mailing_trace_ids')  # [(0, 0, stat_vals)]
-                if traces_command and len(traces_command[0]) == 3:
-                    statistics_dict = traces_command[0][2]
+                statistics_command = mail_values.get('statistics_ids')  # [(0, 0, stat_vals)]
+                if statistics_command and len(statistics_command[0]) == 3:
+                    statistics_dict = statistics_command[0][2]
                     if traces_mapping.get(res_id):
                         statistics_dict['marketing_trace_id'] = traces_mapping[res_id]
 

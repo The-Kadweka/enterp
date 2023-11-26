@@ -2,7 +2,6 @@ odoo.define('web_studio.ActionEditorView', function (require) {
 "use strict";
 
 var Widget = require('web.Widget');
-var config = require('web.config');
 
 var ActionEditorView = Widget.extend({
     template: 'web_studio.ActionEditorView',
@@ -16,11 +15,12 @@ var ActionEditorView = Widget.extend({
      */
     init: function (parent, flags) {
         this._super.apply(this, arguments);
-        this.debug = config.isDebug();
+
         this.active = flags.active;
         this.default_view = flags.default_view;
         this.view_type = flags.view_type;
         this.can_default = flags.can_default;
+        this.can_set_another = flags.can_set_another;
         this.can_be_disabled = flags.can_be_disabled;
     },
 
@@ -51,8 +51,8 @@ var ActionEditorView = Widget.extend({
             case 'set_default_view':
                 eventName = 'studio_default_view';
                 break;
-            case 'restore_default_view':
-                eventName = 'studio_restore_default_view';
+            case 'set_another_view':
+                eventName = 'studio_set_another_view';
                 break;
             case 'disable_view':
                 eventName = 'studio_disable_view';

@@ -1,27 +1,30 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_online_sync
+# * account_online_sync
 # 
 # Translators:
-# Martin Trigaux, 2019
+# Martin Trigaux, 2018
 # Андрей Гусев <gaussgss@gmail.com>, 2019
-# Ivan Yelizariev // IEL <yelizariev@itpp.dev>, 2019
-# Ekaterina <nawsikaya@bk.ru>, 2020
-# ILMIR <karamov@it-projects.info>, 2021
+# Ivan Yelizariev <yelizariev@it-projects.info>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~12.5+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-23 11:38+0000\n"
-"PO-Revision-Date: 2019-08-26 09:34+0000\n"
-"Last-Translator: ILMIR <karamov@it-projects.info>, 2021\n"
+"POT-Creation-Date: 2019-11-14 07:49+0000\n"
+"PO-Revision-Date: 2018-08-24 11:36+0000\n"
+"Last-Translator: Ivan Yelizariev <yelizariev@it-projects.info>, 2019\n"
 "Language-Team: Russian (https://www.transifex.com/odoo/teams/41243/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: ru\n"
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
+
+#. module: account_online_sync
+#: model_terms:ir.ui.view,arch_db:account_online_sync.view_account_online_wizard_form
+msgid "\" bank accounts have been retrieved."
+msgstr "&quot;Полученные банковские счета."
 
 #. module: account_online_sync
 #: model_terms:ir.ui.view,arch_db:account_online_sync.view_account_online_wizard_form
@@ -45,8 +48,15 @@ msgstr "<strong>Поздравляем!</strong> Ваш счет успешно 
 
 #. module: account_online_sync
 #: model_terms:ir.ui.view,arch_db:account_online_sync.view_account_online_wizard_form
-msgid "<strong>Well done!</strong>"
-msgstr "<strong>Отлично!</strong>"
+msgid ""
+"<strong>Well done!</strong> Your banking institution is now connected to "
+"Odoo."
+msgstr "<strong>Хорошая работа!</strong> Ваш банк соединен с Odoo."
+
+#. module: account_online_sync
+#: model_terms:ir.ui.view,arch_db:account_online_sync.view_account_online_wizard_form
+msgid "A total of \""
+msgstr "сумма &quot;"
 
 #. module: account_online_sync
 #: model:ir.model.fields,field_description:account_online_sync.field_account_online_journal__account_number
@@ -55,7 +65,6 @@ msgid "Account Number"
 msgstr "Номер счёта"
 
 #. module: account_online_sync
-#: model:ir.model.fields,field_description:account_online_sync.field_account_journal__account_online_journal_id
 #: model:ir.model.fields,field_description:account_online_sync.field_account_online_provider__account_online_journal_ids
 msgid "Account Online Journal"
 msgstr "Журнал счета онлайн"
@@ -99,7 +108,7 @@ msgid "Action Required"
 msgstr "нужна действие"
 
 #. module: account_online_sync
-#: code:addons/account_online_sync/models/online_sync.py:0
+#: code:addons/account_online_sync/models/online_sync.py:360
 #, python-format
 msgid "Add a Bank Account"
 msgstr "Добавить банковский счет"
@@ -110,7 +119,7 @@ msgid "Additional information"
 msgstr "Дополнительная информация"
 
 #. module: account_online_sync
-#: code:addons/account_online_sync/models/online_sync.py:0
+#: code:addons/account_online_sync/models/online_sync.py:62
 #, python-format
 msgid "An error occurred during online synchronization"
 msgstr "Произошла ошибка во время синхронизации онлайн"
@@ -121,7 +130,7 @@ msgid "Attachment Count"
 msgstr "Количество вложений"
 
 #. module: account_online_sync
-#: code:addons/account_online_sync/models/online_sync.py:0
+#: code:addons/account_online_sync/models/online_sync.py:317
 #, python-format
 msgid "Automated Bank Synchronization"
 msgstr "Автоматизированная банковская синхронизация"
@@ -153,7 +162,7 @@ msgid "Cancel"
 msgstr "Отменить"
 
 #. module: account_online_sync
-#: model:ir.model.fields.selection,name:account_online_sync.selection__account_online_wizard__status__cancelled
+#: selection:account.online.wizard,status:0
 msgid "Cancelled"
 msgstr "Отменено"
 
@@ -173,18 +182,24 @@ msgid "Company"
 msgstr "Компания"
 
 #. module: account_online_sync
+#: model_terms:ir.ui.view,arch_db:account_online_sync.account_bank_journal_form_inherit_online_sync
+#: model_terms:ir.ui.view,arch_db:account_online_sync.account_journal_form_inherit_online_sync
+msgid "Configure"
+msgstr "Настроить"
+
+#. module: account_online_sync
 #: model:ir.model,name:account_online_sync.model_res_partner
 msgid "Contact"
 msgstr "Контакт"
 
 #. module: account_online_sync
-#: code:addons/account_online_sync/models/online_sync.py:0
+#: code:addons/account_online_sync/models/online_sync.py:161
 #, python-format
 msgid "Create a Bank Account"
 msgstr "Создать банковский счет"
 
 #. module: account_online_sync
-#: model:ir.model.fields.selection,name:account_online_sync.selection__account_online_link_wizard__action__create
+#: selection:account.online.link.wizard,action:0
 msgid "Create new journal"
 msgstr "Создать новый журнал"
 
@@ -228,7 +243,7 @@ msgid "Display Name"
 msgstr "Отображаемое Имя"
 
 #. module: account_online_sync
-#: model:ir.model.fields.selection,name:account_online_sync.selection__account_online_link_wizard__action__drop
+#: selection:account.online.link.wizard,action:0
 msgid "Do not link"
 msgstr "не связывает"
 
@@ -238,14 +253,14 @@ msgid "Done"
 msgstr "Сделано"
 
 #. module: account_online_sync
-#: model:ir.model.fields.selection,name:account_online_sync.selection__account_online_wizard__status__failed
+#: selection:account.online.wizard,status:0
 msgid "Failed"
 msgstr "Неудачно"
 
 #. module: account_online_sync
 #: model:ir.model.fields,field_description:account_online_sync.field_account_online_wizard__sync_date
-msgid "Fetch transactions from"
-msgstr " Получить транзакции из"
+msgid "Fetch transaction from"
+msgstr "Извлечь транзакцию из"
 
 #. module: account_online_sync
 #: model:ir.model.fields,field_description:account_online_sync.field_account_online_provider__message_follower_ids
@@ -292,14 +307,17 @@ msgstr ""
 "сервере"
 
 #. module: account_online_sync
-#: model:ir.model.fields,help:account_online_sync.field_account_online_provider__message_needaction
 #: model:ir.model.fields,help:account_online_sync.field_account_online_provider__message_unread
+msgid "If checked new messages require your attention."
+msgstr "Если отмечено, новые сообщения будут требовать вашего внимания."
+
+#. module: account_online_sync
+#: model:ir.model.fields,help:account_online_sync.field_account_online_provider__message_needaction
 msgid "If checked, new messages require your attention."
 msgstr "Если отмечено - новые сообщения требуют Вашего внимания."
 
 #. module: account_online_sync
 #: model:ir.model.fields,help:account_online_sync.field_account_online_provider__message_has_error
-#: model:ir.model.fields,help:account_online_sync.field_account_online_provider__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr "Если обозначено, некоторые сообщения имеют ошибку доставки."
 
@@ -319,7 +337,7 @@ msgid "Is Follower"
 msgstr "Подписчик"
 
 #. module: account_online_sync
-#: code:addons/account_online_sync/models/online_sync.py:0
+#: code:addons/account_online_sync/models/online_sync.py:107
 #: model:ir.model,name:account_online_sync.model_account_journal
 #: model:ir.model.fields,field_description:account_online_sync.field_account_online_journal__journal_ids
 #: model:ir.model.fields,field_description:account_online_sync.field_account_online_link_wizard__journal_id
@@ -331,6 +349,11 @@ msgstr "Журнал"
 #: model:ir.model.fields,field_description:account_online_sync.field_account_online_journal__name
 msgid "Journal Name"
 msgstr "Название журнала"
+
+#. module: account_online_sync
+#: model:ir.model.fields,field_description:account_online_sync.field_account_online_link_wizard__journal_statements_creation
+msgid "Journal Statements Creation"
+msgstr "Создание журнала выписок"
 
 #. module: account_online_sync
 #: model:ir.model.fields,field_description:account_online_sync.field_account_online_journal____last_update
@@ -372,7 +395,7 @@ msgid "Link synchronized account to a journal"
 msgstr "Связь синхронизированного аккаунта с журналом"
 
 #. module: account_online_sync
-#: model:ir.model.fields.selection,name:account_online_sync.selection__account_online_link_wizard__action__link
+#: selection:account.online.link.wizard,action:0
 msgid "Link to existing journal"
 msgstr "Привязать к существующему журнала"
 
@@ -424,7 +447,7 @@ msgid "Next synchronization"
 msgstr "Следующая синхронизация"
 
 #. module: account_online_sync
-#: code:addons/account_online_sync/models/company.py:0
+#: code:addons/account_online_sync/models/company.py:21
 #, python-format
 msgid ""
 "No bank journal could be found! Please install a chart of accounts first, in"
@@ -434,7 +457,7 @@ msgstr ""
 "его."
 
 #. module: account_online_sync
-#: code:addons/account_online_sync/models/online_sync.py:0
+#: code:addons/account_online_sync/models/online_sync.py:109
 #, python-format
 msgid "No new transactions have been loaded in the system."
 msgstr "В системе не загружено новых транзакций."
@@ -451,8 +474,8 @@ msgstr "Количество действий"
 
 #. module: account_online_sync
 #: model:ir.model.fields,field_description:account_online_sync.field_account_online_provider__message_has_error_counter
-msgid "Number of errors"
-msgstr "Количество ошибок"
+msgid "Number of error"
+msgstr "количество ошибок"
 
 #. module: account_online_sync
 #: model:ir.model.fields,help:account_online_sync.field_account_online_provider__message_needaction_counter
@@ -470,6 +493,7 @@ msgid "Number of unread messages"
 msgstr "Количество непрочитанных сообщений"
 
 #. module: account_online_sync
+#: model:ir.model.fields,field_description:account_online_sync.field_account_journal__account_online_journal_id
 #: model:ir.model.fields,field_description:account_online_sync.field_account_online_link_wizard__online_account_id
 msgid "Online Account"
 msgstr "Онлайн Учетная Запись"
@@ -500,34 +524,45 @@ msgid "Online Partner Vendor Name"
 msgstr "Имя онлайн партнера поставщика"
 
 #. module: account_online_sync
-#: code:addons/account_online_sync/models/online_sync.py:0
+#: code:addons/account_online_sync/models/online_sync.py:375
 #: model:ir.ui.menu,name:account_online_sync.menu_action_online_provider_account
 #: model_terms:ir.ui.view,arch_db:account_online_sync.account_journal_dashboard_inherit_online_sync
+#: model_terms:ir.ui.view,arch_db:account_online_sync.account_journal_form_inherit_online_sync
 #: model_terms:ir.ui.view,arch_db:account_online_sync.view_account_online_wizard_form
 #, python-format
 msgid "Online Synchronization"
 msgstr "Онлайн Синхронизация"
 
 #. module: account_online_sync
-#: code:addons/account_online_sync/models/online_sync.py:0
+#: code:addons/account_online_sync/models/online_sync.py:461
 #, python-format
 msgid "Opening statement: first synchronization"
 msgstr "Открытие выписки: первая синхронизация"
 
 #. module: account_online_sync
-#: code:addons/account_online_sync/models/online_sync.py:0
+#: selection:account.online.provider,provider_type:0
+msgid "Plaid"
+msgstr "Plaid"
+
+#. module: account_online_sync
+#: code:addons/account_online_sync/models/online_sync.py:83
 #, python-format
 msgid "Please enter at least a character for the search"
 msgstr "Введите по крайней мере символ для поиска"
 
 #. module: account_online_sync
-#: code:addons/account_online_sync/models/online_sync.py:0
+#: code:addons/account_online_sync/models/online_sync.py:293
 #, python-format
 msgid ""
 "Please link your accounts to a journal or select \"do not link\" as action "
 "to do"
 msgstr ""
 "Свяжите ваш аккаунт с журналом или выберите »не связывать&quot; как действие"
+
+#. module: account_online_sync
+#: selection:account.online.provider,provider_type:0
+msgid "Ponto"
+msgstr "Ponto"
 
 #. module: account_online_sync
 #: model_terms:ir.ui.view,arch_db:account_online_sync.account_journal_dashboard_inherit_online_sync
@@ -560,13 +595,8 @@ msgid "Provider for online account synchronization"
 msgstr "Поставщик для синхронизации счета онлайн"
 
 #. module: account_online_sync
-#: model:ir.model.fields,field_description:account_online_sync.field_account_online_provider__message_has_sms_error
-msgid "SMS Delivery error"
-msgstr "Ошибка доставки SMS"
-
-#. module: account_online_sync
-#: code:addons/account_online_sync/models/online_sync.py:0
-#: code:addons/account_online_sync/models/online_sync.py:0
+#: code:addons/account_online_sync/models/online_sync.py:76
+#: code:addons/account_online_sync/models/online_sync.py:90
 #, python-format
 msgid "Server not reachable, please try again later"
 msgstr "Сервер недоступен. Повторите попытку позже"
@@ -582,19 +612,9 @@ msgid "Status Code"
 msgstr "код статуса"
 
 #. module: account_online_sync
-#: model:ir.model.fields.selection,name:account_online_sync.selection__account_online_wizard__status__success
+#: selection:account.online.wizard,status:0
 msgid "Success"
 msgstr "Удача"
-
-#. module: account_online_sync
-#: model_terms:ir.ui.view,arch_db:account_online_sync.account_journal_form_inherit_online_sync
-msgid "Synchronization Frequency"
-msgstr "частота синхронизации"
-
-#. module: account_online_sync
-#: model:ir.model.fields,field_description:account_online_sync.field_account_online_link_wizard__journal_statements_creation
-msgid "Synchronization frequency"
-msgstr "Частота синхронизации"
 
 #. module: account_online_sync
 #: model:ir.actions.act_window,name:account_online_sync.action_account_online_wizard_form
@@ -652,20 +672,25 @@ msgstr ""
 "yodlee к подходящего партнера (используется при совершении покупки)"
 
 #. module: account_online_sync
-#: code:addons/account_online_sync/models/online_sync.py:0
+#: model_terms:ir.ui.view,arch_db:account_online_sync.view_account_online_wizard_form
+msgid "The account has been linked to your bank journal."
+msgstr "Аккаунт связано с вашим банковским журналом."
+
+#. module: account_online_sync
+#: code:addons/account_online_sync/models/online_sync.py:63
 #, python-format
 msgid "The following error happened during the synchronization: %s"
 msgstr "Следующая ошибка произошло во время синхронизации: %s"
 
 #. module: account_online_sync
-#: code:addons/account_online_sync/models/online_sync.py:0
+#: code:addons/account_online_sync/models/online_sync.py:105
 #, python-format
 msgid "The following transactions have been loaded in the system."
 msgstr "В системе загружены следующие операции."
 
 #. module: account_online_sync
-#: code:addons/account_online_sync/models/online_sync.py:0
-#: code:addons/account_online_sync/models/online_sync.py:0
+#: code:addons/account_online_sync/models/online_sync.py:74
+#: code:addons/account_online_sync/models/online_sync.py:88
 #, python-format
 msgid "Timeout: the server did not reply within 60s"
 msgstr "Время вышло: сервер не отвечал в течение 60 секунд"
@@ -682,13 +707,13 @@ msgstr ""
 "Истина, если пользователю необходимо принять меры, обновив учетную запись"
 
 #. module: account_online_sync
-#: code:addons/account_online_sync/models/online_sync.py:0
+#: code:addons/account_online_sync/models/online_sync.py:201
 #, python-format
 msgid "Unimplemented"
 msgstr "Невыполненными"
 
 #. module: account_online_sync
-#: code:addons/account_online_sync/models/online_sync.py:0
+#: code:addons/account_online_sync/models/online_sync.py:117
 #, python-format
 msgid "Unknown reason"
 msgstr "Неизвестная причина"
@@ -735,13 +760,27 @@ msgid "Wizard to link synchronized accounts to journal"
 msgstr "Помощник для соединения синхронизированного учетной записи с журналом"
 
 #. module: account_online_sync
-#: code:addons/account_online_sync/models/online_sync.py:0
+#: selection:account.online.provider,provider_type:0
+msgid "Yodlee"
+msgstr "Yodlee"
+
+#. module: account_online_sync
+#: model_terms:ir.ui.view,arch_db:account_online_sync.view_account_online_wizard_form
+msgid ""
+"You can associate those bank accounts to a journal in order to automatically"
+" retrieve the latest statements from your bank."
+msgstr ""
+"Вы можете связать эти банковские счета с журналом, чтобы автоматически "
+"получать последние выписки из банка."
+
+#. module: account_online_sync
+#: code:addons/account_online_sync/models/online_sync.py:287
 #, python-format
 msgid "You can not link two accounts to the same journal"
 msgstr "Нельзя связать два учетные записи в одном журнале"
 
 #. module: account_online_sync
-#: model:ir.model.fields.selection,name:account_online_sync.selection__account_online_wizard__method__add
+#: selection:account.online.wizard,method:0
 msgid "add"
 msgstr "добавить"
 
@@ -752,22 +791,7 @@ msgid "balance of the account sent by the third party provider"
 msgstr "баланс счета, отправленного провайдером третьей стороной"
 
 #. module: account_online_sync
-#: model_terms:ir.ui.view,arch_db:account_online_sync.view_account_online_wizard_form
-msgid ""
-"bank accounts have been found.<br/>To finalize, please associate each bank "
-"account with an accounting journal and choose the synchronization frequency "
-"<span title=\"The first synchronization collects all transactions in a "
-"unique bank statement\"> <i class=\"fa fa-info-circle\" aria-"
-"label=\"0\"/></span>"
-msgstr ""
-"обнаружены банковские счета. <br/> Для завершения, пожалуйста, свяжите "
-"каждый банковский счет с бухгалтерским журналом и выберите частоту "
-"синхронизации <span title=\"The first synchronization collects all "
-"transactions in a unique bank statement\"> <i class=\"fa fa-info-circle\" "
-"aria-label=\"0\"/> </span>"
-
-#. module: account_online_sync
-#: model:ir.model.fields.selection,name:account_online_sync.selection__account_online_wizard__method__edit
+#: selection:account.online.wizard,method:0
 msgid "edit"
 msgstr "редактировать"
 
@@ -783,18 +807,18 @@ msgid "name of the banking institution"
 msgstr "имя банковского учреждения"
 
 #. module: account_online_sync
-#: code:addons/account_online_sync/models/online_sync.py:0
+#: code:addons/account_online_sync/models/online_sync.py:507
 #, python-format
 msgid "online sync"
 msgstr "онлайн синхронизация"
 
 #. module: account_online_sync
-#: model:ir.model.fields.selection,name:account_online_sync.selection__account_online_wizard__method__refresh
+#: selection:account.online.wizard,method:0
 msgid "refresh"
 msgstr "обновить"
 
 #. module: account_online_sync
-#: code:addons/account_online_sync/models/online_sync.py:0
+#: code:addons/account_online_sync/models/online_sync.py:107
 #, python-format
 msgid "transactions loaded"
 msgstr "транзакции загружены"

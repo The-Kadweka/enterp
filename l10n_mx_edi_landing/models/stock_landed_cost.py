@@ -32,6 +32,7 @@ class StockLandedCost(models.Model):
          _('The custom number must be unique!'))
     ]
 
+    @api.multi
     @api.constrains('l10n_mx_edi_customs_number')
     def check_l10n_mx_edi_customs_number_format(self):
         help_message = self.fields_get().get(

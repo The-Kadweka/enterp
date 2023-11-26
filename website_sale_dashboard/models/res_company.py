@@ -15,7 +15,7 @@ class ResCompany(models.Model):
     @api.model
     def action_close_website_sale_dashboard_onboarding(self):
         """ Mark the website sale dashboard onboarding panel as closed. """
-        self.env.company.website_sale_dashboard_onboarding_state = 'closed'
+        self.env.user.company_id.website_sale_dashboard_onboarding_state = 'closed'
 
     def get_and_update_website_sale_dashboard_onboarding_state(self):
         """ This method is called on the controller rendering method and ensures that the animations

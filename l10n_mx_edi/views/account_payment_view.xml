@@ -1,5 +1,17 @@
 <?xml version="1.0"?>
 <odoo>
+    <record model="ir.ui.view" id="view_account_payment_inv_form_inh_l10n_mx">
+        <field name="name">view.account.payment.inv.form.inh.l10n.mx</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_invoice_form"/>
+        <field name="arch" type="xml">
+            <data>
+                <xpath expr="//field[@name='journal_id']" position="after">
+                    <field name="l10n_mx_edi_payment_method_id" attrs="{'invisible': [('payment_type', '!=', 'inbound')]}"/>
+                </xpath>
+            </data>
+        </field>
+    </record>
     <record model="ir.ui.view" id="view_account_payment_form_inh_l10n_mx">
         <field name="name">view.account.payment.form.inh.l10n.mx</field>
         <field name="model">account.payment</field>
@@ -7,7 +19,7 @@
         <field name="arch" type="xml">
             <data>
                 <xpath expr="//field[@name='journal_id']" position="after">
-                    <field name="l10n_mx_edi_payment_method_id" attrs="{'invisible': [('payment_type', '=', 'transfer')]}"/>
+                    <field name="l10n_mx_edi_payment_method_id" attrs="{'invisible': [('payment_type', '!=', 'inbound')]}"/>
                 </xpath>
                 <xpath expr="//field[@name='communication']" position="after">
                     <label for="l10n_mx_edi_pac_status" states="posted,sent,reconciled,cancelled" attrs="{'invisible': [('payment_type', '!=', 'inbound')]}"/>
@@ -30,20 +42,18 @@
                         <field name="l10n_mx_edi_cfdi_uuid" states="posted,sent,reconciled,cancelled"/>
                     </div>
                     <field name="l10n_mx_edi_origin" attrs="{'invisible': [('payment_type', '!=', 'inbound')]}"/>
-                    <field name="l10n_mx_edi_partner_bank_id" domain="['|', ('partner_id', '=', partner_id), ('partner_id', '=', False)]" context="{'default_partner_id': partner_id}"/>
                 </xpath>
             </data>
         </field>
     </record>
     <record model="ir.ui.view" id="view_account_reg_payment_form_inh_l10n_mx">
         <field name="name">view.account.reg.payment.form.inh.l10n.mx</field>
-        <field name="model">account.payment.register</field>
-        <field name="inherit_id" ref="account.view_account_payment_form_multi"/>
+        <field name="model">account.register.payments</field>
+        <field name="inherit_id" ref="account.view_account_payment_from_invoices"/>
         <field name="arch" type="xml">
             <data>
                 <xpath expr="//field[@name='journal_id']" position="after">
-                    <field name="l10n_mx_edi_payment_method_id"/>
-                    <field name="l10n_mx_edi_partner_bank_id"/>
+                    <field name="l10n_mx_edi_payment_method_id" attrs="{'invisible': [('payment_type', '!=', 'inbound')]}"/>
                 </xpath>
             </data>
         </field>

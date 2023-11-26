@@ -21,14 +21,14 @@ var intervals = {
 var CohortView = AbstractView.extend({
     display_name: _lt('Cohort'),
     icon: 'fa-signal',
-    config: _.extend({}, AbstractView.prototype.config, {
+    config: {
         Model: CohortModel,
         Controller: CohortController,
         Renderer: CohortRenderer,
-    }),
+    },
     viewType: 'cohort',
-    searchMenuTypes: ['filter', 'timeRange', 'favorite'],
-
+    groupable: false,
+    enableTimeRangeMenu: 'true',
     /**
      * @override
      */
@@ -45,6 +45,13 @@ var CohortView = AbstractView.extend({
             throw new Error(_lt('Cohort view has not defined "date_stop" attribute.'));
         }
 
+        // Model Parameters
+        this.loadParams.dateStart = params.context.cohort_date_start ||  attrs.date_start;
+        this.loadParams.dateStop = params.context.cohort_date_stop ||  attrs.date_stop;
+        this.loadParams.mode = params.context.cohort_mode || attrs.mode || 'retention';
+        this.loadParams.timeline = params.context.cohort_timeline || attrs.timeline || 'forward';
+        this.loadParams.measure = params.context.cohort_measure ||  attrs.measure || '__count__';
+        this.loadParams.interval = params.context.cohort_interval || attrs.interval || 'day';
 
         // Renderer Parameters
         var measures = {};
@@ -56,12 +63,19 @@ var CohortView = AbstractView.extend({
         measures.__count__ = _t('Count');
         this.rendererParams.measures = measures;
         this.rendererParams.intervals = intervals;
+        this.rendererParams.mode = this.loadParams.mode;
+        this.rendererParams.timeline = this.loadParams.timeline;
+        this.rendererParams.dateStartString = fields[this.loadParams.dateStart].string;
+        this.rendererParams.dateStopString = fields[this.loadParams.dateStop].string;
 
         // Controller Parameters
         this.controllerParams.measures = _.omit(measures, '__count__');
         this.controllerParams.intervals = intervals;
         this.controllerParams.title = params.title || attrs.string || _t('Untitled');
         // Used in export
+        this.controllerParams.dateStartString = this.rendererParams.dateStartString;
+        this.controllerParams.dateStopString = this.rendererParams.dateStopString;
+        this.controllerParams.timeline = this.rendererParams.timeline;
         // Retrieve form and list view ids from the action to open those views
         // when a row of the cohort view is clicked
         this.controllerParams.views = [
@@ -78,29 +92,6 @@ var CohortView = AbstractView.extend({
             var result = _.findWhere(action.views, {type: viewType});
             return [contextID || (result ? result.viewID : false), viewType];
         }
-    },
-
-
-    _updateMVCParams: function () {
-        this._super.apply(this, arguments);
-        // Model Parameters
-        var context = this.loadParams.context;
-        var attrs = this.arch.attrs;
-        this.loadParams.dateStart = context.cohort_date_start ||  attrs.date_start;
-        this.loadParams.dateStop = context.cohort_date_stop ||  attrs.date_stop;
-        this.loadParams.mode = context.cohort_mode || attrs.mode || 'retention';
-        this.loadParams.timeline = context.cohort_timeline || attrs.timeline || 'forward';
-        this.loadParams.measure = context.cohort_measure ||  attrs.measure || '__count__';
-        this.loadParams.interval = context.cohort_interval || attrs.interval || 'day';
-
-        this.rendererParams.mode = this.loadParams.mode;
-        this.rendererParams.timeline = this.loadParams.timeline;
-        this.rendererParams.dateStartString = this.fields[this.loadParams.dateStart].string;
-        this.rendererParams.dateStopString = this.fields[this.loadParams.dateStop].string;
-
-        this.controllerParams.dateStartString = this.rendererParams.dateStartString;
-        this.controllerParams.dateStopString = this.rendererParams.dateStopString;
-        this.controllerParams.timeline = this.rendererParams.timeline;
     },
 });
 

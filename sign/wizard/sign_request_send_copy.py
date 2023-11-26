@@ -15,7 +15,7 @@ class SignRequestSendCopy(models.TransientModel):
         return res
 
     request_id = fields.Many2one('sign.request')
-    partner_ids = fields.Many2many('res.partner', string="Contact")
+    partner_ids = fields.Many2many('res.partner', string="Send a copy")
 
     def send_a_copy(self):
         return self.env['sign.request'].add_followers(self.request_id.id, self.partner_ids.ids)

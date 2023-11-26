@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from odoo import fields, api, models, tools
+from odoo import fields, api, models
+from odoo.tools import pycompat
 from odoo.tools.safe_eval import safe_eval
 from random import randint, shuffle
 import datetime
@@ -13,48 +14,71 @@ evaluation_context = {
     'context_today': datetime.datetime.now,
 }
 
+if pycompat.PY2:
+    _flanker_warning = False
+    try:
+        from flanker.addresslib import address
+
+        def checkmail(mail):
+            return bool(address.validate_address(mail))
+
+    except ImportError:
+        def checkmail(mail):
+            global _flanker_warning
+            if not _flanker_warning:
+                _logger.warning("The `flanker` Python module is not installed, so email validation is unavailable. Use 'pip install flanker' to install it")
+                _flanker_warning = True
+            return True
+else:
+    _logger.info('Flanker is not compatible with Python 3, email validation has been disabled')
+    def checkmail(mail): return True
 
 class team_user(models.Model):
     _name = 'team.user'
     _inherit = ['mail.thread']
     _description = 'Salesperson (Team Member)'
 
+    @api.one
     def _count_leads(self):
-        for rec in self:
-            if rec.id:
-                limit_date = datetime.datetime.now() - datetime.timedelta(days=30)
-                domain = [('user_id', '=', rec.user_id.id),
-                          ('team_id', '=', rec.team_id.id),
-                          ('assign_date', '>', fields.Datetime.to_string(limit_date))
-                          ]
-                rec.leads_count = self.env['crm.lead'].search_count(domain)
-            else:
-                rec.leads_count = 0
+        if self.id:
+            limit_date = datetime.datetime.now() - datetime.timedelta(days=30)
+            domain = [('user_id', '=', self.user_id.id),
+                      ('team_id', '=', self.team_id.id),
+                      ('assign_date', '>', fields.Datetime.to_string(limit_date))
+                      ]
+            self.leads_count = self.env['crm.lead'].search_count(domain)
+        else:
+            self.leads_count = 0
 
+    @api.one
     def _get_percentage(self):
-        for rec in self:
-            try:
-                rec.percentage_leads = round(100 * rec.leads_count / float(rec.maximum_user_leads), 2)
-            except ZeroDivisionError:
-                rec.percentage_leads = 0.0
+        try:
+            self.percentage_leads = round(100 * self.leads_count / float(self.maximum_user_leads), 2)
+        except ZeroDivisionError:
+            self.percentage_leads = 0.0
 
+    @api.one
     @api.constrains('team_user_domain')
     def _assert_valid_domain(self):
-        for rec in self:
-            try:
-                domain = safe_eval(rec.team_user_domain or '[]', evaluation_context)
-                self.env['crm.lead'].search(domain, limit=1)
-            except Exception:
-                raise Warning('The domain is incorrectly formatted')
+        try:
+            domain = safe_eval(self.team_user_domain or '[]', evaluation_context)
+            self.env['crm.lead'].search(domain, limit=1)
+        except Exception:
+            raise Warning('The domain is incorrectly formatted')
 
-    team_id = fields.Many2one('crm.team', string='Sales Team', required=True)
+    team_id = fields.Many2one('crm.team', string='SaleTeam', required=True, oldname='section_id')
     user_id = fields.Many2one('res.users', string='Saleman', required=True)
     name = fields.Char(string="Name", related='user_id.partner_id.display_name', readonly=False)
-    active = fields.Boolean(string='Running', default=True)
-    team_user_domain = fields.Char('Domain', tracking=True)
+    running = fields.Boolean(string='Running', default=True)
+    team_user_domain = fields.Char('Domain', track_visibility='onchange')
     maximum_user_leads = fields.Integer('Leads Per Month')
     leads_count = fields.Integer('Assigned Leads', compute='_count_leads', help='Assigned Leads this last month')
     percentage_leads = fields.Float(compute='_get_percentage', string='Percentage leads')
+
+    @api.one
+    def toggle_active(self):
+        if isinstance(self.id, int):  # if already saved
+            self.running = not self.running
 
 
 class crm_team(models.Model):
@@ -63,53 +87,50 @@ class crm_team(models.Model):
 
     @api.model
     @api.returns('self', lambda value: value.id if value else False)
-    def _get_default_team_id(self, user_id=None, domain=None):
+    def _get_default_team_id(self, user_id=None):
         if user_id is None:
             user_id = self.env.user.id
-        team_id = self.sudo().search([
-            ('team_user_ids.user_id', '=', user_id),
-            '|', ('company_id', '=', False), ('company_id', '=', self.env.company.id)
-        ], limit=1)
+        team_id = self.sudo().search([('team_user_ids.user_id', '=', user_id)], limit=1)
         if not team_id:
-            team_id = super(crm_team, self)._get_default_team_id(user_id=user_id, domain=domain)
+            team_id = super(crm_team, self)._get_default_team_id(user_id=user_id)
         return team_id
 
+    @api.one
     def _count_leads(self):
-        for rec in self:
-            if rec.id:
-                rec.leads_count = self.env['crm.lead'].search_count([('team_id', '=', rec.id)])
-            else:
-                rec.leads_count = 0
+        if self.id:
+            self.leads_count = self.env['crm.lead'].search_count([('team_id', '=', self.id)])
+        else:
+            self.leads_count = 0
 
+    @api.one
     def _assigned_leads_count(self):
-        for rec in self:
-            limit_date = datetime.datetime.now() - datetime.timedelta(days=30)
-            domain = [('assign_date', '>=', fields.Datetime.to_string(limit_date)),
-                      ('team_id', '=', rec.id),
-                      ('user_id', '!=', False)
-                      ]
-            rec.assigned_leads_count = self.env['crm.lead'].search_count(domain)
+        limit_date = datetime.datetime.now() - datetime.timedelta(days=30)
+        domain = [('assign_date', '>=', fields.Datetime.to_string(limit_date)),
+                  ('team_id', '=', self.id),
+                  ('user_id', '!=', False)
+                  ]
+        self.assigned_leads_count = self.env['crm.lead'].search_count(domain)
 
+    @api.one
     def _capacity(self):
-        for rec in self:
-            rec.capacity = sum(s.maximum_user_leads for s in rec.team_user_ids)
+        self.capacity = sum(s.maximum_user_leads for s in self.team_user_ids)
 
+    @api.one
     @api.constrains('score_team_domain')
     def _assert_valid_domain(self):
-        for rec in self:
-            try:
-                domain = safe_eval(rec.score_team_domain or '[]', evaluation_context)
-                self.env['crm.lead'].search(domain, limit=1)
-            except Exception:
-                raise Warning('The domain is incorrectly formatted')
+        try:
+            domain = safe_eval(self.score_team_domain or '[]', evaluation_context)
+            self.env['crm.lead'].search(domain, limit=1)
+        except Exception:
+            raise Warning('The domain is incorrectly formatted')
 
     ratio = fields.Float(string='Ratio')
-    score_team_domain = fields.Char('Domain', tracking=True)
+    score_team_domain = fields.Char('Domain', track_visibility='onchange')
     leads_count = fields.Integer(compute='_count_leads')
     assigned_leads_count = fields.Integer(compute='_assigned_leads_count')
     capacity = fields.Integer(compute='_capacity')
     team_user_ids = fields.One2many('team.user', 'team_id', string='Salesman')
-    min_for_assign = fields.Integer("Minimum score", help="Minimum score to be automatically assign (>=)", default=0, required=True, tracking=True)
+    min_for_assign = fields.Integer("Minimum score", help="Minimum score to be automatically assign (>=)", default=0, required=True, track_visibility='onchange')
 
     @api.model
     def direct_assign_leads(self, ids=[]):
@@ -129,7 +150,7 @@ class crm_team(models.Model):
                 domain = safe_eval(salesteam['score_team_domain'], evaluation_context)
                 limit_date = fields.Datetime.to_string(datetime.datetime.now() - datetime.timedelta(hours=1))
                 domain.extend([('create_date', '<', limit_date), ('team_id', '=', False), ('user_id', '=', False)])
-                domain.extend(['|', ('stage_id.is_won', '=', False), '&', ('probability', '!=', 0), ('probability', '!=', 100)])
+                domain.extend(['|', ('stage_id.on_change', '=', False), '&', ('stage_id.probability', '!=', 0), ('stage_id.probability', '!=', 100)])
                 leads = self.env["crm.lead"].search(domain, limit=BUNDLE_LEADS)
                 haslead = haslead or (len(leads) == BUNDLE_LEADS)
                 _logger.info('Assignation of %s leads for team %s' % (len(leads), salesteam['id']))
@@ -143,7 +164,7 @@ class crm_team(models.Model):
                 # Erase fake/false email
                 spams = [
                     x.id for x in leads
-                    if x.email_from and not tools.email_normalize(x.email_from)
+                    if x.email_from and not checkmail(x.email_from)
                 ]
 
                 if spams:
@@ -232,7 +253,7 @@ class crm_team(models.Model):
 
         all_salesteams = self.search_read(fields=['score_team_domain'], domain=[('score_team_domain', '!=', False)])
 
-        all_team_users = self.env['team.user'].search([])
+        all_team_users = self.env['team.user'].search([('running', '=', True)])
 
         _logger.info('Starting assign_scores_to_leads')
 

@@ -26,6 +26,7 @@ class VoipPhonecallLogWizard(models.TransientModel):
         string='Specific Date',
         default=lambda *a: datetime.now() + timedelta(hours=2))
 
+    @api.multi
     def _schedule_new_activity(self):
         self.ensure_one()
         new_activity = self.activity_id.copy()
@@ -41,6 +42,7 @@ class VoipPhonecallLogWizard(models.TransientModel):
             new_activity.date_deadline = self.reschedule_date
         new_activity.voip_phonecall_id.date_deadline = new_activity.date_deadline
 
+    @api.multi
     def action_done(self):
         self.ensure_one()
         self.activity_id.write({

@@ -4,7 +4,6 @@ odoo.define('web_dashboard.DashboardController', function (require) {
 var AbstractController = require('web.AbstractController');
 var BasicController = require('web.BasicController');
 var core = require('web.core');
-var Domain = require('web.Domain');
 
 var _t = core._t;
 
@@ -23,7 +22,7 @@ var DashboardController = AbstractController.extend({
         // clicked field specific - filters, so that they can be removed if
         // another field is clicked.
         this.actionDomain = params.actionDomain;
-        this.currentFilterIDs = [];
+        this.currentFilters = [];
     },
 
     //--------------------------------------------------------------------------
@@ -33,8 +32,8 @@ var DashboardController = AbstractController.extend({
     /**
      * @override
      */
-    getOwnedQueryParams: function () {
-        return {context: this.renderer.getsubControllersContext()};
+    getContext: function () {
+        return this.renderer.getsubControllersContext();
     },
 
     //--------------------------------------------------------------------------
@@ -57,7 +56,7 @@ var DashboardController = AbstractController.extend({
         var data = ev.data;
         var action = {
             domain: this.actionDomain,
-            context: _.omit(data.context, 'timeRangeMenuData'),
+            context: data.context,
             name: _.str.sprintf(_t('%s Analysis'), _.str.capitalize(data.viewType)),
             res_model: this.modelName,
             type: 'ir.actions.act_window',
@@ -68,9 +67,7 @@ var DashboardController = AbstractController.extend({
                 additionalMeasures: ev.data.additionalMeasures
             };
         }
-        this.do_action(action, {
-            controllerState: this.exportState(),
-        });
+        this.do_action(action, {keepSearchView: true});
     },
     /**
      * Handles a reload request (it occurs when a field is clicked). If this
@@ -87,28 +84,19 @@ var DashboardController = AbstractController.extend({
      */
     _onReload: function (ev) {
         ev.stopPropagation();
-
-        /*
-        * If we do not have a control panel, this method
-        * will not work. e.g. user dashboard
-        */
-        if (!this._controlPanel) {
-            return this.do_warn(
-                _t("Incorrect Operation"),
-                _t("You cannot apply a filter from this view.")
-            );
-        }
-
+        var self = this;
         var newFilters = [];
         if (ev.data.domain && ev.data.domain.length) {
-            newFilters.push({
-                type: 'filter',
-                domain: Domain.prototype.arrayToString(ev.data.domain),
-                description: ev.data.domainLabel
-            });
+            newFilters.push({domain: ev.data.domain, help: ev.data.domainLabel});
         }
-        var filtersToRemove = this.currentFilterIDs || [];
-        this.currentFilterIDs = this._controlPanel.updateFilters(newFilters, filtersToRemove);
+        this.trigger_up('update_filters', {
+            callback: function (addedFilters) {
+                self.currentFilters = addedFilters;
+            },
+            controllerID: this.controllerID,
+            filtersToRemove: this.currentFilters || [],
+            newFilters: newFilters,
+        });
     },
 });
 

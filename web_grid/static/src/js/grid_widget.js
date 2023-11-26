@@ -103,7 +103,7 @@ var FloatToggleWidget = BaseGridWidget.extend({
         var current = formattedValue;
 
         // handlers
-        function onClick () {
+        function onClick () {
             // current is in user's format
             var currentFloat = field_utils.parse['float'](current);
             var closest = utils.closestNumber(currentFloat, range);
@@ -118,7 +118,7 @@ var FloatToggleWidget = BaseGridWidget.extend({
                 formattedValue: current.toString(),
                 path: path,
             });
-        }
+        }
         function triggerSaveChange () {
             self.trigger_up('grid_cell_edited', {
                 path: path,

@@ -14,6 +14,6 @@ class IrHttp(models.AbstractModel):
         if result['is_system']:
             # necessary keys for Studio
             result['dbuuid'] = request.env['ir.config_parameter'].sudo().get_param('database.uuid')
-            result['multi_lang'] = len(request.env['res.lang'].get_installed()) > 1
+            result['multi_lang'] = bool(request.env['res.lang'].search_count([('code', '!=', 'en_US')]))
 
         return result

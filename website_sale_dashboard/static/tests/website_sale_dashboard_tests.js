@@ -19,20 +19,19 @@ QUnit.module('Views', {
 
     QUnit.module('WebsiteSaleDashboardView');
 
-    QUnit.test('The website sale dashboard view has a "Go to Website" Button', async function (assert) {
+    QUnit.test('The website sale dashboard view has a "Go to Website" Button', function (assert) {
         assert.expect(1);
 
-        var dashboard = await createView({
+        var dashboard = createView({
             View: WebsiteSaleDashboardView,
             model: 'test_report',
             data: this.data,
             arch: '<dashboard js_class="website_sale_dashboard"></dashboard>',
         });
 
-        assert.containsOnce(dashboard.$buttons, '.btn-primary[title="Go to Website"]',
+        assert.strictEqual(dashboard.$buttons.find('.btn-primary[title="Go to Website"]').length, 1,
             "the control panel should contain a 'Go to Website' button");
 
-        dashboard.destroy();
     });
 });
 

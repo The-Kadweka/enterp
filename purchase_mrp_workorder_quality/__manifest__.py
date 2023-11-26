@@ -5,7 +5,7 @@
 {
     'name': 'Full Traceability Report Demo Data',
     'version': '1.0',
-    'category': 'Manufacturing/Manufacturing',
+    'category': 'Manufacturing',
     'sequence': 50,
     'summary': 'Full Traceability Report Demo Data',
     'depends': ['purchase_mrp', 'quality_mrp_workorder', 'purchase_stock'],

@@ -6,16 +6,17 @@ odoo.define('documents.DocumentsInspector', function (require) {
  * the KanbanRenderer in the DocumentsKanbanView.
  */
 
+var DocumentViewer = require('mail.DocumentViewer');
+
 var core = require('web.core');
 var fieldRegistry = require('web.field_registry');
 var session = require('web.session');
-var dialogs = require('web.view_dialogs');
 var Widget = require('web.Widget');
 
 var _t = core._t;
 var qweb = core.qweb;
 
-var TAGS_SEARCH_LIMIT = 8;
+var TAGS_SEARCH_LIMIT = 4;
 
 var DocumentsInspector = Widget.extend({
     template: 'documents.DocumentsInspector',
@@ -52,37 +53,19 @@ var DocumentsInspector = Widget.extend({
 
         this.nbDocuments = params.state.count;
         this.size = params.state.size;
-        this.focusTagInput = params.focusTagInput;
-        this.currentFolder = _.findWhere(params.folders, {id: params.folderId});
-        this.recordsData = {};
+        this.currentFolder = _.findWhere(params.state.folders, {id: params.state.folderID});
 
         this.records = [];
-        for (const resID of params.recordIDs) {
+        _.each(params.recordIDs, function (resID) {
             var record = _.findWhere(params.state.data, {res_id: resID});
             if (record) {
-                let youtubeToken;
-                let youtubeUrlMatch;
-                if (record.data.url && record.data.url.length) {
-                    /** youtu<A>/<B><token>
-                     * A = .be|be.com
-                     * B = watch?v=|''
-                     * token = <11 case sensitive alphanumeric characters and _>
-                     */
-                    youtubeUrlMatch = record.data.url.match('youtu(?:\.be|be\.com)/(?:.*v(?:/|=)|(?:.*/)?)([a-zA-Z0-9-_]{11})');
-                }
-                if (youtubeUrlMatch && youtubeUrlMatch.length > 1) {
-                     youtubeToken = youtubeUrlMatch[1];
-                }
-                this.recordsData[record.id] = {
-                    isGif: new RegExp('image.*(gif)').test(record.data.mimetype),
-                    isImage: new RegExp('image.*(jpeg|jpg|png)').test(record.data.mimetype),
-                    isYouTubeVideo: !!youtubeToken,
-                    youtubeToken,
-                };
-                this.records.push(record);
+                self.records.push(_.extend(record, {
+                    _isImage: new RegExp('image.*(gif|jpeg|jpg|png)').test(record.data.mimetype),
+                }));
             }
-        }
-        this.tags = params.tags;
+        });
+
+        this.tags = params.state.tags;
         var tagIDsByRecord = _.map(this.records, function (record) {
             return record.data.tag_ids.res_ids;
         });
@@ -91,7 +74,7 @@ var DocumentsInspector = Widget.extend({
         var ruleIDsByRecord = _.map(this.records, function (record) {
             return record.data.available_rule_ids.res_ids;
         });
-        var commonRuleIDs = _.intersection.apply(_, ruleIDsByRecord);
+        var commonRuleIDs =_.intersection.apply(_, ruleIDsByRecord);
         var record = this.records[0];
         this.rules = _.map(commonRuleIDs, function (ruleID) {
             var rule = _.findWhere(record.data.available_rule_ids.data, {
@@ -100,27 +83,21 @@ var DocumentsInspector = Widget.extend({
             return rule.data;
         });
 
-        // we have to block some actions (like opening the record preview) when
+        // we have to lock some actions (like opening the record preview) when
         // there are pending 'multiSave' requests
+        this.savingDef = null;
         this.pendingSavingRequests = 0;
-
-        this._isLocked = this.records.some(record =>
-             record.data.lock_uid && record.data.lock_uid.res_id !== session.uid
-        );
     },
     /**
      * @override
      */
-    async start() {
+    start: function () {
+        this._renderFields();
         this._renderTags();
         this._renderRules();
         this._renderModel();
         this._updateButtons();
-        await Promise.all([
-            this._renderFields(),
-            this._super.apply(this, arguments)
-        ]);
-        this.$('.o_inspector_table .o_input').prop('disabled', this._isLocked);
+        return this._super.apply(this, arguments);
     },
 
     //--------------------------------------------------------------------------
@@ -183,7 +160,6 @@ var DocumentsInspector = Widget.extend({
      * @param {Object} [options] options to pass to the field
      * @param {string} [options.icon] optional icon to display
      * @param {string} [options.label] the label to display
-     * @return {Promise}
      */
     _renderField: function (fieldName, options) {
         options = options || {};
@@ -217,89 +193,80 @@ var DocumentsInspector = Widget.extend({
             viewType: 'kanban',
         });
         var fieldWidget = new FieldWidget(this, fieldName, record, options);
-        const prom = fieldWidget.appendTo($row.find('.o_inspector_value')).then(function() {
-            fieldWidget.getFocusableElement().attr('id', fieldName);
-            if (type === 'many2one' && values.length > 1) {
-                fieldWidget.$el.addClass('o_multiple_values');
-            }
-        });
+        fieldWidget.appendTo($row.find('.o_inspector_value'));
+        fieldWidget.getFocusableElement().attr('id', fieldName);
+        if (type === 'many2one' && values.length > 1) {
+            fieldWidget.$el.addClass('o_multiple_values');
+        }
+
         $row.insertBefore(this.$('.o_inspector_fields tbody tr.o_inspector_divider'));
-        return prom;
     },
     /**
      * @private
-     * @return {Promise}
      */
     _renderFields: function () {
         var options = {mode: 'edit'};
-        var proms = [];
         if (this.records.length === 1) {
-            proms.push(this._renderField('name', options));
+            this._renderField('name', options);
             if (this.records[0].data.type === 'url') {
-                proms.push(this._renderField('url', options));
+                this._renderField('url', options);
             }
-            proms.push(this._renderField('partner_id', options));
+            this._renderField('partner_id', options);
         }
         if (this.records.length > 0) {
-            proms.push(this._renderField('owner_id', options));
-            proms.push(this._renderField('folder_id', {
+            this._renderField('owner_id', options);
+            this._renderField('folder_id', {
                 icon: 'fa fa-folder o_documents_folder_color',
                 mode: 'edit',
-            }));
+            });
         }
-        return Promise.all(proms);
     },
     /**
      * @private
      */
     _renderModel: function () {
-        if (this.records.length !== 1) {
-           return;
-        }
-        var resModelName = this.records[0].data.res_model_name;
-        if (!resModelName || this.records[0].data.res_model === 'documents.document') {
-            return;
-        }
+        if (this.records.length === 1){
+            var resModelName = this.records[0].data.res_model_name;
+            if (!resModelName || this.records[0].data.res_model === 'ir.attachment') {
+                return;
+            }
 
-        var $modelContainer = this.$('.o_model_container');
-        var options = {
-            res_model: resModelName,
-            res_name: this.records[0].data.res_name,
-        };
-        $modelContainer.append(qweb.render('documents.DocumentsInspector.resModel', options));
+            var $modelContainer = this.$('.o_model_container');
+            var options = {
+                res_model: resModelName,
+                res_name: this.records[0].data.res_name,
+            };
+            $modelContainer.append(qweb.render('documents.DocumentsInspector.resModel', options));
+        }
     },
     /**
      * @private
      */
     _renderRules: function () {
-        if (!this.currentFolder || this._isLocked) {
-           return;
-        }
         var self = this;
         _.each(this.rules, function (rule) {
-            if (self.records.length === 1 || !rule.limited_to_single_record) {
-                var $rule = $(qweb.render('documents.DocumentsInspector.rule', rule));
-                $rule.appendTo(self.$('.o_inspector_rules'));
-            }
+            var $rule = $(qweb.render('documents.DocumentsInspector.rule', rule));
+            $rule.appendTo(self.$('.o_inspector_rules'));
         });
     },
     /**
      * @private
      */
     _renderTags: function () {
+        var self = this;
         var $tags = this.$('.o_inspector_tags');
 
         // render common tags
-        const commonTags = this.tags.filter(tag => this.commonTagIDs.includes(tag.id));
-        for (const tag of commonTags) {
+        _.each(this.commonTagIDs, function (tagID) {
+            var tag = _.findWhere(self.tags, {tag_id: tagID});
             if (tag) {
                 // hide unknown tags (this may happen if a document with tags
                 // is moved to another folder, but we keep those tags in case
                 // the document is moved back to its original folder)
                 var $tag = $(qweb.render('documents.DocumentsInspector.tag', tag));
-                $tag.appendTo(this.$('.o_inspector_tags'));
+                $tag.appendTo(self.$('.o_inspector_tags'));
             }
-        };
+        });
 
         // render autocomplete input (if there are still tags to add)
         if (this.tags.length > this.commonTagIDs.length) {
@@ -311,36 +278,23 @@ var DocumentsInspector = Widget.extend({
             this.$tagInput.autocomplete({
                 delay: 0,
                 minLength: 0,
-                autoFocus: true,
-                select: (event, ui) => {
-                    this.trigger_up('set_focus_tag_input');
-                    const currentId = ui.item.id;
-                    if (ui.item.special) {
-                        if (ui.item.special === 'more') {
-                            this._searchMore(this._lastSearchVal);
-                        }
-                    } else if (currentId) {
-                        this._saveMulti({
-                            tag_ids: {
-                                operation: 'ADD_M2M',
-                                resIDs: [currentId],
-                            },
-                        });
-                    }
+                select: function (event, ui) {
+                    self._saveMulti({
+                        tag_ids: {
+                            operation: 'ADD_M2M',
+                            resIDs: [ui.item.id],
+                        },
+                    });
                 },
-                source: (req, resp) => {
-                    resp(this._search(req.term));
-                    this._lastSearchVal = req.term;
+                source: function (req, resp) {
+                    resp(self._search(req.term));
                 },
             });
 
-            var disabled = this._isLocked || (this.records.length === 1 && !this.records[0].data.active);
+            var disabled = this.records.length === 1 && !this.records[0].data.active;
             $tags.closest('.o_inspector_custom_field').toggleClass('o_disabled', disabled);
 
             this.$tagInput.appendTo($tags);
-            if (this.focusTagInput) {
-                this.$tagInput.focus();
-            }
         }
     },
     /**
@@ -351,12 +305,16 @@ var DocumentsInspector = Widget.extend({
      */
     _saveMulti: function (changes) {
         var self = this;
+        this.savingDef = this.savingDef || $.Deferred();
         this.pendingSavingRequests++;
         this.trigger_up('save_multi', {
             changes: changes,
             dataPointIDs: _.pluck(this.records, 'id'),
             callback: function () {
                 self.pendingSavingRequests--;
+                if (self.pendingSavingRequests === 0) {
+                    self.savingDef.resolve();
+                }
             },
         });
     },
@@ -370,81 +328,25 @@ var DocumentsInspector = Widget.extend({
      */
     _search: function (value) {
         var self = this;
+        var options = {
+            extract: function (el) {
+                return el.label;
+            }
+        };
         var tags = [];
         _.each(this.tags, function (tag) {
             // don't search amongst already linked tags
-            if (!_.contains(self.commonTagIDs, tag.id)) {
+            if (!_.contains(self.commonTagIDs, tag.tag_id)) {
                 tags.push({
-                    id: tag.id,
-                    label: tag.group_name + ' > ' + tag.name,
+                    id: tag.tag_id,
+                    label: tag.facet_name + ' > ' + tag.tag_name,
                 });
             }
         });
-        const lowerValue = value.toLowerCase();
-        const allSearchResults = tags.filter(tag => tag.label.toLowerCase().includes(lowerValue));
-        const searchResults = allSearchResults.slice(0, TAGS_SEARCH_LIMIT);
-        if (allSearchResults.length > TAGS_SEARCH_LIMIT) {
-            searchResults.push({
-                label: _t("Search more..."),
-                special: 'more',
-                classname: 'o_m2o_dropdown_option',
-            });
-        }
-
-        return searchResults;
-    },
-    /**
-     * @private
-     * @param {Object[]} [dynamicFilters=[]] filters to add to the search view
-     *   in the dialog (each filter has keys 'description' and 'domain')
-     */
-    _searchCreatePopup(dynamicFilters=[]) {
-        this.$('.o_inspector_tag_add').val('');
-        return new dialogs.SelectCreateDialog(this, {
-            domain: [['folder_id', '=', this.currentFolder.id]],
-            dynamicFilters: dynamicFilters || [],
-            no_create: true,
-            on_selected: records => this._saveMulti({
-                tag_ids: {
-                   operation: 'ADD_M2M',
-                   resIDs: records.map(record => record.id),
-                },
-            }),
-            res_model: 'documents.tag',
-            title: _t('Select tags'),
-        }).open();
-    },
-    /**
-     * Search for tags matching the value for either tag.name and tag.facet_id.name.
-     *
-     * @private
-     * @param {String} value
-     */
-    async _searchMore(value) {
-        let results;
-        if (value) {
-            results = await this._rpc({
-                model: 'documents.tag',
-                method: 'search_read',
-                fields: ['id'],
-                domain: ['&', '&',
-                            ['id', 'not in', this.commonTagIDs],
-                            ['folder_id', '=', this.currentFolder.id],
-                            '|',
-                                ['facet_id.name', 'ilike', value],
-                                ['name', 'ilike', value]
-                ],
-            });
-        }
-        let dynamicFilters;
-        if (results) {
-            const ids = results.map(result => result.id);
-            dynamicFilters = [{
-                description: _.str.sprintf(_t('Name or Category contains: %s'), value),
-                domain: [['id', 'in', ids]],
-            }];
-        }
-        await this._searchCreatePopup(dynamicFilters);
+        var searchResults = fuzzy.filter(value, tags, options).slice(0, TAGS_SEARCH_LIMIT);
+        return _.map(searchResults, function (result) {
+            return tags[result.index];
+        });
     },
     /**
      * Disable buttons if at least one of the selected records is locked by
@@ -453,14 +355,16 @@ var DocumentsInspector = Widget.extend({
      * @private
      */
     _updateButtons: function () {
+        var disabled = _.some(this.records, function (record) {
+            return record.data.lock_uid && record.data.lock_uid.res_id !== session.uid;
+        });
         var binary = _.some(this.records, function (record) {
             return record.data.type === 'binary';
         });
-        if (this._isLocked) {
+        if (disabled) {
             this.$('.o_inspector_replace').prop('disabled', true);
             this.$('.o_inspector_delete').prop('disabled', true);
             this.$('.o_inspector_archive').prop('disabled', true);
-            this.$('.o_inspector_table .o_field_widget').prop('disabled', true);
         }
         if (!binary && (this.records.length > 1 || (this.records.length && this.records[0].data.type === 'empty'))) {
             this.$('.o_inspector_download').prop('disabled', true);
@@ -544,7 +448,7 @@ var DocumentsInspector = Widget.extend({
      */
     _onOpenChatter: function () {
         this.trigger_up('open_chatter', {
-            id: this.records[0].data.id,
+            id: this.records[0].id,
         });
     },
     /**
@@ -552,19 +456,16 @@ var DocumentsInspector = Widget.extend({
      * download and print options.
      *
      * @private
-     * @param {MouseEvent} ev
      */
     _onOpenPreview: function (ev) {
-        ev.preventDefault();
         ev.stopPropagation();
-        if (this.pendingSavingRequests > 0)
-            return;
+        var self = this;
         var activeID = $(ev.currentTarget).data('id');
         if (activeID) {
-            var records = _.pluck(this.records, 'data');
-            this.trigger_up('kanban_image_clicked', {
-                recordID: activeID,
-                recordList: records
+            $.when(this.savingDef).then(function () {
+                var records = _.pluck(self.records, 'data');
+                var documentViewer = new DocumentViewer(self, records, activeID);
+                documentViewer.appendTo($('.o_documents_kanban_view'));
             });
         }
     },

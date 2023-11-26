@@ -35,21 +35,29 @@ QUnit.module('Control Panel', {
         };
     },
 }, function () {
-    QUnit.test('searchview should be hidden by default', async function (assert) {
-        assert.expect(2);
+    QUnit.test('searchview should be hidden by default', function (assert) {
+        assert.expect(4);
 
-        var actionManager = await createActionManager({
+        var actionManager = createActionManager({
             actions: this.actions,
             archs: this.archs,
             data: this.data,
         });
 
-        await actionManager.doAction(1);
+        actionManager.doAction(1);
 
+        assert.ok($('.o_control_panel').hasClass('o_breadcrumb_full'),
+            "should use full width to display the breadcrumbs by default");
         assert.notOk($('.o_control_panel .o_mobile_search').is(':visible'),
             "search options are hidden by default");
         assert.strictEqual($('.o_control_panel .o_enable_searchview').length, 1,
             "should display a button to toggle the searchview");
+
+        // toggle the searchview
+        $('.o_control_panel .o_enable_searchview').click();
+
+        assert.ok($('.o_control_panel .o_mobile_search').is(':visible'),
+            "search options should now be visible");
 
         actionManager.destroy();
     });

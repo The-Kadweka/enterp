@@ -1,7 +1,7 @@
 odoo.define('web_mobile.CrashManager', function (require) {
 "use strict";
 
-var CrashManager = require('web.CrashManager').CrashManager;
+var CrashManager = require('web.CrashManager');
 
 var mobile = require('web_mobile.rpc');
 

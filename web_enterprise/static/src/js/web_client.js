@@ -2,6 +2,7 @@ odoo.define('web.WebClient', function (require) {
 "use strict";
 
 var AbstractWebClient = require('web.AbstractWebClient');
+var ActionManager = require('web.ActionManager');
 var config = require('web.config');
 var core = require('web.core');
 var data_manager = require('web.data_manager');
@@ -16,12 +17,8 @@ return AbstractWebClient.extend({
         app_clicked: 'on_app_clicked',
         menu_clicked: 'on_menu_clicked',
         show_home_menu: '_onShowHomeMenu',
-        hide_home_menu: '_onHideHomeMenu'
+        hide_home_menu: '_onHideHomeMenu',
     }),
-    init: function () {
-        this._super.apply(this, arguments);
-        this.home_menu_displayed = false;
-    },
     start: function () {
         core.bus.on('change_menu_section', this, function (menu_id) {
             this.do_push_state(_.extend($.bbq.getState(), {
@@ -63,34 +60,34 @@ return AbstractWebClient.extend({
         });
     },
     load_menus: function () {
-        return (odoo.loadMenusPromise || odoo.reloadMenus())
-            .then(function (menuData) {
+        return this._rpc({
+                model: 'ir.ui.menu',
+                method: 'load_menus',
+                args: [config.debug],
+                context: session.user_context,
+            })
+            .then(function(menu_data) {
                 // Compute action_id if not defined on a top menu item
-                for (var i = 0; i < menuData.children.length; i++) {
-                    var child = menuData.children[i];
+                for (var i = 0; i < menu_data.children.length; i++) {
+                    var child = menu_data.children[i];
                     if (child.action === false) {
                         while (child.children && child.children.length) {
                             child = child.children[0];
                             if (child.action) {
-                                menuData.children[i].action = child.action;
+                                menu_data.children[i].action = child.action;
                                 break;
                             }
                         }
                     }
                 }
-                odoo.loadMenusPromise = null;
-                return menuData;
+                return menu_data;
             });
     },
     show_application: function () {
         var self = this;
         this.set_title();
 
-        const insertMenu = () => {
-            this.menu.$el.prependTo(this.$el);
-        };
-
-        return this.menu_dp.add(this.instanciate_menu_widgets()).then(function () {
+        return this.instanciate_menu_widgets().then(function () {
             $(window).bind('hashchange', self.on_hashchange);
 
             // Listen to 'scroll' event in home_menu and propagate it on main bus
@@ -100,13 +97,12 @@ return AbstractWebClient.extend({
             // show the home menu if not)
             // If it is not empty, we trigger a dummy hashchange event so that `self.on_hashchange`
             // will take care of toggling the home menu and loading the action.
-            var state = $.bbq.getState(true);
-            if (_.keys(state).length === 1 && _.keys(state)[0] === "cids") {
-                return self.menu_dp.add(self._rpc({
+            if (_.isEmpty($.bbq.getState(true))) {
+                return self._rpc({
                         model: 'res.users',
                         method: 'read',
                         args: [session.uid, ["action_id"]],
-                    }))
+                    })
                     .then(function(result) {
                         var data = result[0];
                         if(data.action_id) {
@@ -121,7 +117,7 @@ return AbstractWebClient.extend({
             } else {
                 return self.on_hashchange();
             }
-        }).then(insertMenu).guardedCatch(insertMenu);
+        });
     },
 
     instanciate_menu_widgets: function() {
@@ -130,22 +126,50 @@ return AbstractWebClient.extend({
         return this.load_menus().then(function(menu_data) {
             self.menu_data = menu_data;
 
+            // Here, we instanciate every menu widgets and we immediately append them into dummy
+            // document fragments, so that their `start` method are executed before inserting them
+            // into the DOM.
+            if (self.home_menu) {
+                self.home_menu.destroy();
+            }
+            if (self.menu) {
+                self.menu.destroy();
+            }
             self.home_menu = new HomeMenu(self, menu_data);
             self.menu = new Menu(self, menu_data);
 
             defs.push(self.home_menu.appendTo(document.createDocumentFragment()));
-            defs.push(self.menu.appendTo(document.createDocumentFragment()));
-            return Promise.all(defs);
+            defs.push(self.menu.prependTo(self.$el));
+            return $.when.apply($, defs);
         });
     },
 
+    set_action_manager: function () {
+        this.action_manager = new ActionManager(this, session.user_context);
+        return this.action_manager.appendTo(this.$el);
+    },
+    // --------------------------------------------------------------
+    // do_*
+    // --------------------------------------------------------------
+    /**
+     * Extends do_action() to toggle the home menu off if the action isn't displayed in a dialog
+     */
+    do_action: function () {
+        var self = this;
+        return this._super.apply(this, arguments).done(function(action) {
+            if (self.home_menu_displayed && action.target !== 'new' &&
+                action.type !== 'ir.actions.act_window_close') {
+                    self.toggle_home_menu(false);
+                }
+        });
+    },
     // --------------------------------------------------------------
     // URL state handling
     // --------------------------------------------------------------
     on_hashchange: function(event) {
         if (this._ignore_hashchange) {
             this._ignore_hashchange = false;
-            return Promise.resolve();
+            return $.when();
         }
 
         var self = this;
@@ -153,8 +177,8 @@ return AbstractWebClient.extend({
             var stringstate = $.bbq.getState(false);
             if (!_.isEqual(self._current_state, stringstate)) {
                 var state = $.bbq.getState(true);
-                if (state.action || (state.model && (state.view_type || state.id))) {
-                    return self.menu_dp.add(self.action_manager.loadState(state, !!self._current_state)).then(function () {
+                if (state.sa || state.action || (state.model && (state.view_type || state.id))) {
+                    return self.action_manager.loadState(state, !!self._current_state).then(function () {
                         if (state.menu_id) {
                             if (state.menu_id !== self.menu.current_primary_menu) {
                                 core.bus.trigger('change_menu_section', state.menu_id);
@@ -167,10 +191,10 @@ return AbstractWebClient.extend({
                             }
                         }
                         self.toggle_home_menu(false);
-                    }).guardedCatch(self.toggle_home_menu.bind(self, true));
+                    }).fail(self.toggle_home_menu.bind(self, true));
                 } else if (state.menu_id) {
                     var action_id = self.menu.menu_id_to_action_id(state.menu_id);
-                    return self.menu_dp.add(self.do_action(action_id, {clear_breadcrumbs: true})).then(function () {
+                    return self.do_action(action_id, {clear_breadcrumbs: true}).then(function () {
                         core.bus.trigger('change_menu_section', state.menu_id);
                         self.toggle_home_menu(false);
                     });
@@ -191,39 +215,45 @@ return AbstractWebClient.extend({
     // --------------------------------------------------------------
     on_app_clicked: function (ev) {
         var self = this;
-        return this.menu_dp.add(data_manager.load_action(ev.data.action_id))
+        return this.menu_dm.add(data_manager.load_action(ev.data.action_id))
             .then(function (result) {
                 return self.action_mutex.exec(function () {
-                    return new Promise(function (resolve, reject) {
-                        var options = _.extend({}, ev.data.options, {
-                            clear_breadcrumbs: true,
-                            action_menu_id: ev.data.menu_id,
-                        });
-                        Promise.resolve(self._openMenu(result, options)).guardedCatch(function () {
-                            self.toggle_home_menu(true);
-                            resolve();
-                        }).then(function () {
-                            self._on_app_clicked_done(ev)
-                                .then(resolve)
-                                .guardedCatch(reject);
-                        });
+                    var completed = $.Deferred();
+                    var options = _.extend({}, ev.data.options, {
+                        clear_breadcrumbs: true,
+                        action_menu_id: ev.data.menu_id,
                     });
+                    $.when(self._openMenu(result, options)).fail(function () {
+                        self.toggle_home_menu(true);
+                        completed.resolve();
+                    }).done(function () {
+                        self._on_app_clicked_done(ev)
+                            .then(completed.resolve.bind(completed))
+                            .fail(completed.reject.bind(completed));
+                    });
+                    return completed;
                 });
             });
     },
     _on_app_clicked_done: function(ev) {
         core.bus.trigger('change_menu_section', ev.data.menu_id);
         this.toggle_home_menu(false);
-        return Promise.resolve();
+        return $.Deferred().resolve();
     },
     on_menu_clicked: function (ev) {
         var self = this;
-        return this.menu_dp.add(data_manager.load_action(ev.data.action_id))
+        return this.menu_dm.add(data_manager.load_action(ev.data.action_id))
             .then(function (result) {
                 return self.action_mutex.exec(function () {
-                    return self._openMenu(result, {clear_breadcrumbs: true});
+                    var completed = $.Deferred();
+                    $.when(self._openMenu(result, {
+                        clear_breadcrumbs: true,
+                    })).always(function () {
+                        completed.resolve();
+                    });
+                    return completed;
                 });
-            }).then(function () {
+            }).always(function () {
                 self.$el.removeClass('o_mobile_menu_opened');
             });
     },
@@ -234,7 +264,7 @@ return AbstractWebClient.extend({
      * @private
      * @param {Object} action
      * @param {Object} options
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _openMenu: function (action, options) {
         return this.do_action(action, options);
@@ -268,8 +298,6 @@ return AbstractWebClient.extend({
                     self._ignore_hashchange = true;
                     $.bbq.pushState('#home', 2); // merge_mode 2 to replace the current state
                 }
-                $.bbq.pushState({'cids': self.url.cids}, 0);
-
                 self.menu.toggle_mode(true, self.action_manager.getCurrentAction() !== null);
             });
         } else {
@@ -291,19 +319,6 @@ return AbstractWebClient.extend({
         });
         this.home_menu_displayed = true;
     },
-    /**
-     * Ensure to toggle off the home menu when an action is executed (for
-     * instance from a systray item or from a dialog).
-     *
-     * @private
-     */
-    current_action_updated: function() {
-        this._super.apply(this, arguments);
-
-        if (this.home_menu_displayed) {
-            this.toggle_home_menu(false);
-        }
-    },
     _onShowHomeMenu: function () {
         this.toggle_home_menu(true);
     },
@@ -320,19 +335,17 @@ return AbstractWebClient.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * Overrides to return the left and top scroll positions of the webclient
-     * in mobile (as it is the main scrolling element in that case).
+     * Returns the left and top scroll positions of the main scrolling area
+     * (i.e. the action manager in desktop and the webclient itself in mobile).
      *
      * @returns {Object} with keys left and top
      */
     getScrollPosition: function () {
-        if (config.device.isMobile) {
-            return {
-                left: $(window).scrollLeft(),
-                top: $(window).scrollTop(),
-            };
-        }
-        return this._super.apply(this, arguments);
+        var isMobile = config.device.isMobile;
+        return {
+            left: isMobile ? $(window).scrollLeft() : this.action_manager.el.scrollLeft,
+            top: isMobile ? $(window).scrollTop() : this.action_manager.el.scrollTop,
+        };
     },
 
     //--------------------------------------------------------------------------
@@ -343,16 +356,29 @@ return AbstractWebClient.extend({
      * @override
      * @private
      */
+    _onGetScrollPosition: function (ev) {
+        ev.data.callback(this.getScrollPosition());
+    },
+    /**
+     * @override
+     * @private
+     */
     _onScrollTo: function (ev) {
-        if (config.device.isMobile) {
-            var offset = {top: ev.data.top, left: ev.data.left || 0};
-            if (!offset.top) {
-                offset = dom.getPosition(document.querySelector(ev.data.selector));
+        var offset = {top: ev.data.top, left: ev.data.left || 0};
+        var isMobile = config.device.isMobile;
+        if (ev.data.selector) {
+            offset = dom.getPosition(document.querySelector(ev.data.selector));
+            if (!isMobile) {
+                // Substract the position of the action_manager as it is the scrolling part
+                offset.top -= dom.getPosition(this.action_manager.el).top;
             }
-            $(window).scrollTop(offset.top);
-            $(window).scrollLeft(offset.left);
         }
-        this._super.apply(this, arguments);
+        if (isMobile) {
+            this.el.scrollTop = offset.top;
+        } else {
+            this.action_manager.el.scrollTop = offset.top;
+        }
+        this.action_manager.el.scrollLeft = offset.left;
     },
 });
 

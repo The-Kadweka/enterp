@@ -20,22 +20,23 @@ class EbayCategory(models.Model):
         string='Category Type',
     )
 
+    @api.one
     @api.depends('category_parent_id', 'name')
     def _compute_full_name(self):
-        for rec in self:
-            name = rec.name if rec.name else ''
-            parent_id = rec.category_parent_id
-            category_type = rec.category_type
-            while parent_id != '0':
-                parent = rec.search([
-                    ('category_id', '=', parent_id),
-                    ('category_type', '=', category_type),
-                ])
-                parent_name = parent.name if parent.name else ''
-                name = parent_name + " > " + name
-                parent_id = parent.category_parent_id if parent.category_parent_id else '0'
-            rec.full_name = name
+        name = self.name if self.name else ''
+        parent_id = self.category_parent_id
+        category_type = self.category_type
+        while parent_id != '0':
+            parent = self.search([
+                ('category_id', '=', parent_id),
+                ('category_type', '=', category_type),
+            ])
+            parent_name = parent.name if parent.name else ''
+            name = parent_name + " > " + name
+            parent_id = parent.category_parent_id if parent.category_parent_id else '0'
+        self.full_name = name
 
+    @api.multi
     def name_get(self):
         result = []
         for cat in self:

@@ -1,20 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import datetime
-
-from odoo import api, fields, models, _, SUPERUSER_ID
+from odoo import api, models, _, SUPERUSER_ID
 from odoo.exceptions import ValidationError
 from odoo.tools import float_compare, float_round, ormcache
 
 from .taxcloud_request import TaxCloudRequest
 
-
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
-    is_taxcloud_configured = fields.Boolean(related='company_id.is_taxcloud_configured', help='Used to determine whether or not to warn the user to configure TaxCloud.')
-    is_taxcloud = fields.Boolean(related='fiscal_position_id.is_taxcloud', help='Technical field to determine whether to hide taxes in views or not.')
-
+    @api.multi
     def action_confirm(self):
         for order in self.filtered('fiscal_position_id.is_taxcloud'):
             order.validate_taxes_on_sales_order()
@@ -29,28 +24,24 @@ class SaleOrder(models.Model):
     def _get_all_taxes_values(self, request, request_hash):
         return request.get_all_taxes_values()
 
+    @api.multi
     def validate_taxes_on_sales_order(self):
-        if not self.fiscal_position_id.is_taxcloud:
-            return True
         company = self.company_id
-        shipper = company or self.env.company
-        api_id = shipper.taxcloud_api_id
-        api_key = shipper.taxcloud_api_key
+        Param = self.env['ir.config_parameter']
+        api_id = Param.sudo().get_param('account_taxcloud.taxcloud_api_id_{}'.format(company.id)) or Param.sudo().get_param('account_taxcloud.taxcloud_api_id')
+        api_key = Param.sudo().get_param('account_taxcloud.taxcloud_api_key_{}'.format(company.id)) or Param.sudo().get_param('account_taxcloud.taxcloud_api_key')
         request = self._get_TaxCloudRequest(api_id, api_key)
 
+        shipper = self.company_id or self.env.user.company_id
         request.set_location_origin_detail(shipper)
         request.set_location_destination_detail(self.partner_shipping_id)
 
         request.set_order_items_detail(self)
-        request.taxcloud_date = fields.Datetime.context_timestamp(self, datetime.datetime.now())
 
         response = self._get_all_taxes_values(request, request.hash)
 
         if response.get('error_message'):
-            raise ValidationError(
-                _('Unable to retrieve taxes from TaxCloud: ') + '\n' +
-                response['error_message']
-            )
+            raise ValidationError(_('Unable to retrieve taxes from TaxCloud: ')+'\n'+response['error_message']+'\n\n'+_('The configuration of TaxCloud is in the Accounting app, Settings menu.'))
 
         tax_values = response['values']
 
@@ -71,19 +62,16 @@ class SaleOrder(models.Model):
                         ('type_tax_use', '=', 'sale'),
                         ('company_id', '=', company.id),
                     ], limit=1)
-                    if tax:
-                        # Only set if not already set, otherwise it triggers a
-                        # needless and potentially heavy recompute for
-                        # everything related to the tax.
-                        if not tax.active:
-                            tax.active = True  # Needs to be active to be included in order total computation
-                    else:
-                        tax = self.env['account.tax'].sudo().with_context(default_company_id=company.id).create({
+                    if tax and not tax.active:
+                        tax.write({'active': True})
+                    if not tax:
+                        tax = self.env['account.tax'].sudo().create({
                             'name': 'Tax %.3f %%' % (tax_rate),
                             'amount': tax_rate,
                             'amount_type': 'percent',
                             'type_tax_use': 'sale',
                             'description': 'Sales Tax',
+                            'company_id': company.id,
                         })
                     line.tax_id = tax
         return True

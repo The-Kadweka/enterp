@@ -11,9 +11,8 @@ local Post company.
 
 See: https://www.bpost.be/portal/goHome
     """,
-    'category': 'Operations/Inventory/Delivery',
+    'category': 'Warehouse',
     'version': '1.0',
-    'application': True,
     'depends': ['delivery', 'mail'],
     'data': [
         'data/delivery_bpost_data.xml',

@@ -249,3 +249,4 @@ class TestMrpPlm(common.TransactionCase):
             'change_type': 'update',
             'upd_product_qty': 11,
         }])
+

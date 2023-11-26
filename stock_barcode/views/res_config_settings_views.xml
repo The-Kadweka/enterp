@@ -5,14 +5,8 @@
         <field name="model">res.config.settings</field>
         <field name="inherit_id" ref="stock.res_config_settings_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//div[@name='stock_barcode']" position="after">
-                <div class="content-group row mt16" attrs="{'invisible': [('module_stock_barcode', '=', False)]}">
-                    <label for="barcode_nomenclature_id" string="Barcode Nomenclature" class="col-lg-3 o_light_label"/>
-                    <field name="barcode_nomenclature_id" attrs="{'required': [('module_stock_barcode', '=', True)]}"/>
-                </div>
-            </xpath>
             <xpath expr="//div[@id='use_product_barcode']" position="replace">
-                <div class="mt8" attrs="{'invisible': [('module_stock_barcode', '=', False)]}">
+                <div class="mt16" attrs="{'invisible': [('module_stock_barcode', '=', False)]}">
                     <button class="btn-link" type="action" string="Configure Product Barcodes" name="%(stock_barcode.product_action_barcodes)d" icon="fa-arrow-right"/>
                 </div>
             </xpath>

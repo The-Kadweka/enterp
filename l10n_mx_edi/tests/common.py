@@ -1,5 +1,6 @@
 # coding: utf-8
 
+from odoo.tools.pycompat import imap
 from odoo.addons.account.tests.account_test_classes import AccountingTestCase
 from odoo.tests import tagged
 
@@ -22,13 +23,19 @@ class InvoiceTransactionCase(AccountingTestCase):
         })
 
         self.uid = self.manager_billing
+        self.invoice_model = self.env['account.invoice']
+        self.invoice_line_model = self.env['account.invoice.line']
         self.tax_model = self.env['account.tax']
         self.partner_agrolait = self.env.ref("base.res_partner_address_4")
         self.partner_agrolait.type = 'invoice'
         self.partner_agrolait.parent_id.street_name = 'Street Parent'
         self.product = self.env.ref("product.product_product_3")
-        self.company = self.env.company
+        self.company = self.env.user.company_id
         self.account_settings = self.env['res.config.settings']
+        self.tax_tag_iva = self.env['account.account.tag'].create({
+            'name': 'IVA',
+            'applicability': 'taxes',
+        })
         self.tax_positive = self.tax_model.create({
             'name': 'IVA(16%) VENTAS TEST',
             'description': 'IVA(16%)',
@@ -36,6 +43,7 @@ class InvoiceTransactionCase(AccountingTestCase):
             'amount_type': 'percent',
             'type_tax_use': 'sale',
         })
+        self.tax_positive.tag_ids |= self.tax_tag_iva
         self.tax_positive.l10n_mx_cfdi_tax_type = 'Tasa'
         self.tax_negative = self.tax_model.create({
             'name': 'ISR',
@@ -46,10 +54,14 @@ class InvoiceTransactionCase(AccountingTestCase):
         self.product.taxes_id = [self.tax_positive.id, self.tax_negative.id]
         self.product.l10n_mx_edi_code_sat_id = self.ref(
             'l10n_mx_edi.prod_code_sat_01010101')
-        self.payment_term = self.env.ref('account.account_payment_term_30days')
+        self.payment_term = self.env.ref('account.account_payment_term_net')
         # force PPD
         self.payment_term.line_ids.days = 90
-        self.company.l10n_mx_edi_fiscal_regime = '601'
+        self.fiscal_position_model = self.env['account.fiscal.position']
+        self.fiscal_position = self.fiscal_position_model.create({
+            'name': 'Personas morales del régimen general',
+            'l10n_mx_edi_code': '601',
+        })
         self.payment_method_cash = self.env.ref(
             'l10n_mx_edi.payment_method_efectivo')
         self.account_payment = self.env['res.partner.bank'].create({
@@ -86,30 +98,36 @@ class InvoiceTransactionCase(AccountingTestCase):
         if currency_id is None:
             currency_id = self.usd.id
         self.partner_agrolait.lang = None
-        invoice = self.env['account.move'].with_env(self.env(user=self.manager_billing)).with_context(default_type=inv_type).create({
+        invoice = self.invoice_model.with_env(self.env(user=self.user_billing)).create({
             'partner_id': self.partner_agrolait.id,
             'type': inv_type,
             'currency_id': currency_id,
             'l10n_mx_edi_payment_method_id': self.payment_method_cash.id,
             'l10n_mx_edi_partner_bank_id': self.account_payment.id,
-            'invoice_payment_term_id': self.payment_term.id,
-            'invoice_line_ids': [(0, 0, {
-                'product_id': self.product.id,
-                'quantity': 1,
-                'price_unit': 450.0,
-                'product_uom_id': self.product.uom_id.id,
-                'name': self.product.name,
-            })],
+        })
+        self.create_invoice_line(invoice)
+        invoice.compute_taxes()
+        # I manually assign a tax on invoice
+        self.env['account.invoice.tax'].create({
+            'name': 'Test Tax for Customer Invoice',
+            'manual': 1,
+            'amount': 0,
+            'account_id': self.ova.id,
+            'invoice_id': invoice.id,
         })
         return invoice
-        # TODO: fix that...
-        # self.env['account.move.line'].create({
-        #     'name': 'Test Tax for Customer Invoice',
-        #     'debit': 0.0,
-        #     'credit': 0.0,
-        #     'account_id': self.ova.id,
-        #     'invoice_id': invoice.id,
-        # })
+
+    def create_invoice_line(self, invoice_id):
+        invoice_line = self.invoice_line_model.new({
+            'product_id': self.product.id,
+            'invoice_id': invoice_id,
+            'quantity': 1,
+        })
+        invoice_line._onchange_product_id()
+        invoice_line_dict = invoice_line._convert_to_write({
+            name: invoice_line[name] for name in invoice_line._cache})
+        invoice_line_dict['price_unit'] = 450
+        self.invoice_line_model.create(invoice_line_dict)
 
     def xml_merge_dynamic_items(self, xml, xml_expected):
         xml_expected.attrib['Fecha'] = xml.attrib['Fecha']

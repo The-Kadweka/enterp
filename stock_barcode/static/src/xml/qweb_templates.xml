@@ -19,8 +19,6 @@
         <div class="o_barcode_settings flex-column h100 bg-700">
             <button t-if="widget.model == 'stock.picking'" class="btn-lg btn btn-dark text-uppercase o_print_picking">Print Picking Operations</button>
             <button t-if="widget.model == 'stock.picking'" class="btn-lg btn btn-dark text-uppercase o_print_delivery_slip">Print Delivery Slip</button>
-            <button t-if="widget.model == 'stock.picking'" class="btn-lg btn btn-dark text-uppercase o_print_barcodes_zpl">Print Barcodes ZPL</button>
-            <button t-if="widget.model == 'stock.picking'" class="btn-lg btn btn-dark text-uppercase o_print_barcodes_pdf">Print Barcodes PDF</button>
             <button t-if="widget.model == 'stock.picking' &amp;&amp; widget.allow_scrap" class="btn-lg btn btn-dark text-uppercase o_scrap">Scrap</button>
             <button t-if="widget.model == 'stock.inventory'" class="btn-lg btn btn-dark text-uppercase o_print_inventory">Print Inventory</button>
             <button t-if="widget.mode !== 'done' &amp;&amp; widget.mode !== 'cancel'" class="btn-lg btn btn-dark text-uppercase o_validate">Validate</button>
@@ -30,10 +28,6 @@
 
     <t t-name="stock_barcode_lines_widget">
         <div class="o_barcode_message d-flex flex-column justify-content-center align-items-center bg-800">
-            <div class="o_barcode_pic position-relative text-center mt-4 mb-1">
-                <span class="o_stock_barcode_laser"/>
-                <i class="fa fa-5x mx-auto fa-exclamation-triangle text-white"/>
-            </div>
             <span class="o_hidden o_scan_message o_scan_message_scan_products">Scan products</span>
             <span class="o_hidden o_scan_message o_scan_message_scan_more_dest">Scan more products, or scan the destination location</span>
             <span class="o_hidden o_scan_message o_scan_message_scan_more_src">Scan more products, or scan a new source location</span>
@@ -96,7 +90,7 @@
                         <div t-if="line.owner_id">
                             <i class="fa fa-fw fa-user-o"/> <t t-esc="line.owner_id[1]"></t>
                         </div>
-                        <div t-if="line.product_id.tracking !== 'none' and requireLotNumber">
+                        <div t-if="line.product_id.tracking !== 'none'">
                             <i class="fa fa-barcode"/>
                             <span class="o_line_lot_name"><t t-if="line.lot_name" t-esc="line.lot_name"></t></span>
                             <span class="o_line_lot_id"><t t-if="! line.lot_name &amp;&amp; line.lot_id &amp;&amp; line.lot_id[1]" t-esc="line.lot_id[1]"></t></span>

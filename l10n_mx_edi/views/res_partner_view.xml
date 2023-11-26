@@ -17,11 +17,18 @@
                 <xpath expr="//field[@name='vat']" position="after">
                     <field name="l10n_mx_edi_curp"/>
                 </xpath>
-                <xpath expr="//page[@name='sales_purchases']//field[@name='user_id']" position="after">
-                    <field name="l10n_mx_edi_external_trade"/>
-                </xpath>
             </field>
         </record>
 
+        <record id="view_account_fiscal_position_inh_l10n_mx" model="ir.ui.view">
+            <field name="name">view.account.fiscal.position.inh.l10n.mx</field>
+            <field name="model">account.fiscal.position</field>
+            <field name="inherit_id" ref="account.view_account_position_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='name']" position="after">
+                    <field name="l10n_mx_edi_code"/>
+                </xpath>
+            </field>
+        </record>
     </data>
 </odoo>

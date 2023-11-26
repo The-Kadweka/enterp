@@ -10,7 +10,7 @@
     """,
     "version": "0.1",
     "author": "Vauxoo",
-    "category": "Accounting/Accounting",
+    "category": "Accounting",
     "website": "http://www.vauxoo.com",
     "license": "OEEL-1",
     "depends": [

@@ -1,312 +1,400 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from defusedxml.lxml import fromstring
-from datetime import datetime, date, timedelta
-from lxml import etree
-from zeep import Client, Plugin
-from zeep.wsdl.utils import etree_to_string
+import binascii
+import time
+from math import ceil
+from datetime import datetime
+from xml.etree import ElementTree as etree
+import unicodedata
+
+import requests
 
 from odoo import _
 from odoo import release
 from odoo.exceptions import UserError
-from odoo.modules.module import get_resource_path
 from odoo.tools import float_repr
+
+
+def _set_is_dutiable_element(is_dutiable, element):
+    if is_dutiable:
+        etree.SubElement(element, "IsDutiable").text = "Y"
+    else:
+        etree.SubElement(element, "IsDutiable").text = "N"
+
 
 class DHLProvider():
 
-    def __init__(self, debug_logger, request_type='ship', prod_environment=False):
+    def __init__(self, prod_environment, debug_logger):
         self.debug_logger = debug_logger
         if not prod_environment:
             self.url = 'https://xmlpitest-ea.dhl.com/XMLShippingServlet?isUTF8Support=true'
         else:
             self.url = 'https://xmlpi-ea.dhl.com/XMLShippingServlet?isUTF8Support=true'
-        if request_type == "ship":
-            self.client = self._set_client('ship-10.0.wsdl', 'Ship')
-            self.factory = self.client.type_factory('ns1')
-        elif request_type =="rate":
-            self.client = self._set_client('rate.wsdl', 'Rate')
-            self.factory = self.client.type_factory('ns1')
-            self.factory_dct_request = self.client.type_factory('ns2')
-            self.factory_dct_response = self.client.type_factory('ns3')
 
+    def _get_rate_param(self, order, carrier):
+        res = {}
+        total_weight = carrier._dhl_convert_weight(sum([(line.product_id.weight * line.product_qty) for line in order.order_line]), carrier.dhl_package_weight_unit)
+        max_weight = carrier._dhl_convert_weight(carrier.dhl_default_packaging_id.max_weight, carrier.dhl_package_weight_unit)
 
-    def _set_client(self, wsdl_filename, api):
-        wsdl_path = get_resource_path('delivery_dhl', 'api', wsdl_filename)
-        client = Client('file:///%s' % wsdl_path.lstrip('/'))
-        return client
+        res = {
+            'MessageTime': datetime.now().isoformat(),
+            'MessageReference': 'ref:' + datetime.now().isoformat(),
+            'carrier': carrier,
+            'shipper_partner': order.warehouse_id.partner_id,
+            'Date': time.strftime('%Y-%m-%d'),
+            'ReadyTime': time.strftime('PT%HH%MM'),
+            'recipient_partner': order.partner_shipping_id,
+            'total_weight': total_weight,
+            'currency_name': order.currency_id.name,
+            'total_value': str(float_repr(sum([(line.price_unit * line.product_uom_qty) for line in order.order_line.filtered(lambda line: not line.is_delivery)]), 2)),
+            'is_dutiable': carrier.dhl_dutiable,
+            'package_ids': False,
+        }
+        if max_weight and total_weight > max_weight:
+            total_package = int(ceil(total_weight / max_weight))
+            last_package_weight = total_weight % max_weight
+            res['total_packages'] = total_package
+            res['last_package_weight'] = last_package_weight
+            res['package_ids'] = carrier.dhl_default_packaging_id
+        return res
 
-    def _set_request(self, site_id, password):
-        request = self.factory.Request()
-        service_header = self.factory.ServiceHeader()
-        service_header.MessageTime = datetime.now()
-        service_header.MessageReference = 'ref:' + datetime.now().isoformat() #CHANGEME
-        service_header.SiteID = site_id
-        service_header.Password = password
-        request.ServiceHeader = service_header
-        metadata = self.factory.MetaData()
-        metadata.SoftwareName = release.product_name
-        metadata.SoftwareVersion = release.series
-        request.MetaData = metadata
-        return request
+    def rate_request(self, order, carrier):
+        dict_response = {'price': 0.0,
+                         'currency': False,
+                         'error_found': False}
 
-    def _set_region_code(self, region_code):
-        return region_code
+        param = self._get_rate_param(order, carrier)
+        request_text = self._create_rate_xml(param)
+        try:
+            root = self._send_request(request_text)
+        except UserError as e:
+            dict_response['error_found'] = e.args[0]
+            return dict_response
 
-    def _set_requested_pickup_time(self, requested_pickup):
-        if requested_pickup:
-            return "Y"
+        if root.tag == '{http://www.dhl.com}ErrorResponse':
+            condition = root.findall('Response/Status/Condition')
+            dict_response['error_found'] = "%s: %s" % (condition[0][0].text, condition[0][1].text)
+            return dict_response
+
+        elif root.tag == '{http://www.dhl.com}DCTResponse':
+            condition = root.findall('GetQuoteResponse/Note/Condition')
+            if condition:
+                dict_response['error_found'] = "%s: %s" % (condition[0][0].text, condition[0][1].text)
+                return dict_response
+
+            products = root.findall('GetQuoteResponse/BkgDetails/QtdShp')
+            found = False
+            for product in products:
+                if product.findtext('GlobalProductCode') == carrier.dhl_product_code\
+                        and product.findall('ShippingCharge'):
+                    dict_response['price'] = product.findall('ShippingCharge')[0].text
+                    dict_response['currency'] = product.findall('QtdSInAdCur/CurrencyCode')[0].text
+                    found = True
+            if not found:
+                dict_response['error_found'] = _("No shipping available for the selected DHL product")
+            return dict_response
+
+    def _get_send_param(self, picking, carrier):
+        return {
+            # it's if you want to track the message numbers
+            'MessageTime': datetime.now().isoformat(),
+            'MessageReference': 'ref:' + datetime.now().isoformat(),
+            'carrier': carrier,
+            'RegionCode': carrier.dhl_region_code,
+            'lang': 'en',
+            'recipient_partner': picking.partner_id,
+            'PiecesEnabled': 'Y',
+            # Hard coded, S for Shipper, R for Recipient and T for Third Party
+            'ShippingPaymentType': 'S',
+            'recipient_streetLines': ('%s%s') % (picking.partner_id.street or '',
+                                                 picking.partner_id.street2 or ''),
+            'NumberOfPieces': len(picking.package_ids) or 1,
+            'weight_bulk': carrier._dhl_convert_weight(picking.weight_bulk, carrier.dhl_package_weight_unit),
+            'package_ids': picking.package_ids,
+            'total_weight': carrier._dhl_convert_weight(picking.shipping_weight, carrier.dhl_package_weight_unit),
+            'weight_unit': carrier.dhl_package_weight_unit[:1],
+            'dimension_unit': carrier.dhl_package_dimension_unit[0],
+            # For the rating API waits for CM and IN here for C and I...
+            'GlobalProductCode': carrier.dhl_product_code,
+            'Date': time.strftime('%Y-%m-%d'),
+            'shipper_partner': picking.picking_type_id.warehouse_id.partner_id,
+            'shipper_company': picking.company_id,
+            'shipper_streetLines': ('%s%s') % (picking.picking_type_id.warehouse_id.partner_id.street or '',
+                                               picking.picking_type_id.warehouse_id.partner_id.street2 or ''),
+            'LabelImageFormat': carrier.dhl_label_image_format,
+            'LabelTemplate': carrier.dhl_label_template,
+            'is_dutiable': carrier.dhl_dutiable,
+            'currency_name': picking.sale_id.currency_id.name or picking.company_id.currency_id.name,
+            'total_value': str(float_repr(sum([line.product_id.lst_price * int(line.product_uom_qty) for line in picking.move_lines]), 2))
+        }
+
+    def _get_send_param_final_rating(self, picking, carrier):
+        return {
+            'MessageTime': datetime.now().isoformat(),
+            'MessageReference': 'ref:' + datetime.now().isoformat(),
+            'carrier': carrier,
+            'shipper_partner': picking.picking_type_id.warehouse_id.partner_id,
+            'Date': time.strftime('%Y-%m-%d'),
+            'ReadyTime': time.strftime('PT%HH%MM'),
+            'recipient_partner': picking.partner_id,
+            'currency_name': picking.sale_id.currency_id.name or picking.company_id.currency_id.name,
+            'total_value': str(float_repr(sum([line.product_id.lst_price * int(line.product_uom_qty) for line in picking.move_lines]), 2)),
+            'is_dutiable': carrier.dhl_dutiable,
+            'package_ids': picking.package_ids,
+            'total_weight': carrier._dhl_convert_weight(picking.weight_bulk, carrier.dhl_package_weight_unit),
+        }
+
+    def send_shipping(self, picking, carrier):
+        dict_response = {'tracking_number': 0.0,
+                         'price': 0.0,
+                         'currency': False}
+
+        param = self._get_send_param(picking, carrier)
+        request_text = self._create_shipping_xml(param)
+
+        root = self._send_request(request_text)
+        if root.tag == '{http://www.dhl.com}ShipmentValidateErrorResponse':
+            condition = root.findall('Response/Status/Condition/')
+            error_msg = "%s: %s" % (condition[1].text, condition[0].text)
+            raise UserError(_(error_msg))
+        elif root.tag == '{http://www.dhl.com}ErrorResponse':
+            condition = root.findall('Response/Status/Condition/')
+            if isinstance(condition[0], list):
+                error_msg = "%s: %s" % (condition[0][0].text, condition[0][1].text)
+            else:
+                error_msg = "%s: %s" % (condition[0].text, condition[1].text)
+            raise UserError(_(error_msg))
+        elif root.tag == '{http://www.dhl.com}ShipmentResponse':
+            label_image = root.findall('LabelImage')
+            self.label = label_image[0].findall('OutputImage')[0].text
+            dict_response['tracking_number'] = root.findtext('AirwayBillNumber')
+
+        # Warning sometimes the ShipmentRequest returns a shipping rate, not everytime.
+        # After discussing by mail with the DHL Help Desk, they said that the correct rate
+        # is given by the DCTRequest GetQuote.
+
+        param_final_rating = self._get_send_param_final_rating(picking, carrier)
+        request_text = self._create_rate_xml(param_final_rating)
+        root = self._send_request(request_text)
+        if root.tag == '{http://www.dhl.com}ErrorResponse':
+            condition = root.findall('Response/Status/Condition/')
+            error_msg = "%s: %s" % (condition[0][0].text, condition[0][1].text)
+            raise UserError(_(error_msg))
+        elif root.tag == '{http://www.dhl.com}DCTResponse':
+            products = root.findall('GetQuoteResponse/BkgDetails/QtdShp')
+            found = False
+            for product in products:
+                if product.findtext('GlobalProductCode') == carrier.dhl_product_code\
+                        and product.findall('ShippingCharge'):
+                    dict_response['price'] = product.findall('ShippingCharge')[0].text
+                    dict_response['currency'] = product.findall('QtdSInAdCur/CurrencyCode')[0].text
+                    found = True
+            if not found:
+                raise UserError(_("No service available for the selected product"))
+
+        return dict_response
+
+    def save_label(self):
+        label_binary_data = binascii.a2b_base64(self.label)
+        return label_binary_data
+
+    def send_cancelling(self, picking, carrier):
+        dict_response = {'tracking_number': 0.0, 'price': 0.0, 'currency': False}
+        return dict_response
+
+    def _send_request(self, request_xml):
+        try:
+            self.debug_logger(request_xml, 'dhl_request')
+            req = requests.post(self.url, data=request_xml, headers={'Content-Type': 'application/xml'})
+            req.raise_for_status()
+            response_text = req.content
+            self.debug_logger(response_text, 'dhl_response')
+        except IOError:
+            raise UserError("DHL Server not found. Check your connectivity.")
+        root = etree.fromstring(response_text.decode(encoding="utf-8"))
+        return root
+
+    def _create_rate_xml(self, param):
+        carrier = param["carrier"].sudo()
+        etree.register_namespace("req", "http://www.dhl.com")
+        root = etree.Element("{http://www.dhl.com}DCTRequest")
+        root.attrib['schemaVersion'] = "2.0"
+        get_quote_node = etree.SubElement(root, "GetQuote")
+        request_node = etree.SubElement(get_quote_node, "Request")
+        service_header_node = etree.SubElement(request_node, "ServiceHeader")
+        etree.SubElement(service_header_node, "MessageTime").text = param['MessageTime']
+        etree.SubElement(service_header_node, "MessageReference").text = param['MessageReference']
+        etree.SubElement(service_header_node, "SiteID").text = carrier.dhl_SiteID
+        etree.SubElement(service_header_node, "Password").text = carrier.dhl_password
+
+        metadata_node = etree.SubElement(request_node, "MetaData")
+        etree.SubElement(metadata_node, "SoftwareName").text = release.product_name
+        etree.SubElement(metadata_node, "SoftwareVersion").text = release.series
+
+        from_node = etree.SubElement(get_quote_node, "From")
+        etree.SubElement(from_node, "CountryCode").text = param["shipper_partner"].country_id.code
+        etree.SubElement(from_node, "Postalcode").text = param["shipper_partner"].zip
+        etree.SubElement(from_node, "City").text = param["shipper_partner"].city
+
+        bkg_details_node = etree.SubElement(get_quote_node, "BkgDetails")
+        etree.SubElement(bkg_details_node, "PaymentCountryCode").text = param["shipper_partner"].country_id.code
+        etree.SubElement(bkg_details_node, "Date").text = param["Date"]
+        etree.SubElement(bkg_details_node, "ReadyTime").text = param["ReadyTime"]
+        etree.SubElement(bkg_details_node, "DimensionUnit").text = carrier.dhl_package_dimension_unit
+        etree.SubElement(bkg_details_node, "WeightUnit").text = carrier.dhl_package_weight_unit
+        pieces_node = etree.SubElement(bkg_details_node, "Pieces")
+        if param["package_ids"] and not param.get('total_packages'):
+            for index, package in enumerate(param["package_ids"], start=1):
+                piece_node = etree.SubElement(pieces_node, "Piece")
+                etree.SubElement(piece_node, "PieceID").text = str(index)
+                packaging = package.packaging_id or carrier.dhl_default_packaging_id
+                etree.SubElement(piece_node, "PackageTypeCode").text = packaging.shipper_package_code
+                etree.SubElement(piece_node, "Height").text = str(packaging.height)
+                etree.SubElement(piece_node, "Depth").text = str(packaging.length)
+                etree.SubElement(piece_node, "Width").text = str(packaging.width)
+                etree.SubElement(piece_node, "Weight").text = float_repr(package.shipping_weight, 3)
+        elif param['package_ids'] and param.get('total_packages'):
+            package = param['package_ids']
+            for seq in range(1, param['total_packages'] + 1):
+                piece_node = etree.SubElement(pieces_node, "Piece")
+                etree.SubElement(piece_node, "PieceID").text = str(seq)
+                etree.SubElement(piece_node, "PackageTypeCode").text = package.shipper_package_code
+                etree.SubElement(piece_node, "Height").text = str(package.height)
+                etree.SubElement(piece_node, "Depth").text = str(package.length)
+                etree.SubElement(piece_node, "Width").text = str(package.width)
+                if seq == param['total_packages'] and param['last_package_weight']:
+                    etree.SubElement(piece_node, "Weight").text = float_repr(param['last_package_weight'], 3)
+                else:
+                    etree.SubElement(piece_node, "Weight").text = float_repr(package.max_weight, 3)
         else:
-            return "N"
-
-    def _set_billing(self, shipper_account, payment_type, duty_payment_type, is_dutiable):
-        billing = self.factory.Billing()
-        billing.ShipperAccountNumber = shipper_account
-        billing.ShippingPaymentType = payment_type
-        if is_dutiable:
-            billing.DutyPaymentType = duty_payment_type
-        return billing
-
-    def _set_consignee(self, partner_id):
-        consignee = self.factory.Consignee()
-        consignee.CompanyName = partner_id.commercial_company_name or partner_id.name
-        consignee.AddressLine1 = partner_id.street or partner_id.street2
-        consignee.AddressLine2 = partner_id.street and partner_id.street2 or None
-        consignee.City = partner_id.city
-        if partner_id.state_id:
-            consignee.Division = partner_id.state_id.name
-            consignee.DivisionCode = partner_id.state_id.code
-        consignee.PostalCode = partner_id.zip
-        consignee.CountryCode = partner_id.country_id.code
-        consignee.CountryName = partner_id.country_id.name
-        contact = self.factory.Contact()
-        contact.PersonName = partner_id.name
-        contact.PhoneNumber = partner_id.phone
-        contact.Email = partner_id.email
-        consignee.Contact = contact
-        return consignee
-
-    def _set_dct_to(self, partner_id):
-        to = self.factory_dct_request.DCTTo()
-        to.CountryCode = partner_id.country_id.code
-        to.Postalcode = partner_id.zip
-        to.City = partner_id.city
-        return to
-
-    def _set_shipper(self, account_number, company_partner_id, warehouse_partner_id):
-        shipper = self.factory.Shipper()
-        shipper.ShipperID = account_number
-        shipper.CompanyName = company_partner_id.name
-        shipper.AddressLine1 = warehouse_partner_id.street or warehouse_partner_id.street2
-        shipper.AddressLine2 = warehouse_partner_id.street and warehouse_partner_id.street2 or None
-        shipper.City = warehouse_partner_id.city
-        if warehouse_partner_id.state_id:
-            shipper.Division = warehouse_partner_id.state_id.name
-            shipper.DivisionCode = warehouse_partner_id.state_id.code
-        shipper.PostalCode = warehouse_partner_id.zip
-        shipper.CountryCode = warehouse_partner_id.country_id.code
-        shipper.CountryName = warehouse_partner_id.country_id.name
-        contact = self.factory.Contact()
-        contact.PersonName = warehouse_partner_id.name
-        contact.PhoneNumber = warehouse_partner_id.phone
-        contact.Email = warehouse_partner_id.email
-        shipper.Contact = contact
-        return shipper
-
-    def _set_dct_from(self, warehouse_partner_id):
-        dct_from = self.factory_dct_request.DCTFrom()
-        dct_from.CountryCode = warehouse_partner_id.country_id.code
-        dct_from.Postalcode = warehouse_partner_id.zip
-        dct_from.City = warehouse_partner_id.city
-        return dct_from
-
-    def _set_dutiable(self, total_value, currency_name, incoterm):
-        dutiable = self.factory.Dutiable()
-        dutiable.DeclaredValue = float_repr(total_value, 2)
-        dutiable.DeclaredCurrency = currency_name
-        if not incoterm:
-            raise UserError(_("Please define an incoterm in the associated sale order or set a default incoterm for the company in the accounting's settings."))
-        dutiable.TermsOfTrade = incoterm.code
-        return dutiable
-
-    def _set_dct_dutiable(self, total_value, currency_name):
-        dct_dutiable = self.factory_dct_request.DCTDutiable()
-        dct_dutiable.DeclaredCurrency = currency_name
-        dct_dutiable.DeclaredValue = total_value
-        return dct_dutiable
-
-    def _set_dct_bkg_details(self, weight, carrier, shipper):
-        packaging = carrier.dhl_default_packaging_id
-        bkg_details = self.factory_dct_request.BkgDetailsType()
-        bkg_details.PaymentCountryCode = shipper.country_id.code
-        bkg_details.Date = date.today()
-        bkg_details.ReadyTime = timedelta(hours=1,minutes=2)
-        bkg_details.DimensionUnit = "CM" if carrier.dhl_package_dimension_unit == "C" else "IN"
-        bkg_details.WeightUnit = "KG" if carrier.dhl_package_weight_unit == "K" else "LB"
-        piece = self.factory_dct_request.PieceType()
-        piece.PieceID = str(1)
-        piece.PackageTypeCode = packaging.shipper_package_code
-        piece.Height = packaging.height
-        piece.Depth = packaging.length
-        piece.Width = packaging.width
-        piece.Weight = carrier._dhl_convert_weight(weight, carrier.dhl_package_weight_unit)
-        bkg_details.Pieces = {'Piece': [piece]}
-        bkg_details.PaymentAccountNumber = carrier.dhl_account_number
-        if carrier.dhl_dutiable:
-            bkg_details.IsDutiable = "Y"
-        else:
-            bkg_details.IsDutiable = "N"
-        bkg_details.NetworkTypeCode = "AL"
-        return bkg_details
-
-    def _set_dct_bkg_details_from_picking(self, picking):
-        carrier = picking.carrier_id
-        bkg_details = self.factory_dct_request.BkgDetailsType()
-        bkg_details.PaymentCountryCode = picking.company_id.partner_id.country_id.code
-        bkg_details.Date = date.today()
-        bkg_details.ReadyTime = timedelta(hours=1,minutes=2)
-        bkg_details.DimensionUnit = "CM" if carrier.dhl_package_dimension_unit == "C" else "IN"
-        bkg_details.WeightUnit = "KG" if carrier.dhl_package_weight_unit == "K" else "LB"
-        pieces = []
-        index = 0
-        for package in picking.package_ids:
-            index+=1
-            packaging = package.packaging_id or carrier.dhl_default_packaging_id
-            piece = self.factory_dct_request.PieceType()
-            piece.PieceID = index
-            piece.PackageTypeCode = packaging.shipper_package_code
-            piece.Height = packaging.height
-            piece.Depth = packaging.length
-            piece.Width = packaging.width
-            piece.Weight = picking.carrier_id._dhl_convert_weight(package.shipping_weight, picking.carrier_id.dhl_package_weight_unit)
-            pieces.append(piece)
-        if picking.weight_bulk:
-            index+=1
+            piece_node = etree.SubElement(pieces_node, "Piece")
+            etree.SubElement(piece_node, "PieceID").text = str(1)
             packaging = carrier.dhl_default_packaging_id
-            piece = self.factory_dct_request.PieceType()
-            piece.PieceID = index
-            piece.PackageTypeCode = packaging.shipper_package_code
-            piece.Height = packaging.height
-            piece.Depth = packaging.length
-            piece.Width = packaging.width
-            piece.Weight = picking.carrier_id._dhl_convert_weight(picking.weight_bulk, picking.carrier_id.dhl_package_weight_unit)
-            pieces.append(piece)
-        bkg_details.Pieces = {'Piece': pieces}
-        bkg_details.PaymentAccountNumber = carrier.dhl_account_number
-        if carrier.dhl_dutiable:
-            bkg_details.IsDutiable = "Y"
+            etree.SubElement(piece_node, "PackageTypeCode").text = packaging.shipper_package_code
+            etree.SubElement(piece_node, "Height").text = str(packaging.height)
+            etree.SubElement(piece_node, "Depth").text = str(packaging.length)
+            etree.SubElement(piece_node, "Width").text = str(packaging.width)
+            etree.SubElement(piece_node, "Weight").text = float_repr(param["total_weight"], 3)
+
+        etree.SubElement(bkg_details_node, "PaymentAccountNumber").text = carrier.dhl_account_number
+        _set_is_dutiable_element(param['is_dutiable'], bkg_details_node)
+        etree.SubElement(bkg_details_node, "NetworkTypeCode").text = 'AL'
+        to_node = etree.SubElement(get_quote_node, "To")
+        etree.SubElement(to_node, "CountryCode").text = param["recipient_partner"].country_id.code
+        etree.SubElement(to_node, "Postalcode").text = param["recipient_partner"].zip
+        etree.SubElement(to_node, "City").text = param["recipient_partner"].city
+
+        if param["is_dutiable"]:
+            dutiable_node = etree.SubElement(get_quote_node, "Dutiable")
+            etree.SubElement(dutiable_node, "DeclaredCurrency").text = param["currency_name"]
+            etree.SubElement(dutiable_node, "DeclaredValue").text = param["total_value"]
+        return etree.tostring(root)
+
+    def _create_shipping_xml(self, param):
+        carrier = param["carrier"].sudo()
+        etree.register_namespace("req", "http://www.dhl.com")
+        root = etree.Element("{http://www.dhl.com}ShipmentRequest")
+        root.attrib['schemaVersion'] = "6.2"
+        root.attrib['xsi:schemaLocation'] = "http://www.dhl.com ship-val-global-req-6.2.xsd"
+        root.attrib['xmlns:xsi'] = "http://www.w3.org/2001/XMLSchema-instance"
+
+        request_node = etree.SubElement(root, "Request")
+        service_header_node = etree.SubElement(request_node, "ServiceHeader")
+        etree.SubElement(service_header_node, "MessageTime").text = param["MessageTime"]
+        etree.SubElement(service_header_node, "MessageReference").text = param["MessageReference"]
+        etree.SubElement(service_header_node, "SiteID").text = carrier.dhl_SiteID
+        etree.SubElement(service_header_node, "Password").text = carrier.dhl_password
+
+        metadata_node = etree.SubElement(request_node, "MetaData")
+        etree.SubElement(metadata_node, "SoftwareName").text = release.product_name
+        etree.SubElement(metadata_node, "SoftwareVersion").text = release.series
+
+        etree.SubElement(root, "RegionCode").text = param["RegionCode"]
+        etree.SubElement(root, "RequestedPickupTime").text = "Y"
+
+        etree.SubElement(root, "LanguageCode").text = param["lang"]
+        etree.SubElement(root, "PiecesEnabled").text = param["PiecesEnabled"]
+
+        billing_node = etree.SubElement(root, "Billing")
+        etree.SubElement(billing_node, "ShipperAccountNumber").text = carrier.dhl_account_number
+        etree.SubElement(billing_node, "ShippingPaymentType").text = param['ShippingPaymentType']
+        if param["is_dutiable"]:
+            # S:Shipper, R:Recipient, T:Third Party.
+            etree.SubElement(billing_node, "DutyPaymentType").text = carrier.env['ir.config_parameter'].get_param("delivery_dhl.duty_payment_type", "S")
+
+        consignee_node = etree.SubElement(root, "Consignee")
+        if param["recipient_partner"].parent_id:
+            etree.SubElement(consignee_node, "CompanyName").text = (param["recipient_partner"].parent_id.name or '')[:35]
         else:
-            bkg_details.IsDutiable = "N"
-        bkg_details.NetworkTypeCode = "AL"
-        return bkg_details
+            etree.SubElement(consignee_node, "CompanyName").text = (param["recipient_partner"].name or '')[:35]
+        etree.SubElement(consignee_node, "AddressLine").text = param["recipient_streetLines"]
+        etree.SubElement(consignee_node, "City").text = param["recipient_partner"].city
 
-    def _set_shipment_details(self, picking):
-        shipment_details = self.factory.ShipmentDetails()
-        #CHECK IF WEIGHT BULK AND PACKAGES
-        pieces = []
-        index = 0
-        for package in picking.package_ids:
-            index+=1
-            packaging = package.packaging_id or picking.carrier_id.dhl_default_packaging_id
-            piece = self.factory.Piece()
-            piece.PieceID = index
-            piece.Width = packaging.width
-            piece.Height = packaging.height
-            piece.Depth = packaging.length
-            piece.Weight = picking.carrier_id._dhl_convert_weight(
-                package.shipping_weight or package.weight,
-                picking.carrier_id.dhl_package_weight_unit
-            )
-            piece.PieceContents = package.name
-            pieces.append(piece)
-        if picking.weight_bulk or picking.is_return_picking:
-            index+=1
-            packaging = picking.carrier_id.dhl_default_packaging_id
-            piece = self.factory.Piece()
-            piece.PieceID = index
-            piece.Width = packaging.width
-            piece.Height = packaging.height
-            piece.Depth = packaging.length
-            piece.Weight = picking.carrier_id._dhl_convert_weight(
-                picking.weight_bulk,
-                picking.carrier_id.dhl_package_weight_unit
-            )
-            piece.PieceContents = "Bulk Content"
-            pieces.append(piece)
-        shipment_details.Pieces = self.factory.Pieces(pieces)
-        shipment_details.WeightUnit = picking.carrier_id.dhl_package_weight_unit
-        shipment_details.GlobalProductCode = picking.carrier_id.dhl_product_code
-        shipment_details.LocalProductCode = picking.carrier_id.dhl_product_code
-        shipment_details.Date = date.today()
-        shipment_details.Contents = "MY DESCRIPTION"
-        shipment_details.DimensionUnit = picking.carrier_id.dhl_package_dimension_unit
-        if picking.carrier_id.dhl_dutiable:
-            shipment_details.IsDutiable = "Y"
-        shipment_details.CurrencyCode = picking.sale_id.currency_id.name or picking.company_id.currency_id.name
-        return shipment_details
+        if param["recipient_partner"].state_id:
+            etree.SubElement(consignee_node, "Division").text = param["recipient_partner"].state_id.name
+            etree.SubElement(consignee_node, "DivisionCode").text = param["recipient_partner"].state_id.code
+        etree.SubElement(consignee_node, "PostalCode").text = param["recipient_partner"].zip
+        etree.SubElement(consignee_node, "CountryCode").text = param["recipient_partner"].country_id.code
+        etree.SubElement(consignee_node, "CountryName").text = param["recipient_partner"].country_id.name
+        contact_node = etree.SubElement(consignee_node, "Contact")
+        etree.SubElement(contact_node, "PersonName").text = (param["recipient_partner"].name or '')[:35]
+        etree.SubElement(contact_node, "PhoneNumber").text = param["recipient_partner"].phone or 'NA'
+        etree.SubElement(contact_node, "Email").text = param["recipient_partner"].email
+        if param["is_dutiable"]:
+            dutiable_node = etree.SubElement(root, "Dutiable")
+            etree.SubElement(dutiable_node, "DeclaredValue").text = param["total_value"]
+            etree.SubElement(dutiable_node, "DeclaredCurrency").text = param["currency_name"]
 
-    def _set_label_image_format(self, label_image_format):
-        return label_image_format
+        shipment_details_node = etree.SubElement(root, "ShipmentDetails")
+        etree.SubElement(shipment_details_node, "NumberOfPieces").text = str(param["NumberOfPieces"])
+        pieces_node = etree.SubElement(shipment_details_node, "Pieces")
+        if param["package_ids"]:
+            # Multi-package
+            for package in param["package_ids"]:
+                piece_node = etree.SubElement(pieces_node, "Piece")
+                etree.SubElement(piece_node, "PieceID").text = str(package.name)   # need to be removed
+                packaging = package.packaging_id or carrier.dhl_default_packaging_id
+                etree.SubElement(piece_node, "Weight").text = str(package.shipping_weight)
+                etree.SubElement(piece_node, "Width").text = str(packaging.width)
+                etree.SubElement(piece_node, "Height").text = str(packaging.height)
+                etree.SubElement(piece_node, "Depth").text = str(packaging.length)
+                etree.SubElement(piece_node, "PieceContents").text = str(package.name)
+        if param["weight_bulk"]:
+            # Monopackage
+            packaging = carrier.dhl_default_packaging_id
+            piece_node = etree.SubElement(pieces_node, "Piece")
+            etree.SubElement(piece_node, "PieceID").text = str(1)   # need to be removed
+            etree.SubElement(piece_node, "Width").text = str(packaging.width)
+            etree.SubElement(piece_node, "Height").text = str(packaging.height)
+            etree.SubElement(piece_node, "Depth").text = str(packaging.length)
+        etree.SubElement(shipment_details_node, "Weight").text = float_repr(param["total_weight"], 3)
+        etree.SubElement(shipment_details_node, "WeightUnit").text = param["weight_unit"]
+        etree.SubElement(shipment_details_node, "GlobalProductCode").text = param["GlobalProductCode"]
+        etree.SubElement(shipment_details_node, "LocalProductCode").text = param["GlobalProductCode"]
+        etree.SubElement(shipment_details_node, "Date").text = param["Date"]
+        etree.SubElement(shipment_details_node, "Contents").text = "MY DESCRIPTION"
+        etree.SubElement(shipment_details_node, "DimensionUnit").text = param["dimension_unit"]
+        _set_is_dutiable_element(param['is_dutiable'], shipment_details_node)
+        etree.SubElement(shipment_details_node, "CurrencyCode").text = param["currency_name"]
 
-    def _set_label(self, label):
-        label_obj = self.factory.Label()
-        label_obj.LabelTemplate = label
-        return label_obj
+        shipper_node = etree.SubElement(root, "Shipper")
+        etree.SubElement(shipper_node, "ShipperID").text = carrier.dhl_account_number
+        etree.SubElement(shipper_node, "CompanyName").text = (param["shipper_company"].name or '')[:35]
+        etree.SubElement(shipper_node, "AddressLine").text = param["shipper_streetLines"]
+        etree.SubElement(shipper_node, "City").text = param["shipper_partner"].city
+        etree.SubElement(shipper_node, "PostalCode").text = param["shipper_partner"].zip
+        etree.SubElement(shipper_node, "CountryCode").text = param["shipper_partner"].country_id.code
+        etree.SubElement(shipper_node, "CountryName").text = param["shipper_partner"].country_id.name
 
-    def _set_return(self):
-        return_service = self.factory.SpecialService()
-        return_service.SpecialServiceType = "PV"
-        return return_service
+        contact_node = etree.SubElement(shipper_node, "Contact")
+        etree.SubElement(contact_node, "PersonName").text = (param["shipper_partner"].name or '')[:35]
+        etree.SubElement(contact_node, "PhoneNumber").text = param["shipper_partner"].phone
 
-    def _process_shipment(self, shipment_request):
-        ShipmentRequest  = self.client.get_element('ns0:ShipmentRequest')
-        document = etree.Element('root')
-        ShipmentRequest.render(document, shipment_request)
-        request_to_send = etree_to_string(list(document)[0])
-        headers = {'Content-Type': 'text/xml'}
-        response = self.client.transport.post(self.url, request_to_send, headers=headers)
-        if self.debug_logger:
-            self.debug_logger(request_to_send, 'dhl_shipment_request')
-            self.debug_logger(response.content, 'dhl_shipment_response')
-        response_element_xml = fromstring(response.content)
-        Response = self.client.get_element(response_element_xml.tag)
-        response_zeep = Response.type.parse_xmlelement(response_element_xml)
-        dict_response = {'tracking_number': 0.0,
-                         'price': 0.0,
-                         'currency': False}
-        # This condition handle both 'ShipmentValidateErrorResponse' and
-        # 'ErrorResponse', we could handle them differently if needed as
-        # the 'ShipmentValidateErrorResponse' is something you cannot do,
-        # and 'ErrorResponse' are bad values given in the request.
-        if hasattr(response_zeep.Response, 'Status'):
-            condition = response_zeep.Response.Status.Condition[0]
-            error_msg = "%s: %s" % (condition.ConditionCode, condition.ConditionData)
-            raise UserError(error_msg)
-        return response_zeep
+        etree.SubElement(root, "LabelImageFormat").text = param["LabelImageFormat"]
 
-    def _process_rating(self, rating_request):
-        DCTRequest  = self.client.get_element('ns0:DCTRequest')
-        document = etree.Element('root')
-        DCTRequest.render(document, rating_request)
-        request_to_send = etree_to_string(list(document)[0])
-        headers = {'Content-Type': 'text/xml'}
-        response = self.client.transport.post(self.url, request_to_send, headers=headers)
-        if self.debug_logger:
-            self.debug_logger(request_to_send, 'dhl_rating_request')
-            self.debug_logger(response.content, 'dhl_rating_response')
-        response_element_xml = fromstring(response.content)
-        dict_response = {'tracking_number': 0.0,
-                         'price': 0.0,
-                         'currency': False}
-        # This condition handle both 'ShipmentValidateErrorResponse' and
-        # 'ErrorResponse', we could handle them differently if needed as
-        # the 'ShipmentValidateErrorResponse' is something you cannot do,
-        # and 'ErrorResponse' are bad values given in the request.
-        if response_element_xml.find('GetQuoteResponse'):
-            return response_element_xml
-        else:
-            condition = response_element_xml.find('Response/Status/Condition')
-            error_msg = "%s: %s" % (condition.find('ConditionCode').text, condition.find('ConditionData').text)
-            raise UserError(error_msg)
+        label_node = etree.SubElement(root, "Label")
+        etree.SubElement(label_node, "LabelTemplate").text = param["LabelTemplate"]
+        return etree.tostring(root, encoding='utf-8')
 
     def check_required_value(self, carrier, recipient, shipper, order=False, picking=False):
         carrier = carrier.sudo()
@@ -335,6 +423,6 @@ class DHLProvider():
         if order:
             if not order.order_line:
                 return _("Please provide at least one item to ship.")
-            for line in order.order_line.filtered(lambda line: not line.product_id.weight and not line.is_delivery and line.product_id.type not in ['service', 'digital'] and not line.display_type):
+            for line in order.order_line.filtered(lambda line: not line.product_id.weight and not line.is_delivery and line.product_id.type not in ['service', 'digital']):
                 return _('The estimated price cannot be computed because the weight of your product %s is missing.') % line.product_id.display_name
         return False

@@ -4,10 +4,10 @@
 {
     'name': 'Master Production Schedule',
     'version': '1.0',
-    'category': 'Manufacturing/Manufacturing',
+    'category': 'Manufacturing',
     'sequence': 50,
     'summary': 'Master Production Schedule',
-    'depends': ['mrp', 'purchase_stock'],
+    'depends': ['mrp', 'purchase', 'purchase_stock'],
     'description': """
 Master Production Schedule
 ==========================
@@ -25,19 +25,15 @@ procure.
 """,
     'data': [
         'security/ir.model.access.csv',
-        'security/mrp_mps_security.xml',
-        'views/mrp_mps_templates.xml',
-        'views/mrp_mps_views.xml',
-        'views/mrp_mps_menu_views.xml',
-        'views/res_config_settings_views.xml',
-        'wizard/mrp_mps_forecast_details_views.xml'
+        'views/product_views.xml',
+        'views/mrp_mps_report_views.xml',
+        'report/mrp_mps_report_templates.xml',
+        'views/res_config_settings_views.xml'
     ],
     'demo': [
         'data/mps_demo.xml',
     ],
-    'qweb': [
-        "static/src/xml/qweb_templates.xml",
-    ],
+    'qweb': ['static/src/xml/mps_backend.xml'],
     'application': False,
     'license': 'OEEL-1',
 }

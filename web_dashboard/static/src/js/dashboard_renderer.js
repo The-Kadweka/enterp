@@ -11,7 +11,6 @@ var pyUtils = require('web.py_utils');
 var viewRegistry = require('web.view_registry');
 
 var renderComparison = dataComparisonUtils.renderComparison;
-var renderVariation = dataComparisonUtils.renderVariation;
 
 var QWeb = core.qweb;
 
@@ -36,15 +35,10 @@ var DashboardRenderer = FormRenderer.extend({
         this.subControllers = {};
         this.subControllersContext = _.pick(state.context || {}, 'pivot', 'graph', 'cohort');
         this.subcontrollersNextMeasures = {pivot: {}, graph: {}, cohort: {}};
-        var session = this.getSession();
-        var currency_id = session.company_currency_id;
-        if (session.companies_currency_id && session.user_context.allowed_company_ids) {
-            currency_id = session.companies_currency_id[session.user_context.allowed_company_ids[0]];
-        }
         this.formatOptions = {
             // in the dashboard view, all monetary values are displayed in the
             // currency of the current company of the user
-            currency_id: currency_id,
+            currency_id: this.getSession().company_currency_id,
             // allow to decide if utils.human_number should be used
             humanReadable: function (value) {
                 return Math.abs(value) >= 1000;
@@ -86,10 +80,7 @@ var DashboardRenderer = FormRenderer.extend({
      */
     getsubControllersContext: function () {
         return _.mapObject(this.subControllers, function (controller) {
-            // for now the views embedded in a dashboard can be of type
-            // cohort, graph, pivot. The getOwnedQueryParams method of their controller
-            // does not export anything but a context.
-            return controller.getOwnedQueryParams().context;
+            return controller.getContext();
         });
     },
     /**
@@ -100,7 +91,7 @@ var DashboardRenderer = FormRenderer.extend({
     updateState: function (state, params) {
         var viewType;
         for (viewType in this.subControllers) {
-            this.subControllersContext[viewType] = this.subControllers[viewType].getOwnedQueryParams().context;
+            this.subControllersContext[viewType] = this.subControllers[viewType].getContext();
         }
         var subControllersContext = _.pick(params.context || {}, 'pivot', 'graph', 'cohort');
         _.extend(this.subControllersContext, subControllersContext);
@@ -127,7 +118,7 @@ var DashboardRenderer = FormRenderer.extend({
             delay: { show: 1000, hide: 0 },
             title: function () {
                 return QWeb.render('web_dashboard.StatisticTooltip', {
-                    debug: config.isDebug(),
+                    debug: config.debug,
                     node: node,
                 });
             }
@@ -176,12 +167,10 @@ var DashboardRenderer = FormRenderer.extend({
             // use a formatter to render the value if there exists one for the
             // specified widget attribute, or there is no widget attribute
             var fieldValue = self.state.data[statisticName];
-            fieldValue = _.contains(['date', 'datetime'], statistic.type) ? (fieldValue === 0 ? NaN : moment(fieldValue)) : fieldValue;
             var formatType = node.attrs.widget || statistic.type;
             formatter = fieldUtils.format[formatType];
             if (this.state.compare) {
                 var comparisonValue = this.state.comparisonData[statisticName];
-                comparisonValue = _.contains(['date', 'datetime'], statistic.type) ? (comparisonValue === 0 ? NaN : moment(comparisonValue)) : comparisonValue;
                 variation = this.state.variationData[statisticName];
                 renderComparison($el, fieldValue, comparisonValue, variation, formatter, statistic, this.formatOptions);
                 $('.o_comparison', $el).append(valueLabel);
@@ -199,10 +188,17 @@ var DashboardRenderer = FormRenderer.extend({
                 fakeState.data = fakeState.comparisonData;
                 var $comparisonValue = this._renderFieldWidget(node, fakeState);
                 variation = this.state.variationData[statisticName];
-                fakeState.data[statisticName] = variation;
+                fakeState.data[statisticName] = variation.magnitude;
+                var $variationValue = fieldUtils.format.percentage(
+                    variation.magnitude,
+                    statistic,
+                    this.formatOptions
+                );
 
                 $el
-                .append(renderVariation(variation, statistic))
+                .append($('<div>', {class: 'o_variation' + variation.signClass}).html(
+                    $variationValue
+                ))
                 .append($('<div>', {class: 'o_comparison'}).append(
                     $originalValue,
                     $('<span>').html(" vs "),
@@ -217,15 +213,15 @@ var DashboardRenderer = FormRenderer.extend({
 
         // customize border left
         if (variation) {
-            if (variation > 0) {
+            if (variation.signClass === ' o_positive') {
                 $el.addClass('border-success');
-            } else if (variation < 0) {
+            } else if (variation.signClass === ' o_negative') {
                 $el.addClass('border-danger');
             }
         }
 
         this._registerModifiers(node, this.state, $el);
-        if (config.isDebug() || node.attrs.help) {
+        if (config.debug || node.attrs.help) {
             this._addStatisticTooltip($el, node);
         }
         return $el;
@@ -246,7 +242,7 @@ var DashboardRenderer = FormRenderer.extend({
         // and put it/them into this group
         var $buttonGroup = $('<div class="btn-group">');
         $buttonGroup.append($buttons.find('[aria-label="Main actions"]'));
-        $buttonGroup.append($buttons.find('.o_dropdown:has(.o_group_by_menu)'));
+        $buttonGroup.append($buttons.find('.btn-group[class*="groupbys"]'));
         $buttonGroup.prependTo($buttons);
 
         // render the button to open the view in full screen
@@ -258,9 +254,7 @@ var DashboardRenderer = FormRenderer.extend({
             .appendTo($buttons);
 
         // select primary and interval buttons and alter their style
-        $buttons.find('.btn-primary,.btn-secondary')
-            .removeClass('btn-primary btn-secondary o_dropdown_toggler_btn')
-            .addClass("btn-outline-secondary");
+        $buttons.find('.btn-primary').removeClass('btn-primary').addClass("btn-outline-secondary");
         $buttons.find('[class*=interval_button]').addClass('text-muted text-capitalize');
         // remove bars icon on "Group by" button
         $buttons.find('.fa.fa-bars').removeClass('fa fa-bars');
@@ -300,6 +294,16 @@ var DashboardRenderer = FormRenderer.extend({
         var $group = this._renderOuterGroup(node);
         if (node.children.length && node.children[0].tag === 'widget') {
             $group.addClass('o_has_widget');
+            var nbr_pie_charts = node.children.reduce(
+                    function (acc, child) {
+                        return acc + (child.attrs.name === "pie_chart" ? 1 : 0);
+                    },
+                    0
+                );
+            $group.addClass('o_nbr_pie_charts_' + nbr_pie_charts);
+            if (this.state.compare) {
+                $group.addClass('o_active_comparison');
+            }
         }
         return $group;
     },
@@ -316,18 +320,15 @@ var DashboardRenderer = FormRenderer.extend({
         var self = this;
         var viewType = node.attrs.type;
         var controllerContext = this.subControllersContext[viewType];
-        var searchQuery = {
+        var subViewParams = {
             context: _.extend({}, this.state.context, controllerContext),
             domain: this.state.domain,
             groupBy: [],
-        };
-        var subViewParams = {
             modelName: this.state.model,
             withControlPanel: false,
             hasSwitchButton: true,
             isEmbedded: true,
             additionalMeasures: this.additionalMeasures,
-            searchQuery: searchQuery,
         };
         var SubView = viewRegistry.get(viewType);
         var subView = new SubView(this.subFieldsViews[viewType], subViewParams);
@@ -422,10 +423,7 @@ var DashboardRenderer = FormRenderer.extend({
         var viewType = $(ev.currentTarget).attr('viewType');
         var controller = this.subControllers[viewType];
         this.trigger_up('open_view', {
-            // for now the views embedded in a dashboard can be of type
-            // cohort, graph, pivot. The getOwnedQueryParams method of their controller
-            // does not export anything but a context.
-            context: _.extend({}, this.state.context, controller.getOwnedQueryParams().context),
+            context: _.extend({}, this.state.context, controller.getContext()),
             viewType: viewType,
             additionalMeasures: this.additionalMeasures,
         });

@@ -5,17 +5,17 @@ odoo.define('account_online_synchronization.odoo_fin_connector', function(requir
     var ajax = require('web.ajax');
 
     function OdooFinConnector (parent, action) {
-        const id = action.id;
-        let mode = action.params.mode || 'link';
+        var id = action.id;
+        var mode = action.params.mode || 'link';
         // Ensure that the proxyMode is valid
-        const modeRegexp = /^[a-z0-9-_]+$/i;
+        var modeRegexp = /^[a-z0-9-_]+$/i;
         if (!modeRegexp.test(action.params.proxyMode)) { return; }
-        let url = 'https://' + action.params.proxyMode + '.odoofin.com/proxy/v1/odoofin_link';
+        var url = 'https://' + action.params.proxyMode + '.odoofin.com/proxy/v1/odoofin_link';
         
         ajax.loadJS(url)
         .then(function () {
             // Create and open the iframe
-            let params = {
+            var params = {
                 data: action.params, 
                 proxyMode: action.params.proxyMode, 
                 onEvent: function(event, data){
@@ -25,7 +25,7 @@ odoo.define('account_online_synchronization.odoo_fin_connector', function(requir
                         case 'reload':
                             return parent.do_action({type: 'ir.actions.client', tag: 'reload'});
                         case 'notification':
-                            parent.displayNotification(data);
+                            parent.do_notify(data.title, data.message);
                             break;
                         case 'exchange_token':
                             parent._rpc({
@@ -41,7 +41,9 @@ odoo.define('account_online_synchronization.odoo_fin_connector', function(requir
                                 method: 'success',
                                 args: [[id], mode, data]
                             })
-                            .then(action => parent.do_action(action));
+                            .then(function(action) {
+                                parent.do_action(action)
+                            });
                         default:
                             return;
                     }

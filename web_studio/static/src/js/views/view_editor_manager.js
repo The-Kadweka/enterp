@@ -22,7 +22,6 @@ var PivotEditor = require('web_studio.PivotEditor');
 var SearchEditor = require('web_studio.SearchEditor');
 var SearchRenderer = require('web_studio.SearchRenderer');
 
-var FieldSelectorDialog = require('web_studio.FieldSelectorDialog');
 var NewButtonBoxDialog = require('web_studio.NewButtonBoxDialog');
 var NewFieldDialog = require('web_studio.NewFieldDialog');
 var utils = require('web_studio.utils');
@@ -56,18 +55,14 @@ var ViewEditorManager = AbstractEditorManager.extend({
      * @override
      * @param {Widget} parent
      * @param {Object} params
-     * @param {Object} params.action
      * @param {Object} params.fields_view
      * @param {string} params.viewType
      * @param {Object} [params.chatter_allowed]
-     * @param {String} [params.controllerState]
      * @param {Object} [params.studio_view_id]
      * @param {Object} [params.studio_view_arch]
      */
     init: function (parent, params) {
         this._super.apply(this, arguments);
-
-        this.action = params.action;
 
         this.fields_view = params.fields_view;
         this.view_id = this.fields_view.view_id;
@@ -78,6 +73,10 @@ var ViewEditorManager = AbstractEditorManager.extend({
         // do not take it from the fields_view as it directly comes from the
         // server and might be `tree` sometimes
         this.view_type = params.viewType;
+        if (this.view_type == 'list') {
+            // reset the group by so lists are not grouped in studio.
+            this.env.groupBy = [];
+        }
 
         this.renamingAllowedFields = []; // those fields can be renamed
 
@@ -94,8 +93,6 @@ var ViewEditorManager = AbstractEditorManager.extend({
         this.studio_view_id = params.studio_view_id;
         this.studio_view_arch = params.studio_view_arch;
         this.x2mEditorPath = params.x2mEditorPath || [];
-
-        this.controllerState = params.controllerState;
     },
     /**
      * @override
@@ -116,7 +113,7 @@ var ViewEditorManager = AbstractEditorManager.extend({
                     currentX2m.x2mViewType, true, fields_view, x2mData);
             }
             // TODO: useless I think
-            return Promise.resolve();
+            return $.when();
         });
     },
 
@@ -126,7 +123,7 @@ var ViewEditorManager = AbstractEditorManager.extend({
 
     /**
      * @param {Object} options
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     updateEditor: function (options) {
         var self = this;
@@ -138,11 +135,19 @@ var ViewEditorManager = AbstractEditorManager.extend({
         var oldEditor = this.editor;
 
         return this._instantiateEditor(options).then(function (editor) {
+            var def = $.Deferred();
             var fragment = document.createDocumentFragment();
-            return editor.appendTo(fragment).then(function () {
+            try {
+                def = editor.appendTo(fragment);
+            } catch (e) {
+                self.trigger_up('studio_error', {error: 'view_rendering'});
+                self._undo(null, true);
+                def.reject();
+            }
+            return $.when(def).then(function () {
                 dom.append(self.$('.o_web_studio_view_renderer'), [fragment], {
                     in_DOM: self.isInDOM,
-                    callbacks: [{ widget: editor }],
+                    callbacks: [{widget: editor}],
                 });
                 self.editor = editor;
                 oldEditor.destroy();
@@ -152,9 +157,6 @@ var ViewEditorManager = AbstractEditorManager.extend({
                 if (localState) {
                     self.editor.setLocalState(localState);
                 }
-            }).guardedCatch(function (e) {
-                self.trigger_up('studio_error', {error: 'view_rendering'});
-                self._undo(null, true);
             });
         });
     },
@@ -203,7 +205,6 @@ var ViewEditorManager = AbstractEditorManager.extend({
         this._do({
             type: 'chatter',
             model: this.model_name,
-            remove_activity_ids: data.remove_activity_ids,
             remove_message_ids: data.remove_message_ids,
             remove_follower_ids: data.remove_follower_ids,
         });
@@ -248,7 +249,7 @@ var ViewEditorManager = AbstractEditorManager.extend({
         var def_field_values;
         var dialog;
 
-        var openCurrencyCreationDialog = function (relatedCurrency, resolve) {
+        var openCurrencyCreationDialog = function (relatedCurrency) {
             var msg = _t("In order to use a monetary field, you need a currency field on the model. " +
                 "Do you want to create a currency field first? You can make this field invisible afterwards.");
             return Dialog.confirm(this, msg, {
@@ -267,7 +268,7 @@ var ViewEditorManager = AbstractEditorManager.extend({
                     if (relatedCurrency) {
                         field_description.related = relatedCurrency;
                     }
-                    resolve();
+                    def_field_values.resolve();
                 },
             });
         };
@@ -292,77 +293,46 @@ var ViewEditorManager = AbstractEditorManager.extend({
                     ['3', "Very High"],
                 ];
             } else if (_.contains(['selection', 'one2many', 'many2one', 'many2many', 'related'], field_description.type)) {
-                def_field_values = new Promise(function (resolve, reject) {
-                    var prom;
-                    if (field_description.type === 'one2many') {
-                        // check for existing m2o fields for current model
-                        var modelName = self.x2mModel ? self.x2mModel : self.model_name;
-                        prom = self._rpc({
-                            model:"ir.model.fields",
-                            method: "search_count",
-                            args: [[['relation', '=', modelName], ['ttype', '=', 'many2one']]],
-                        });
-                    } else {
-                        prom = Promise.resolve(true);
-                    }
-                    prom.then(function (openFieldDialog) {
-                        if (!openFieldDialog) {
-                            // In case of o2m fields, if there's no m2o field available, display a warning instead
-                            var $message = $(QWeb.render('web_studio.FieldOne2manyWarning'));
-                            dialog = Dialog.alert(self, '', {
-                                $content: $('<main/>', {
-                                    role: 'alert',
-                                    html: $message,
-                                }),
-                                title: _t("No related many2one fields found"),
-                            });
-                            dialog.on('closed', self, function () {
-                                reject();
-                            });
+                // open dialog to precise the required fields for this field
+                def_field_values = $.Deferred();
+                dialog = new NewFieldDialog(this, modelName, field_description, _.filter(this.fields, {type: 'many2one'})).open();
+                dialog.on('field_default_values_saved', this, function (values) {
+                    if (values.related && values.type === 'monetary') {
+                        if (this._hasCurrencyField()) {
+                            def_field_values.resolve(values);
+                            dialog.close();
                         } else {
-                            // open dialog to precise the required fields for this field
-                            dialog = new NewFieldDialog(self, modelName, field_description, _.filter(self.fields, {type: 'many2one'})).open();
-                            dialog.on('field_default_values_saved', self, function (values) {
-                                if (values.related && values.type === 'monetary') {
-                                    if (self._hasCurrencyField()) {
-                                        resolve(values);
-                                        dialog.close();
-                                    } else {
-                                        var relatedCurrency = values._currency;
-                                        delete values._currency;
-                                        var currencyDialog = openCurrencyCreationDialog(relatedCurrency, resolve);
-                                        currencyDialog.on('closed', self, function () {
-                                            dialog.close();
-                                        });
-                                    }
-                                } else {
-                                    resolve(values);
-                                    dialog.close();
-                                }
-                            });
-                            dialog.on('closed', self, function () {
-                                reject();
+                            var relatedCurrency = values._currency;
+                            delete values._currency;
+                            var currencyDialog = openCurrencyCreationDialog(relatedCurrency);
+                            currencyDialog.on('closed', this, function () {
+                                dialog.close();
                             });
                         }
-                    });
-                });
-            } else if (field_description.type === 'monetary') {
-                def_field_values = new Promise(function (resolve, reject) {
-                    if (self._hasCurrencyField()) {
-                        resolve();
                     } else {
-                        dialog = openCurrencyCreationDialog(null, resolve);
-                        dialog.on('closed', self, function () {
-                            reject();
-                        });
+                        def_field_values.resolve(values);
+                        dialog.close();
                     }
                 });
+                dialog.on('closed', this, function () {
+                    def_field_values.reject();
+                });
+            } else if (field_description.type === 'monetary') {
+                def_field_values = $.Deferred();
+                if (this._hasCurrencyField()) {
+                    def_field_values.resolve();
+                } else {
+                    dialog = openCurrencyCreationDialog();
+                    dialog.on('closed', this, function () {
+                        def_field_values.reject();
+                    });
+                }
             } else if (field_description.type === 'integer') {
                 field_description.default_value = '0'
             }
         }
         // When the field values is selected, close the dialog and update the view
-        Promise.resolve(def_field_values).then(function (values) {
+        $.when(def_field_values).then(function (values) {
             if (field_description) {
                 self.renamingAllowedFields.push(field_description.name);
             }
@@ -383,12 +353,8 @@ var ViewEditorManager = AbstractEditorManager.extend({
                     attrs: new_attrs,
                     field_description: _.extend(field_description, values),
                 },
-            }).then(function () {
-                if (self.editor.selectField && field_description) {
-                    self.editor.selectField(field_description.name);
-                }
             });
-        }).guardedCatch(function () {
+        }).fail(function () {
             self.updateEditor();
         });
     },
@@ -422,43 +388,6 @@ var ViewEditorManager = AbstractEditorManager.extend({
         this._do({
             type: 'kanban_dropdown',
         });
-    },
-    /**
-     * @private
-     * @param {string} type
-     */
-    _editKanbanCover: function (type) {
-        if (type === 'kanban_set_cover') {
-            var compatibleFields = _.pick(this.fields, function (field) {
-               return field.type === "many2one" && field.relation === "ir.attachment";
-            });
-            var dialog = new FieldSelectorDialog(this, compatibleFields, true).open();
-            dialog.on('confirm', this, function (field) {
-                this._do({
-                    type: type,
-                    field: field,
-                });
-            });
-        }
-        if (type === 'remove') {
-            var fieldToRemove = _.pick(this.view.fieldsInfo[this.view_type], function (field) {
-                return field.widget === "attachment_image";
-            });
-
-            this._do({
-                type: type,
-                target: {
-                    tag: 'field',
-                    attrs: {name: _.keys(fieldToRemove)[0]},
-                    extra_nodes: [{
-                        tag: "a",
-                        attrs: {
-                            type: 'set_cover',
-                        },
-                    }],
-                },
-            });
-        }
     },
     /**
      * @private
@@ -534,13 +463,13 @@ var ViewEditorManager = AbstractEditorManager.extend({
      */
     _applyChangeHandling: function (result, opID) {
         var self = this;
-        var prom = Promise.resolve();
+        var def;
 
         if (!result.fields_views) {
             // the operation can't be applied
             this.trigger_up('studio_error', {error: 'wrong_xpath'});
             return this._undo(opID, true).then(function () {
-                return Promise.reject();
+                return $.Deferred().reject();
             });
         }
 
@@ -569,9 +498,9 @@ var ViewEditorManager = AbstractEditorManager.extend({
         // fields and fields_view has been updated so let's update everything
         // (i.e. the sidebar which displays the 'Existing Fields', etc.)
         if (this.x2mField) {
-            prom = this._setX2mParameters();
+            def = this._setX2mParameters();
         }
-        return prom.then(self.updateEditor.bind(self));
+        return $.when(def).then(self.updateEditor.bind(self));
     },
     /**
      * Find a currency field on the current model ; a monetary field can not be
@@ -589,13 +518,12 @@ var ViewEditorManager = AbstractEditorManager.extend({
     },
     /**
      * @override
-     * @param {Object} [lastOp]
      */
     _cleanOperationsStack: function (lastOp) {
         // As the studio view arch is stored in this widget, if this view
         // is updated directly with the XML editor, the arch should be updated.
         // The operations may not have any sense anymore so they are dropped.
-        if (lastOp && lastOp.view_id === this.studio_view_id) {
+        if (lastOp.view_id === this.studio_view_id) {
             this.studio_view_arch = lastOp.new_arch;
             this._super.apply(this, arguments);
         }
@@ -607,20 +535,14 @@ var ViewEditorManager = AbstractEditorManager.extend({
      * @private
      * @param {string} type
      * @param {string} field_name
-     * @return {Promise}
+     * @return {Deferred}
      */
     _createInlineView: function (type, field_name) {
         var self = this;
         var subviewType = type === 'list' ? 'tree' : type;
         // We build the correct xpath if we are editing a 'sub' subview
         var subviewXpath = this._getSubviewXpath(this.x2mEditorPath.slice(0, -1));
-        var context = _.extend({}, session.user_context, {lang: false});
-        // Use specific view if available in context
-        var specific_view = this.x2mViewParams.context[subviewType+'_view_ref'];
-        if (specific_view) {
-            context[subviewType+'_view_ref'] = specific_view;
-        }
-        var prom = this._rpc({
+        var def = this._rpc({
             route: '/web_studio/create_inline_view',
             params: {
                 model: this.x2mModel,
@@ -630,10 +552,10 @@ var ViewEditorManager = AbstractEditorManager.extend({
                 subview_xpath: subviewXpath,
                 // We write views in the base language to make sure we do it on the source term field
                 // of ir.ui.view
-                context: context,
+                context: _.extend({}, session.user_context, {lang: false}),
             },
         });
-        return prom
+        return def
             .then(function (studio_view_arch) {
                 // We clean the stack of operations because the edited view will change
                 self.operations = [];
@@ -740,6 +662,19 @@ var ViewEditorManager = AbstractEditorManager.extend({
      * @param {Object} new_attrs
      */
     _editViewAttributes: function (type, new_attrs) {
+        if (this.view_type === "gantt") {
+            // Shouldn't be forward ported to >= saas-12.2
+            // These two attributes are mutually exclusive in RNG spec
+            var allAttrs = _.extend({}, this.view.arch.attrs, new_attrs);
+            if (allAttrs.date_delay && allAttrs.date_stop) {
+                if (new_attrs.date_delay) {
+                    new_attrs.date_stop = "";
+                }
+                if (new_attrs.date_stop) {
+                    new_attrs.date_delay = "";
+                }
+            }
+        }
         this._do({
             type: type,
             target: {
@@ -751,10 +686,58 @@ var ViewEditorManager = AbstractEditorManager.extend({
         });
     },
     /**
+     * Enable kanban stages.
+     * What it actually does:
+     *  - create a new model Stage
+     *  - create a new Many2one field in the current model related to it
+     *  - set the `default_group_by` attribute on the view
+     *
+     *  @private
+     */
+    _enableStages: function () {
+        var self = this;
+        data_manager.invalidate();
+        var modelName = this.x2mModel ? this.x2mModel : this.model_name;
+        this._rpc({
+            route: '/web_studio/create_stages_model',
+            params: {
+                context: session.user_context,
+                model_name: modelName,
+            },
+        }).then(function (relationID) {
+            var fieldName = 'x_stage_id';
+            if (self.fields && self.fields.stage_id) {
+                fieldName = 'stage_id';
+            }
+            self._do({
+                type: 'add',
+                target: {
+                    tag: 'templates',
+                },
+                position: 'before',
+                node: {
+                    tag: 'field',
+                    attrs: {},
+                    field_description: {
+                        name: fieldName,
+                        field_description: _t('Stage'),
+                        model_name: modelName,
+                        type: 'many2one',
+                        relation_id: relationID,
+                    },
+                },
+            });
+
+            self._editViewAttributes('attributes', {
+                default_group_by: fieldName,
+            });
+        });
+    },
+    /**
      * @private
      * @param {String} model_name
      * @param {String} field_name
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _getDefaultValue: function (model_name, field_name) {
         return this._rpc({
@@ -774,7 +757,8 @@ var ViewEditorManager = AbstractEditorManager.extend({
     /**
      * @private
      * @param {String} model_name
-     * @returns {Promise}
+     * @returns {Deferred}
+     * @returns {Deferred}
      */
     _getEmailAlias: function (model_name) {
         return this._rpc({
@@ -786,18 +770,15 @@ var ViewEditorManager = AbstractEditorManager.extend({
     },
     /**
      * @override
-     * @param {Object} [params]
-     * @param {Object} [params.node] mandatory if mode "properties"
      */
-    _getSidebarState: function (mode, params) {
-        var newState;
-        var def = Promise.resolve();
+    _getSidebarState: function (mode, node) {
+        var def, newState;
         if (mode) {
-            newState = _.extend({}, params, {
+            newState = {
                 renamingAllowedFields: this.renamingAllowedFields,
                 mode: mode,
                 show_invisible: this.sidebar.state && this.sidebar.state.show_invisible || false,
-            });
+            };
         } else {
             newState = this.sidebar.state;
         }
@@ -811,7 +792,6 @@ var ViewEditorManager = AbstractEditorManager.extend({
                 break;
             case 'properties':
                 var attrs;
-                var node = params.node;
                 if (node.tag === 'field' && this.view_type !== 'search') {
                     var viewType = this.editor.state.viewType;
                     attrs = this.editor.state.fieldsInfo[viewType][node.attrs.name];
@@ -819,6 +799,7 @@ var ViewEditorManager = AbstractEditorManager.extend({
                     attrs = node.attrs;
                 }
                 newState = _.extend(newState, {
+                    node: node,
                     attrs: attrs,
                 });
 
@@ -832,7 +813,7 @@ var ViewEditorManager = AbstractEditorManager.extend({
                 break;
         }
 
-        return def.then(function (result) {
+        return $.when(def || $.when()).then(function (result) {
             return _.extend(newState, result);
         });
     },
@@ -859,7 +840,7 @@ var ViewEditorManager = AbstractEditorManager.extend({
         // this is a crappy way of processing the arch received as string
         // because we need a processed fields_view to find the x2m fields view
         var View = view_registry.get(this.mainViewType);
-        var view = new View(this.fields_view, _.extend({}, this.x2mViewParams));
+        var view = new View(this.fields_view, this.env);
 
         var fields_view = view.fieldsView;
         _.each(this.x2mEditorPath, function (step) {
@@ -871,18 +852,11 @@ var ViewEditorManager = AbstractEditorManager.extend({
     },
     /**
      * @override
-     * @returns {Promise<Widget>}
+     * @returns {Deferred<Widget>}
      */
     _instantiateEditor: function (params) {
         params = params || {};
         var fields_view = this.x2mField ? this._getX2mFieldsView() : this.fields_view;
-        var viewParams = this.x2mField ? this.x2mViewParams : {
-            action: this.action,
-            context: this.action.context,
-            controllerState: this.controllerState,
-            withSearchPanel: false,
-            domain: this.action.domain,
-        };
 
         var def;
         // Different behaviour for the search view because
@@ -894,10 +868,10 @@ var ViewEditorManager = AbstractEditorManager.extend({
             } else {
                 this.view = new SearchRenderer(this, fields_view);
             }
-            def = Promise.resolve(this.view);
+            def = $.when(this.view);
         } else {
             var View = view_registry.get(this.view_type);
-            this.view = new View(fields_view, _.extend({}, viewParams));
+            this.view = new View(fields_view, this.env);
             if (this.mode === 'edition') {
                 var Editor = Editors[this.view_type];
                 if (!Editor) {
@@ -910,8 +884,6 @@ var ViewEditorManager = AbstractEditorManager.extend({
                     chatter_allowed: chatterAllowed,
                     show_invisible: this.sidebar && this.sidebar.state.show_invisible,
                     arch: this.view.arch,
-                    x2mField: this.x2mField,
-                    viewType: this.view_type,
                 });
 
                 if (this.view_type === 'list') {
@@ -967,7 +939,7 @@ var ViewEditorManager = AbstractEditorManager.extend({
      * with the x2m information.
      *
      * @private
-     * @return {Promise}
+     * @return {Deferred}
      */
     _instantiateX2mEditor: function () {
         var self = this;
@@ -986,7 +958,7 @@ var ViewEditorManager = AbstractEditorManager.extend({
      * @param {boolean} fromBreadcrumb
      * @param {object} fieldsView
      * @param {object} x2mData
-     * @return {Promise}
+     * @return {Deferred}
      */
     _openX2mEditor: function (fieldName, viewType, fromBreadcrumb, fieldsView, x2mData) {
         var self = this;
@@ -1022,7 +994,7 @@ var ViewEditorManager = AbstractEditorManager.extend({
         var context = _.omit(data.getContext(), function (val, key) {
             return _.str.startsWith(key, 'default_');
         });
-        this.x2mViewParams = {
+        this.env = {
             currentId: data.res_id,
             context: context,
             ids: data.res_ids,
@@ -1111,7 +1083,7 @@ var ViewEditorManager = AbstractEditorManager.extend({
      * @private
      * @param {string} oldName
      * @param {string} newName
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _renameField: function (oldName, newName) {
         var self = this;
@@ -1136,8 +1108,8 @@ var ViewEditorManager = AbstractEditorManager.extend({
             var oldFieldIndex = self.renamingAllowedFields.indexOf(oldName);
             self.renamingAllowedFields.splice(oldFieldIndex, 1);
             self.renamingAllowedFields.push(newName);
-            return self._applyChanges().then(framework.unblockUI).guardedCatch(framework.unblockUI);
-        }).guardedCatch(framework.unblockUI);
+            return self._applyChanges().then(framework.unblockUI).fail(framework.unblockUI);
+        }).fail(framework.unblockUI);
     },
     /**
      * @private
@@ -1147,46 +1119,26 @@ var ViewEditorManager = AbstractEditorManager.extend({
     },
     /**
      * @private
-     * @param {int} view_id
-     * @returns {Promise}
-     */
-    _restoreDefaultView: async function (view_id) {
-        core.bus.trigger('clear_cache');
-        const result = await this._rpc({
-            route: '/web_studio/restore_default_view',
-            params: {
-                view_id: view_id,
-            },
-        });
-        await this._applyChangeHandling(result);
-        this.studio_view_id = null;
-        this.operations = [];
-        this.operations_undone = [];
-        this.studio_view_arch = "";
-        this._updateButtons();
-        await this._updateSidebar(this.sidebar.state.mode);
-        bus.trigger('toggle_snack_bar', 'saved');
-    },
-    /**
-     * @private
      * @param {String} model_name
      * @param {String} field_name
      * @param {*} value
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _setDefaultValue: function (model_name, field_name, value) {
+        var def = $.Deferred();
         var params = {
             model_name: model_name,
             field_name: field_name,
             value: value,
         };
-        return this._rpc({route: '/web_studio/set_default_value', params: params});
+        this._rpc({route: '/web_studio/set_default_value', params: params});
+        return def;
     },
     /**
      * @private
      * @param {String} model_name
      * @param {[type]} value
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _setEmailAlias: function (model_name, value) {
         return this._rpc({
@@ -1295,7 +1247,7 @@ var ViewEditorManager = AbstractEditorManager.extend({
         var data = event.data;
         var modelName = this.x2mModel ? this.x2mModel : this.model_name;
         this._setDefaultValue(modelName, data.field_name, data.value)
-            .guardedCatch(function () {
+            .fail(function () {
                 if (data.on_fail) {
                     data.on_fail();
                 }
@@ -1344,10 +1296,7 @@ var ViewEditorManager = AbstractEditorManager.extend({
     /**
      * Toggle editor sidebar.
      *
-     * @param {Object} ev.data.node
-     * @param {jQueryElement} [ev.data.$node]
      * @override
-     *
      */
     _onNodeClicked: function (ev) {
         var self = this;
@@ -1388,7 +1337,7 @@ var ViewEditorManager = AbstractEditorManager.extend({
                 });
             }
         }
-        this._updateSidebar('properties', ev.data);
+        this._updateSidebar('properties', node);
     },
     /**
      * @private
@@ -1469,7 +1418,7 @@ var ViewEditorManager = AbstractEditorManager.extend({
         var new_attrs = event.data.new_attrs || {};
         var position = event.data.position || 'after';
         var xpath_info;
-        if (node) {
+        if (node && _.isEmpty(_.pick(node.attrs, this.expr_attrs[node.tag]))) {
             xpath_info = findParentsPositions(this.view.arch, node);
         }
         switch (structure) {
@@ -1498,9 +1447,6 @@ var ViewEditorManager = AbstractEditorManager.extend({
             case 'chatter':
                 this._addChatter(event.data);
                 break;
-            case 'kanban_cover':
-                this._editKanbanCover(type);
-                break;
             case 'kanban_dropdown':
                 this._addKanbanDropdown();
                 break;
@@ -1527,8 +1473,9 @@ var ViewEditorManager = AbstractEditorManager.extend({
             case 'separator':
                 this._addSeparator(type, node, xpath_info, position);
                 break;
-            case 'restore':
-                this._restoreDefaultView(this.view_id);
+            case 'enable_stage':
+                this._enableStages();
+                break;
         }
     },
 });

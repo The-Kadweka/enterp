@@ -276,7 +276,7 @@
             <field name="code">l10n_es_pymes_debits_sum_12400</field>
             <field name="domain" eval="['|', ('account_id.code','=like','5523%'),
                                         ('account_id.code','=like','5524%')]"/>
-            <field name="formulas">balance = sum_if_pos.balance</field>
+            <field name="formulas">balance = sum.debit</field>
             <field name="groupby">account_id</field>
             <field name="show_domain">foldable</field>
             <field name="level" eval="2" />
@@ -334,7 +334,7 @@
                                         '|', ('account_id.code','=like','551%'),
                                         '|', ('account_id.code','=like','554%'),
                                         ('account_id.code','=like','5525%')]"/>
-            <field name="formulas">balance = sum_if_pos.balance</field>
+            <field name="formulas">balance = sum.debit</field>
             <field name="groupby">account_id</field>
             <field name="show_domain">foldable</field>
             <field name="level" eval="2" />
@@ -801,7 +801,7 @@
                                         '|', ('account_id.code','=like','551%'),
                                         '|', ('account_id.code','=like','554%'),
                                         ('account_id.code','=like','5525%')]"/>
-            <field name="formulas">balance = -sum_if_neg.balance</field>
+            <field name="formulas">balance = sum.credit</field>
             <field name="groupby">account_id</field>
             <field name="show_domain">foldable</field>
             <field name="level" eval="3" />
@@ -844,7 +844,7 @@
             <field name="code">l10n_es_pymes_credits_sum_32400</field>
             <field name="domain" eval="['|', ('account_id.code','=like','5523%'),
                                         ('account_id.code','=like','5524%')]"/>
-            <field name="formulas">balance = -sum_if_neg.balance</field>
+            <field name="formulas">balance = sum.credit</field>
             <field name="groupby">account_id</field>
             <field name="show_domain">foldable</field>
             <field name="level" eval="2" />

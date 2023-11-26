@@ -7,6 +7,7 @@ odoo.define('account_reports.ActionManager', function (require) {
  */
 
 var ActionManager = require('web.ActionManager');
+var crash_manager = require('web.crash_manager');
 var framework = require('web.framework');
 var session = require('web.session');
 
@@ -20,24 +21,23 @@ ActionManager.include({
      *
      * @private
      * @param {Object} action the description of the action to execute
-     * @returns {Promise} resolved when the report has been downloaded ;
+     * @returns {Deferred} resolved when the report has been downloaded ;
      *   rejected if an error occurred during the report generation
      */
     _executeAccountReportDownloadAction: function (action) {
-        var self = this;
         framework.blockUI();
-        return new Promise(function (resolve, reject) {
-            session.get_file({
-                url: '/account_reports',
-                data: action.data,
-                success: resolve,
-                error: (error) => {
-                    self.call('crash_manager', 'rpc_error', error);
-                    reject();
-                },
-                complete: framework.unblockUI,
-            });
+        var def = $.Deferred();
+        session.get_file({
+            url: '/account_reports',
+            data: action.data,
+            success: def.resolve.bind(def),
+            error: function () {
+                crash_manager.rpc_error.apply(crash_manager, arguments);
+                def.reject();
+            },
+            complete: framework.unblockUI,
         });
+        return def;
     },
     /**
      * Overrides to handle the 'ir_actions_account_report_download' actions.

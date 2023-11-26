@@ -83,11 +83,11 @@
                             </a>
                         </td>
                         <td t-if="rating_enable" title="Customer satisfaction analysis" t-att-class="(values and values['helpdesk_target_rating'] and values['helpdesk_target_rating'] &lt;= values['today']['rating'])?'o_main':'o_secondary'">
-                            <a href="#" class="o_dashboard_action" name="action_view_rating_today" type="object">
+                            <a href="#" class="o_dashboard_action" name="helpdesk_rating_today" type="object">
                                 <span class="o_highlight">
-                                    <t t-esc="values['today']['rating']"/> %
+                                    <t t-esc="values['today']['rating']"/> / 10
                                 </span><br/>
-                                Happy Rating
+                                Customer Rating
 
                             </a>
                         </td>
@@ -108,8 +108,8 @@
                             </a>
                         </td>
                         <td t-if="rating_enable" class="o_secondary">
-                            <a href="#" class="o_dashboard_action" name="action_view_rating_7days">
-                                <t t-esc="values['7days']['rating']"/> %
+                            <a href="#" class="o_dashboard_action" name="helpdesk_rating_7days">
+                                <t t-esc="values['7days']['rating']"/> / 10
                             </a>
                         </td>
                         <td t-if="success_rate_enable" class="o_secondary">
@@ -135,7 +135,7 @@
                         <td class="o_secondary" t-if="rating_enable">
                             <span t-if="!show_demo" class="o_target_to_set" name='helpdesk_target_rating' t-att-value="values['helpdesk_target_rating'] ? values['helpdesk_target_rating'] : undefined" title="Click to set">
                                 <t t-if="values['helpdesk_target_rating']">
-                                    <t t-esc="values['helpdesk_target_rating']"/>%
+                                    <t t-esc="values['helpdesk_target_rating']"/>
                                 </t>
                                 <t t-if="!values['helpdesk_target_rating']">
                                     Click to set
@@ -148,7 +148,7 @@
                         <td class="o_secondary" t-if="success_rate_enable">
                             <span t-if="!show_demo" class="o_target_to_set" name='helpdesk_target_success' t-att-value="values['helpdesk_target_success'] ? values['helpdesk_target_success'] : undefined" title="Click to set">
                                 <t t-if="values['helpdesk_target_success']">
-                                    <t t-esc="values['helpdesk_target_success']"/>%
+                                    <t t-esc="values['helpdesk_target_success']"/>
                                 </t>
                                 <t t-if="!values['helpdesk_target_success']">
                                     Click to set

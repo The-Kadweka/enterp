@@ -19,13 +19,14 @@ var DashboardRenderer = require('web_dashboard.DashboardRenderer');
 var _lt = core._lt;
 
 var DashboardView = BasicView.extend({
-    config: _.extend({}, BasicView.prototype.config, {
+    config: {
         Model: DashboardModel,
         Controller: DashboardController,
         Renderer: DashboardRenderer,
-    }),
+    },
     display_name: _lt('Dashboard'),
-    searchMenuTypes: ['filter', 'timeRange', 'favorite'],
+    groupable: false,
+    enableTimeRangeMenu: true,
     icon: 'fa-tachometer',
     viewType: 'dashboard',
 
@@ -48,6 +49,18 @@ var DashboardView = BasicView.extend({
         this.loadParams.aggregates = this.fieldsView.aggregates;
         this.loadParams.formulas = this.fieldsView.formulas;
 
+        // add '*_view_ref' keys in context, to fetch the adequate view
+        var context = this.loadParams.context;
+        _.each(this.fieldsView.subViews, function (subView) {
+            if (subView[0]) {
+                context[subView[1] + '_view_ref'] = subView[0];
+            }
+        });
+
+        // replaces the xmlids by false in the views description
+        this.fieldsView.subViews = _.map(this.fieldsView.subViews, function (subView) {
+            return [false, subView[1]]; // e.g. [false, 'graph']
+        });
 	},
 
     //--------------------------------------------------------------------------
@@ -60,12 +73,12 @@ var DashboardView = BasicView.extend({
      * @override
      * @private
      */
-    _loadData: function (model) {
+    _loadData: function (parent) {
         var self = this;
 
         var subViewsDef;
         if (this.fieldsView.subViews.length) {
-            subViewsDef = model
+            subViewsDef = parent
                 .loadViews(this.modelName, this.loadParams.context, this.fieldsView.subViews)
                 .then(function (fieldsViews) {
                     for (var viewType in fieldsViews) {
@@ -75,11 +88,10 @@ var DashboardView = BasicView.extend({
         }
 
         var superDef = this._super.apply(this, arguments);
-        return Promise.all([superDef, subViewsDef]).then(function (results) {
-            // the parent expects a promise resolved with a dataPoint id, but
-            // with this override, it becomes a promise resolved with an Array,
+        return $.when(superDef, subViewsDef).then(function (dataPointID) {
+            // the parent expects a deferred resolved with a dataPoint id, but
+            // with this override, it becomes a deferred resolved with an Array,
             // whose first element is the dataPoint id
-            var dataPointID = results[0];
             return dataPointID;
         });
     },
@@ -182,20 +194,6 @@ var DashboardView = BasicView.extend({
 
         return res;
     },
-    _updateMVCParams: function () {
-        var self = this;
-        this._super.apply(this, arguments);
-        // add '*_view_ref' keys in context, to fetch the adequate view
-        _.each(this.fieldsView.subViews, function (subView) {
-            if (subView[0]) {
-                self.loadParams.context[subView[1] + '_view_ref'] = subView[0];
-            }
-        });
-        // replaces the xmlids by false in the views description
-        this.fieldsView.subViews = _.map(this.fieldsView.subViews, function (subView) {
-            return [false, subView[1]]; // e.g. [false, 'graph']
-        });
-    }
 });
 
 viewRegistry.add('dashboard', DashboardView);

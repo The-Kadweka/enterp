@@ -1,8 +1,8 @@
 odoo.define('web_studio.SearchRenderer', function (require) {
 "use strict";
 
-var config = require('web.config');
 var core = require('web.core');
+var session = require('web.session');
 var utils = require('web.utils');
 var Widget = require('web.Widget');
 
@@ -32,7 +32,8 @@ var SearchRenderer = Widget.extend({
      */
     start: function () {
         this.$el.addClass(this.arch.attrs.class);
-        return this._super.apply(this, arguments).then(this._render.bind(this));
+        this._render();
+        return this._super.apply(this, arguments);
     },
 
     //--------------------------------------------------------------------------
@@ -96,7 +97,6 @@ var SearchRenderer = Widget.extend({
      */
     _render: function () {
         var self = this;
-        this.defs = [];
         this.$el.empty();
         this.$el.html(qweb.render('web_studio.searchRenderer', this.widget));
         this.first_field = undefined;
@@ -131,7 +131,6 @@ var SearchRenderer = Widget.extend({
                 nodesToTreat = nodesToTreat.concat(node.children);
             }
         }
-        return Promise.all(this.defs);
     },
     /**
      * @private
@@ -143,7 +142,7 @@ var SearchRenderer = Widget.extend({
         var $tbody = this.$('.o_web_studio_search_autocompletion_fields tbody');
         var field_string = this.fields[node.attrs.name].string;
         var display_string = node.attrs.string || field_string;
-        if (config.isDebug()) {
+        if (session.debug) {
             display_string += ' (' + node.attrs.name +')';
         }
         var $new_row = $('<tr>').append(
@@ -182,7 +181,7 @@ var SearchRenderer = Widget.extend({
         // we use a regex to get the field string
         var display_string = node.attrs.string;
         var field_name = node.attrs.context.match(":.?'(.*)'")[1];
-        if (config.isDebug()) {
+        if (session.debug) {
             display_string += ' (' + field_name +')';
         }
         var $new_row = $('<tr>').append(

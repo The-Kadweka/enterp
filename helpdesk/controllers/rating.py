@@ -22,7 +22,7 @@ class WebsiteHelpdesk(http.Controller):
         user = request.env.user
         # to avoid giving any access rights on helpdesk team to the public user, let's use sudo
         # and check if the user should be able to view the team (team managers only if it's not published or has no rating)
-        if not (team.use_rating and team.portal_show_rating) and not user.has_group('helpdesk.group_helpdesk_manager'):
+        if not (team.use_rating and team.portal_show_rating) and not user.sudo(user).has_group('helpdesk.group_helpdesk_manager'):
             raise NotFound()
         tickets = request.env['helpdesk.ticket'].sudo().search([('team_id', '=', team.id)])
         domain = [

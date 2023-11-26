@@ -62,24 +62,20 @@ class USPSRequest():
         if order:
             if not order.order_line:
                 return _("Please provide at least one item to ship.")
-            for line in order.order_line.filtered(lambda line: not line.product_id.weight and not line.is_delivery and line.product_id.type not in ['service', 'digital'] and not line.display_type):
+            for line in order.order_line.filtered(lambda line: not line.product_id.weight and not line.is_delivery and line.product_id.type not in ['service', 'digital']):
                 return _("The estimated price cannot be computed because the weight of your product %s is missing.") % line.product_id.display_name
-            tot_weight = sum([(line.product_id.weight * line.product_qty) for line in order.order_line if not line.display_type]) or 0
+            tot_weight = sum([(line.product_id.weight * line.product_qty) for line in order.order_line]) or 0
             weight_uom_id = order.env['product.template']._get_weight_uom_id_from_ir_config_parameter()
             weight_in_pounds = weight_uom_id._compute_quantity(tot_weight, order.env.ref('uom.product_uom_lb'))
             if weight_in_pounds > 4 and order.carrier_id.usps_service == 'First Class':     # max weight of FirstClass Service
                 return _("Please choose another service (maximum weight of this service is 4 pounds)")
-        if picking and picking.move_lines:
-            # https://www.usps.com/business/web-tools-apis/evs-international-label-api.htm
-            if max(picking.move_lines.mapped('product_uom_qty')) > 999:
-                return _("Quantity for each move line should be less than 1000.")
         return False
 
     def _usps_request_data(self, carrier, order):
         currency = carrier.env['res.currency'].search([('name', '=', 'USD')], limit=1)  # USPS Works in USDollars
-        tot_weight = sum([(line.product_id.weight * line.product_qty) for line in order.order_line if not line.display_type]) or 0.0
+        tot_weight = sum([(line.product_id.weight * line.product_qty) for line in order.order_line]) or 0.0
         total_weight = carrier._usps_convert_weight(tot_weight)
-        total_value = sum([(line.price_unit * line.product_uom_qty) for line in order.order_line.filtered(lambda line: not line.is_delivery and not line.display_type)]) or 0.0
+        total_value = sum([(line.price_unit * line.product_uom_qty) for line in order.order_line.filtered(lambda line: not line.is_delivery)]) or 0.0
 
         if order.currency_id.name == currency.name:
             price = total_value
@@ -165,14 +161,14 @@ class USPSRequest():
     def _item_data(self, line, weight, price):
         return {
             'Description': line.name,
-            'Quantity': max(int(line.product_uom_qty), 1),  # the USPS API does not accept 1.0 but 1
+            'Quantity': int(line.product_uom_qty),  # the USPS API does not accept 1.0 but 1
             'Value': price,
             'NetPounds': weight['pound'],
             'NetOunces': round(weight['ounce'], 0),
             'CountryOfOrigin': line.warehouse_id.partner_id.country_id.name or ''
         }
 
-    def _usps_shipping_data(self, picking, is_return=False):
+    def _usps_shipping_data(self, picking):
         carrier = picking.carrier_id
         itemdetail = []
 
@@ -181,10 +177,10 @@ class USPSRequest():
         for line in picking.move_lines:
             USD = carrier.env['res.currency'].search([('name', '=', 'USD')], limit=1)
             order = picking.sale_id
-            company = order.company_id or picking.company_id or self.env.company
+            company = order.company_id or picking.company_id or self.env.user.company_id
             shipper_currency = picking.sale_id.currency_id or picking.company_id.currency_id
             if shipper_currency.name == USD.name:
-                price = line.product_id.lst_price * line.product_uom_qty
+                price = line.product_id.lst_price * int(line.product_uom_qty)
             else:
                 quote_currency = picking.env['res.currency'].search([('name', '=', shipper_currency.name)], limit=1)
                 amount = line.product_id.lst_price * line.product_uom_qty
@@ -193,17 +189,17 @@ class USPSRequest():
             weight = carrier._usps_convert_weight(line.product_id.weight * line.product_uom_qty)
             itemdetail.append(self._item_data(line, weight, price))
 
-        if not is_return:
-            gross_weight = carrier._usps_convert_weight(picking.shipping_weight)
-            weight_in_ounces = 16 * gross_weight['pound'] + gross_weight['ounce']
-        else:
-            gross_weight = carrier._usps_convert_weight(picking.weight)
-            weight_in_ounces = picking.weight * 35.274
+        gross_weight = carrier._usps_convert_weight(picking.shipping_weight)
+        weight_in_ounces = 16 * gross_weight['pound'] + gross_weight['ounce']
         shipping_detail = {
             'api': api,
             'ID': carrier.sudo().usps_username,
             'revision': '2' if carrier.usps_delivery_nature == 'international' else '',
             'ImageParameters': '',
+            'picking_warehouse_partner': picking.picking_type_id.warehouse_id.partner_id,
+            'picking_warehouse_partner_phone': self._convert_phone_number(picking.picking_type_id.warehouse_id.partner_id.phone),
+            'picking_partner': picking.partner_id,
+            'picking_partner_phone': self._convert_phone_number(picking.partner_id.phone or picking.partner_id.mobile or ''),
             'picking_carrier': picking.carrier_id,
             'ToPOBoxFlag': 'N',
             'ToPOBoxFlagDom': 'false',
@@ -231,29 +227,13 @@ class USPSRequest():
             'AltReturnCountry': carrier.usps_redirect_partner_id.country_id.name,
             'Machinable': str(carrier.usps_machinable),
             'Container': carrier.usps_container,
-            'IsReturn': is_return,
             # We pass the function so that the template can use it too
             'func_split_zip': split_zip,
         }
-        if not is_return:
-            shipping_detail.update({
-                'picking_warehouse_partner': picking.picking_type_id.warehouse_id.partner_id,
-                'picking_warehouse_partner_phone': self._convert_phone_number(picking.picking_type_id.warehouse_id.partner_id.phone),
-                'picking_partner': picking.partner_id,
-                'picking_partner_phone': self._convert_phone_number(picking.partner_id.phone or picking.partner_id.mobile or ''),
-            })
-        else:
-            shipping_detail.update({
-                'picking_warehouse_partner': picking.partner_id,
-                'picking_warehouse_partner_phone': self._convert_phone_number(picking.partner_id.phone or picking.partner_id.mobile or ''),
-                'picking_partner': picking.picking_type_id.warehouse_id.partner_id,
-                'picking_partner_phone': self._convert_phone_number(picking.picking_type_id.warehouse_id.partner_id.phone),
-            })
-
         return shipping_detail
 
-    def usps_request(self, picking, delivery_nature, service, is_return=False):
-        ship_detail = self._usps_shipping_data(picking, is_return)
+    def usps_request(self, picking, delivery_nature, service):
+        ship_detail = self._usps_shipping_data(picking)
         request_text = picking.env['ir.qweb'].render('delivery_usps.usps_shipping_common', ship_detail)
         api = self._api_url(delivery_nature, service)
         dict_response = {'tracking_number': 0.0, 'price': 0.0, 'currency': "USD"}

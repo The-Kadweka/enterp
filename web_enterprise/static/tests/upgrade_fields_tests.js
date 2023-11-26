@@ -27,10 +27,10 @@ QUnit.module('upgrade_fields', {
 
     QUnit.module('FieldUpgrade');
 
-    QUnit.test('widget upgrade_boolean in a form view (enterprise version)', async function (assert) {
+    QUnit.test('widget upgrade_boolean in a form view (enterprise version)', function (assert) {
         assert.expect(2);
 
-        var form = await createView({
+        var form = createView({
             View: FormView,
             model: 'partner',
             data: this.data,
@@ -40,7 +40,7 @@ QUnit.module('upgrade_fields', {
                 '</form>',
         });
 
-        assert.containsNone(form, '.label',
+        assert.strictEqual(form.$('.label').length, 0,
             "there should be no upgrade label");
         assert.strictEqual(form.$('.o_label').text(), "BarCoucou",
             "the label should be correct");

@@ -1,11 +1,12 @@
+$o-dms-selector-width: 220px;
 $o-dms-inspector-width: 320px;
-$o-dms-chatter-width: 525px;
+$o-dms-chatter-width: 450px;
 
 $o-dms-p: $o-horizontal-padding;
 $o-dms-p-small: $o-horizontal-padding*0.5;
 $o-dms-p-tiny: $o-dms-p-small*0.5;
 
-$o-dms-color-tag: $o-searchpanel-filter-default-color;
+$o-dms-color-tag: #D59244;
 $o-dms-color-model: #338FFC;
 $o-dms-color-action: $o-brand-primary;
 $o-dms-color-folder: $o-enterprise-color;
@@ -28,43 +29,12 @@ $o-dms-inspector-bg-medium: #3D3D3D;
 $o-dms-inspector-bg-dark: #2E2E2E;
 $o-dms-inspector-bg-darker: #1A1A1A;
 
-$o-dms-progress-bar-height: 15px;
-
 
 ////// ======  Dashboard Kanban View ==========
 ////// ========================================
 
-.o_documents_drag_icon {
-    padding: 0px 3px;
-    color: white;
-    font-weight: bold;
-    background-color: $o-brand-primary;
-    border: 1px solid $o-brand-primary;
-    border-radius: 3px;
-    @include o-position-absolute($top: 0, $right: 0);
-    z-index: -9999;
-}
-
 .o_documents_kanban {
     align-items: flex-start;
-
-    // SearchPanel
-
-    .o_search_panel > .o_search_panel_section {
-        .o_drag_over_selector {
-            &.o_search_panel_filter_value, > header {
-                background-color: $o-searchpanel-active-bg;
-                font-weight: bold;
-                padding-left: 20px;
-            }
-
-        }
-
-        .o_search_panel_spinner {
-            @include o-position-absolute($right: 3px);
-            margin: 3px;
-        }
-    }
 
     .o_documents_model_color {
         color: $o-dms-color-model;
@@ -82,54 +52,90 @@ $o-dms-progress-bar-height: 15px;
         color: $o-dms-color-action;
     }
 
-    .o_kanban_record, .o_inspector_tag_remove, .o_inspector_model, .o_inspector_open_chatter, .o_document_close_chatter {
+    .o_documents_selector label, .o_kanban_record, .o_inspector_tag_remove, .o_inspector_model, .o_inspector_open_chatter, .o_document_close_chatter {
         cursor: pointer;
         user-select: none;
     }
 
-    .o_kanban_record > .o_kanban_tags {
-        padding-left: $o-kanban-attachement-image-size + $o-kanban-inside-hgutter;
-    }
+    .o_documents_selector {
+        flex: 0 0 $o-dms-selector-width;
+        padding: $o-dms-p-small $o-dms-p-small $o-dms-p*2 $o-dms-p;
 
-    .o_documents_progress_border {
-
-        position: relative;
-        padding: 0;
-        min-height: 80px;
-        cursor: pointer;
-
-        .o_kanban_record_bottom {
-            color: $gray-900;
-        }
-        .o_kanban_image_wrapper {
-            opacity: 0.7;
-        }
-    }
-
-    .o_documents_progress_bar_wrapper {
-        @include o-position-absolute($top: 0px, $left: 0px);
-        height: 100%;
-        width: 100%;
-        .o_documents_progress_bar {
-            z-index: 0;
-            transition: width 0.1s;
-            border-right: 1px solid #007b79;
-            height: 100%;
-            width: 100%;
-            background-color: $o-enterprise-primary-color;
-            opacity: 0.5;
-        }
-        .o_upload_cross {
-            @include o-position-absolute($o-kanban-inside-vgutter - 4px , $o-kanban-inside-hgutter - 4px);
-            padding: $o-dms-p-tiny;
-            color: $o-dms-btn-to-delete;
-            font-size: 16px;
-            &:active {
-                opacity: 0.7;
+        .o_foldable {
+            .o_toggle_fold {
+                padding: $o-dms-p-tiny;
+                @include o-hover-text-color($o-main-text-color, $headings-color);
+            }
+            .o_folded {
+                display: none !important;
             }
         }
-        &:not(:hover) .o_upload_cross {
-            display: none;
+
+        .o_documents_selector_header {
+            padding: $o-dms-p-small 0;
+        }
+
+        .list-group-item {
+            padding: 0 0 $o-dms-p-small 0;
+
+            .list-group-item {
+                padding: 0 0 0 $custom-control-gutter;
+                margin-bottom: $o-dms-p-tiny*0.5;
+
+                &:first-child {
+                    margin-top: $o-dms-p-tiny*0.5;
+                }
+            }
+
+            span.o_docs_label_title {
+                color: $headings-color;
+                @include o-text-overflow(inline-block, calc(100% - 22px));
+            }
+
+            header.active {
+                background-color: $list-group-action-active-bg;
+            }
+        }
+
+        .o_documents_selector_folders {
+            .o_documents_selector_folder header {
+                margin-left: -$o-dms-p-tiny;
+                padding-left: $o-dms-p-tiny;
+            }
+
+            .o_documents_selector_folder .o_documents_selector_folder {
+                position: relative;
+                padding-left: $o-dms-p;
+                padding-bottom: $o-dms-p-tiny;
+                margin-bottom: 0;
+
+
+                &:before, &:after {
+                    @include o-position-absolute(0, $left: $o-dms-p-tiny )
+                    @include size(1px, 100%);
+                    background: $gray-500;
+                    content: '';
+                }
+
+                &:after {
+                    top: 10px;
+                    @include size(8px, 1px);
+                }
+
+                &:last-child {
+                    &:before {
+                        height: 11px;
+                    }
+
+                    &:after {
+                        top: 11px;
+                    }
+                }
+            }
+        }
+
+        .o_documents_selector_count {
+            font-size: 12px;
         }
     }
 
@@ -139,19 +145,9 @@ $o-dms-progress-bar-height: 15px;
         height: 100%;
 
         .o_kanban_record.o_kanban_attachment {
-            display: flex;
-            flex-direction: column;
-
             &.oe_file_request {
                 border-style: dashed;
                 background-color: #fff0;
-            }
-
-            .o_kanban_image, .o_kanban_image_wrapper {
-                height: 100%;
-                width: $o-kanban-attachement-image-size;
-                position: absolute;
-                top: 0
             }
 
             .o_kanban_image .o_kanban_image_wrapper {
@@ -159,8 +155,7 @@ $o-dms-progress-bar-height: 15px;
             }
 
             .o_request_image .o_kanban_image_wrapper {
-                background-color: #f1f1f1;
-                opacity: 0.5;
+                background-color: #fff0;
 
                 &:hover {
                     background-color: $gray-200;
@@ -173,21 +168,6 @@ $o-dms-progress-bar-height: 15px;
 
             .o_kanban_details {
                 padding-left: $o-kanban-attachement-image-size + $o-kanban-inside-hgutter;
-                height: 100%;
-                flex-grow: 2;
-
-                .o_documents_lock {
-                    color: gray('700');
-                }
-
-                .o_kanban_details_wrapper {
-                    height: 100%;
-
-                    .o_field_many2manytags {
-                        margin-top: 5px;
-                        white-space: normal;
-                    }
-                }
             }
 
             .o_kanban_record_title {
@@ -282,14 +262,6 @@ $o-dms-progress-bar-height: 15px;
                 box-shadow: 0 1px 10px -2px $o-dms-inspector-bg-darker;
                 animation: o_documents_preview_in 0.2s ease-out 0s 1 normal backwards;
 
-                &.o_non_image_preview:not(.o_documents_single_preview) {
-                    // allows previews to resize and stack properly if they are not images.
-                    max-width: 50%;
-                    .o_preview_available {
-                        max-width: 100%;
-                    }
-                }
-
                 @for $i from 2 through 5 {
                     &:nth-child(#{$i}){
                         animation-delay: $i * 50ms;
@@ -335,10 +307,6 @@ $o-dms-progress-bar-height: 15px;
 
                 img, .o_preview_available {
                     cursor: zoom-in;
-
-                    &.o_documents_image_background {
-                        background-color: white;
-                    }
                 }
             }
 
@@ -374,16 +342,11 @@ $o-dms-progress-bar-height: 15px;
                 &.o_locked {
                     background-color: $o-dms-btn-is-locked;
                 }
-
-                &.o_inspector_archive:hover {
-                    background-color: $o-dms-btn-to-delete;
-                }
             }
 
             .o_inspector_table {
                 .o_inspector_label {
                     width: 0%;
-                    color: $o-dms-inspector-txt-light;
                     vertical-align: middle;
                     padding-left: 0;
 
@@ -397,20 +360,12 @@ $o-dms-progress-bar-height: 15px;
                     padding-left: $o-dms-p-small;
                     color: $o-dms-inspector-txt-light;
                 }
-
-                .o_input:disabled {
-                    opacity: 0.6;
-                }
             }
 
             .o_inspector_section {
                 &.o_inspector_section_rules {
                     display: inline-block;
                     width: 100%;
-
-                    > label {
-                        margin-bottom: 10px;
-                    }
                 }
 
                 .o_inspector_custom_field {
@@ -487,17 +442,11 @@ $o-dms-progress-bar-height: 15px;
 
                     .o_tag_prefix {
                         opacity: 0.5;
-                        @include o-text-overflow($max-width: 40%);
-                    }
-
-                    .o_documents_tag_name {
-                        @include o-text-overflow($max-width: 40%);
                     }
 
                     .o_inspector_tag_remove {
                         padding-left: $o-dms-p-small;
                         @include o-hover-opacity();
-                        display: inline-block;
                     }
 
                     &.o_inspector_hover {
@@ -552,23 +501,13 @@ $o-dms-progress-bar-height: 15px;
             box-shadow:none;
             border-radius: 0 0 10px 10px;
             line-height: 1.2;
-            z-index: 1;
         }
 
         .o_chatter_topbar {
 
             .o_topbar_right_area {
-                margin-right: 60px; // at least 40px to prevent overlapping with 'close' button (see .o_document_close_chatter)
-                display: flex;
-
-                .o_chatter_button_attachment {
-                    margin-right: 0px; // overrides the margin to prevent overlap.
-                }
+                right: 40px; // prevent the 'close' button from overlapping
             }
-        }
-
-        .o_attachments_previews {
-            margin: 0px; // overrides the margin to prevent negative value.
         }
     }
 

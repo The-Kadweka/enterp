@@ -27,15 +27,10 @@ class TestCodaFile(AccountingTestCase):
         self.bank_statement_model = self.env['account.bank.statement']
         coda_file_path = get_module_resource('l10n_be_coda', 'test_coda_file', 'Ontvangen_CODA.2013-01-11-18.59.15.txt')
         self.coda_file = base64.b64encode(open(coda_file_path, 'rb').read())
-        self.env['account.journal'].browse(self.ref('account.bank_journal')).currency_id = self.env['res.currency'].search([('name', '=', 'EUR')], limit=1).id
         self.context = {
             'journal_id': self.ref('account.bank_journal')
         }
-        self.bank_statement = self.statement_import_model.create({'attachment_ids': [(0, 0, {
-            'name': 'test file',
-            'datas': self.coda_file,
-        })]
-        })
+        self.bank_statement = self.statement_import_model.create(dict(data_file=self.coda_file,))
 
     def test_coda_file_import(self):
         self.bank_statement.with_context(self.context).import_file()
@@ -50,11 +45,7 @@ class TestCodaFile(AccountingTestCase):
 
     def test_coda_file_wrong_journal(self):
         """ The demo account used by the CODA file is linked to the demo bank_journal """
-        bank_statement_id = self.statement_import_model.create({'attachment_ids': [(0, 0, {
-            'name': 'test file',
-            'datas': self.coda_file,
-        })]
-        })
+        bank_statement_id = self.statement_import_model.create(dict(data_file=self.coda_file,))
         self.context['journal_id'] = self.ref('account.miscellaneous_journal')
         with self.assertRaises(Exception):
             self.statement_import_model.with_context(self.context).import_file([bank_statement_id])

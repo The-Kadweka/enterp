@@ -31,18 +31,6 @@
         <field name="level" eval="0" />
     </record>
 
-    <record id="account_financial_report_de_off_sheet" model="account.financial.html.report.line">
-        <field name="name">OFF BALANCE SHEET ACCOUNTS</field>
-        <field name="code">DE_OS</field>
-        <field name="financial_report_id" ref="balance_sheet_l10n_de"/>
-        <field name="domain" eval="[('account_id.user_type_id', '=', ref('account.data_account_off_sheet'))]"/>
-        <field name="groupby">account_id</field>
-        <field name="formulas">balance = -sum.balance</field>
-        <field name="sequence" eval="3"/>
-        <field name="level" eval="0"/>
-        <field name="hide_if_empty" eval="1"/>
-    </record>
-
 
     <!-- Asset -->
     <record id="skr_bs_asset_a" model="account.financial.html.report.line">

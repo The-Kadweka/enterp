@@ -4,7 +4,7 @@
 {
     'name': 'MRP features for Quality Control',
     'version': '1.0',
-    'category': 'Manufacturing/Quality',
+    'category': 'Manufacturing',
     'sequence': 50,
     'summary': 'Quality Management with MRP',
     'depends': ['quality_control', 'mrp_workorder', 'barcodes'],

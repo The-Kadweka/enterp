@@ -1,17 +1,17 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_sepa
+# * account_sepa
 # 
 # Translators:
-# Linkup <link-up@naver.com>, 2019
+# Linkup <link-up@naver.com>, 2018
 # JH CHOI <hwangtog@gmail.com>, 2020
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server saas~11.5+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-27 09:32+0000\n"
-"PO-Revision-Date: 2019-08-26 09:34+0000\n"
+"POT-Creation-Date: 2018-09-21 14:06+0000\n"
+"PO-Revision-Date: 2018-08-24 11:36+0000\n"
 "Last-Translator: JH CHOI <hwangtog@gmail.com>, 2020\n"
 "Language-Team: Korean (https://www.transifex.com/odoo/teams/41243/ko/)\n"
 "MIME-Version: 1.0\n"
@@ -19,12 +19,6 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Language: ko\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-
-#. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
-#, python-format
-msgid "A bank account is not defined."
-msgstr "은행 계좌가 정의되지 않았습니다."
 
 #. module: account_sepa
 #: code:addons/account_sepa/models/account_payment.py:0
@@ -48,24 +42,25 @@ msgid "Config Settings"
 msgstr "설정 구성"
 
 #. module: account_sepa
-#: model:ir.model.fields,field_description:account_sepa.field_account_payment__display_qr_code
-msgid "Display Qr Code"
-msgstr "Qr 코드 표시"
+#: model:ir.model,name:account_sepa.model_account_abstract_payment
+msgid ""
+"Contains the logic shared between models which allows to register payments"
+msgstr "지급금을 등록하기 위한 모델 사이에 공유되는 논리가 포함됩니다."
 
 #. module: account_sepa
 #: model:ir.model.fields,help:account_sepa.field_res_company__sepa_orgid_issr
 msgid ""
 "Entity that assigns the identification (eg. KBE-BCO or Finanzamt Muenchen "
 "IV)."
-msgstr "ID를 할당하는 엔티티 (예 : KBE-BCO 또는 Finanzamt Muenchen IV)."
+msgstr "식별을 할당하는 엔티티 (예 : KBE-BCO 또는 Finanzamt Muenchen IV)."
 
 #. module: account_sepa
-#: model:ir.model.fields.selection,name:account_sepa.selection__res_company__sepa_pain_version__pain_001_001_03
+#: selection:res.company,sepa_pain_version:0
 msgid "Generic"
-msgstr "범용"
+msgstr "일반"
 
 #. module: account_sepa
-#: model:ir.model.fields.selection,name:account_sepa.selection__res_company__sepa_pain_version__pain_001_003_03
+#: selection:res.company,sepa_pain_version:0
 msgid "German Version"
 msgstr "독일어 버전"
 
@@ -82,8 +77,8 @@ msgid "Identification assigned by an institution (eg. VAT number)."
 msgstr "기관에서 지정한 식별 번호 (예 : VAT 번호)"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:44
+#: code:addons/account_sepa/models/account_batch_payment.py:51
 #, python-format
 msgid ""
 "In result, the file might not be accepted by all bank as a valid SEPA Credit"
@@ -109,12 +104,6 @@ msgid ""
 msgstr "채권자 참조 당사자의 이름 사용 규칙 : 길이는 70 자로 제한됩니다."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_journal.py:0
-#, python-format
-msgid "Partner %s has not bank account defined."
-msgstr "%s 협력사의 은행 계좌가 정의되지 않았습니다."
-
-#. module: account_sepa
 #: model_terms:ir.ui.view,arch_db:account_sepa.account_journal_dashboard_kanban_view_inherited
 msgid "Payment to send via SEPA"
 msgstr "SEPA를 통해 송금"
@@ -122,7 +111,7 @@ msgstr "SEPA를 통해 송금"
 #. module: account_sepa
 #: model:ir.model,name:account_sepa.model_account_payment
 msgid "Payments"
-msgstr "결제"
+msgstr "지급금"
 
 #. module: account_sepa
 #: model_terms:ir.ui.view,arch_db:account_sepa.account_journal_dashboard_kanban_view_inherited
@@ -130,31 +119,27 @@ msgid "Payments to send via SEPA"
 msgstr "SEPA를 통해 송금"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:42
 #, python-format
 msgid "Please note that the following warning has been raised:"
-msgstr "다음과 같은 경고가 발생했습니다 :"
+msgstr "다음과 같은 경고가 발생했습니다."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:46
 #, python-format
 msgid "Please note that the following warnings have been raised:"
 msgstr "다음과 같은 경고가 발생했습니다 :"
 
 #. module: account_sepa
-#: model:ir.model.fields,field_description:account_sepa.field_account_payment__qr_code_url
-msgid "Qr Code Url"
-msgstr "QR 코드 URL"
+#: model:ir.model.fields,field_description:account_sepa.field_account_payment__partner_bank_account_id
+#: model:ir.model.fields,field_description:account_sepa.field_account_register_payments__partner_bank_account_id
+msgid "Recipient Bank Account"
+msgstr "수취인 은행 계좌"
 
 #. module: account_sepa
-#: model:ir.model,name:account_sepa.model_account_payment_register
-msgid "Register Payment"
+#: model:ir.model,name:account_sepa.model_account_register_payments
+msgid "Register Payments"
 msgstr "결제 등록"
-
-#. module: account_sepa
-#: model_terms:ir.ui.view,arch_db:account_sepa.view_sepa_credit_transfer_search
-msgid "SCT Payments To Send"
-msgstr "보낼 SCT 지불"
 
 #. module: account_sepa
 #: model:account.payment.method,name:account_sepa.account_payment_method_sepa_ct
@@ -162,7 +147,12 @@ msgid "SEPA Credit Transfer"
 msgstr "SEPA 계좌 이체"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_journal_dashboard.py:0
+#: model_terms:ir.ui.view,arch_db:account_sepa.view_sepa_credit_transfer_search
+msgid "SEPA Credit Transfer Payments To Send"
+msgstr ""
+
+#. module: account_sepa
+#: code:addons/account_sepa/models/account_journal_dashboard.py:23
 #, python-format
 msgid "SEPA Credit Transfers to Send"
 msgstr "보낼 SEPA 신용 이체"
@@ -185,12 +175,6 @@ msgstr ""
 "조정이 필요합니다."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_payment.py:0
-#, python-format
-msgid "Scan me with your banking app."
-msgstr "뱅킹 앱으로 스캔하십시오."
-
-#. module: account_sepa
 #: model:ir.model.fields,field_description:account_sepa.field_account_batch_payment__sct_generic
 msgid "Sct Generic"
 msgstr "Sct 일반 "
@@ -201,7 +185,7 @@ msgid "Sct Warning"
 msgstr "SCt 경고"
 
 #. module: account_sepa
-#: model:ir.model.fields.selection,name:account_sepa.selection__res_company__sepa_pain_version__pain_001_001_03_ch_02
+#: selection:res.company,sepa_pain_version:0
 msgid "Swiss Version"
 msgstr "스위스 버전"
 
@@ -217,13 +201,7 @@ msgstr ""
 "일지가 €에 있지 않으면 거래가 €에 있지 않거나 수취인이 IBAN 계좌 번호와 은행 BIC으로 식별되지 않습니다."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_payment.py:0
-#, python-format
-msgid "The SEPA QR Code information is not set correctly."
-msgstr "SEPA QR 코드 정보가 올바르게 설정되지 않았습니다."
-
-#. module: account_sepa
-#: code:addons/account_sepa/models/account_journal.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:353
 #, python-format
 msgid ""
 "The account %s, linked to partner '%s', is not of type IBAN.\n"
@@ -233,7 +211,7 @@ msgstr ""
 "SEPA 기능을 사용하려면 유효한 IBAN 계정이 필요합니다."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:103
 #, python-format
 msgid ""
 "The account %s, of journal '%s', is not of type IBAN.\n"
@@ -243,7 +221,7 @@ msgstr ""
 "SEPA 기능을 사용하려면 유효한 IBAN 계정이 필요합니다."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_payment.py:0
+#: code:addons/account_sepa/models/account_payment.py:47
 #, python-format
 msgid ""
 "The account '%s' (journal %s) requires a Bank Identification Code (BIC) to "
@@ -251,28 +229,28 @@ msgid ""
 msgstr "계정 '%s'(%s 분개장)는 SEPA를 통해 결제하기 위해 은행 식별 코드 (BIC)가 필요합니다. 먼저 구성하십시오."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_journal.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:317
 #, python-format
 msgid ""
 "The amount of the payment '%s' is too high. The maximum permitted is %s."
 msgstr "지불 금액 '%s'이 너무 높습니다. 허용되는 최대 값은 %s입니다."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:90
 #, python-format
 msgid ""
 "The creditor bank account %s used in payment %s is not identified by a BIC"
 msgstr "채권자 은행 계좌 %s는 지불에 사용된 %s지만 BIC에 의해 식별되지 않습니다."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:92
 #, python-format
 msgid ""
 "The creditor bank account %s used in payment %s is not identified by an IBAN"
 msgstr "채권자 은행 계좌 %s는 지불에 사용된 %s지만 IBAN에 의해 식별되지 않습니다."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:111
 #, python-format
 msgid ""
 "The following payments have no recipient bank account set: %s. \n"
@@ -282,7 +260,7 @@ msgstr ""
 "\n"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_payment.py:0
+#: code:addons/account_sepa/models/account_payment.py:45
 #, python-format
 msgid ""
 "The journal '%s' requires a proper IBAN account to pay via SEPA. Please "
@@ -290,7 +268,7 @@ msgid ""
 msgstr "'%s' 분개장은 SEPA를 이용해 적절한 IBAN 계정으로 지불해야 합니다. 먼저 구성하십시오."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_payment.py:0
+#: code:addons/account_sepa/models/account_payment.py:56
 #, python-format
 msgid ""
 "The partner account '%s' requires a Bank Identification Code (BIC) to pay "
@@ -298,7 +276,7 @@ msgid ""
 msgstr "파트너 계정 '%s'는 SEPA를 통해 결제하기 위해 은행 식별 코드 (BIC)가 필요합니다. 먼저 구성하십시오."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:18
 #, python-format
 msgid ""
 "The text used in SEPA files can only contain the following characters :\n"
@@ -316,19 +294,19 @@ msgstr ""
 "/ - ? : ( ) . , ' + (space)"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:88
 #, python-format
 msgid "The transaction %s is instructed in another currency than EUR"
 msgstr "%s거래는 EUR 이외의 다른 통화로 지시됩니다."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_journal.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:347
 #, python-format
 msgid "There is no Bank Identifier Code recorded for bank account '%s'"
 msgstr "'%s' 은행 계좌에 기록된 은행 식별자 코드가 없습니다."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_journal.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:191
 #, python-format
 msgid ""
 "There is no Bank Identifier Code recorded for bank account '%s' of journal "
@@ -336,7 +314,7 @@ msgid ""
 msgstr "'%s' 은행 계좌가 '%s' 분개장에 있지만 기록된 은행 식별자 코드가 없습니다."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_journal.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:189
 #, python-format
 msgid "Too many transactions for a single file."
 msgstr "단일 파일에 대한 트랜잭션이 너무 많습니다."
@@ -356,7 +334,7 @@ msgid "Your Company Name"
 msgstr "회사 명"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:84
 #, python-format
 msgid "Your bank account is not labelled in EUR"
 msgstr "귀하의 은행 계좌는 EUR로 표시되어 있지 않습니다"

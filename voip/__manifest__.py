@@ -8,10 +8,10 @@
         Make calls using a VOIP system""",
 
     'description': """
-Allows to make call from next activities or with click-to-dial.
+        Allow to make call from next activities or with click-to-dial.
     """,
 
-    'category': 'Tools',
+    'category': 'Sales',
     'version': '2.0',
 
     # any module necessary for this one to work correctly
@@ -20,6 +20,7 @@ Allows to make call from next activities or with click-to-dial.
     # always loaded
     'data': [
         'security/ir.model.access.csv',
+        'views/mail_activity_views.xml',
         'views/res_config_settings_views.xml',
         'views/res_partner_views.xml',
         'views/res_users_views.xml',

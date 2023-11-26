@@ -1,17 +1,18 @@
 .ui-autocomplete .ui-menu-item {
-    > a.ui-state-active {
+    &.ui-state-focus {
         background-color: $dropdown-link-hover-bg;
+    }
+    &.ui-state-focus > a {
         color: $dropdown-link-color;
         &:hover {
             color: $dropdown-link-color;
         }
     }
-    &.o_m2o_dropdown_option {
-        > a, > a.ui-state-active {
+    &.o_m2o_dropdown_option > a,
+    &.ui-state-focus.o_m2o_dropdown_option > a {
+        color: $o-brand-primary;
+        &:hover {
             color: $o-brand-primary;
-            &:hover {
-                color: $o-brand-primary;
-            }
         }
     }
 }

@@ -23,6 +23,7 @@ class ProviderAccount(models.Model):
     provider_type = fields.Selection(selection_add=[('ponto', 'Ponto')])
     ponto_token = fields.Char(readonly=True, help='Technical field that contains the ponto token')
 
+    @api.multi
     def _get_available_providers(self):
         ret = super(ProviderAccount, self)._get_available_providers()
         ret.append('ponto')
@@ -100,6 +101,7 @@ class ProviderAccount(models.Model):
         else:
             self.log_ponto_message('Credentials missing! Please, be sure to set your client id and secret id.')
 
+    @api.multi
     def get_login_form(self, site_id, provider, beta=False):
         if provider != 'ponto':
             return super(ProviderAccount, self).get_login_form(site_id, provider, beta)
@@ -114,7 +116,7 @@ class ProviderAccount(models.Model):
     def log_ponto_message(self, message):
         # We need a context check because upon first synchronization the account_online_provider record is created and just after
         # we call api to get accounts but this call can result on an error (token not correct or else) and the transaction
-        # would be rollbacked causing an error if we try to post a message on the deleted record with a new cursor. Solution
+        # would be rollbacked causing an error if we try to post a message on the deleted record with a new cursor. Solution 
         # is to not try to log message in that case.
         if not self._context.get('no_post_message'):
             subject = _("An error occurred during online synchronization")
@@ -139,13 +141,6 @@ class ProviderAccount(models.Model):
     def _update_ponto_accounts(self, method='add'):
         resp_json = self._ponto_fetch('GET', '/accounts', {}, {})
         res = {'added': self.env['account.online.journal']}
-        # When we are trying to add a new institution, add all existing account_online_journal that are not currently linked
-        # The reason is that a user can first synchronize for journal A and receive 3 bank accounts, he only link one bank account
-        # and does nothing with the 2 others, then later he create a new journal and synchronize again with the same ponto token
-        # because he would like to link one of the two remaining account to his journal. Since the accounts were already fetched in
-        # Odoo, we have to show it to him so that he can link them.
-        if method == 'add':
-            res['added'] = self.account_online_journal_ids.filtered(lambda j: len(j.journal_ids) == 0)
         for account in resp_json.get('data', {}):
             # Fetch accounts
             vals = {
@@ -174,41 +169,28 @@ class ProviderAccount(models.Model):
 
     def success_callback(self, token):
         # Create account.provider and fetch account
-        encoded_token = str(base64.b64encode(bytes(token, 'utf-8')), 'utf-8')
-        ponto_token = '{"encoded_credentials": "%s"}' % encoded_token
+        ponto_token = '{"encoded_credentials": "%s"}' % str(base64.b64encode(bytes(token, 'utf-8')), 'utf-8')
         method = self._context.get('method', 'add')
 
         if self.id:
             self.write({'ponto_token': ponto_token})
             provider_account = self
         else:
-            # Search for already existing ponto provider and if found update that one, otherwise create a new one
-            provider_accounts = self.search([('provider_identifier', '=', 'ponto')])
-            provider_account = False
-            for provider in provider_accounts:
-                try:
-                    credentials = json.loads(provider.ponto_token)
-                    if credentials.get('encoded_credentials') == encoded_token:
-                        provider_account = provider
-                        break
-                except ValueError as e:
-                    # ignore error as it is possible that it is due to an old encoding of ponto_token
-                    continue
-            if not provider_account:
-                vals = {
-                    'name': _('Ponto'),
-                    'ponto_token': ponto_token,
-                    'provider_identifier': 'ponto',
-                    'status': 'SUCCESS',
-                    'status_code': 0,
-                    'message': '',
-                    'last_refresh': fields.Datetime.now(),
-                    'action_required': False,
-                    'provider_type': 'ponto',
-                }
-                provider_account = self.create(vals)
+            provider_account = self.create({
+                'name': _('Ponto'),
+                'ponto_token': ponto_token,
+                'provider_identifier': 'ponto',
+                'status': 'SUCCESS',
+                'status_code': 0,
+                'message': '',
+                'last_refresh': fields.Datetime.now(),
+                'action_required': False,
+                'provider_type': 'ponto',
+            })
+
         return provider_account.with_context(no_post_message=True)._update_ponto_accounts(method)
 
+    @api.multi
     def manual_sync(self):
         if self.provider_type != 'ponto':
             return super(ProviderAccount, self).manual_sync()
@@ -217,10 +199,11 @@ class ProviderAccount(models.Model):
             if account.journal_ids:
                 tr = account.retrieve_transactions()
                 transactions.append({'journal': account.journal_ids[0].name, 'count': tr})
-        self.write({'status': 'SUCCESS', 'action_required': False, 'last_refresh': fields.Datetime.now()})
+        self.write({'status': 'SUCCESS', 'action_required': False})
         result = {'status': 'SUCCESS', 'transactions': transactions, 'method': 'refresh', 'added': self.env['account.online.journal']}
         return self.show_result(result)
 
+    @api.multi
     def update_credentials(self):
         if self.provider_type != 'ponto':
             return super(ProviderAccount, self).update_credentials()
@@ -275,15 +258,17 @@ class OnlineAccount(models.Model):
                 break
             count += 1
             time.sleep(2)
+        self.account_online_provider_id.last_refresh = fields.Datetime.now()
         return
 
+    @api.multi
     def retrieve_transactions(self):
         if (self.account_online_provider_id.provider_type != 'ponto'):
             return super(OnlineAccount, self).retrieve_transactions()
         # actualize the data in ponto
         # For some reason, ponto has 2 different routes to update the account balance and transactions
         # however if we try to refresh both one after another or at the same time, an error is received
-        # An error is also received if we call their synchronization route too quickly. Therefore we
+        # An error is also received if we call their synchronization route too quickly. Therefore we 
         # only refresh the transactions of the account and don't update the account which means that the
         # balance of the account won't be up-to-date. However this is not a big problem as the record that
         # store the balance is hidden for most user.
@@ -352,10 +337,7 @@ class OnlineAccount(models.Model):
                     'end_amount': end_amount
                 }
                 if account_number:
-                    company_id = self.account_online_provider_id.company_id.id
-                    partner_bank = self.env['res.partner.bank'].search([
-                        ('sanitized_acc_number', '=', sanitize_account_number(account_number)),
-                        '|', ('company_id', '=', company_id), ('company_id', '=', False)], order='company_id', limit=1)
+                    partner_bank = self.env['res.partner.bank'].search([('sanitized_acc_number', '=', sanitize_account_number(account_number))], limit=1)
                     if partner_bank:
                         trans['bank_account_id'] = partner_bank.id
                         trans['partner_id'] = partner_bank.partner_id.id
@@ -367,25 +349,3 @@ class OnlineAccount(models.Model):
             self.ponto_last_synchronization_identifier = latest_transaction_identifier
         # Create the bank statement with the transactions
         return self.env['account.bank.statement'].online_sync_bank_statement(transactions, self.journal_ids[0])
-
-
-class OnlineAccountWizard(models.TransientModel):
-    _inherit = 'account.online.wizard'
-
-    def _get_journal_values(self, account, create=False):
-        vals = super(OnlineAccountWizard, self)._get_journal_values(account=account, create=create)
-        if account.online_account_id.account_online_provider_id.provider_type == 'ponto':
-            vals['post_at'] = 'bank_rec'
-            vals['name'] = account.account_number
-            # create bank account in Odoo if not already exists
-            company = account.journal_id and account.journal_id.company_id or self.env.company
-            res_bank_id = self.env['res.partner.bank'].search([('acc_number', '=', account.account_number), ('company_id', '=', company.id)])
-            if not len(res_bank_id):
-                res_bank_id = self.env['res.partner.bank'].create({
-                    'acc_number': account.account_number,
-                    'company_id': company.id,
-                    'currency_id': company.currency_id.id,
-                    'partner_id': company.partner_id.id,
-                })
-            vals['bank_account_id'] = res_bank_id.id
-        return vals

@@ -18,6 +18,7 @@ class AccountAnalyticAccount(models.Model):
         for account in self:
             account.subscription_count = mapped_data.get(account.id, 0)
 
+    @api.multi
     def subscriptions_action(self):
         subscription_ids = self.mapped('subscription_ids').ids
         result = {

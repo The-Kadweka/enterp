@@ -4,7 +4,7 @@
 {
     'name': 'Maintenance - MRP',
     'version': '1.0',
-    'category': 'Manufacturing/Manufacturing',
+    'category': 'Manufacturing',
     'summary': 'Schedule and manage maintenance on machine and tools.',
     'website': 'https://www.odoo.com/page/tpm-maintenance-software',
     'description': """

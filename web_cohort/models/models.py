@@ -6,7 +6,6 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from odoo import api, fields, models
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT
-from odoo.osv import expression
 
 DISPLAY_FORMATS = {
     'day': '%d %b %Y',
@@ -39,45 +38,27 @@ class Base(models.AbstractModel):
         total_value = 0
         initial_churn_value = 0
         measure_is_many2one = self._fields.get(measure) and self._fields.get(measure).type == 'many2one'
-        field_measure = (
-            [measure + ':count_distinct']
-            if measure_is_many2one
-            else ([measure] if  self._fields.get(measure) else [])
-        )
-        row_groups = self._read_group_raw(
-            domain=domain,
-            fields=[date_start] + field_measure,
-            groupby=date_start + ':' + interval
-        )
-        for group in row_groups:
+        for group in self.with_context(tz=False)._read_group_raw(domain=domain, fields=[date_start], groupby=date_start + ':' + interval):
             dates = group['%s:%s' % (date_start, interval)]
             if not dates:
                 continue
-            # Split with space for smoothly format datetime field
-            clean_start_date = dates[0].split('/')[0].split(' ')[0]
+            clean_start_date = dates[0].split('/')[0].split(' ')[0]  # Split with space for smoothly format datetime field
             cohort_start_date = fields.Datetime.from_string(clean_start_date)
-            if measure == '__count__':
-                value = float(group[date_start + '_count'])
-            else:
-                value = float(group[measure] or 0.0)
-            total_value += value
 
-            sub_group = self._read_group_raw(
-                domain=group['__domain'],
-                fields=[date_stop] + field_measure,
-                groupby=date_stop + ':' + interval
-            )
-            sub_group_per_period = {}
-            for g in sub_group:
-                d_stop = g["%s:%s" % (date_stop, interval)]
-                if d_stop:
-                    date_group = fields.Datetime.from_string(d_stop[0].split('/')[0])
-                    group_interval = date_group.strftime(DISPLAY_FORMATS[interval])
-                    sub_group_per_period[group_interval] = g
+            records = self.search(group['__domain'])
+            if measure == '__count__':
+                value = float(len(records))
+            else:
+                if measure_is_many2one:
+                    value = len(set([record[measure] for record in records]))
+                else:
+                    value = float(sum([record[measure] for record in records]))
+            total_value += value
 
             columns = []
             initial_value = value
             col_range = range(-15, 1) if timeline == 'backward' else range(0, 16)
+
             for col_index, col in enumerate(col_range):
                 col_start_date = cohort_start_date
                 if interval == 'day':
@@ -103,37 +84,25 @@ class Base(models.AbstractModel):
                     continue
 
                 significative_period = col_start_date.strftime(DISPLAY_FORMATS[interval])
-                col_group = sub_group_per_period.get(significative_period, {})
-                if not col_group:
-                    col_value = 0.0
-                elif measure == '__count__':
-                    col_value = col_group[date_stop + '_count']
+                col_records = [record for record in records if record[date_stop] and record[date_stop].strftime(DISPLAY_FORMATS[interval]) == significative_period]
+
+                if measure == '__count__':
+                    col_value = len(col_records)
                 else:
-                    col_value = col_group[measure] or 0.0
+                    if measure_is_many2one:
+                        col_value = len(set([record[measure].id for record in col_records]))
+                    else:
+                        col_value = sum([record[measure] for record in col_records])
 
                 # In backward timeline, if columns are out of given range, we need
                 # to set initial value for calculating correct percentage
                 if timeline == 'backward' and col_index == 0:
-                    outside_timeline_domain = expression.AND(
-                        [
-                            group['__domain'],
-                            ['|',
-                                (date_stop, '=', False),
-                                (date_stop, '>=', fields.Datetime.to_string(col_start_date)),
-                            ]
-                        ]
-                    )
-                    col_group = self._read_group_raw(
-                        domain=outside_timeline_domain,
-                        fields=field_measure,
-                        groupby=[]
-                    )
+                    col_records = [record for record in records if record[date_stop] and record[date_stop] >= col_start_date]
                     if measure == '__count__':
-                        initial_value = float(col_group[0]['__count'])
+                        initial_value = len(col_records)
                     else:
-                        initial_value = float(col_group[0][measure] or 0.0)
+                        initial_value = sum([record[measure] for record in col_records])
                     initial_churn_value = value - initial_value
-
                 previous_col_remaining_value = initial_value if col_index == 0 else columns[-1]['value']
                 col_remaining_value = previous_col_remaining_value - col_value
                 percentage = value and (col_remaining_value) / value or 0

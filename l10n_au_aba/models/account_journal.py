@@ -50,7 +50,7 @@ class AccountJournal(models.Model):
         """
         aba_ct = self.env.ref('l10n_au_aba.account_payment_method_aba_ct')
         aud = self.env.ref('base.AUD')
-        if self.env.company.currency_id == aud:
+        if self.env.user.company_id.currency_id == aud:
             domain = ['&', ('type', '=', 'bank'), '|', ('currency_id', '=', aud.id), ('currency_id', '=', False)]
         else:
             domain = ['&', ('type', '=', 'bank'), ('currency_id', '=', aud.id)]

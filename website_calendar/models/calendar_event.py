@@ -22,6 +22,7 @@ class CalendarEvent(models.Model):
                 if event.appointment_type_id.id == appointment_type_id:
                     event.is_highlighted = True
 
+    @api.model_cr_context
     def _init_column(self, column_name):
         """ Initialize the value of the given column for existing rows.
             Overridden here because we skip generating unique access tokens

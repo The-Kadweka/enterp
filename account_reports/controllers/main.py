@@ -14,11 +14,8 @@ class FinancialReportController(http.Controller):
     @http.route('/account_reports', type='http', auth='user', methods=['POST'], csrf=False)
     def get_report(self, model, options, output_format, token, financial_id=None, **kw):
         uid = request.session.uid
-        account_report_model = request.env['account.report']
+        report_obj = request.env[model].sudo(uid)
         options = json.loads(options)
-        cids = request.httprequest.cookies.get('cids', str(request.env.user.company_id.id))
-        allowed_company_ids = [int(cid) for cid in cids.split(',')]
-        report_obj = request.env[model].with_user(uid).with_context(allowed_company_ids=allowed_company_ids)
         if financial_id and financial_id != 'null':
             report_obj = report_obj.browse(int(financial_id))
         report_name = report_obj.get_report_filename(options)
@@ -27,16 +24,16 @@ class FinancialReportController(http.Controller):
                 response = request.make_response(
                     None,
                     headers=[
-                        ('Content-Type', account_report_model.get_export_mime_type('xlsx')),
+                        ('Content-Type', 'application/vnd.ms-excel'),
                         ('Content-Disposition', content_disposition(report_name + '.xlsx'))
                     ]
                 )
-                response.stream.write(report_obj.get_xlsx(options))
+                report_obj.get_xlsx(options, response)
             if output_format == 'pdf':
                 response = request.make_response(
                     report_obj.get_pdf(options),
                     headers=[
-                        ('Content-Type', account_report_model.get_export_mime_type('pdf')),
+                        ('Content-Type', 'application/pdf'),
                         ('Content-Disposition', content_disposition(report_name + '.pdf'))
                     ]
                 )
@@ -45,7 +42,7 @@ class FinancialReportController(http.Controller):
                 response = request.make_response(
                     content,
                     headers=[
-                        ('Content-Type', account_report_model.get_export_mime_type('xml')),
+                        ('Content-Type', 'application/vnd.sun.xml.writer'),
                         ('Content-Disposition', content_disposition(report_name + '.xml')),
                         ('Content-Length', len(content))
                     ]
@@ -55,7 +52,7 @@ class FinancialReportController(http.Controller):
                 response = request.make_response(
                     content,
                     headers=[
-                        ('Content-Type', account_report_model.get_export_mime_type('xaf')),
+                        ('Content-Type', 'application/vnd.sun.xml.writer'),
                         ('Content-Disposition', content_disposition(report_name + '.xaf')),
                         ('Content-Length', len(content))
                     ]
@@ -65,7 +62,7 @@ class FinancialReportController(http.Controller):
                 response = request.make_response(
                     content,
                     headers=[
-                        ('Content-Type', account_report_model.get_export_mime_type('txt')),
+                        ('Content-Type', 'text/plain'),
                         ('Content-Disposition', content_disposition(report_name + '.txt')),
                         ('Content-Length', len(content))
                     ]
@@ -75,17 +72,17 @@ class FinancialReportController(http.Controller):
                 response = request.make_response(
                     content,
                     headers=[
-                        ('Content-Type', account_report_model.get_export_mime_type('csv')),
+                        ('Content-Type', 'text/csv'),
                         ('Content-Disposition', content_disposition(report_name + '.csv')),
                         ('Content-Length', len(content))
                     ]
                 )
             if output_format == 'zip':
-                content = report_obj.get_zip(options)
+                content = report_obj._get_zip(options)
                 response = request.make_response(
                     content,
                     headers=[
-                        ('Content-Type', account_report_model.get_export_mime_type('zip')),
+                        ('Content-Type', 'application/zip'),
                         ('Content-Disposition', content_disposition(report_name + '.zip')),
                     ]
                 )

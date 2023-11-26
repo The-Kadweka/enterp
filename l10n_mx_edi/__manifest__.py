@@ -14,20 +14,20 @@ This module allows the creation of the EDI documents and the communication with 
     """,
     'depends': [
         'account',
+        'account_cancel',
         'base_vat',
         'base_address_extended',
-        'attachment_indexation',
+        'document',
         'base_address_city',
     ],
     'external_dependencies' : {
-        'python' : ['pyOpenSSL'],
+        'python' : ['OpenSSL'],
     },
     'data': [
         'security/ir.model.access.csv',
         'security/l10n_mx_edi_certificate.xml',
         'data/3.3/cfdi.xml',
         'data/3.3/payment10.xml',
-        'data/3.3/external_trade.xml',
         'data/account_data.xml',
         'data/action_server_data.xml',
         'data/payment_method_data.xml',
@@ -50,7 +50,6 @@ This module allows the creation of the EDI documents and the communication with 
         "views/l10n_mx_edi_report_payment.xml",
         'views/res_country_view.xml',
         'views/product_view.xml',
-        'views/res_bank_view.xml',
     ],
     'demo': [
         'demo/l10n_mx_edi_demo.xml',

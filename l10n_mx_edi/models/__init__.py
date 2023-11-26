@@ -13,10 +13,7 @@ from . import ir_view
 from . import mail_template
 from . import payment_method
 from . import product
-from . import res_bank
-from . import res_city
 from . import res_company
 from . import res_country
 from . import res_currency
-from . import res_locality
 from . import res_partner

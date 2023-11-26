@@ -3,4 +3,6 @@
 
 # Copyright (c) 2012 Noviat nv/sa (www.noviat.be). All rights reserved.
 
-from . import test_import_bank_statement
+# If someone reads this, please ask to the accounting team to fix me
+# I'm commented since the 9th version... I want to be executed. Please.
+# import test_import_bank_statement

@@ -15,28 +15,16 @@ FormRenderer.include({
     // Private
     //--------------------------------------------------------------------------
 
-    /** We always return a $el even if it's asynchronous (see _renderFieldWidget).
-     *
+    /**
      * @private
-     * @returns {jQueryElement}
      */
-    _renderTagContactsync: function (node) {
-        var $el = $('<div>');
+    _renderTagContactsync: function () {
         var widget = new ContactSync(this, {
             res_id: this.state.res_id,
             res_model: this.state.model,
         });
-        // Prepare widget rendering and save the related promise
-        var prom = widget._widgetRenderAndInsert(function () { });
-        prom.then(() => {
-            this._registerModifiers(node, this.state, widget);
-            $el.replaceWith(widget.$el);
-        });
-
-        this.widgets.push(widget);
-        this.defs.push(prom);
-
-        return $el;
+        widget.appendTo($('<div>'));
+        return widget.$el;
     },
 });
 

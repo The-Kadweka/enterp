@@ -20,7 +20,7 @@ except ImportError:
 class PACSWMixin(models.AbstractModel):
     """PAC SW Mixin is a mixin Abstract class to add methods
     in order to call services of the PAC SW.
-    It defines standard name methods that are auto-called from account.move
+    It defines standard name methods that are auto-called from account.invoice
     or account.payment.
 
     Re-using code as soon as possible.
@@ -85,7 +85,7 @@ class PACSWMixin(models.AbstractModel):
         if (response_json['status'] == 'error' and
                 response_json['message'].startswith('307')):
             # XML signed previously
-            cfdi = base64.encodebytes(
+            cfdi = base64.encodestring(
                 response_json['messageDetail'].encode('UTF-8'))
             cfdi = cfdi.decode('UTF-8')
             response_json['data'] = {'cfdi': cfdi}
@@ -123,92 +123,68 @@ class PACSWMixin(models.AbstractModel):
         }
 
     def _l10n_mx_edi_sw_sign(self, pac_info):
-        for rec in self:
-            xml = base64.b64decode(rec.l10n_mx_edi_cfdi)
-            xml_signed, code, msg = self._l10n_mx_edi_sw_sign_service(pac_info, xml)
-            if code == 'error':
-                rec.l10n_mx_edi_log_error(msg)
-                continue
-            rec._l10n_mx_edi_post_sign_process(
-                base64.b64encode(xml_signed) if xml_signed else None,
-                code, msg)
-
-    def _l10n_mx_edi_sw_sign_service(self, pac_info, cfdi):
-        ''' SW Sapiens API requires a base64 encoded string
-        '''
         token, req_e = self._l10n_mx_edi_sw_token(pac_info)
         if not token:
-            return None, 'error', _("Token could not be obtained %s") % req_e
+            self.l10n_mx_edi_log_error(
+                _("Token could not be obtained %s") % req_e)
+            return
         url = pac_info['url']
-        boundary = self._l10n_mx_edi_sw_boundary()
-        payload = """--%(boundary)s
+        for rec in self:
+            xml = rec.l10n_mx_edi_cfdi.decode('UTF-8')
+            boundary = self._l10n_mx_edi_sw_boundary()
+            payload = """--%(boundary)s
 Content-Type: text/xml
 Content-Transfer-Encoding: binary
 Content-Disposition: form-data; name="xml"; filename="xml"
 
 %(xml)s
 --%(boundary)s--
-""" % {'boundary': boundary, 'xml': base64.b64encode(cfdi).decode('UTF-8')}
-        headers = {
-            'Authorization': "bearer " + token,
-            'Content-Type': ('multipart/form-data; '
-                             'boundary="%s"') % boundary,
-        }
-        payload = payload.replace('\n', '\r\n').encode('UTF-8')
-
-        response_json = self._l10n_mx_edi_sw_post(url, headers, payload=payload)
-        code = response_json.get('status')
-        msg = '%s: %s' % (response_json.get('messageDetail'), response_json.get('message'))
-        try:
-            xml_signed = base64.b64decode(response_json['data']['cfdi'])
-        except (KeyError, TypeError) as e:
-            xml_signed, code, msg = None, 'error', e
-        return xml_signed, code, msg
+""" % {'boundary': boundary, 'xml': xml}
+            headers = {
+                'Authorization': "bearer " + token,
+                'Content-Type': ('multipart/form-data; '
+                                 'boundary="%s"') % boundary,
+            }
+            payload = payload.replace('\n', '\r\n').encode('UTF-8')
+            response_json = self._l10n_mx_edi_sw_post(
+                url, headers, payload=payload)
+            code = response_json.get('message')
+            msg = response_json.get('messageDetail')
+            try:
+                xml_signed = response_json['data']['cfdi']
+            except (KeyError, TypeError):
+                xml_signed = None
+            rec._l10n_mx_edi_post_sign_process(
+                xml_signed.encode('utf-8') if xml_signed else None,
+                code, msg)
 
     def _l10n_mx_edi_sw_cancel(self, pac_info):
-        for rec in self:
-            xml = rec.l10n_mx_edi_get_xml_etree()
-            tfd_node = rec.l10n_mx_edi_get_tfd_etree(xml)
-            uuid = tfd_node.get('UUID')
-            uuid_replace = rec.l10n_mx_edi_cancel_invoice_id.l10n_mx_edi_cfdi_uuid
-
-            cancelled, code, msg = rec._l10n_mx_edi_sw_cancel_service(uuid, rec.company_id, pac_info, uuid_replace)
-            if code == 'error':
-                rec.l10n_mx_edi_log_error(msg)
-                continue
-            rec._l10n_mx_edi_post_cancel_process(
-                cancelled, code=code, msg=msg)
-
-    def _l10n_mx_edi_sw_cancel_service(self, uuid, company, pac_info, uuid_replace=None):
-        ''' A generic method to cancel a PAC document having UUID.
-        '''
         token, req_e = self._l10n_mx_edi_sw_token(pac_info)
         if not token:
-            return None, 'error', _("Token could not be obtained %s") % req_e
-
+            self.l10n_mx_edi_log_error(
+                _("Token could not be obtained %s") % req_e)
+            return
         url = pac_info['url']
         headers = {
             'Authorization': "bearer " + token,
             'Content-Type': "application/json"
         }
-
-        certificate_ids = company.l10n_mx_edi_certificate_ids
-        certificate = certificate_ids.sudo().get_valid_certificate()
-
-        data = {
-            'rfc': company.vat,
-            'b64Cer': certificate.content.decode('UTF-8'),
-            'b64Key': certificate.key.decode('UTF-8'),
-            'password': certificate.password,
-            'uuid': uuid,
-            'motivo': "01" if uuid_replace else "02"
-        }
-        if uuid_replace:
-            data['folioSustitucion'] = uuid_replace
-
-        response_json = self._l10n_mx_edi_sw_post(
-            url, headers, payload=json.dumps(data).encode('UTF-8'))
-        cancelled = response_json['status'] == 'success'
-        code = response_json.get('message')
-        msg = response_json.get('messageDetail')
-        return cancelled, code, msg
+        for rec in self:
+            xml = rec.l10n_mx_edi_get_xml_etree()
+            tfd_node = rec.l10n_mx_edi_get_tfd_etree(xml)
+            certificate_ids = rec.company_id.l10n_mx_edi_certificate_ids
+            certificate = certificate_ids.sudo().get_valid_certificate()
+            data = {
+                'rfc': xml.Emisor.get('Rfc'),
+                'b64Cer': certificate.content.decode('UTF-8'),
+                'b64Key': certificate.key.decode('UTF-8'),
+                'password': certificate.password,
+                'uuid': tfd_node.get('UUID'),
+            }
+            response_json = self._l10n_mx_edi_sw_post(
+                url, headers, payload=json.dumps(data).encode('UTF-8'))
+            cancelled = response_json['status'] == 'success'
+            code = response_json.get('message')
+            msg = response_json.get('messageDetail')
+            rec._l10n_mx_edi_post_cancel_process(
+                cancelled, code=code, msg=msg)

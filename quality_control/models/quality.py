@@ -7,6 +7,7 @@ import random
 
 from odoo import api, models, fields, _, SUPERUSER_ID
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
+from odoo.addons import decimal_precision as dp
 
 
 class QualityPoint(models.Model):
@@ -21,12 +22,12 @@ class QualityPoint(models.Model):
     measure_frequency_value = fields.Float('Percentage')  # TDE RENAME ?
     measure_frequency_unit_value = fields.Integer('Frequency Unit Value')  # TDE RENAME ?
     measure_frequency_unit = fields.Selection([
-        ('day', 'Days'),
-        ('week', 'Weeks'),
-        ('month', 'Months')], default="day")  # TDE RENAME ?
-    norm = fields.Float('Norm', digits='Quality Tests')  # TDE RENAME ?
-    tolerance_min = fields.Float('Min Tolerance', digits='Quality Tests')
-    tolerance_max = fields.Float('Max Tolerance', digits='Quality Tests')
+        ('day', 'Day(s)'),
+        ('week', 'Week(s)'),
+        ('month', 'Month(s)')], default="day")  # TDE RENAME ?
+    norm = fields.Float('Norm', digits=dp.get_precision('Quality Tests'))  # TDE RENAME ?
+    tolerance_min = fields.Float('Min Tolerance', digits=dp.get_precision('Quality Tests'))
+    tolerance_max = fields.Float('Max Tolerance', digits=dp.get_precision('Quality Tests'))
     norm_unit = fields.Char('Norm Unit', default=lambda self: 'mm')  # TDE RENAME ?
     average = fields.Float(compute="_compute_standard_deviation_and_average")
     standard_deviation = fields.Float(compute="_compute_standard_deviation_and_average")
@@ -34,11 +35,8 @@ class QualityPoint(models.Model):
     def _compute_standard_deviation_and_average(self):
         # The variance and mean are computed by the Welford’s method and used the Bessel's
         # correction because are working on a sample.
-        for point in self:
-            if point.test_type != 'measure':
-                point.average = 0
-                point.standard_deviation = 0
-                continue
+        points = self.filtered(lambda x: x.test_type == 'measure')
+        for point in points:
             mean = 0.0
             s = 0.0
             n = 0
@@ -64,6 +62,7 @@ class QualityPoint(models.Model):
         if self.tolerance_max == 0.0:
             self.tolerance_max = self.norm
 
+    @api.multi
     def check_execute_now(self):
         self.ensure_one()
         if self.measure_frequency_type == 'all':
@@ -94,12 +93,10 @@ class QualityPoint(models.Model):
         self.ensure_one()
         action = self.env.ref('quality_control.quality_check_action_main').read()[0]
         action['domain'] = [('point_id', '=', self.id)]
-        action['context'] = {
-            'default_company_id': self.company_id.id,
-            'default_point_id': self.id
-        }
+        action['context'] = {'default_point_id': self.id}
         return action
 
+    @api.multi
     def action_see_spc_control(self):
         self.ensure_one()
         action = self.env.ref('quality_control.quality_check_action_spc').read()[0]
@@ -125,7 +122,7 @@ class QualityCheck(models.Model):
     _inherit = "quality.check"
 
     failure_message = fields.Html(related='point_id.failure_message', readonly=True)
-    measure = fields.Float('Measure', default=0.0, digits='Quality Tests', tracking=True)
+    measure = fields.Float('Measure', default=0.0, digits=dp.get_precision('Quality Tests'), track_visibility='onchange')
     measure_success = fields.Selection([
         ('none', 'No measure'),
         ('pass', 'Pass'),
@@ -136,43 +133,50 @@ class QualityCheck(models.Model):
     warning_message = fields.Text(compute='_compute_warning_message')
     norm_unit = fields.Char(related='point_id.norm_unit', readonly=True)
 
+    @api.one
     @api.depends('measure_success')
     def _compute_warning_message(self):
-        for rec in self:
-            if rec.measure_success == 'fail':
-                rec.warning_message = _('You measured %.2f %s and it should be between %.2f and %.2f %s.') % (
-                    rec.measure, rec.norm_unit, rec.point_id.tolerance_min,
-                    rec.point_id.tolerance_max, rec.norm_unit
-                )
-            else:
-                rec.warning_message = ''
+        if self.measure_success == 'fail':
+            self.warning_message = _('You measured %.2f %s and it should be between %.2f and %.2f %s.') % (
+                self.measure, self.norm_unit, self.point_id.tolerance_min,
+                self.point_id.tolerance_max, self.norm_unit
+            )
 
+    @api.one
     @api.depends('measure')
     def _compute_measure_success(self):
-        for rec in self:
-            if rec.point_id.test_type == 'passfail':
-                rec.measure_success = 'none'
+        if self.point_id.test_type == 'passfail':
+            self.measure_success = 'none'
+        else:
+            if self.measure < self.point_id.tolerance_min or self.measure > self.point_id.tolerance_max:
+                self.measure_success = 'fail'
             else:
-                if rec.measure < rec.point_id.tolerance_min or rec.measure > rec.point_id.tolerance_max:
-                    rec.measure_success = 'fail'
-                else:
-                    rec.measure_success = 'pass'
+                self.measure_success = 'pass'
 
     # Add picture dependency
     @api.depends('picture')
     def _compute_result(self):
         super(QualityCheck, self)._compute_result()
 
-    def _get_check_result(self):
-        if self.test_type == 'picture' and self.picture:
+    def _get_check_result(self, test_type):
+        if test_type == 'picture' and self.picture:
             return _('Picture Uploaded')
         else:
-            return super(QualityCheck, self)._get_check_result()
+            return super(QualityCheck, self)._get_check_result(test_type)
 
     def do_measure(self):
         self.ensure_one()
         if self.measure < self.point_id.tolerance_min or self.measure > self.point_id.tolerance_max:
-            return self.do_fail()
+            return {
+                'name': _('Quality Check Failed'),
+                'type': 'ir.actions.act_window',
+                'res_model': 'quality.check',
+                'view_mode': 'form',
+                'view_id': self.env.ref('quality_control.quality_check_view_form_failure').id,
+                'target': 'new',
+                'res_id': self.id,
+                'context': self.env.context,
+            }
         else:
             return self.do_pass()
 
@@ -223,13 +227,11 @@ class QualityCheck(models.Model):
         else:
             action = self.env.ref('quality_control.quality_alert_action_check').read()[0]
             action['domain'] = [('id', 'in', self.alert_ids.ids)]
-            action['context'] = dict(self._context, default_check_id=self.id)
             return action
 
+    @api.multi
     def redirect_after_pass_fail(self):
         check = self[0]
-        if check.quality_state =='fail' and check.test_type in ['passfail', 'measure']:
-            return self.show_failure_message()
         if check.picking_id:
             checkable_products = check.picking_id.mapped('move_line_ids').mapped('product_id')
             checks = self.picking_id.check_ids.filtered(lambda x: x.quality_state == 'none' and x.product_id in checkable_products)
@@ -239,28 +241,7 @@ class QualityCheck(models.Model):
                 return action
         return super(QualityCheck, self).redirect_after_pass_fail()
 
-    def redirect_after_failure(self):
-        check = self[0]
-        if check.picking_id:
-            checkable_products = check.picking_id.mapped('move_line_ids').mapped('product_id')
-            checks = self.picking_id.check_ids.filtered(lambda x: x.quality_state == 'none' and x.product_id in checkable_products)
-            if checks:
-                action = self.env.ref('quality_control.quality_check_action_small').read()[0]
-                action['res_id'] = checks.ids[0]
-                return action
-        return super(QualityCheck, self).redirect_after_pass_fail()
 
-    def show_failure_message(self):
-        return {
-            'name': _('Quality Check Failed'),
-            'type': 'ir.actions.act_window',
-            'res_model': 'quality.check',
-            'view_mode': 'form',
-            'view_id': self.env.ref('quality_control.quality_check_view_form_failure').id,
-            'target': 'new',
-            'res_id': self.id,
-            'context': self.env.context,
-        }
 class QualityAlert(models.Model):
     _inherit = "quality.alert"
 
@@ -270,6 +251,7 @@ class QualityAlert(models.Model):
         return {
             'name': _('Quality Check'),
             'type': 'ir.actions.act_window',
+            'view_type': 'form',
             'view_mode': 'form',
             'res_model': 'quality.check',
             'target': 'current',
@@ -284,6 +266,7 @@ class QualityAlert(models.Model):
         stage_ids = stages._search([], order=order, access_rights_uid=SUPERUSER_ID)
         return stages.browse(stage_ids)
 
+    @api.multi
     @api.depends('name', 'title')
     def name_get(self):
         result = []
@@ -312,86 +295,3 @@ class QualityAlert(models.Model):
         if msg_dict.get('body'):
             custom_values['description'] = msg_dict['body']
         return super(QualityAlert, self).message_new(msg_dict, custom_values)
-
-
-class ProductTemplate(models.Model):
-    _inherit = "product.template"
-
-    quality_control_point_qty = fields.Integer(compute='_compute_quality_check_qty', groups='quality.group_quality_user')
-    quality_pass_qty = fields.Integer(compute='_compute_quality_check_qty', groups='quality.group_quality_user')
-    quality_fail_qty = fields.Integer(compute='_compute_quality_check_qty', groups='quality.group_quality_user')
-
-    @api.depends('product_variant_ids')
-    def _compute_quality_check_qty(self):
-        self.quality_fail_qty = 0
-        self.quality_pass_qty = 0
-        self.quality_control_point_qty = 0
-
-        for product_tmpl in self:
-            quality_checks_by_state = self.env['quality.check'].read_group(
-                [('product_id', 'in', product_tmpl.product_variant_ids.ids), ('company_id', '=', self.env.company.id)],
-                ['product_id'],
-                ['quality_state']
-            )
-            for checks_data in quality_checks_by_state:
-                if checks_data['quality_state'] == 'fail':
-                    product_tmpl.quality_fail_qty = checks_data['quality_state_count']
-                elif checks_data['quality_state'] == 'pass':
-                    product_tmpl.quality_pass_qty = checks_data['quality_state_count']
-            product_tmpl.quality_control_point_qty = self.env['quality.point'].search_count([
-                ('product_tmpl_id', '=', product_tmpl.id), ('company_id', '=', self.env.company.id)
-            ])
-
-    def action_see_quality_control_points(self):
-        self.ensure_one()
-        action = self.env.ref('quality_control.quality_point_action').read()[0]
-        action['context'] = dict(self.env.context)
-        action['context'].update({
-            'search_default_product_tmpl_id': self.id,
-            'default_product_tmpl_id': self.id,
-        })
-        return action
-
-    def action_see_quality_checks(self):
-        self.ensure_one()
-        action = self.env.ref('quality_control.quality_check_action_main').read()[0]
-        action['context'] = dict(self.env.context, default_product_id=self.product_variant_id.id, create=False)
-        return action
-
-
-class ProductProduct(models.Model):
-    _inherit = "product.product"
-
-    quality_control_point_qty = fields.Integer(compute='_compute_quality_check_qty', groups='quality.group_quality_user')
-    quality_pass_qty = fields.Integer(compute='_compute_quality_check_qty', groups='quality.group_quality_user')
-    quality_fail_qty = fields.Integer(compute='_compute_quality_check_qty', groups='quality.group_quality_user')
-
-    def _compute_quality_check_qty(self):
-        self.quality_fail_qty = 0
-        self.quality_pass_qty = 0
-        self.quality_control_point_qty = 0
-        for product in self:
-            quality_checks_by_state = self.env['quality.check'].read_group(
-                [('product_id', '=', product.id), ('company_id', '=', self.env.company.id)],
-                ['product_id'],
-                ['quality_state']
-            )
-            for checks_data in quality_checks_by_state:
-                if checks_data['quality_state'] == 'fail':
-                    product.quality_fail_qty = checks_data['quality_state_count']
-                elif checks_data['quality_state'] == 'pass':
-                    product.quality_pass_qty = checks_data['quality_state_count']
-            product.quality_control_point_qty = self.env['quality.point'].search_count([
-                ('product_id', '=', product.id), ('company_id', '=', self.env.company.id)
-            ])
-
-    def action_see_quality_control_points(self):
-        self.ensure_one()
-        action = self.product_tmpl_id.action_see_quality_control_points()
-        return action
-
-    def action_see_quality_checks(self):
-        self.ensure_one()
-        action = self.env.ref('quality_control.quality_check_action_main').read()[0]
-        action['context'] = dict(self.env.context, default_product_id=self.id, create=False)
-        return action

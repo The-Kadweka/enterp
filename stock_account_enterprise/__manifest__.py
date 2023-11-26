@@ -4,7 +4,7 @@
 {
     'name': "Stock account enterprise",
     'version': "1.0",
-    'category': 'Operations/Inventory',
+    'category': "Stock",
     'summary': "Advanced features for stock_account",
     'description': """
 Contains the enterprise views for Stock account
@@ -17,6 +17,6 @@ Contains the enterprise views for Stock account
     ],
     'installable': True,
     'application': False,
-    'auto_install': ['stock_account'],
+    'auto_install': True,
     'license': 'OEEL-1',
 }

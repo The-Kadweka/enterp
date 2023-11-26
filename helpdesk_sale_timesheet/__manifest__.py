@@ -13,5 +13,8 @@
     'data': [
         'views/helpdesk_views.xml',
     ],
+    'demo': [
+        'data/helpdesk_sale_timesheet_demo.xml',
+    ],
     'license': 'OEEL-1',
 }

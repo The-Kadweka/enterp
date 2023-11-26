@@ -1,12 +1,17 @@
 <?xml version="1.0" ?>
 <odoo>
-    <data noupdate="1">
+    <data>
         <!-- volume is always sent in milliliter to blackbox -->
         <record id="product_uom_millilitre" model="uom.uom">
-            <field name="name">Milliliters</field>
+            <field name="name">Milliliter(s)</field>
             <field name="category_id" ref="uom.product_uom_categ_vol"/>
             <field name="factor">1000</field>
             <field name="uom_type">smaller</field>
+        </record>
+
+        <record id="zero_vat_work_in_out" model="account.tax">
+            <field name="name">0% (work in/out)</field>
+            <field name="amount">0</field>
         </record>
 
         <record id="product_product_work_in" model="product.product">
@@ -16,8 +21,7 @@
             <field name="type">consu</field>
             <field name="uom_id" ref="uom.product_uom_unit"/>
             <field name="uom_po_id" ref="uom.product_uom_unit"/>
-            <field name="available_in_pos">True</field>
-            <field name="taxes_id" eval="[]"/>
+            <field name="taxes_id" eval="[(6, 0, [ref('zero_vat_work_in_out')])]"/>
         </record>
         <record id="product_product_work_out" model="product.product">
             <field name="name">WORK OUT</field>
@@ -26,14 +30,17 @@
             <field name="type">consu</field>
             <field name="uom_id" ref="uom.product_uom_unit"/>
             <field name="uom_po_id" ref="uom.product_uom_unit"/>
-            <field name="available_in_pos">True</field>
-            <field name="taxes_id" eval="[]"/>
+            <field name="taxes_id" eval="[(6, 0, [ref('zero_vat_work_in_out')])]"/>
+        </record>
+        <record id="point_of_sale.product_product_tip" model="product.product">
+            <field name="taxes_id" eval="[(6, 0, [ref('zero_vat_work_in_out')])]"/>
         </record>
 
-        <!--read-only user that minfin functionaries can use to export data-->
+        <!-- read-only user that minfin functionaries can use to export data -->
         <record id="fdm_minfin" model="res.partner">
             <field name="name">MinFin personnel</field>
             <field name="company_id" ref="base.main_company"/>
+            <field name="customer" eval="False"/>
             <field name="country_id" ref="base.be"/>
         </record>
 
@@ -41,7 +48,8 @@
             <field name="partner_id" ref="fdm_minfin"/>
             <field name="login">minfin_personnel</field>
             <field name="email">minfin_personnel@minfin.fgov.be</field>
-            <field name="password">12345678</field>
+            <field name="password">123</field>
+            <field name="active" eval="False"/>
             <field name="company_id" ref="base.main_company"/>
             <field name="groups_id" eval="[(6,0,[ref('base.group_user'), ref('group_minfin_personnel')])]"/>
         </record>
@@ -475,7 +483,5 @@
             <field name="name">description</field>
             <field name="export_id" ref="minfin_export_logbook"/>
         </record>
-
-        <function model="product.product" name="set_tax_on_work_in_out" context="{'install_mode' : True}"/>
     </data>
 </odoo>

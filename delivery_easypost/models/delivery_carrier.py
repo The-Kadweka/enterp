@@ -24,12 +24,6 @@ class DeliverCarrier(models.Model):
         ('PNG', 'PNG'), ('PDF', 'PDF'),
         ('ZPL', 'ZPL'), ('EPL2', 'EPL2')],
         string="Easypost Label File Type", default='PDF')
-    
-    def _compute_can_generate_return(self):
-        super(DeliverCarrier, self)._compute_can_generate_return()
-        for carrier in self:
-            if carrier.delivery_type == 'easypost':
-                carrier.can_generate_return = True
 
     def action_get_carrier_type(self):
         """ Return the list of carriers configured by the customer
@@ -67,7 +61,7 @@ class DeliverCarrier(models.Model):
             price = float(rate['rate'])
         else:
             quote_currency = self.env['res.currency'].search([('name', '=', rate['currency'])], limit=1)
-            price = quote_currency._convert(float(rate['rate']), order.currency_id, self.env.company, fields.Date.today())
+            price = quote_currency._convert(float(rate['rate']), order.currency_id, self.env['res.users']._get_company(), fields.Date.today())
 
         return {
             'success': True,
@@ -95,7 +89,7 @@ class DeliverCarrier(models.Model):
                 price = float(rate['rate'])
             else:
                 quote_currency = self.env['res.currency'].search([('name', '=', rate['currency'])], limit=1)
-                price = quote_currency._convert(float(rate['rate']), picking.company_id.currency_id, self.env.company, fields.Date.today())
+                price = quote_currency._convert(float(rate['rate']), picking.company_id.currency_id, self.env['res.users']._get_company(), fields.Date.today())
 
             # return tracking information
             carrier_tracking_link = ""
@@ -109,44 +103,16 @@ class DeliverCarrier(models.Model):
                 label = requests.get(label_url)
                 labels.append(('LabelEasypost-%s.%s' % (track_number, self.easypost_label_file_type), label.content))
 
-            logmessage = _("Shipment created into Easypost<br/>"
-                           "<b>Tracking Numbers:</b> %s<br/>") % (carrier_tracking_link)
-            pickings.message_post(body=logmessage, attachments=labels)
+            logmessage = (_("Shipping label for packages"))
+            picking.message_post(body=logmessage, attachments=labels)
+            picking.message_post(body=carrier_tracking_link)
 
             shipping_data = {'exact_price': price,
                              'tracking_number': carrier_tracking_ref}
             res = res + [shipping_data]
             # store order reference on picking
             picking.ep_order_ref = result.get('id')
-            if picking.carrier_id.return_label_on_delivery:
-                self.get_return_label(picking)
         return res
-
-    def easypost_get_return_label(self, pickings, tracking_number=None, origin_date=None):
-        ep = EasypostRequest(self.sudo().easypost_production_api_key if self.prod_environment else self.sudo().easypost_test_api_key, self.log_xml)
-        result = ep.send_shipping(self, pickings.partner_id, pickings.picking_type_id.warehouse_id.partner_id, picking=pickings, is_return=True)
-        if result.get('error_message'):
-            raise UserError(_(result['error_message']))
-        rate = result.get('rate')
-        if rate['currency'] == pickings.company_id.currency_id.name:
-            price = rate['rate']
-        else:
-            quote_currency = self.env['res.currency'].search([('name', '=', rate['currency'])], limit=1)
-            price = quote_currency._convert(float(rate['rate']), pickings.company_id.currency_id, self.env.company, fields.Date.today())
-
-        # return tracking information
-        carrier_tracking_link = ""
-        for track_number, tracker_url in result.get('track_shipments_url').items():
-            carrier_tracking_link += '<a href=' + tracker_url + '>' + track_number + '</a><br/>'
-
-        carrier_tracking_ref = ' + '.join(result.get('track_shipments_url').keys())
-
-        labels = []
-        for track_number, label_url in result.get('track_label_data').items():
-            label = requests.get(label_url)
-            labels.append(('%s-%s-%s.%s' % (self.get_return_label_prefix(), 'blablabla', track_number, self.easypost_label_file_type), label.content))
-        pickings.message_post(body='Return Label', attachments=labels)
-
 
     def easypost_get_tracking_link(self, picking):
         """ Returns the tracking links from a picking. Easypost reutrn one
@@ -186,7 +152,7 @@ class DeliverCarrier(models.Model):
         if self.delivery_type == 'easypost':
             self = self.sudo()
             if not self.easypost_test_api_key or not self.easypost_production_api_key:
-                carrier = self.env['delivery.carrier'].search([('delivery_type', '=', 'easypost'), ('company_id', '=', self.env.company.id)], limit=1)
+                carrier = self.env['delivery.carrier'].search([('delivery_type', '=', 'easypost'), ('company_id', '=', self.env.user.company_id.id)], limit=1)
                 if carrier.easypost_test_api_key and not self.easypost_test_api_key:
                     self.easypost_test_api_key = carrier.easypost_test_api_key
                 if carrier.easypost_production_api_key and not self.easypost_production_api_key:
@@ -213,16 +179,7 @@ class DeliverCarrier(models.Model):
         """ Each API request for easypost required
         a weight in pounds.
         """
-        if weight == 0:
-            return weight
         weight_uom_id = self.env['product.template']._get_weight_uom_id_from_ir_config_parameter()
         weight_in_pounds = weight_uom_id._compute_quantity(weight, self.env.ref('uom.product_uom_lb'))
-        weigth_in_ounces = max(0.1, float_round((weight_in_pounds * 16), precision_digits=1))
+        weigth_in_ounces = float_round((weight_in_pounds * 16), precision_digits=1)
         return weigth_in_ounces
-
-    def _get_delivery_type(self):
-        """ Override of delivery to return the easypost delivery type."""
-        res = super()._get_delivery_type()
-        if self.delivery_type != 'easypost':
-            return res
-        return self.easypost_delivery_type

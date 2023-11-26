@@ -21,6 +21,7 @@ class VoipPhonecallReport(models.Model):
     call_date = fields.Datetime('Date', readonly=True, index=True)
     nbr = fields.Integer('# of Cases', readonly=True)
 
+    @api.model_cr
     def init(self):
         tools.drop_view_if_exists(self._cr, 'voip_phonecall_report')
         self._cr.execute("""

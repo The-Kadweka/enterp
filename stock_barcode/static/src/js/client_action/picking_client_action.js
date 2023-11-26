@@ -11,8 +11,6 @@ var PickingClientAction = ClientAction.extend({
     custom_events: _.extend({}, ClientAction.prototype.custom_events, {
         'picking_print_delivery_slip': '_onPrintDeliverySlip',
         'picking_print_picking': '_onPrintPicking',
-        'picking_print_barcodes_zpl': '_onPrintBarcodesZpl',
-        'picking_print_barcodes_pdf': '_onPrintBarcodesPdf',
         'picking_scrap': '_onScrap',
         'validate': '_onValidate',
         'cancel': '_onCancel',
@@ -60,12 +58,11 @@ var PickingClientAction = ClientAction.extend({
             } else if (picking_state === 'cancel') {
                 self.mode = 'cancel';
             }
-            self.allow_scrap = (
-                (picking_type_code === 'incoming') && (picking_state === 'done') ||
-                (picking_type_code === 'outgoing') && (picking_state !== 'done') ||
-                (picking_type_code === 'internal')
-            )
-            self.requireLotNumber = self.currentState.use_create_lots || self.currentState.use_existing_lots;
+            self.allow_scrap = (!(
+                ((picking_type_code !== 'incoming') && (['draft', 'cancel', 'waiting'].indexOf(picking_state) !== -1))
+                || ((picking_type_code === 'incoming') && (picking_state !== 'done'))
+            ))
+
         });
         return res;
     },
@@ -118,7 +115,7 @@ var PickingClientAction = ClientAction.extend({
     /**
      * @override
      */
-    _makeNewLine: function (product, barcode, qty_done, package_id, result_package_id, owner_id) {
+    _makeNewLine: function (product, barcode, qty_done, package_id, result_package_id) {
         var virtualId = this._getNewVirtualId();
         var currentPage = this.pages[this.currentPageIndex];
         var newLine = {
@@ -144,7 +141,6 @@ var PickingClientAction = ClientAction.extend({
             },
             'package_id': package_id,
             'result_package_id': result_package_id,
-            'owner_id': owner_id,
             'state': 'assigned',
             'reference': this.name,
             'virtual_id': virtualId,
@@ -158,7 +154,7 @@ var PickingClientAction = ClientAction.extend({
      * event listener.
      *
      * @private
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _validate: function () {
         var self = this;
@@ -170,13 +166,13 @@ var PickingClientAction = ClientAction.extend({
                     'args': [[self.actionParams.pickingId]],
                     'context': self.context,
                 }).then(function (res) {
-                    var def = Promise.resolve();
+                    var def = $.when();
                     var successCallback = function(){
                         self.do_notify(_t("Success"), _t("The transfer has been validated"));
                         self.trigger_up('exit');
                     };
                     var exitCallback = function (infos) {
-                        if ((infos === undefined || !infos.special) && this.dialog.$modal.is(':visible')) {
+                        if (infos !== 'special' && (!this.dialog || this.dialog.$modal.is(':visible'))) {
                             successCallback();
                         }
                         core.bus.on('barcode_scanned', self, self._onBarcodeScannedHandler);
@@ -281,7 +277,6 @@ var PickingClientAction = ClientAction.extend({
                     'state': 'assigned',
                     'package_id': line.package_id ? line.package_id[0] : false,
                     'result_package_id': line.result_package_id ? line.result_package_id[0] : false,
-                    'owner_id': line.owner_id ? line.owner_id[0]: false,
                     'dummy_id': line.virtual_id,
                 }];
                 formattedCommands.push(cmd);
@@ -300,7 +295,7 @@ var PickingClientAction = ClientAction.extend({
                 'params': params,
             });
         } else {
-            return Promise.reject();
+            return $.Deferred().reject();
         }
     },
 
@@ -322,7 +317,7 @@ var PickingClientAction = ClientAction.extend({
                 {currentId: self.currentState.id},
                 'readonly'
             );
-            self.ViewsWidget.appendTo(self.$('.o_content'));
+            self.ViewsWidget.appendTo(self.$el);
         });
     },
 
@@ -341,15 +336,13 @@ var PickingClientAction = ClientAction.extend({
                     'model': 'stock.picking',
                     'method': 'put_in_pack',
                     'args': [[self.actionParams.pickingId]],
-                    kwargs: {
-                        context: _.extend({}, self.context || {}, {barcode_view: true})
-                    },
+                    kwargs: {context: self.context},
                 }).then(function (res) {
-                    var def = Promise.resolve();
+                    var def = $.when()
                     self._endBarcodeFlow();
                     if (res.type && res.type === 'ir.actions.act_window') {
                         var exitCallback = function (infos) {
-                            if (infos === undefined || !infos.special) {
+                            if (infos !== 'special') {
                                 self.trigger_up('reload');
                             }
                             core.bus.on('barcode_scanned', self, self._onBarcodeScannedHandler);
@@ -401,14 +394,9 @@ var PickingClientAction = ClientAction.extend({
                 });
                 package_id = package_id.package_id[0];
 
-                var params = {
-                    searchQuery: {
-                        context: self.context,
-                        domain: [['package_id', '=', package_id]],
-                    },
-                };
+                var params = {domain: [['package_id', '=', package_id]]};
                 self.ViewsWidget = new ViewsWidget(self, 'stock.quant', 'stock_barcode.stock_quant_barcode_kanban', {}, params, false, 'kanban');
-                return self.ViewsWidget.appendTo(self.$('.o_content'));
+                return self.ViewsWidget.appendTo(self.$el);
             });
         });
     },
@@ -434,36 +422,6 @@ var PickingClientAction = ClientAction.extend({
         this.mutex.exec(function () {
             return self._save().then(function () {
                 return self.do_action(self.currentState.actionReportDeliverySlipId, {
-                    'additional_context': {
-                        'active_id': self.actionParams.pickingId,
-                        'active_ids': [self.actionParams.pickingId],
-                        'active_model': 'stock.picking',
-                    }
-                });
-            });
-        });
-    },
-
-    _printBarcodesZpl: function () {
-        var self = this;
-        this.mutex.exec(function () {
-            return self._save().then(function () {
-                return self.do_action(self.currentState.actionReportBarcodesZplId, {
-                    'additional_context': {
-                        'active_id': self.actionParams.pickingId,
-                        'active_ids': [self.actionParams.pickingId],
-                        'active_model': 'stock.picking',
-                    }
-                });
-            });
-        });
-    },
-
-    _printBarcodesPdf: function () {
-        var self = this;
-        this.mutex.exec(function () {
-            return self._save().then(function () {
-                return self.do_action(self.currentState.actionReportBarcodesPdfId, {
                     'additional_context': {
                         'active_id': self.actionParams.pickingId,
                         'active_ids': [self.actionParams.pickingId],
@@ -525,30 +483,6 @@ var PickingClientAction = ClientAction.extend({
     _onPrintDeliverySlip: function (ev) {
         ev.stopPropagation();
         this._printDeliverySlip();
-    },
-
-    /**
-     * Handles the `print_barcodes_zpl` OdooEvent. It makes an RPC call
-     * to the method 'do_print_barcodes_zpl'.
-     *
-     * @private
-     * @param {OdooEvent} ev
-     */
-    _onPrintBarcodesZpl: function (ev) {
-        ev.stopPropagation();
-        this._printBarcodesZpl();
-    },
-
-    /**
-     * Handles the `print_barcodes_pdf` OdooEvent. It makes an RPC call
-     * to the method 'do_print_barcodes_zpl'.
-     *
-     * @private
-     * @param {OdooEvent} ev
-     */
-    _onPrintBarcodesPdf: function (ev) {
-        ev.stopPropagation();
-        this._printBarcodesPdf();
     },
 
     /**

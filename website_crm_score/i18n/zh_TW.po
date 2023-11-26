@@ -1,20 +1,19 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* website_crm_score
+# * website_crm_score
 # 
 # Translators:
-# Martin Trigaux, 2019
-# Andy Cheng <andy.cheng@richsoda.com>, 2019
-# amos lin <seeing@edirect168.com>, 2019
+# Martin Trigaux, 2018
+# sejun huang <sejun.huang@gmail.com>, 2018
 # Mandy Choy <mnc@odoo.com>, 2021
 # 敬雲 林 <chingyun@yuanchih-consult.com>, 2021
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-05 12:37+0000\n"
-"PO-Revision-Date: 2019-08-26 09:39+0000\n"
+"POT-Creation-Date: 2019-01-15 15:18+0000\n"
+"PO-Revision-Date: 2018-08-24 11:49+0000\n"
 "Last-Translator: 敬雲 林 <chingyun@yuanchih-consult.com>, 2021\n"
 "Language-Team: Chinese (Taiwan) (https://www.transifex.com/odoo/teams/41243/zh_TW/)\n"
 "MIME-Version: 1.0\n"
@@ -22,6 +21,11 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Language: zh_TW\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+
+#. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_crm_lead__pageviews_count
+msgid "# Page Views"
+msgstr "# 頁面查看"
 
 #. module: website_crm_score
 #: model_terms:ir.ui.view,arch_db:website_crm_score.website_crm_score_view_kanban
@@ -34,24 +38,23 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_needaction
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__message_needaction
 msgid "Action Needed"
-msgstr "需採取行動"
+msgstr "需要採取行動"
 
 #. module: website_crm_score
-#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__active
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__running
 msgid "Active"
-msgstr "啟用"
+msgstr "有效"
 
 #. module: website_crm_score
-#: model:ir.model.fields.selection,name:website_crm_score.selection__website_crm_score__rule_type__active
+#: model:ir.model.fields,help:website_crm_score.field_ir_ui_view__track
+#: model:ir.model.fields,help:website_crm_score.field_website_page__track
+msgid "Allow to specify for one page of the website to be trackable or not"
+msgstr "允許指定網站的一頁可跟蹤或不可跟蹤"
+
+#. module: website_crm_score
+#: selection:website.crm.score,rule_type:0
 msgid "Archive"
 msgstr "歸檔"
-
-#. module: website_crm_score
-#: model_terms:ir.ui.view,arch_db:website_crm_score.team_user_view_search
-#: model_terms:ir.ui.view,arch_db:website_crm_score.view_crm_score_form
-#: model_terms:ir.ui.view,arch_db:website_crm_score.website_crm_score_view_search
-msgid "Archived"
-msgstr "封存"
 
 #. module: website_crm_score
 #: model_terms:ir.ui.view,arch_db:website_crm_score.sales_team_form_view_assign
@@ -77,7 +80,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_attachment_count
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__message_attachment_count
 msgid "Attachment Count"
-msgstr "附件數"
+msgstr "附件計數"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_crm_lead__assign_date
@@ -102,15 +105,17 @@ msgstr "創建一個新的銷售員"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__create_uid
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__create_uid
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__create_uid
 msgid "Created by"
-msgstr "創立者"
+msgstr "創建者"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__create_date
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__create_date
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__create_date
 msgid "Created on"
-msgstr "建立於"
+msgstr "創建時間"
 
 #. module: website_crm_score
 #: model:ir.actions.server,name:website_crm_score.action_score_now
@@ -144,16 +149,17 @@ msgstr ""
 
 #. module: website_crm_score
 #: model_terms:ir.actions.act_window,help:website_crm_score.team_action
-msgid "Define a new sales team"
-msgstr "定義新的銷售團隊"
+msgid "Define a new sales channel"
+msgstr ""
 
 #. module: website_crm_score
-#: model:ir.model.fields.selection,name:website_crm_score.selection__website_crm_score__rule_type__unlink
+#: selection:website.crm.score,rule_type:0
 msgid "Delete"
 msgstr "刪除"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__display_name
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__display_name
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__display_name
 msgid "Display Name"
 msgstr "顯示名稱"
@@ -163,7 +169,7 @@ msgstr "顯示名稱"
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__team_user_domain
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__domain
 msgid "Domain"
-msgstr "域"
+msgstr "域名"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__event_based
@@ -174,75 +180,102 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_follower_ids
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__message_follower_ids
 msgid "Followers"
-msgstr "關注人"
+msgstr "訂閱者"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_channel_ids
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__message_channel_ids
 msgid "Followers (Channels)"
-msgstr "關注人（頻道）"
+msgstr "關注者(渠道)"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_partner_ids
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__message_partner_ids
 msgid "Followers (Partners)"
-msgstr "關注人（業務夥伴）"
+msgstr "關注者(業務夥伴)"
 
 #. module: website_crm_score
-#: model_terms:ir.ui.view,arch_db:website_crm_score.team_user_view_search
-msgid "Group By"
-msgstr "分組按"
+#: model:ir.model,name:website_crm_score.model_ir_http
+msgid "HTTP Routing"
+msgstr "HTTP 路由"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__id
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__id
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__id
 msgid "ID"
 msgstr "ID"
 
 #. module: website_crm_score
-#: model:ir.model.fields,help:website_crm_score.field_team_user__message_needaction
 #: model:ir.model.fields,help:website_crm_score.field_team_user__message_unread
-#: model:ir.model.fields,help:website_crm_score.field_website_crm_score__message_needaction
 #: model:ir.model.fields,help:website_crm_score.field_website_crm_score__message_unread
+msgid "If checked new messages require your attention."
+msgstr "查看是否有需要您留意的新信息。"
+
+#. module: website_crm_score
+#: model:ir.model.fields,help:website_crm_score.field_team_user__message_needaction
+#: model:ir.model.fields,help:website_crm_score.field_website_crm_score__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "勾選代表有新訊息需要您留意。"
+msgstr "如果勾選此項，有新消息會提醒您。"
 
 #. module: website_crm_score
 #: model:ir.model.fields,help:website_crm_score.field_team_user__message_has_error
-#: model:ir.model.fields,help:website_crm_score.field_team_user__message_has_sms_error
 #: model:ir.model.fields,help:website_crm_score.field_website_crm_score__message_has_error
-#: model:ir.model.fields,help:website_crm_score.field_website_crm_score__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr "勾選代表有訊息發生傳送錯誤。"
+msgstr "如果勾選此項， 某些信息將會產生傳遞錯誤。"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_is_follower
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__message_is_follower
 msgid "Is Follower"
-msgstr "是關注人"
+msgstr "是訂閱者"
+
+#. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_crm_lead__lang_id
+msgid "Language"
+msgstr "語言"
+
+#. module: website_crm_score
+#: model:ir.model.fields,help:website_crm_score.field_crm_lead__lang_id
+msgid "Language from the website when lead has been created"
+msgstr ""
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user____last_update
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview____last_update
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score____last_update
 msgid "Last Modified on"
-msgstr "最後修改於"
+msgstr "最後修改時間"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__write_uid
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__write_uid
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__write_uid
 msgid "Last Updated by"
-msgstr "最後更新者"
+msgstr "最後更新人"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__write_date
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__write_date
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__write_date
 msgid "Last Updated on"
-msgstr "最後更新於"
+msgstr "最後更新時間"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__last_run
 msgid "Last run"
 msgstr "最後運行"
+
+#. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__lead_id
+msgid "Lead"
+msgstr "線索"
+
+#. module: website_crm_score
+#: model:ir.actions.act_window,name:website_crm_score.website_crm_score_pageviews
+#: model:ir.ui.menu,name:website_crm_score.pageview_menu
+msgid "Lead Page Views"
+msgstr ""
 
 #. module: website_crm_score
 #: model:ir.model,name:website_crm_score.model_crm_lead
@@ -251,7 +284,6 @@ msgstr "線索/商機"
 
 #. module: website_crm_score
 #: model:ir.actions.act_window,name:website_crm_score.score_leads
-#: model:ir.ui.menu,name:website_crm_score.menu_crm_leads
 #: model_terms:ir.ui.view,arch_db:website_crm_score.view_crm_score_form
 msgid "Leads"
 msgstr "線索"
@@ -280,13 +312,24 @@ msgid ""
 msgstr ""
 
 #. module: website_crm_score
+#: model:ir.model.fields,help:website_crm_score.field_crm_lead__score_pageview_ids
+msgid "List of (tracked) pages seen by the owner of this lead"
+msgstr ""
+
+#. module: website_crm_score
+#. openerp-web
+#: code:addons/website_crm_score/static/src/xml/track_page.xml:9
+#, python-format
+msgid "Log visits on leads"
+msgstr ""
+
+#. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_main_attachment_id
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__message_main_attachment_id
 msgid "Main Attachment"
 msgstr "主要附件"
 
 #. module: website_crm_score
-#: model_terms:ir.ui.view,arch_db:website_crm_score.sales_team_form_view_assign
 #: model_terms:ir.ui.view,arch_db:website_crm_score.view_crm_team_user_form
 msgid "Maximum Leads / 30 days"
 msgstr ""
@@ -295,13 +338,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_has_error
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__message_has_error
 msgid "Message Delivery error"
-msgstr "訊息遞送錯誤"
+msgstr "郵件傳遞錯誤"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_ids
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__message_ids
 msgid "Messages"
-msgstr "訊息"
+msgstr "消息"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_crm_team__min_for_assign
@@ -318,42 +361,67 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__name
 #: model_terms:ir.ui.view,arch_db:website_crm_score.view_crm_score_form
 msgid "Name"
-msgstr "名称"
+msgstr "名稱"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_needaction_counter
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__message_needaction_counter
 msgid "Number of Actions"
-msgstr "動作數量"
+msgstr "行動數量"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_has_error_counter
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__message_has_error_counter
-msgid "Number of errors"
+msgid "Number of error"
 msgstr "錯誤數量"
 
 #. module: website_crm_score
 #: model:ir.model.fields,help:website_crm_score.field_team_user__message_needaction_counter
 #: model:ir.model.fields,help:website_crm_score.field_website_crm_score__message_needaction_counter
 msgid "Number of messages which requires an action"
-msgstr "需要處理的消息數量"
+msgstr "需要行動消息的數量"
 
 #. module: website_crm_score
 #: model:ir.model.fields,help:website_crm_score.field_team_user__message_has_error_counter
 #: model:ir.model.fields,help:website_crm_score.field_website_crm_score__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr "有發送錯誤的郵件數量"
+msgstr "發送錯誤的郵件數"
 
 #. module: website_crm_score
 #: model:ir.model.fields,help:website_crm_score.field_team_user__message_unread_counter
 #: model:ir.model.fields,help:website_crm_score.field_website_crm_score__message_unread_counter
 msgid "Number of unread messages"
-msgstr "未讀訊息的數量"
+msgstr "未讀消息的數量"
+
+#. module: website_crm_score
+#: model:ir.actions.act_window,name:website_crm_score.crm_score_views_action_table
+#: model_terms:ir.ui.view,arch_db:website_crm_score.crm_case_graph_view_leads_sales
+#: model_terms:ir.ui.view,arch_db:website_crm_score.crm_case_table_view_leads_sales
+#: model_terms:ir.ui.view,arch_db:website_crm_score.sales_team_form_view_assign
+msgid "Opportunities"
+msgstr "商機"
+
+#. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_crm_lead__score_pageview_ids
+#: model_terms:ir.ui.view,arch_db:website_crm_score.crm_score_pageview_form
+#: model_terms:ir.ui.view,arch_db:website_crm_score.crm_score_pageview_graph
+msgid "Page Views"
+msgstr "頁面瀏覽數"
+
+#. module: website_crm_score
+#: model_terms:ir.ui.view,arch_db:website_crm_score.lead_score_form
+msgid "Page views"
+msgstr "頁面查看"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__percentage_leads
 msgid "Percentage leads"
 msgstr ""
+
+#. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_crm_lead__phone
+msgid "Phone"
+msgstr "電話"
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_crm_team__ratio
@@ -366,15 +434,14 @@ msgid "Rule Type"
 msgstr ""
 
 #. module: website_crm_score
-#: model:ir.model.fields,field_description:website_crm_score.field_team_user__active
+#: model:ir.model.fields,field_description:website_crm_score.field_team_user__running
 msgid "Running"
 msgstr "運行中"
 
 #. module: website_crm_score
-#: model:ir.model.fields,field_description:website_crm_score.field_team_user__message_has_sms_error
-#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__message_has_sms_error
-msgid "SMS Delivery error"
-msgstr "簡訊發送錯誤"
+#: model:ir.model.fields,field_description:website_crm_score.field_team_user__team_id
+msgid "SaleTeam"
+msgstr ""
 
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_team_user__user_id
@@ -382,27 +449,22 @@ msgid "Saleman"
 msgstr ""
 
 #. module: website_crm_score
+#: model:ir.actions.act_window,name:website_crm_score.team_action
+#: model:ir.model,name:website_crm_score.model_crm_team
+msgid "Sales Channels"
+msgstr "銷售團隊"
+
+#. module: website_crm_score
+#: model:ir.actions.act_window,name:website_crm_score.team_user_action
 #: model_terms:ir.ui.view,arch_db:website_crm_score.view_crm_team_user_form
 #: model_terms:ir.ui.view,arch_db:website_crm_score.view_crm_team_user_tree
 msgid "Sales Men"
 msgstr "銷售人員"
 
 #. module: website_crm_score
-#: model_terms:ir.ui.view,arch_db:website_crm_score.team_user_view_search
-msgid "Sales Person"
-msgstr "銷售人員"
-
-#. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_res_users__team_user_ids
 msgid "Sales Records"
 msgstr ""
-
-#. module: website_crm_score
-#: model:ir.model,name:website_crm_score.model_crm_team
-#: model:ir.model.fields,field_description:website_crm_score.field_team_user__team_id
-#: model_terms:ir.ui.view,arch_db:website_crm_score.team_user_view_search
-msgid "Sales Team"
-msgstr "銷售團隊"
 
 #. module: website_crm_score
 #: model:ir.model.fields,help:website_crm_score.field_res_users__sale_team_id
@@ -422,11 +484,6 @@ msgid "Salesperson (Team Member)"
 msgstr ""
 
 #. module: website_crm_score
-#: model:ir.actions.act_window,name:website_crm_score.team_user_action
-msgid "Salespersons"
-msgstr "銷售人員"
-
-#. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_crm_lead__score
 #: model_terms:ir.ui.view,arch_db:website_crm_score.crm_lead_view_dashboard
 #: model_terms:ir.ui.view,arch_db:website_crm_score.crm_opportunity_view_dashboard
@@ -441,8 +498,9 @@ msgid "Scores"
 msgstr ""
 
 #. module: website_crm_score
-#: model:ir.model.fields.selection,name:website_crm_score.selection__website_crm_score__rule_type__score
 #: model_terms:ir.ui.view,arch_db:website_crm_score.lead_score_form
+#: model_terms:ir.ui.view,arch_db:website_crm_score.score_opp_form_view
+#: selection:website.crm.score,rule_type:0
 msgid "Scoring"
 msgstr "評分"
 
@@ -463,14 +521,24 @@ msgid ""
 msgstr ""
 
 #. module: website_crm_score
-#: model_terms:ir.ui.view,arch_db:website_crm_score.website_crm_score_view_search
-msgid "Search CRM Score"
+#: model_terms:ir.ui.view,arch_db:website_crm_score.crm_score_pageview_filter
+msgid "Search PageViews"
 msgstr ""
 
 #. module: website_crm_score
-#: model:ir.actions.act_window,name:website_crm_score.team_action
 #: model:ir.ui.menu,name:website_crm_score.team
 msgid "Teams Assignation"
+msgstr ""
+
+#. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_ir_ui_view__track
+#: model:ir.model.fields,field_description:website_crm_score.field_website_page__track
+msgid "Track"
+msgstr "追蹤"
+
+#. module: website_crm_score
+#: model:ir.actions.act_window,name:website_crm_score.crm_score_views_action_graph
+msgid "Unassigned leads"
 msgstr ""
 
 #. module: website_crm_score
@@ -486,16 +554,26 @@ msgid "Unread Messages Counter"
 msgstr "未讀消息計數器"
 
 #. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__url
+msgid "Url"
+msgstr "網址"
+
+#. module: website_crm_score
 #: model_terms:ir.actions.act_window,help:website_crm_score.team_action
 msgid ""
-"Use sales teams to organize your sales departments.\n"
-"                    Each team will work with a separate pipeline."
+"Use sales channels to organize your sales departments.\n"
+"                    Each channel will work with a separate pipeline."
 msgstr ""
 
 #. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__user_id
+msgid "User"
+msgstr "使用者"
+
+#. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_res_users__sale_team_id
-msgid "User Sales Team"
-msgstr "用戶銷售團隊"
+msgid "User Sales Channel"
+msgstr ""
 
 #. module: website_crm_score
 #: model:ir.model,name:website_crm_score.model_res_users
@@ -505,7 +583,22 @@ msgstr "使用者"
 #. module: website_crm_score
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__value
 msgid "Value"
-msgstr "值"
+msgstr "價值"
+
+#. module: website_crm_score
+#: model:ir.model,name:website_crm_score.model_ir_ui_view
+msgid "View"
+msgstr "視圖"
+
+#. module: website_crm_score
+#: model:ir.model.fields,field_description:website_crm_score.field_website_crm_pageview__view_date
+msgid "Viewing Date"
+msgstr ""
+
+#. module: website_crm_score
+#: model:ir.model,name:website_crm_score.model_website_crm_pageview
+msgid "Website CRM Page View"
+msgstr ""
 
 #. module: website_crm_score
 #: model:ir.model,name:website_crm_score.model_website_crm_score
@@ -517,6 +610,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_crm_score.field_website_crm_score__website_message_ids
 msgid "Website Messages"
 msgstr "網站信息"
+
+#. module: website_crm_score
+#: model_terms:ir.ui.view,arch_db:website_crm_score.website_crm_pageview_pivot
+msgid "Website Pages"
+msgstr "網站頁面"
 
 #. module: website_crm_score
 #: model:ir.model.fields,help:website_crm_score.field_team_user__website_message_ids
@@ -531,6 +629,18 @@ msgid ""
 "have already been checked previously. This option incurs a large performance"
 " penalty, so it should be checked only for rules that depend on dynamic "
 "events"
+msgstr ""
+
+#. module: website_crm_score
+#: model_terms:ir.ui.view,arch_db:website_crm_score.sales_team_form_view_assign
+#: model_terms:ir.ui.view,arch_db:website_crm_score.team_user_kanban
+msgid "fa-check"
+msgstr ""
+
+#. module: website_crm_score
+#: model_terms:ir.ui.view,arch_db:website_crm_score.sales_team_form_view_assign
+#: model_terms:ir.ui.view,arch_db:website_crm_score.team_user_kanban
+msgid "fa-times"
 msgstr ""
 
 #. module: website_crm_score

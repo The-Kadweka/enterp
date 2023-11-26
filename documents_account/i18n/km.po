@@ -5,13 +5,15 @@
 # Translators:
 # Chan Nath <channath@gmail.com>, 2018
 # Sengtha Chay <sengtha@gmail.com>, 2018
+# Lux Sok <sok.lux@gmail.com>, 2019
+# 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~11.5+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-02 10:31+0000\n"
-"PO-Revision-Date: 2018-10-02 10:31+0000\n"
-"Last-Translator: Sengtha Chay <sengtha@gmail.com>, 2018\n"
+"POT-Creation-Date: 2018-12-19 09:12+0000\n"
+"PO-Revision-Date: 2018-08-24 11:37+0000\n"
+"Last-Translator: Lux Sok <sok.lux@gmail.com>, 2019\n"
 "Language-Team: Khmer (https://www.transifex.com/odoo/teams/41243/km/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -25,18 +27,19 @@ msgid ""
 "A set of condition and actions which will be available to all attachments "
 "matching the conditions"
 msgstr ""
+"ការកំណត់សំណុំនៃលក្ខខណ្ឌនិងសកម្មភាពដែលនឹងមានសុពលភាពសម្រាប់ការតភ្ជាប់ឯកសារទាំងអស់ដែលស្របតាមលក្ខខណ្ឌ"
 
 #. module: documents_account
 #: model:ir.model.fields,field_description:documents_account.field_res_company__account_folder
 #: model:ir.model.fields,field_description:documents_account.field_res_config_settings__dms_account_settings
 msgid "Account Folder"
-msgstr ""
+msgstr "កន្លែងស្តុបគណនី"
 
 #. module: documents_account
 #: model:ir.model.fields,field_description:documents_account.field_res_company__account_tags
 #: model:ir.model.fields,field_description:documents_account.field_res_config_settings__account_tags
 msgid "Account Tags"
-msgstr ""
+msgstr "ការភ្ជាប់គណនី"
 
 #. module: documents_account
 #: model:ir.model,name:documents_account.model_res_company
@@ -46,28 +49,32 @@ msgstr "ក្រុមហ៊ុន"
 #. module: documents_account
 #: model:ir.model,name:documents_account.model_res_config_settings
 msgid "Config Settings"
-msgstr ""
+msgstr "កំណត់រចនាសម្ព័ន្ធ"
 
 #. module: documents_account
 #: model:ir.model.fields,field_description:documents_account.field_documents_workflow_rule__create_model
 msgid "Create"
-msgstr ""
+msgstr "ការបង្កើត"
 
 #. module: documents_account
-#: code:addons/documents_account/models/account_invoice.py:13
-#, python-format
-msgid "Created by: "
-msgstr ""
+#: model:documents.workflow.rule,name:documents_account.vendor_bill_rule
+msgid "Create vendor bill"
+msgstr "ការបង្កើតការព្យាករវិកយ័បត្រ"
+
+#. module: documents_account
+#: model:documents.workflow.rule,name:documents_account.credit_note_rule
+msgid "Create vendor refund"
+msgstr "ការបង្កើតការព្យាករណ៌ការបញ្ជូនទំនិញត្រលប់"
 
 #. module: documents_account
 #: selection:documents.workflow.rule,create_model:0
 msgid "Credit note"
-msgstr ""
+msgstr "ការបង្កើតការកត់ត្រា"
 
 #. module: documents_account
 #: model:ir.model.fields,field_description:documents_account.field_res_company__dms_account_settings
 msgid "Dms Account Settings"
-msgstr ""
+msgstr "ការកំណត់គណនី DMS"
 
 #. module: documents_account
 #: model:ir.model,name:documents_account.model_ir_attachment
@@ -77,37 +84,32 @@ msgstr "ឯកសារ"
 #. module: documents_account
 #: model:mail.activity.type,name:documents_account.mail_documents_activity_data_fs
 msgid "Financial Statement"
-msgstr ""
+msgstr "របាយការណ៌ហិរញ្ញវត្ថុ"
 
 #. module: documents_account
 #: model:ir.model.fields,field_description:documents_account.field_documents_workflow_rule__has_business_option
 msgid "Has Business Option"
-msgstr ""
-
-#. module: documents_account
-#: model:ir.model,name:documents_account.model_account_invoice
-msgid "Invoice"
-msgstr "វិកិយប័ត្រ"
+msgstr "ការជ្រើសរើសពាណិជ្ជកម្ម"
 
 #. module: documents_account
 #: selection:documents.workflow.rule,create_model:0
 msgid "Product template"
-msgstr ""
+msgstr "ប៉ាន់គំរូផលិតជល"
 
 #. module: documents_account
 #: model_terms:ir.ui.view,arch_db:documents_account.res_config_settings_view_form
 msgid "Select the folder to be used for accounting's documents."
-msgstr ""
+msgstr "ការជ្រើសរើសកន្លែងថតទុកឯកសារសម្រាប់ការប្រើប្រាស់របស់អ្នក"
 
 #. module: documents_account
 #: model_terms:ir.ui.view,arch_db:documents_account.res_config_settings_view_form
 msgid "Select the tags to be applied to the accounting's new documents"
-msgstr ""
+msgstr "ជ្រើសរើសកន្លែងស្តុបទុកឯកសារគណនេថ្មីរបស់អ្នក"
 
 #. module: documents_account
 #: selection:documents.workflow.rule,create_model:0
 msgid "Signature template"
-msgstr ""
+msgstr "ទម្រង់ហត្ថលេខា"
 
 #. module: documents_account
 #: selection:documents.workflow.rule,create_model:0
@@ -117,14 +119,19 @@ msgstr "កិច្ចការ"
 #. module: documents_account
 #: model:mail.activity.type,name:documents_account.mail_documents_activity_data_vat
 msgid "Tax Statement"
-msgstr ""
+msgstr "របាយការណ៌សារពើពន្ឋ"
+
+#. module: documents_account
+#: selection:documents.workflow.rule,create_model:0
+msgid "Vendor Credit Note"
+msgstr "ចំណាំឥណទានអ្នកលក់"
 
 #. module: documents_account
 #: selection:documents.workflow.rule,create_model:0
 msgid "Vendor bill"
-msgstr ""
+msgstr "វិក័យបត្រព្យាករណ៌"
 
 #. module: documents_account
 #: model:ir.model.fields,field_description:documents_account.field_res_config_settings__account_folder
 msgid "account default folder"
-msgstr ""
+msgstr "លំនំាគណនីដើម"

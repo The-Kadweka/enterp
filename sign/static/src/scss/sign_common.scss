@@ -7,16 +7,6 @@
     display: block;
 }
 
-.o_sign_request_reference_title {
-    text-align: left;
-}
-.o_sign_signer_status.clearfix {
-    text-align: right;
-}
-.o_sign_request_from {
-    text-align: left;
-}
-
 .o_sign_request_follower_name {
     &:before {
         content: ', ';
@@ -59,6 +49,10 @@
         }
     }
 
+    .media-object {
+        width: 32px;
+    }
+
     .o_sign_signer_status > img {
         height: 32px;
     }
@@ -71,6 +65,48 @@
 
     > img {
         min-width: 100px;
+    }
+}
+
+/* Signature Dialog */
+// The .card selector is important to make sure the position absolute will take
+// priority over the position relative of the card.
+.card.o_sign_font_dialog {
+    @include o-position-absolute(0, 0);
+    display: none;
+    height: 100%;
+
+    .o_sign_font_selection {
+        overflow: auto;
+        height: 90%;
+        padding: 0;
+
+        > a {
+            height: 100px;
+            padding: 0;
+
+            > img {
+                height: 100%;
+            }
+        }
+    }
+
+    .o_sign_loading {
+        background-image: url(../../img/loading.gif);
+        width: 31px;
+        height: 31px;
+        margin: 35px auto 0;
+    }
+
+    .o_sign_load {
+        visibility: hidden;
+    }
+}
+
+.o_sign_signature_draw .o_sign_signature {
+    padding: 0;
+    > canvas.jSignature {
+        outline: #ced4da 1px solid;
     }
 }
 
@@ -91,14 +127,19 @@
 .modal.o_sign_thank_you_dialog {
     border: none;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.6), 0 6px 20px 0 rgba(0, 0, 0, 0.1);
-    text-align: left;
+
     .btn {
         border-radius: 0;
         border: none;
     }
+    .btn-primary {
+        background-color: $o-brand-primary;
+        color: white;
+    }
+
     .modal-header {
-        border-top-left-radius: 0.0rem;
-        border-top-right-radius: 0.0rem;
+        border-top-left-radius: 0.26rem;
+        border-top-right-radius: 0.26rem;
         background-color: $o-brand-odoo;
         color: #fff;
         .modal-title {
@@ -138,16 +179,8 @@
     .modal-footer {
         border-top: none;
         text-align: left;
-        display: block;
         &:empty {
             padding: 0px;
         }
     }
 }
-.modal.o_sign_signature_dialog {
-    .modal-footer {
-        display: flex;
-        justify-content: flex-start;
-    }
-}
-     

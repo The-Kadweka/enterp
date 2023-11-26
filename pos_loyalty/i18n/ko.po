@@ -1,21 +1,21 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* pos_loyalty
+# * pos_loyalty
 # 
 # Translators:
-# Martin Trigaux, 2019
-# Link Up링크업 <linkup.way@gmail.com>, 2019
+# Martin Trigaux, 2018
+# Link Up링크업 <linkup.way@gmail.com>, 2018
+# Mark Lee <odoos@soti.33mail.com>, 2018
 # Linkup <link-up@naver.com>, 2019
-# Mark Lee <odoos@soti.33mail.com>, 2019
-# JH CHOI <hwangtog@gmail.com>, 2021
+# JH CHOI <hwangtog@gmail.com>, 2020
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~12.5+e\n"
+"Project-Id-Version: Odoo Server saas~11.5+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-23 11:37+0000\n"
-"PO-Revision-Date: 2019-08-26 09:37+0000\n"
-"Last-Translator: JH CHOI <hwangtog@gmail.com>, 2021\n"
+"POT-Creation-Date: 2018-09-21 14:06+0000\n"
+"PO-Revision-Date: 2018-08-24 11:47+0000\n"
+"Last-Translator: JH CHOI <hwangtog@gmail.com>, 2020\n"
 "Language-Team: Korean (https://www.transifex.com/odoo/teams/41243/ko/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -41,7 +41,7 @@ msgstr "<strong>상품 당 포인트 : </strong>"
 #. module: pos_loyalty
 #: model:ir.model.fields,help:pos_loyalty.field_loyalty_program__name
 msgid "An internal identification for the loyalty program configuration"
-msgstr "로열티 프로그램 환경 설정에 대한 내부 ID"
+msgstr "로열티 프로그램 구성을 위한 내부 ID"
 
 #. module: pos_loyalty
 #: model:ir.model.fields,help:pos_loyalty.field_loyalty_rule__name
@@ -54,9 +54,9 @@ msgid "An internal identification for this loyalty reward"
 msgstr "로열티 보상에 대한 내부 ID"
 
 #. module: pos_loyalty
-#: model:ir.model.fields.selection,name:pos_loyalty.selection__loyalty_rule__rule_type__category
+#: selection:loyalty.rule,rule_type:0
 msgid "Category"
-msgstr "범주"
+msgstr "분류"
 
 #. module: pos_loyalty
 #: model:ir.model,name:pos_loyalty.model_res_partner
@@ -73,7 +73,7 @@ msgstr "새로운 로열티 프로그램 만들기"
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_reward__create_uid
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_rule__create_uid
 msgid "Created by"
-msgstr "작성인"
+msgstr "작성자"
 
 #. module: pos_loyalty
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_program__create_date
@@ -89,22 +89,12 @@ msgstr "누적"
 
 #. module: pos_loyalty
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_reward__discount
+#: selection:loyalty.reward,reward_type:0
 msgid "Discount"
 msgstr "할인"
 
 #. module: pos_loyalty
-#: model:ir.model.fields.selection,name:pos_loyalty.selection__loyalty_reward__reward_type__discount
-msgid "Discount (in %)"
-msgstr "할인율 (%)"
-
-#. module: pos_loyalty
-#: model:ir.model.fields.selection,name:pos_loyalty.selection__loyalty_reward__reward_type__resale
-msgid "Discount (in value)"
-msgstr "할인 (값)"
-
-#. module: pos_loyalty
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_reward__discount_product_id
-#: model_terms:ir.ui.view,arch_db:pos_loyalty.view_loyalty_reward_form
 msgid "Discount Product"
 msgstr "할인 상품"
 
@@ -113,7 +103,7 @@ msgstr "할인 상품"
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_reward__display_name
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_rule__display_name
 msgid "Display Name"
-msgstr "표시 이름"
+msgstr "제목"
 
 #. module: pos_loyalty
 #: model:ir.model.fields,help:pos_loyalty.field_loyalty_rule__rule_type
@@ -121,7 +111,7 @@ msgid "Does this rule affects products, or a category of products ?"
 msgstr "이 규칙이 제품 또는 제품 범주에 영향을 줍니까?"
 
 #. module: pos_loyalty
-#: model:ir.model.fields.selection,name:pos_loyalty.selection__loyalty_reward__reward_type__gift
+#: selection:loyalty.reward,reward_type:0
 msgid "Gift"
 msgstr "선물"
 
@@ -149,12 +139,12 @@ msgstr "각 판매 또는 주문에 대해 고객에게 제공되는 로열티 �
 #. module: pos_loyalty
 #: model:ir.model.fields,help:pos_loyalty.field_loyalty_rule__pp_product
 msgid "How many points the product will earn per product ordered"
-msgstr "주문한 상품 당 상품이 얻는 포인트"
+msgstr "주문한 상품 당 제공되는 포인트"
 
 #. module: pos_loyalty
 #: model:ir.model.fields,help:pos_loyalty.field_loyalty_rule__pp_currency
 msgid "How many points the product will earn per value sold"
-msgstr "판매된 가격 당 상품이 얻는 포인트"
+msgstr "판매된 가격 당 제품이 얻는 포인트"
 
 #. module: pos_loyalty
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_program__id
@@ -164,20 +154,11 @@ msgid "ID"
 msgstr "ID"
 
 #. module: pos_loyalty
-#: model:ir.model.fields,help:pos_loyalty.field_loyalty_reward__point_cost
-msgid ""
-"If the reward is a gift, that's the cost of the gift in points. If the "
-"reward type is a discount that's the cost in point per currency (e.g. 1 "
-"point per $)"
-msgstr ""
-"만약 보상이 선물이라면, 포인트가 선물의 가격입니다. 보상 유형이 할인이면 이는 통화당 포인트 가격(예 : 1달러에 1점)이 됩니다."
-
-#. module: pos_loyalty
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_program____last_update
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_reward____last_update
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_rule____last_update
 msgid "Last Modified on"
-msgstr "최근 수정일"
+msgstr "최근 수정"
 
 #. module: pos_loyalty
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_program__write_uid
@@ -191,7 +172,7 @@ msgstr "최근 갱신한 사람"
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_reward__write_date
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_rule__write_date
 msgid "Last Updated on"
-msgstr "최근 갱신일"
+msgstr "최근 갱신 날짜"
 
 #. module: pos_loyalty
 #: model:ir.model.fields,field_description:pos_loyalty.field_pos_order__loyalty_points
@@ -207,7 +188,7 @@ msgstr "로열티 포인트"
 #: model_terms:ir.ui.view,arch_db:pos_loyalty.pos_config_view_form_inherit_pos_loyalty
 #: model_terms:ir.ui.view,arch_db:pos_loyalty.view_loyalty_program_form
 msgid "Loyalty Program"
-msgstr "로열티 프로그램"
+msgstr "포인트 프로그램"
 
 #. module: pos_loyalty
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_program__name
@@ -217,7 +198,6 @@ msgstr "로열티 프로그램 이름"
 
 #. module: pos_loyalty
 #: model:ir.actions.act_window,name:pos_loyalty.action_loyalty_program_form
-#: model:ir.ui.menu,name:pos_loyalty.menu_loyalty_program
 #: model_terms:ir.ui.view,arch_db:pos_loyalty.view_loyalty_program_tree
 #: model_terms:ir.ui.view,arch_db:pos_loyalty.view_pos_pos_form
 msgid "Loyalty Programs"
@@ -243,11 +223,6 @@ msgid "Loyalty Rule"
 msgstr "로열티 규칙"
 
 #. module: pos_loyalty
-#: model:ir.model,name:pos_loyalty.model_base_partner_merge_automatic_wizard
-msgid "Merge Partner Wizard"
-msgstr "협력사 병합 마법사"
-
-#. module: pos_loyalty
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_reward__minimum_points
 msgid "Minimum Points"
 msgstr "최소 포인트"
@@ -260,17 +235,22 @@ msgstr "이름"
 
 #. module: pos_loyalty
 #. openerp-web
-#: code:addons/pos_loyalty/static/src/js/loyalty.js:0
+#: code:addons/pos_loyalty/static/src/js/loyalty.js:368
 #, python-format
 msgid "No Rewards Available"
 msgstr "보상 없음"
 
 #. module: pos_loyalty
 #. openerp-web
-#: code:addons/pos_loyalty/static/src/js/loyalty.js:0
+#: code:addons/pos_loyalty/static/src/js/loyalty.js:384
 #, python-format
 msgid "Please select a reward"
 msgstr "보상을 선택하십시오"
+
+#. module: pos_loyalty
+#: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_reward__point_cost
+msgid "Point Cost"
+msgstr ""
 
 #. module: pos_loyalty
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_reward__point_product_id
@@ -280,7 +260,7 @@ msgstr "포인트 상품"
 #. module: pos_loyalty
 #: model:ir.model,name:pos_loyalty.model_pos_config
 msgid "Point of Sale Configuration"
-msgstr "점포판매시스템 환경 설정"
+msgstr "점포판매시스템 환경설정"
 
 #. module: pos_loyalty
 #: model:ir.model,name:pos_loyalty.model_pos_order
@@ -289,12 +269,12 @@ msgstr "점포판매시스템 주문"
 
 #. module: pos_loyalty
 #. openerp-web
-#: code:addons/pos_loyalty/static/src/xml/loyalty.xml:0
-#: code:addons/pos_loyalty/static/src/xml/loyalty.xml:0
-#: code:addons/pos_loyalty/static/src/xml/loyalty.xml:0
+#: code:addons/pos_loyalty/static/src/xml/loyalty.xml:6
+#: code:addons/pos_loyalty/static/src/xml/loyalty.xml:71
+#: code:addons/pos_loyalty/static/src/xml/loyalty.xml:81
 #, python-format
 msgid "Points"
-msgstr "포인트"
+msgstr "점수"
 
 #. module: pos_loyalty
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_program__rounding
@@ -303,17 +283,31 @@ msgstr "포인트 반올림"
 
 #. module: pos_loyalty
 #. openerp-web
-#: code:addons/pos_loyalty/static/src/xml/loyalty.xml:0
+#: code:addons/pos_loyalty/static/src/xml/loyalty.xml:57
 #, python-format
 msgid "Points Spent"
 msgstr "사용한 포인트"
 
 #. module: pos_loyalty
 #. openerp-web
-#: code:addons/pos_loyalty/static/src/xml/loyalty.xml:0
+#: code:addons/pos_loyalty/static/src/xml/loyalty.xml:111
+#, python-format
+msgid "Points Spent:"
+msgstr ""
+
+#. module: pos_loyalty
+#. openerp-web
+#: code:addons/pos_loyalty/static/src/xml/loyalty.xml:54
 #, python-format
 msgid "Points Won"
-msgstr "포인트 획득"
+msgstr "포인트 성공"
+
+#. module: pos_loyalty
+#. openerp-web
+#: code:addons/pos_loyalty/static/src/xml/loyalty.xml:100
+#, python-format
+msgid "Points Won:"
+msgstr ""
 
 #. module: pos_loyalty
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_program__pp_currency
@@ -338,14 +332,14 @@ msgid "Pos Loyalty Program"
 msgstr "POS 로열티 프로그램"
 
 #. module: pos_loyalty
-#: model:ir.model.fields.selection,name:pos_loyalty.selection__loyalty_rule__rule_type__product
+#: selection:loyalty.rule,rule_type:0
 msgid "Product"
 msgstr "상품"
 
 #. module: pos_loyalty
-#: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_reward__point_cost
-msgid "Reward Cost"
-msgstr "보상 비용"
+#: selection:loyalty.reward,reward_type:0
+msgid "Resale"
+msgstr ""
 
 #. module: pos_loyalty
 #: model_terms:ir.ui.view,arch_db:pos_loyalty.view_loyalty_reward_form
@@ -364,12 +358,12 @@ msgstr "로열티 포인트로 선물 또는 할인으로 고객에게 보상"
 
 #. module: pos_loyalty
 #. openerp-web
-#: code:addons/pos_loyalty/static/src/xml/loyalty.xml:0
+#: code:addons/pos_loyalty/static/src/xml/loyalty.xml:25
 #: model:ir.model.fields,field_description:pos_loyalty.field_loyalty_program__reward_ids
 #: model_terms:ir.ui.view,arch_db:pos_loyalty.view_loyalty_program_form
 #, python-format
 msgid "Rewards"
-msgstr "보상"
+msgstr "포상"
 
 #. module: pos_loyalty
 #: model_terms:ir.ui.view,arch_db:pos_loyalty.view_loyalty_rule_form
@@ -425,21 +419,26 @@ msgid "The category affected by the rule"
 msgstr "규칙의 영향을 받는 범주"
 
 #. module: pos_loyalty
+#: model:ir.model.fields,help:pos_loyalty.field_loyalty_reward__point_cost
+msgid "The cost of the reward"
+msgstr ""
+
+#. module: pos_loyalty
 #: model:ir.model.fields,help:pos_loyalty.field_loyalty_reward__discount
 msgid "The discount percentage"
-msgstr "할인율"
+msgstr "할인 (%)"
 
 #. module: pos_loyalty
-#: code:addons/pos_loyalty/models/pos_loyalty.py:0
+#: code:addons/pos_loyalty/models/pos_loyalty.py:59
 #, python-format
 msgid "The discount product field is mandatory for discount rewards"
-msgstr "할인 보상의 경우 할인 상품 필드는 필수 사항입니다"
+msgstr "할인 상품 필드는 할인 보상에 필수입니다"
 
 #. module: pos_loyalty
-#: code:addons/pos_loyalty/models/pos_loyalty.py:0
+#: code:addons/pos_loyalty/models/pos_loyalty.py:53
 #, python-format
 msgid "The gift product field is mandatory for gift rewards"
-msgstr "선물 보상의 경우 선물 상품 필드는 필수 사항입니다"
+msgstr "선물 상품 필드는 선물 보상에 필수입니다"
 
 #. module: pos_loyalty
 #: model:ir.model.fields,help:pos_loyalty.field_loyalty_program__rounding
@@ -465,7 +464,7 @@ msgid ""
 msgstr "고객이 이 보상의 자격을 갖추기 위해 필요한 최소 포인트"
 
 #. module: pos_loyalty
-#: code:addons/pos_loyalty/models/pos_loyalty.py:0
+#: code:addons/pos_loyalty/models/pos_loyalty.py:65
 #, python-format
 msgid "The point product field is mandatory for point resale rewards"
 msgstr "포인트 재판매 보상의 경우 포인트 제품 필드는 필수 사항입니다"
@@ -479,14 +478,6 @@ msgstr "이 규칙에서 획득한 포인트는 다른 규칙과 함께 획득�
 #: model:ir.model.fields,help:pos_loyalty.field_loyalty_rule__product_id
 msgid "The product affected by the rule"
 msgstr "규칙의 영향을 받는 상품"
-
-#. module: pos_loyalty
-#: code:addons/pos_loyalty/models/product.py:0
-#, python-format
-msgid ""
-"The product cannot be archived because it's used in a point of sales loyalty"
-" program."
-msgstr "이 품목은 매장 로열티 프로그램에서 사용되므로 보관할 수 없습니다."
 
 #. module: pos_loyalty
 #: model:ir.model.fields,help:pos_loyalty.field_loyalty_reward__gift_product_id
@@ -510,7 +501,7 @@ msgstr "보상 유형"
 
 #. module: pos_loyalty
 #. openerp-web
-#: code:addons/pos_loyalty/static/src/js/loyalty.js:0
+#: code:addons/pos_loyalty/static/src/js/loyalty.js:369
 #, python-format
 msgid ""
 "There are no rewards available for this customer as part of the loyalty "
@@ -519,7 +510,14 @@ msgstr "로열티 프로그램의 일환으로 이 고객에게 제공되는 보
 
 #. module: pos_loyalty
 #. openerp-web
-#: code:addons/pos_loyalty/static/src/xml/loyalty.xml:0
+#: code:addons/pos_loyalty/static/src/xml/loyalty.xml:60
 #, python-format
 msgid "Total Points"
 msgstr "총 포인트"
+
+#. module: pos_loyalty
+#. openerp-web
+#: code:addons/pos_loyalty/static/src/xml/loyalty.xml:122
+#, python-format
+msgid "Total Points:"
+msgstr ""

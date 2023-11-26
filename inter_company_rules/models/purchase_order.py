@@ -10,6 +10,7 @@ class purchase_order(models.Model):
     auto_generated = fields.Boolean(string='Auto Generated Purchase Order', copy=False)
     auto_sale_order_id = fields.Many2one('sale.order', string='Source Sales Order', readonly=True, copy=False)
 
+    @api.multi
     def button_approve(self, force=False):
         """ Generate inter company sales order base on conditions."""
         res = super(purchase_order, self).button_approve(force=force)
@@ -21,6 +22,7 @@ class purchase_order(models.Model):
         return res
 
 
+    @api.one
     def inter_company_create_sale_order(self, company):
         """ Create a Sales Order from the current PO (self)
             Note : In this method, reading the current PO is done as sudo, and the creation of the derived
@@ -30,52 +32,48 @@ class purchase_order(models.Model):
         """
         self = self.with_context(force_company=company.id)
         SaleOrder = self.env['sale.order']
-        SaleOrderLine = self.env['sale.order.line']
 
         # find user for creating and validation SO/PO from partner company
         intercompany_uid = company.intercompany_user_id and company.intercompany_user_id.id or False
         if not intercompany_uid:
             raise Warning(_('Provide at least one user for inter company relation for % ') % company.name)
         # check intercompany user access rights
-        if not SaleOrder.with_user(intercompany_uid).check_access_rights('create', raise_exception=False):
+        if not SaleOrder.sudo(intercompany_uid).check_access_rights('create', raise_exception=False):
             raise Warning(_("Inter company user of company %s doesn't have enough access rights") % company.name)
 
-        for rec in self:
-            # check pricelist currency should be same with SO/PO document
-            company_partner = rec.company_id.partner_id.with_user(intercompany_uid)
-            if rec.currency_id.id != company_partner.property_product_pricelist.currency_id.id:
-                raise Warning(
-                    _('You cannot create SO from PO because sale price list currency is different than purchase price list currency.')
-                    + '\n'
-                    + _('The currency of the SO is obtained from the pricelist of the company partner.')
-                    + '\n\n ({} {}, {} {}, {} {} (ID: {}))'.format(
-                        _('SO currency:'), company_partner.property_product_pricelist.currency_id.name,
-                        _('Pricelist:'), company_partner.property_product_pricelist.display_name,
-                        _('Partner:'), company_partner.display_name, company_partner.id,
-                    )
+        # check pricelist currency should be same with SO/PO document
+        company_partner = self.company_id.partner_id.sudo(intercompany_uid)
+        if self.currency_id.id != company_partner.property_product_pricelist.currency_id.id:
+            raise Warning(
+                _('You cannot create SO from PO because sale price list currency is different than purchase price list currency.')
+                + '\n'
+                + _('The currency of the SO is obtained from the pricelist of the company partner.')
+                + '\n\n ({} {}, {} {}, {} {} (ID: {}))'.format(
+                    _('SO currency:'), company_partner.property_product_pricelist.currency_id.name,
+                    _('Pricelist:'), company_partner.property_product_pricelist.display_name,
+                    _('Partner:'), company_partner.display_name, company_partner.id,
                 )
+            )
 
-            # create the SO and generate its lines from the PO lines
-            # read it as sudo, because inter-compagny user can not have the access right on PO
-            sale_order_data = rec.sudo()._prepare_sale_order_data(
-                rec.name, company_partner, company,
-                rec.dest_address_id and rec.dest_address_id.id or False)
-            inter_user = self.env['res.users'].sudo().browse(intercompany_uid)
-            sale_order = SaleOrder.with_context(allowed_company_ids=inter_user.company_ids.ids).with_user(intercompany_uid).create(sale_order_data)
-            # lines are browse as sudo to access all data required to be copied on SO line (mainly for company dependent field like taxes)
-            for line in rec.order_line.sudo():
-                so_line_vals = rec._prepare_sale_order_line_data(line, company, sale_order.id)
-                # TODO: create can be done in batch; this may be a performance bottleneck
-                SaleOrderLine.with_user(intercompany_uid).with_context(allowed_company_ids=inter_user.company_ids.ids).create(so_line_vals)
+        # create the SO and generate its lines from the PO lines
+        SaleOrderLine = self.env['sale.order.line']
+        # read it as sudo, because inter-compagny user can not have the access right on PO
+        sale_order_data = self.sudo()._prepare_sale_order_data(self.name, company_partner, company, self.dest_address_id and self.dest_address_id.id or False)
+        sale_order = SaleOrder.sudo(intercompany_uid).create(sale_order_data[0])
+        # lines are browse as sudo to access all data required to be copied on SO line (mainly for company dependent field like taxes)
+        for line in self.order_line.sudo():
+            so_line_vals = self._prepare_sale_order_line_data(line, company, sale_order.id)
+            SaleOrderLine.sudo(intercompany_uid).create(so_line_vals)
 
-            # write vendor reference field on PO
-            if not rec.partner_ref:
-                rec.partner_ref = sale_order.name
+        # write vendor reference field on PO
+        if not self.partner_ref:
+            self.partner_ref = sale_order.name
 
-            #Validation of sales order
-            if company.auto_validation:
-                sale_order.with_user(intercompany_uid).action_confirm()
+        #Validation of sales order
+        if company.auto_validation == 'validated':
+            sale_order.sudo(intercompany_uid).action_confirm()
 
+    @api.one
     def _prepare_sale_order_data(self, name, partner, company, direct_delivery_address):
         """ Generate the Sales Order values from the PO
             :param name : the origin client reference
@@ -87,7 +85,6 @@ class purchase_order(models.Model):
             :param direct_delivery_address : the address of the SO
             :rtype direct_delivery_address : res.partner record
         """
-        self.ensure_one()
         partner_addr = partner.sudo().address_get(['invoice', 'delivery', 'contact'])
         warehouse = company.warehouse_id and company.warehouse_id.company_id.id == company.id and company.warehouse_id or False
         if not warehouse:
@@ -95,7 +92,6 @@ class purchase_order(models.Model):
         return {
             'name': self.env['ir.sequence'].sudo().next_by_code('sale.order') or '/',
             'company_id': company.id,
-            'team_id': self.env['crm.team'].with_context(allowed_company_ids=company.ids)._get_default_team_id(domain=[('company_id', '=', company.id)]).id,
             'warehouse_id': warehouse.id,
             'client_order_ref': name,
             'partner_id': partner.id,
@@ -126,7 +122,7 @@ class purchase_order(models.Model):
             taxes = line.product_id.taxes_id
         company_taxes = [tax_rec for tax_rec in taxes if tax_rec.company_id.id == company.id]
         if sale_id:
-            so = self.env["sale.order"].with_user(company.intercompany_user_id).browse(sale_id)
+            so = self.env["sale.order"].sudo(company.intercompany_user_id).browse(sale_id)
             company_taxes = so.fiscal_position_id.map_tax(company_taxes, line.product_id, so.partner_id)
         quantity = line.product_id and line.product_uom._compute_quantity(line.product_qty, line.product_id.uom_id) or line.product_qty
         price = line.product_id and line.product_uom._compute_price(price, line.product_id.uom_id) or price
@@ -140,5 +136,4 @@ class purchase_order(models.Model):
             'customer_lead': line.product_id and line.product_id.sale_delay or 0.0,
             'company_id': company.id,
             'tax_id': [(6, 0, company_taxes.ids)],
-            'display_type': line.display_type,
         }

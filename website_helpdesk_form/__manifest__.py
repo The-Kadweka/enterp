@@ -3,11 +3,11 @@
 
 {
     'name': 'Online Ticket Submission',
-    'category': 'Website/Website',
+    'category': 'Website',
     'sequence': 58,
     'summary': 'Qualify helpdesk queries with a website form',
     'depends': [
-        'website_form',
+        'website_form_editor',
         'website_helpdesk',
     ],
     'description': """

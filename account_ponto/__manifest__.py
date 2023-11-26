@@ -13,7 +13,7 @@
         but aims to connect with all European banks later on
     """,
 
-    'category': 'Accounting/Accounting',
+    'category': 'Accounting',
     'version': '1.0',
 
     'depends': ['account_online_sync'],

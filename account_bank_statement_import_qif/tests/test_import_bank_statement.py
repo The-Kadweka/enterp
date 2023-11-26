@@ -12,17 +12,16 @@ class TestQifFile(TransactionCase):
 
     def setUp(self):
         super(TestQifFile, self).setUp()
+        self.BankStatementImport = self.env['account.bank.statement.import']
         self.BankStatement = self.env['account.bank.statement']
         self.BankStatementLine = self.env['account.bank.statement.line']
 
     def test_qif_file_import(self):
+        from odoo.tools import float_compare
         qif_file_path = get_module_resource('account_bank_statement_import_qif', 'static/qif', 'test_qif.qif')
         qif_file = base64.b64encode(open(qif_file_path, 'rb').read())
-
-        bank_journal = self.env['account.journal'].create({'type': 'bank', 'name': 'bank QIF', 'code': 'BNK67'})
-        self.env['account.bank.statement.import'].with_context(journal_id=bank_journal.id).create({'attachment_ids': [(0, 0, {
-            'name': 'test file',
-            'datas': qif_file,
-        })]}).import_file()
+        bank_statement_id = self.BankStatementImport.create(dict(data_file=qif_file,))
+        journal = self.env['account.journal'].create({'type': 'bank', 'name': 'bank QIF', 'code': 'BNK67'})
+        bank_statement_id.with_context(journal_id=journal.id).import_file()
         line = self.BankStatementLine.search([('name', '=', 'YOUR LOCAL SUPERMARKET')], limit=1)
-        self.assertAlmostEqual(line.statement_id.balance_end_real, -1896.09)
+        assert float_compare(line.statement_id.balance_end_real, -1896.09, 2) == 0

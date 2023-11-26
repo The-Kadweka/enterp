@@ -16,7 +16,7 @@ simple and graphical way. It has two main features:
 
 Note: Only the admin user is allowed to make those customizations.
 """,
-    'category': 'Hidden',
+    'category': 'Technical Settings',
     'version': '1.0',
     'depends': [
         'base_automation',
@@ -32,7 +32,6 @@ Note: Only the admin user is allowed to make those customizations.
         'views/base_import_module_view.xml',
         'views/ir_actions_report_xml.xml',
         'views/ir_model_data.xml',
-        'wizard/base_module_uninstall_view.xml',
     ],
     'qweb': [
         "static/src/xml/*.xml",

@@ -61,9 +61,11 @@
         <field name="view_id" ref="stock_barcode.stock_picking_kanban"/>
         <field name="context">{
             'form_view_initial_mode': 'edit',
+            'search_default_picking_type_id': [active_id],
+            'default_picking_type_id': active_id,
             'contact_display': 'partner_address',
             'search_default_available': 1,
-            'force_detailed_view': True
+            'force_detailed_view': True,
         }</field>
     </record>
 
@@ -82,7 +84,7 @@
                 <field name="code"/>
                 <templates>
                     <t t-name="kanban-box">
-                        <div t-if="['incoming', 'outgoing', 'internal'].indexOf(record.code.raw_value) > -1" t-attf-class="oe_kanban_card #{!selection_mode ? kanban_color(record.color.raw_value) : ''} oe_kanban_global_click">
+                        <div t-if="['incoming', 'outgoing', 'internal'].indexOf(record.code.raw_value) > -1" t-attf-class="oe_kanban_card #{kanban_color(record.color.raw_value)} oe_kanban_global_click">
                             <span class="oe_kanban_color_help" t-attf-title="In #{kanban_getcolorname(record.color.raw_value)}" role="img" t-attf-aria-label="In #{kanban_getcolorname(record.color.raw_value)}"/>
                                 <div class="o_kanban_card_header">
                                         <div class="o_primary o_kanban_record_title">

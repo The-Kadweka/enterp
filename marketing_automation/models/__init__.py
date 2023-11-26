@@ -3,5 +3,5 @@
 
 from . import marketing_campaign
 from . import marketing_participant
-from . import mailing_trace
-from . import mailing_mailing
+from . import mass_mailing
+from . import mass_mailing_stats

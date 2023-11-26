@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import UserError
 
 class AccountJournal(models.Model):
     _inherit = "account.journal"
@@ -15,7 +15,7 @@ class AccountJournal(models.Model):
                 ('month', 'Create monthly statements')]
 
     next_link_synchronization = fields.Datetime("Online Link Next synchronization", related='account_online_link_id.next_refresh')
-    account_online_account_id = fields.Many2one('account.online.account', copy=False, ondelete='set null')
+    account_online_account_id = fields.Many2one('account.online.account', ondelete='set null')
     account_online_link_id = fields.Many2one('account.online.link', related='account_online_account_id.account_online_link_id', readonly=True, store=True)
     account_online_link_state = fields.Selection(related="account_online_link_id.state", readonly=True)
     bank_statement_creation_groupby = fields.Selection(selection=_get_statement_creation_possible_values,
@@ -23,11 +23,6 @@ class AccountJournal(models.Model):
                                                     "new transactions from your bank account.",
                                                default='month',
                                                string='Bank Statements Group By')
-
-    @api.constrains('account_online_account_id')
-    def _check_account_online_account_id(self):
-        if len(self.account_online_account_id.journal_ids) > 1:
-            raise ValidationError(_('You cannot have two journals associated with the same Online Account.'))
 
     @api.model
     def _cron_fetch_online_transactions(self):
@@ -51,8 +46,7 @@ class AccountJournal(models.Model):
         Override of the unlink method.\n
         That's usefull to unlink account.online.account too.\n
         '''
-        if self.account_online_account_id:
-            self.account_online_account_id.unlink()
+        self.mapped('account_online_account_id').unlink()
         return super(AccountJournal, self).unlink()
 
     def action_configure_bank_journal(self):

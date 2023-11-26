@@ -3,7 +3,7 @@
 {
     'name': 'Batch Payment',
     'version': '1.0',
-    'category': 'Accounting/Accounting',
+    'category': 'Accounting',
     'description': """
 Batch Payments
 =======================================

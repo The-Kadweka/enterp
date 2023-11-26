@@ -289,7 +289,6 @@ class TestPlaidApi(AccountingTestCase):
         # Reset state to success
         acc_online_provider.status = 'SUCCESS'
         self.assertEqual(acc_online_provider.status, 'SUCCESS', 'state of account online provider should be in SUCCESS')
-        acc_online_provider.flush(['status'])
         with self.assertRaises(UserError) as e:
             acc_online_provider.plaid_fetch('/error_plaid2', {})
         self.assertEqual(acc_online_provider.status, 'FAILED', 'state of account_online_provider should have change to FAILED')
@@ -297,7 +296,6 @@ class TestPlaidApi(AccountingTestCase):
         # Reset state to success
         acc_online_provider.status = 'SUCCESS'
         self.assertEqual(acc_online_provider.status, 'SUCCESS', 'state of account online provider should be in SUCCESS')
-        acc_online_provider.flush(['status'])
         with self.assertRaises(UserError) as e:
             acc_online_provider.plaid_fetch('/no_contract', {})
         self.assertEqual(acc_online_provider.status, 'FAILED', 'state of account_online_provider should have change to FAILED')

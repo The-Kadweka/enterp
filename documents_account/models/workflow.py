@@ -1,91 +1,66 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api, exceptions
-from odoo.tests.common import Form
 
 
 class WorkflowActionRuleAccount(models.Model):
     _inherit = ['documents.workflow.rule']
 
     has_business_option = fields.Boolean(default=True, compute='_get_business')
-    create_model = fields.Selection(selection_add=[('account.move.in_invoice', "Vendor bill"),
-                                                   ('account.move.out_invoice', 'Customer invoice'),
-                                                   ('account.move.in_refund', 'Vendor Credit Note'),
-                                                   ('account.move.out_refund', "Credit note")])
+    create_model = fields.Selection(selection_add=[('account.invoice.in_invoice', "Vendor bill"),
+                                                   ('account.invoice.out_refund', "Credit note"),
+                                                   ('account.invoice.in_refund', 'Vendor Credit Note')])
 
-    def create_record(self, documents=None):
-        rv = super(WorkflowActionRuleAccount, self).create_record(documents=documents)
-        if self.create_model.startswith('account.move'):
+    def create_record(self, attachments=None):
+        rv = super(WorkflowActionRuleAccount, self).create_record(attachments=attachments)
+        if self.create_model.startswith('account.invoice'):
             invoice_type = self.create_model.split('.')[2]
-            journal = self.env['account.move'].with_context(default_type=invoice_type)._get_default_journal()
+            journal = self.env['account.invoice'].with_context({'type': invoice_type})._default_journal()
             new_obj = None
             invoice_ids = []
-            for document in documents:
+            for attachment in attachments:
                 create_values = {
-                    'default_type': invoice_type,
-                    'default_journal_id': journal.id,
+                    'type': invoice_type,
+                    'journal_id': journal.id,
                 }
-                if document.res_model == 'account.move.line' and document.res_id:
-                    create_values.update(default_document_request_line_id=document.res_id)
+                if invoice_type != 'out_refund':
+                    create_values['comment'] = False
 
                 if self.partner_id:
-                    if invoice_type in ['in_invoice', 'in_refund']:
-                        payment_term_id = self.partner_id.property_supplier_payment_term_id.id
-                    elif invoice_type in ['out_invoice', 'out_refund']:
-                        payment_term_id = self.partner_id.property_payment_term_id.id
-                    create_values.update(
-                        default_partner_id=self.partner_id.id,
-                        default_invoice_payment_term_id=payment_term_id
-                    )
-                elif document.partner_id:
-                    if invoice_type in ['in_invoice', 'in_refund']:
-                        payment_term_id = document.partner_id.property_supplier_payment_term_id.id
-                    elif invoice_type in ['out_invoice', 'out_refund']:
-                        payment_term_id = document.partner_id.property_payment_term_id.id
-                    create_values.update(
-                        default_partner_id=document.partner_id.id,
-                        default_invoice_payment_term_id=payment_term_id
-                    )
+                    create_values.update(partner_id=self.partner_id.id)
+                elif attachment.partner_id:
+                    create_values.update(partner_id=attachment.partner_id.id)
 
-                if document.res_model == 'account.move' and document.res_id:
-                    invoice_ids.append(document.res_id)
-                else:
-                    with Form(self.env['account.move'].with_context(create_values)) as invoice_form:
-                        # ignore view required fields (it will fail on create for really required field)
-                        for modifiers in invoice_form._view['modifiers'].values():
-                            modifiers.pop("required", None)
-                        new_obj = invoice_form.save()
+                new_obj = self.env['account.invoice'].create(create_values)
+                body = "<p>created with DMS</p>"
+                new_obj.message_post(body=body, attachment_ids=[attachment.id])
+                this_attachment = attachment
+                if attachment.res_model or attachment.res_id:
+                    this_attachment = attachment.copy()
 
-                    body = "<p>created from Documents app</p>"
-                    # the 'no_document' key in the context indicates that this ir_attachment has already a
-                    # documents.document and a new document shouldn't be automatically generated.
-                    # message_post ignores attachment that are not on mail.compose message, so we link the attachment explicitly afterwards
-                    new_obj.with_context(default_journal_id=journal.id, default_type=invoice_type).message_post(body=body)
-                    document.attachment_id.with_context(no_document=True).write({
-                        'res_model': 'account.move',
-                        'res_id': new_obj.id,
-                    })
-                    document.attachment_id.register_as_main_attachment()  # needs to be called explicitly since we bypassed the standard attachment creation mechanism
-                    invoice_ids.append(new_obj.id)
+                this_attachment.write({'res_model': 'account.invoice',
+                                       'res_id': new_obj.id,
+                                       'folder_id': this_attachment.folder_id.id})
 
-            context = dict(self._context, default_type=invoice_type, default_journal_id=journal.id)
+                invoice_ids.append(new_obj.id)
+
             action = {
                 'type': 'ir.actions.act_window',
-                'res_model': 'account.move',
+                'res_model': 'account.invoice',
                 'name': "Invoices",
                 'view_id': False,
+                'view_type': 'list',
                 'view_mode': 'tree',
                 'views': [(False, "list"), (False, "form")],
                 'domain': [('id', 'in', invoice_ids)],
-                'context': context,
+                'context': self._context,
             }
-            if len(invoice_ids) == 1:
-                record = new_obj or self.env['account.move'].browse(invoice_ids[0])
-                view_id = record.get_formview_id() if record else False
-                action.update({
-                    'view_mode': 'form',
-                    'views': [(view_id, "form")],
-                    'res_id': invoice_ids[0],
-                    'view_id': view_id,
-                })
+            if len(attachments) == 1:
+                view_id = new_obj.get_formview_id() if new_obj else False
+                action.update({'view_type': 'form',
+                               'view_mode': 'form',
+                               'views': [(view_id, "form")],
+                               'res_id': new_obj.id if new_obj else False,
+                               'view_id': view_id,
+                               })
             return action
         return rv

@@ -3,6 +3,8 @@ odoo.define('account_plaid.acc_config_widget', function(require) {
 
 var ajax = require('web.ajax');
 var core = require('web.core');
+var framework = require('web.framework');
+var QWeb = core.qweb;
 var AbstractAction = require('web.AbstractAction');
 
 var PlaidAccountConfigurationWidget = AbstractAction.extend({
@@ -12,13 +14,11 @@ var PlaidAccountConfigurationWidget = AbstractAction.extend({
         }
     },
     init: function(parent, context) {
-        var self = this;
         this._super(parent, context);
+        var self = this;
         this.context = context.context;
         this.exit = false;
-        this.loaded = new Promise(function (resolve) {
-            self._loadedResolver = resolve;
-        });
+        this.loaded = $.Deferred();
         this.institution_id = context.institution_id;
         this.plaid_link = context.open_link;
         this.account_online_provider_id = context.account_online_provider_id;
@@ -46,7 +46,7 @@ var PlaidAccountConfigurationWidget = AbstractAction.extend({
                             }
                             else {
                                 self.exit = true;
-                                self._loadedResolver();
+                                self.loaded.resolve();
                             }
                         },
                         onExit: function(err, metadata) {
@@ -55,7 +55,7 @@ var PlaidAccountConfigurationWidget = AbstractAction.extend({
                                 console.log(metadata);
                             }
                             self.exit = true;
-                            self._loadedResolver();
+                            self.loaded.resolve();
                         },
                     }
                     if (self.public_token !== undefined) {
@@ -75,7 +75,7 @@ var PlaidAccountConfigurationWidget = AbstractAction.extend({
         }
         else {
             // Just show how many transactions have been fetched
-            this._loadedResolver();
+            this.loaded.resolve();
         }
         return this.loaded;
     },
@@ -86,8 +86,7 @@ var PlaidAccountConfigurationWidget = AbstractAction.extend({
         return this._rpc({
                  model: 'account.online.provider',
                  method: 'link_success',
-                 args: [[self.id], public_token, metadata],
-                 context: self.context,
+                 args: [[self.id], public_token, metadata, self.context],
              }).then(function(result) {
                  self.do_action(result);
              });

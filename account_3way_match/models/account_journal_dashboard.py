@@ -6,9 +6,10 @@ from odoo import fields, models, api
 class AccountJournal(models.Model):
     _inherit = 'account.journal'
 
+    @api.multi
     def open_action(self):
         action = super(AccountJournal, self).open_action()
-        view = self.env.ref('account.action_move_in_invoice_type')
+        view = self.env.ref('account.action_vendor_bill_template')
         if view and action["id"] == view.id:
             account_purchase_filter = self.env.ref('account_3way_match.account_invoice_filter_inherit_account_3way_match', False)
             action['search_view_id'] = account_purchase_filter and [account_purchase_filter.id, account_purchase_filter.name] or False
@@ -21,12 +22,10 @@ class AccountJournal(models.Model):
         remains unchanged).
         """
         if self.type == 'purchase':
-            return ("""SELECT state, (CASE WHEN type = 'in_refund' THEN -1 ELSE 1 END) * 
-                   amount_residual as amount_total, currency_id AS currency
-                   FROM account_move
+            return ("""SELECT state, residual_signed as amount_total, currency_id AS currency
+                   FROM account_invoice
                    WHERE journal_id = %(journal_id)s
-                   AND (release_to_pay = 'yes' OR invoice_date_due <= %(today)s)
-                   AND state = 'posted'
-                   AND invoice_payment_state = 'not_paid';""",
+                   AND (release_to_pay = 'yes' OR date_due < %(today)s)
+                   AND state = 'open';""",
                    {'journal_id': self.id, 'today': fields.Date.today()})
         return super(AccountJournal, self)._get_open_bills_to_pay_query()

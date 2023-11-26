@@ -13,7 +13,7 @@ class ReportL10nBePartnerVatIntra(models.AbstractModel):
     _description = "Partner VAT Intra"
     _inherit = 'account.report'
 
-    filter_date = {'mode': 'range', 'filter': 'this_month'}
+    filter_date = {'date_from': '', 'date_to': '', 'filter': 'this_month'}
 
     @api.model
     def _get_lines(self, options, line_id=None, get_xml_data=False):
@@ -22,41 +22,29 @@ class ReportL10nBePartnerVatIntra(models.AbstractModel):
         if not context.get('company_ids'):
             return lines
         seq = amount_sum = 0
-        tax_report_lines = [
-            ('44', 'S', self.env.ref('l10n_be.tax_report_line_44').id),
-            ('44', 'S', self.env.ref('l10n_be.tax_report_line_48s44').id),
-            ('46', 'L', self.env.ref('l10n_be.tax_report_line_46L').id),
-            ('46', 'L', self.env.ref('l10n_be.tax_report_line_48s46L').id),
-            ('46', 'T', self.env.ref('l10n_be.tax_report_line_46T').id),
-            ('46', 'T', self.env.ref('l10n_be.tax_report_line_48s46T').id),
-        ]
+        tag_ids = [self.env['ir.model.data'].xmlid_to_res_id(k) for k in ['l10n_be.tax_tag_44', 'l10n_be.tax_tag_46L', 'l10n_be.tax_tag_46T']]
         if get_xml_data:
-            group_by = 'p.vat, intra_code, code'
+            group_by = 'p.vat, intra_code'
             select = ''
         else:
-            group_by = 'p.name, l.partner_id, p.vat, intra_code, code'
+            group_by = 'p.name, l.partner_id, p.vat, intra_code'
             select = 'p.name As partner_name, l.partner_id AS partner_id,'
         query = """
-            WITH tax_report_lines_additional_info (intra_code, code, id) AS (VALUES {with_values})
             SELECT {select} p.vat AS vat,
-                      tax_report_lines_additional_info.intra_code as intra_code,
-                      tax_report_lines_additional_info.code as code,
-                      SUM(-l.balance) AS amount
+                      tt.account_account_tag_id AS intra_code, SUM(-l.balance) AS amount
                       FROM account_move_line l
                       LEFT JOIN res_partner p ON l.partner_id = p.id
-                      JOIN account_account_tag_account_move_line_rel aml_tag ON l.id = aml_tag.account_move_line_id
-                      JOIN account_account_tag tag ON tag.id = aml_tag.account_account_tag_id
-                      JOIN account_tax_report_line_tags_rel ON account_tax_report_line_tags_rel.account_account_tag_id = tag.id
-                      JOIN tax_report_lines_additional_info ON tax_report_lines_additional_info.id = account_tax_report_line_tags_rel.account_tax_report_line_id
-                       AND l.parent_state = 'posted'
+                      LEFT JOIN account_move_line_account_tax_rel amlt ON l.id = amlt.account_move_line_id
+                      LEFT JOIN account_tax_account_tag tt on amlt.account_tax_id = tt.account_tax_id
+                      WHERE tt.account_account_tag_id IN %s
                        AND l.date >= %s
                        AND l.date <= %s
                        AND l.company_id IN %s
                       GROUP BY {group_by}
         """
-        with_values = ', '.join(str(l) for l in tax_report_lines)
-        params = (context.get('date_from'), context.get('date_to'), tuple(context.get('company_ids')))
-        self.env.cr.execute(query.format(with_values=with_values, select=select, group_by=group_by), params)
+        params = (tuple(tag_ids), context.get('date_from'),
+                  context.get('date_to'), tuple(context.get('company_ids')))
+        self.env.cr.execute(query.format(select=select, group_by=group_by), params)
         p_count = 0
 
         for row in self.env.cr.dictfetchall():
@@ -69,9 +57,11 @@ class ReportL10nBePartnerVatIntra(models.AbstractModel):
                 seq += 1
                 amount_sum += amt
 
-                columns = [row['vat'].replace(' ', '').upper(), row['code'], row['intra_code'], amt]
+                [intra_code, code] = row['intra_code'] == tag_ids[0] and ['44', 'S'] or (row['intra_code'] == tag_ids[1] and ['46L', 'L'] or (row['intra_code'] == tag_ids[2] and ['46T', 'T'] or ['', '']))
+
+                columns = [row['vat'].replace(' ', '').upper(), code, intra_code, amt]
                 if not context.get('no_format', False):
-                    currency_id = self.env.company.currency_id
+                    currency_id = self.env.user.company_id.currency_id
                     columns[3] = formatLang(self.env, columns[3], currency_obj=currency_id)
 
                 lines.append({
@@ -98,12 +88,12 @@ class ReportL10nBePartnerVatIntra(models.AbstractModel):
 
     def _get_reports_buttons(self):
         buttons = super(ReportL10nBePartnerVatIntra, self)._get_reports_buttons()
-        buttons += [{'name': _('Export (XML)'), 'sequence': 3, 'action': 'print_xml', 'file_export_type': _('XML')}]
+        buttons += [{'name': _('Export (XML)'), 'action': 'print_xml'}]
         return buttons
 
     def get_xml(self, options):
         # Check
-        company = self.env.company
+        company = self.env.user.company_id
         company_vat = company.partner_id.vat
         if not company_vat:
             raise UserError(_('No VAT number associated with your company.'))
@@ -215,5 +205,4 @@ class ReportL10nBePartnerVatIntra(models.AbstractModel):
 
         data_decl = '\n\t<ns2:IntraListing SequenceNumber="1" ClientsNbr="%(clientnbr)s" DeclarantReference="%(dnum)s" AmountSum="%(amountsum).2f">' % (xml_data)
 
-        data_rslt = data_head + data_decl + data_comp_period + data_clientinfo + '\n\t\t</ns2:IntraListing>\n</ns2:IntraConsignment>' % (xml_data)
-        return data_rslt.encode('ISO-8859-1', 'ignore')
+        return data_head + data_decl + data_comp_period + data_clientinfo + '\n\t\t</ns2:IntraListing>\n</ns2:IntraConsignment>' % (xml_data)

@@ -8,27 +8,14 @@ from lxml.builder import E
 import os.path
 import zipfile
 
-from odoo import models
 from odoo.osv.expression import OR
-from odoo.tools import topological_sort
+from odoo.tools import topological_sort, pycompat
 
 # list of models to export (the order ensures that dependencies are satisfied)
 MODELS_TO_EXPORT = [
-    'res.groups',
-    'report.paperformat',
-    'ir.model',
-    'ir.model.fields',
-    'ir.ui.view',
-    'ir.actions.act_window',
-    'ir.actions.act_window.view',
-    'ir.actions.report',
-    'mail.template',
-    'ir.actions.server',
-    'ir.ui.menu',
-    'ir.filters',
-    'base.automation',
-    'ir.model.access',
-    'ir.rule',
+    'res.groups', 'ir.model', 'ir.model.fields', 'ir.ui.view', 'ir.actions.act_window',
+    'ir.actions.act_window.view', 'ir.actions.report', 'mail.template', 'ir.actions.server',
+    'ir.ui.menu', 'ir.filters', 'base.automation', 'ir.model.access', 'ir.rule',
 ]
 # list of fields to export by model
 FIELDS_TO_EXPORT = {
@@ -38,24 +25,23 @@ FIELDS_TO_EXPORT = {
         'trg_date_range_type', 'trigger'
     ],
     'ir.actions.act_window': [
-        'binding_model_id', 'binding_type', 'binding_view_types',
-        'context', 'domain', 'filter',
-        'groups_id', 'help', 'limit', 'name', 'res_model', 'search_view_id',
-        'target', 'type', 'usage', 'view_id', 'view_mode'
+        'auto_search', 'binding_model_id', 'binding_type', 'context', 'domain', 'filter',
+        'groups_id', 'help', 'limit', 'multi', 'name', 'res_model', 'search_view_id', 'src_model',
+        'target', 'type', 'usage', 'view_id', 'view_mode', 'view_type'
     ],
     'ir.actions.act_window.view': ['act_window_id', 'multi', 'sequence', 'view_id', 'view_mode'],
     'ir.actions.report': [
-        'attachment', 'attachment_use', 'binding_model_id', 'binding_type', 'binding_view_types', 'groups_id', 'model',
-        'multi', 'name', 'paperformat_id', 'report_name', 'report_type'
+        'attachment', 'attachment_use', 'binding_model_id', 'binding_type', 'groups_id', 'model',
+        'multi', 'name', 'report_name', 'report_type'
     ],
     'ir.actions.server': [
-        'binding_model_id', 'binding_type', 'binding_view_types', 'child_ids', 'code', 'crud_model_id', 'help',
+        'binding_model_id', 'binding_type', 'child_ids', 'code', 'crud_model_id', 'help',
         'link_field_id', 'model_id', 'name', 'sequence', 'state'
     ],
     'ir.filters': [
         'action_id', 'active', 'context', 'domain', 'is_default', 'model_id', 'name', 'sort'
     ],
-    'ir.model': ['info', 'is_mail_thread', 'is_mail_activity', 'model', 'name', 'state', 'transient'],
+    'ir.model': ['info', 'is_mail_thread', 'model', 'name', 'state', 'transient'],
     'ir.model.access': [
         'active', 'group_id', 'model_id', 'name', 'perm_create', 'perm_read', 'perm_unlink',
         'perm_write'
@@ -64,7 +50,7 @@ FIELDS_TO_EXPORT = {
         'complete_name', 'compute', 'copied', 'depends', 'domain', 'field_description', 'groups',
         'help', 'index', 'model', 'model_id', 'name', 'on_delete', 'readonly', 'related',
         'relation', 'relation_field', 'relation_table', 'required', 'selectable', 'selection',
-        'size', 'state', 'store', 'tracking', 'translate',
+        'size', 'state', 'store', 'track_visibility', 'translate',
         'ttype'
     ],
     'ir.rule': [
@@ -90,7 +76,6 @@ FIELDS_NOT_TO_EXPORT = {
     'ir.actions.server': ['channel_ids', 'fields_lines', 'partner_ids'],
     'ir.filter': ['user_id'],
     'mail.template': ['attachment_ids', 'mail_server_id'],
-    'report.paperformat': ['report_ids'],
     'res.groups': ['category_id', 'users'],
 }
 # The fields whose value must be wrapped in <![CDATA[]]>
@@ -136,12 +121,12 @@ def generate_module(module, data):
             continue
 
         # retrieve module and inter-record dependencies
-        fields = [records._fields[name] for name in get_fields_to_export(records)]
+        fields = [records._fields[name] for name in FIELDS_TO_EXPORT[model]]
         record_deps = OrderedDict.fromkeys(records, records.browse())
         for record in records:
             xmlid = get_xmlid(record)
             module_name = xmlid.split('.', 1)[0]
-            if module_name != module.name:
+            if module_name != module.name and module_name != '__export__':
                 # data depends on a record from another module
                 depends.add(module_name)
             for field in fields:
@@ -220,7 +205,7 @@ def generate_module(module, data):
         module.installed_version,
         'u"""\n%s\n"""' % module.description,
         module.author,
-        ''.join("\n        %r," % d for d in sorted(depends - {'__export__'})),
+        ''.join("\n        %r," % d for d in sorted(depends)),
         ''.join("\n        %r," % f for f in filenames),
         module.application,
         module.license,
@@ -266,11 +251,11 @@ def get_relations(record, field):
             # but it refers to another field that must be defined beforehand
             return record.search([('model', '=', record.relation), ('name', '=', record.relation_field)])
 
-    # Fields 'res_model' and 'binding_model' on 'ir.actions.act_window' and 'model'
+    # Fields 'res_model' and 'src_model' on 'ir.actions.act_window' and 'model'
     # on 'ir.actions.report' are of type char but refer to models that may
     # be defined in other modules and those modules need to be listed as
     # dependencies of the exported module
-    if field.model_name == 'ir.actions.act_window' and field.name in ('res_model', 'binding_model'):
+    if field.model_name == 'ir.actions.act_window' and field.name in ('res_model', 'src_model'):
         return record.env['ir.model'].search([('model', '=', record[field.name])])
     if field.model_name == 'ir.actions.report' and field.name == 'model':
         return record.env['ir.model'].search([('model', '=', record.model)])
@@ -285,7 +270,7 @@ def generate_record(record, get_xmlid):
 
     # Create the record node
     record_node = E.record(id=xmlid, model=record._name, context="{'studio': True}")
-    for name in get_fields_to_export(record):
+    for name in FIELDS_TO_EXPORT[record._name]:
         field = record._fields[name]
         try:
             record_node.append(generate_field(record, field, get_xmlid))
@@ -301,22 +286,12 @@ def generate_record(record, get_xmlid):
 
     return record_node, skipped
 
-def get_fields_to_export(record):
-    fields_to_export = FIELDS_TO_EXPORT.get(record._name)
-    if not fields_to_export:
-        # deduce the fields_to_export from available data
-        fields_to_export = set(record._fields.keys())
-        fields_to_export -= set(models.MAGIC_COLUMNS)
-        fields_to_export.discard(record.CONCURRENCY_CHECK_FIELD)
-        if FIELDS_NOT_TO_EXPORT.get(record._name):
-            fields_to_export -= set(FIELDS_NOT_TO_EXPORT.get(record._name))
-    return fields_to_export
 
 def generate_field(record, field, get_xmlid):
     """ Serialize the value of ``field`` on ``record`` as an etree Element. """
     value = record[field.name]
     if field.type == 'boolean':
-        return E.field(name=field.name, eval=str(value))
+        return E.field(name=field.name, eval=pycompat.text_type(value))
     elif field.type in ('many2one', 'reference'):
         if value:
             return E.field(name=field.name, ref=get_xmlid(value))
@@ -333,14 +308,14 @@ def generate_field(record, field, get_xmlid):
         elif (field.model_name, field.name) in CDATA_FIELDS:
             # Wrap value in <![CDATA[]] to preserve it to be interpreted as XML markup
             node = E.field(name=field.name)
-            node.text = etree.CDATA(str(value))
+            node.text = etree.CDATA(pycompat.text_type(value))
             return node
         elif (field.model_name, field.name) in XML_FIELDS:
             # Use an xml parser to remove new lines and indentations in value
             parser = etree.XMLParser(remove_blank_text=True)
             return E.field(etree.XML(value, parser), name=field.name, type='xml')
         else:
-            return E.field(str(value), name=field.name)
+            return E.field(pycompat.text_type(value), name=field.name)
 
 
 def xmlid_getter():
@@ -355,7 +330,7 @@ def xmlid_getter():
             res = cache[record]
         except KeyError:
             # prefetch when possible
-            records = record.browse(record._prefetch_ids)
+            records = record.browse(record._prefetch[record._name])
             for rid, val in records.get_external_id().items():
                 cache[record.browse(rid)] = val
             res = cache[record]

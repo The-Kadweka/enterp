@@ -5,6 +5,7 @@ from odoo import models, api, _
 class account_payment(models.Model):
     _inherit = "account.payment"
 
+    @api.multi
     def do_print_checks(self):
         if self:
             check_layout = self[0].company_id.account_check_printing_layout

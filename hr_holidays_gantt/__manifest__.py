@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "Time off Gantt",
-    'summary': """Gantt view for Time Off Dashboard""",
+    'name': "Leaves Gantt",
+    'summary': """Gantt view for Leaves Dashboard""",
     'description': """
-    Gantt view for Time Off Dashboard
+    Gantt view for Leaves Dashboard
     """,
     'category': 'Human Resources',
     'version': '1.0',

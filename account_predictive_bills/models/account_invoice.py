@@ -2,50 +2,23 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
+from odoo.tools import frozendict
 import re
 
 
-class AccountMove(models.Model):
-    _inherit = 'account.move'
+class AccountInvoiceLine(models.Model):
+    _inherit = 'account.invoice.line'
 
-    @api.onchange('line_ids', 'invoice_payment_term_id', 'invoice_date_due', 'invoice_cash_rounding_id', 'invoice_vendor_bill_id')
-    def _onchange_recompute_dynamic_lines(self):
-        # OVERRIDE
-        to_predict_lines = self.line_ids.filtered(lambda line: line.predict_from_name)
-        for line in to_predict_lines:
-            line.predict_from_name = False
-
-            # Predict product.
-            if self.env.user.has_group('account.group_products_in_bills') and not line.product_id:
-                predicted_product_id = line._predict_product(line.name)
-                if predicted_product_id and predicted_product_id != line.product_id.id:
-                    line['product_id'] = predicted_product_id
-                    line._onchange_product_id()
-                    line.recompute_tax_line = True
-
-            # Predict account.
-            if not line.account_id or line.predict_override_default_account:
-                predicted_account_id = line._predict_account(line.name, line.partner_id)
-                if predicted_account_id and predicted_account_id != line.account_id.id:
-                    line['account_id'] = predicted_account_id
-                    line._onchange_account_id()
-                    line.recompute_tax_line = True
-
-            line.predict_override_default_account = False
-        return super(AccountMove, self)._onchange_recompute_dynamic_lines()
-
-
-class AccountMoveLine(models.Model):
-    _inherit = 'account.move.line'
-
-    predict_from_name = fields.Boolean(store=False,
-        help="Technical field used to know on which lines the prediction must be done.")
-    predict_override_default_account = fields.Boolean(store=False)
+    @api.model
+    def _default_account(self):
+        if self._context.get('set_default_account', True):
+            return super(AccountInvoiceLine, self)._default_account()
 
     def _get_predict_postgres_dictionary(self):
         lang = self._context.get('lang') and self._context.get('lang')[:2]
         return {'fr': 'french'}.get(lang, 'english')
 
+    @api.multi
     def _predict_field(self, sql_query, description):
         psql_lang = self._get_predict_postgres_dictionary()
         parsed_description = re.sub(r"[*&()|!':<>=%/~@,.;$\[\]]+", " ", description)
@@ -54,7 +27,7 @@ class AccountMoveLine(models.Model):
         params = {
             'lang': psql_lang,
             'description': parsed_description,
-            'company_id': self.move_id.journal_id.company_id.id or self.env.company.id,
+            'company_id': self.company_id.id or self.env.user.company_id.id,
             'limit_parameter': int(limit_parameter),
         }
         try:
@@ -68,6 +41,7 @@ class AccountMoveLine(models.Model):
             return False
         return False
 
+    @api.multi
     def _predict_product(self, description):
         if not description:
             return False
@@ -86,16 +60,14 @@ class AccountMoveLine(models.Model):
                         ail.product_id,
                         (setweight(to_tsvector(%(lang)s, ail.name), 'B'))
                          AS document
-                    FROM account_move_line ail
-                    JOIN account_move inv
-                        ON ail.move_id = inv.id
+                    FROM account_invoice_line ail
+                    JOIN account_invoice inv
+                        ON ail.invoice_id = inv.id
 
                     WHERE inv.type = 'in_invoice'
-                        AND inv.state = 'posted'
-                        AND ail.display_type IS NULL
-                        AND NOT ail.exclude_from_invoice_tab
+                        AND inv.state NOT IN ('draft', 'cancel')
                         AND ail.company_id = %(company_id)s
-                    ORDER BY inv.invoice_date DESC
+                    ORDER BY inv.date_invoice DESC
                     LIMIT %(limit_parameter)s
                 ) p_search,
                 to_tsquery(%(lang)s, %(description)s) query_plain
@@ -106,6 +78,7 @@ class AccountMoveLine(models.Model):
         """
         return self._predict_field(sql_query, description)
 
+    @api.multi
     def _predict_account(self, description, partner):
         # This method uses postgres tsvector in order to try to deduce the account_id of an invoice line
         # based on the text entered into the name (description) field.
@@ -135,16 +108,14 @@ class AccountMoveLine(models.Model):
                         ail.account_id,
                         (setweight(to_tsvector(%(lang)s, ail.name), 'B')) ||
                         (setweight(to_tsvector('simple', 'partnerid'|| replace(ail.partner_id::text, '-', 'x')), 'A')) AS document
-                    FROM account_move_line ail
-                    JOIN account_move inv ON ail.move_id = inv.id
+                    FROM account_invoice_line ail
+                    JOIN account_invoice inv ON ail.invoice_id = inv.id
                     JOIN account_account account ON ail.account_id = account.id
                     WHERE inv.type = 'in_invoice'
-                        AND inv.state = 'posted'
-                        AND ail.display_type IS NULL
-                        AND NOT ail.exclude_from_invoice_tab
-                        AND ail.company_id = %(company_id)s
-                        AND account.deprecated IS NOT TRUE
-                    ORDER BY inv.invoice_date DESC
+                      AND inv.state NOT IN ('draft', 'cancel')
+                      AND ail.company_id = %(company_id)s
+                      AND account.deprecated IS NOT TRUE
+                    ORDER BY inv.date_invoice DESC
                     LIMIT %(limit_parameter)s
                     ) UNION ALL (
                     SELECT
@@ -168,28 +139,40 @@ class AccountMoveLine(models.Model):
         description += ' partnerid' + str(partner.id or '').replace('-', 'x')
         return self._predict_field(sql_query, description)
 
+    def _get_invoice_line_name_from_product(self):
+        """ Overridden from account in order to allow not renaming the invoice
+        line when we predict a product and change the value of the product_id
+        field (_get_invoice_line_name_from_product is called in account module
+        by _onchange_product_id).
+        """
+        if not self.env.context.get('skip_product_onchange_rename'):
+            return super(AccountInvoiceLine, self)._get_invoice_line_name_from_product()
+        else:
+            # The context gets reset between each onchange call, so we don't have to remove our 'skip_product_onchange_rename' key.
+            return None
+
     @api.onchange('name')
-    def _onchange_enable_predictive(self):
-        if self.move_id.type == 'in_invoice' and self.name and not self.display_type:
-            self.predict_from_name = True
+    def _onchange_name(self):
+        if self.invoice_id.type == 'in_invoice' and self.name:
+            # don't call prediction when the name change is triggered by a change of product
+            if self.name != self._get_invoice_line_name_from_product():
+                # don't predict the account if it has already be filled
+                predict_account = not bool(self.account_id)
+                if self.env.user.has_group('account.group_products_in_bills') and not self.product_id:
+                    predicted_product_id = self._predict_product(self.name)
+                    # We only change the product if we manage to predict its value
+                    if predicted_product_id:
+                        # We pass a context key to tell that we don't want the product
+                        # onchange function to override the description that was entered by the user
+                        self.env.context = frozendict(self.env.context, skip_product_onchange_rename=True)
+                        self.product_id = predicted_product_id
+                        # the account has been set via the onchange, there's no need to predict it any longer
+                        predict_account = False
 
-    @api.onchange('product_id')
-    def _onchange_product_id(self):
-        # OVERRIDE
-        # Don't predict the account if computed from the product.
-        res = super()._onchange_product_id()
-
-        if self.product_id and self.account_id:
-            self.predict_override_default_account = False
-
-        return res
-
-    @api.model
-    def default_get(self, default_fields):
-        # OVERRIDE
-        # Add a flag meant to predict the account when the move.line change.
-        # Don't set a default account. Let the prediction do this job.
-        values = super(AccountMoveLine, self).default_get(default_fields)
-        if 'account_id' in default_fields and values.get('account_id'):
-            values['predict_override_default_account'] = True
-        return values
+                if predict_account:
+                    predicted_account_id = self._predict_account(self.name, self.partner_id)
+                    # We only change the account if we manage to predict its value
+                    if predicted_account_id:
+                        self.account_id = predicted_account_id
+                    else:
+                        self.account_id = self.with_context(set_default_account=True, journal_id=self.invoice_id.journal_id.id)._default_account()

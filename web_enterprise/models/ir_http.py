@@ -13,7 +13,7 @@ class Http(models.AbstractModel):
     def webclient_rendering_context(self):
         """ Overrides community to prevent unnecessary load_menus request """
         return {
-            'session_info': self.session_info(),
+            'session_info': json.dumps(self.session_info()),
         }
 
     def session_info(self):
@@ -28,8 +28,7 @@ class Http(models.AbstractModel):
             warn_enterprise = False
 
         result = super(Http, self).session_info()
-        if warn_enterprise:
-            result['warning'] = warn_enterprise
-            result['expiration_date'] = ICP.get_param('database.expiration_date')
-            result['expiration_reason'] = ICP.get_param('database.expiration_reason')
+        result['warning'] = warn_enterprise
+        result['expiration_date'] = ICP.get_param('database.expiration_date')
+        result['expiration_reason'] = ICP.get_param('database.expiration_reason')
         return result

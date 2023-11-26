@@ -4,13 +4,15 @@
 # 
 # Translators:
 # Sengtha Chay <sengtha@gmail.com>, 2018
+# Lux Sok <sok.lux@gmail.com>, 2019
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~11.5+e\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-09-21 14:06+0000\n"
-"PO-Revision-Date: 2018-09-21 14:06+0000\n"
-"Last-Translator: Sengtha Chay <sengtha@gmail.com>, 2018\n"
+"PO-Revision-Date: 2018-08-24 11:36+0000\n"
+"Last-Translator: Lux Sok <sok.lux@gmail.com>, 2019\n"
 "Language-Team: Khmer (https://www.transifex.com/odoo/teams/41243/km/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,9 +21,15 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: account_sepa
+#: code:addons/account_sepa/models/account_payment.py:0
+#, python-format
+msgid "A bank account must be set on the following documents: "
+msgstr ""
+
+#. module: account_sepa
 #: model:ir.model,name:account_sepa.model_account_batch_payment
 msgid "Batch Payment"
-msgstr ""
+msgstr "កញ្ជប់ការបង់ប្រាក់"
 
 #. module: account_sepa
 #: model:ir.model,name:account_sepa.model_res_company
@@ -31,13 +39,14 @@ msgstr "ក្រុមហ៊ុន"
 #. module: account_sepa
 #: model:ir.model,name:account_sepa.model_res_config_settings
 msgid "Config Settings"
-msgstr ""
+msgstr "កំណត់រចនាសម្ព័ន្ធ"
 
 #. module: account_sepa
 #: model:ir.model,name:account_sepa.model_account_abstract_payment
 msgid ""
 "Contains the logic shared between models which allows to register payments"
 msgstr ""
+"មានតក្កវិជ្ជាដែលបានចែករំលែករវាងម៉ូដែលដែលអនុញ្ញាតឱ្យចុះឈ្មោះការបង់ប្រាក់"
 
 #. module: account_sepa
 #: model:ir.model.fields,help:account_sepa.field_res_company__sepa_orgid_issr
@@ -45,28 +54,30 @@ msgid ""
 "Entity that assigns the identification (eg. KBE-BCO or Finanzamt Muenchen "
 "IV)."
 msgstr ""
+"អង្គភាពដែលផ្តល់អត្តសញ្ញាណប័ណ្ណ (ឧទាហរណ៍ KBE-BCO ឬ Finanzamt Muenchen IV) ។"
 
 #. module: account_sepa
 #: selection:res.company,sepa_pain_version:0
 msgid "Generic"
-msgstr ""
+msgstr "ប្រភេទ"
 
 #. module: account_sepa
 #: selection:res.company,sepa_pain_version:0
 msgid "German Version"
-msgstr ""
+msgstr "ទិន្ន័យចុងក្រោយបានមកពីបុរសជនជាតិអាឡឺម៉ង់"
 
 #. module: account_sepa
 #: model:ir.model.fields,field_description:account_sepa.field_res_company__sepa_orgid_id
 #: model:ir.model.fields,field_description:account_sepa.field_res_config_settings__sepa_orgid_id
 msgid "Identification"
-msgstr ""
+msgstr "ភាពច្បាស់លាស់"
 
 #. module: account_sepa
 #: model:ir.model.fields,help:account_sepa.field_res_company__sepa_orgid_id
 #: model:ir.model.fields,help:account_sepa.field_res_config_settings__sepa_orgid_id
 msgid "Identification assigned by an institution (eg. VAT number)."
 msgstr ""
+"ការកំណត់អត្តសញ្ញាណដែលបានកំណត់ដោយស្ថាប័ន (ឧទាហរណ៍លេខពន្ធលើតម្លៃបន្ថែម) ។"
 
 #. module: account_sepa
 #: code:addons/account_sepa/models/account_batch_payment.py:44
@@ -76,84 +87,86 @@ msgid ""
 "In result, the file might not be accepted by all bank as a valid SEPA Credit"
 " Transfer file"
 msgstr ""
+"ជាលទ្ធផលឯកសារអាចមិនត្រូវបានទទួលយកដោយធនាគារទាំងអស់ជាឯកសារផ្ទេរប្រាក់ SEPA "
+"ត្រឹមត្រូវ"
 
 #. module: account_sepa
 #: model:ir.model.fields,field_description:account_sepa.field_res_company__sepa_orgid_issr
 #: model:ir.model.fields,field_description:account_sepa.field_res_config_settings__sepa_orgid_issr
 msgid "Issuer"
-msgstr ""
+msgstr "បញ្ជា"
 
 #. module: account_sepa
 #: model:ir.model,name:account_sepa.model_account_journal
 msgid "Journal"
-msgstr ""
+msgstr "ទិនានុប្បវត្តិ"
 
 #. module: account_sepa
 #: model:ir.model.fields,help:account_sepa.field_res_config_settings__sepa_initiating_party_name
 msgid ""
 "Name of the Creditor Reference Party. Usage Rule: Limited to 70 characters "
 "in length."
-msgstr ""
+msgstr "ឈ្មោះរបស់ភាគីតិកនិក។ ច្បាប់ប្រើប្រាស់: កំណត់ត្រឹមតែ 70 តួអក្សរ។"
 
 #. module: account_sepa
 #: model_terms:ir.ui.view,arch_db:account_sepa.account_journal_dashboard_kanban_view_inherited
 msgid "Payment to send via SEPA"
-msgstr ""
+msgstr "ការបង់និងផ្ងើទៅកាន់ការផ្សារភ្ជាប់ខ្សែ"
 
 #. module: account_sepa
 #: model:ir.model,name:account_sepa.model_account_payment
 msgid "Payments"
-msgstr ""
+msgstr "ការបង់ប្រាក់"
 
 #. module: account_sepa
 #: model_terms:ir.ui.view,arch_db:account_sepa.account_journal_dashboard_kanban_view_inherited
 msgid "Payments to send via SEPA"
-msgstr ""
+msgstr "ការទូទាត់ដើម្បីផ្ញើតាមរយៈ SEPA"
 
 #. module: account_sepa
 #: code:addons/account_sepa/models/account_batch_payment.py:42
 #, python-format
 msgid "Please note that the following warning has been raised:"
-msgstr ""
+msgstr "សូមចំណាំថាការព្រមានខាងក្រោមត្រូវបានលើកឡើង:"
 
 #. module: account_sepa
 #: code:addons/account_sepa/models/account_batch_payment.py:46
 #, python-format
 msgid "Please note that the following warnings have been raised:"
-msgstr ""
+msgstr "សូមចំណាំថាការព្រមានខាងក្រោមត្រូវបានលើកឡើង:"
 
 #. module: account_sepa
 #: model:ir.model.fields,field_description:account_sepa.field_account_payment__partner_bank_account_id
 #: model:ir.model.fields,field_description:account_sepa.field_account_register_payments__partner_bank_account_id
 msgid "Recipient Bank Account"
-msgstr ""
+msgstr "គណនីធនាគាររបស់អ្នកទទួល"
 
 #. module: account_sepa
 #: model:ir.model,name:account_sepa.model_account_register_payments
 msgid "Register Payments"
-msgstr ""
+msgstr "ការចុះឈ្មោះបង់ប្រាក់"
 
 #. module: account_sepa
 #: model:account.payment.method,name:account_sepa.account_payment_method_sepa_ct
 msgid "SEPA Credit Transfer"
-msgstr ""
+msgstr "ការផ្ទេរឥណទាន SEPA"
 
 #. module: account_sepa
 #: model_terms:ir.ui.view,arch_db:account_sepa.view_sepa_credit_transfer_search
 msgid "SEPA Credit Transfer Payments To Send"
-msgstr ""
+msgstr "ការទូទាត់ផ្ទេរឥណទាន SEPA ដើម្បីផ្ញើ"
 
 #. module: account_sepa
 #: code:addons/account_sepa/models/account_journal_dashboard.py:23
 #, python-format
 msgid "SEPA Credit Transfers to Send"
-msgstr ""
+msgstr "ការផ្ទេរប្រាក់ SEPA ទៅផ្ញើ"
 
 #. module: account_sepa
 #: model:ir.model.fields,field_description:account_sepa.field_res_company__sepa_pain_version
 #: model:ir.model.fields,field_description:account_sepa.field_res_config_settings__sepa_pain_version
 msgid "SEPA Pain Version"
-msgstr ""
+msgstr "SEPA ជាទិន្ន័យពិបាកក្នុងពេលវេលានេះ"
 
 #. module: account_sepa
 #: model:ir.model.fields,help:account_sepa.field_res_company__sepa_pain_version
@@ -163,21 +176,24 @@ msgid ""
 "recommandations made by the EPC (European Payment Councile) and thus the XML"
 " created need some tweakenings."
 msgstr ""
+"EPA អាចជាទំរង់ទូទៅមួយប្រទេសមួយចំនួនខុសគ្នាពីអនុសាសន៍ SEPA ដែលធ្វើឡើងដោយ EPC "
+"(ក្រុមប្រឹក្សាទូទាត់អឺរ៉ុប) ហើយដូច្នេះ XML "
+"ត្រូវបានបង្កើតឡើងត្រូវការការកែប្រែបន្តិចបន្តួច។"
 
 #. module: account_sepa
 #: model:ir.model.fields,field_description:account_sepa.field_account_batch_payment__sct_generic
 msgid "Sct Generic"
-msgstr ""
+msgstr "Sct ទម្រង់ទូទៅ"
 
 #. module: account_sepa
 #: model:ir.model.fields,field_description:account_sepa.field_account_batch_payment__sct_warning
 msgid "Sct Warning"
-msgstr ""
+msgstr "ប្រយ័ត្នប្រយ័ត្ន"
 
 #. module: account_sepa
 #: selection:res.company,sepa_pain_version:0
 msgid "Swiss Version"
-msgstr ""
+msgstr "កំណែស្វ៊ីស"
 
 #. module: account_sepa
 #: model:ir.model.fields,help:account_sepa.field_account_batch_payment__sct_generic
@@ -187,6 +203,11 @@ msgid ""
 "transfer. That is if the bank journal is not in €, a transaction is not in €"
 " or a payee is not identified by an IBAN account number and a bank BIC."
 msgstr ""
+"លក្ខណៈបច្ចេកទេសដែលត្រូវបានប្រើកំឡុងពេលបង្កើតឯកសារ។ សារអេឡិចត្រូនិច SEPA "
+"ត្រូវបានគេនិយាយថាមានលក្ខណៈទូទៅប្រសិនបើវាមិនអាចចាត់ទុកថាជាការផ្ទេរឥណទានជាស្តង់ដារអឺរ៉ុប។"
+" នោះគឺប្រសិនបើរបាយការណ៍របស់ធនាគារមិនមាននៅក្នុង€, "
+"ប្រតិបត្តិការមួយគឺមិនមាននៅក្នុង€ឬអ្នកទទួលត្រូវបានកំណត់ដោយលេខគណនី IBAN "
+"និងធនាគារ BIC ទេ។"
 
 #. module: account_sepa
 #: code:addons/account_sepa/models/account_batch_payment.py:353
@@ -195,6 +216,8 @@ msgid ""
 "The account %s, linked to partner '%s', is not of type IBAN.\n"
 "A valid IBAN account is required to use SEPA features."
 msgstr ""
+"គណនីដែលបានភ្ជាប់ទៅដៃគូ%s '' មិនមែនជាប្រភេទ%s IBAN ទេ។ គណនី IBAN "
+"ត្រឹមត្រូវត្រូវបានតម្រូវឱ្យប្រើលក្ខណៈពិសេស SEPA ។"
 
 #. module: account_sepa
 #: code:addons/account_sepa/models/account_batch_payment.py:103
@@ -203,6 +226,8 @@ msgid ""
 "The account %s, of journal '%s', is not of type IBAN.\n"
 "A valid IBAN account is required to use SEPA features."
 msgstr ""
+"គណនីនៃទិនានុប្បវត្តិ%s '' មិនមែនជាប្រភេទ IBAN ទេ%s។ គណនី IBAN "
+"ត្រឹមត្រូវត្រូវបានតម្រូវឱ្យប្រើលក្ខណៈពិសេស SEPA ។"
 
 #. module: account_sepa
 #: code:addons/account_sepa/models/account_payment.py:47
@@ -211,13 +236,15 @@ msgid ""
 "The account '%s' (journal %s) requires a Bank Identification Code (BIC) to "
 "pay via SEPA. Please configure it first."
 msgstr ""
+"គណនី '' (ទិនានុប្បវត្តិ) %sតម្រូវឱ្យមានលេខកូដផ្ទៀងផ្ទាត់ធនាគារ (BIC%s) "
+"ដើម្បីទូទាត់តាមរយៈ SEPA ។ សូមកំណត់រចនាសម្ព័ន្ធវាជាមុន។"
 
 #. module: account_sepa
 #: code:addons/account_sepa/models/account_batch_payment.py:317
 #, python-format
 msgid ""
 "The amount of the payment '%s' is too high. The maximum permitted is %s."
-msgstr ""
+msgstr "ចំនួនទឹកប្រាក់នៃការទូទាត់នេះគឺខ្ពស់ពេក។ ការ%sអនុញ្ញាតអតិបរមាគឺ។%s"
 
 #. module: account_sepa
 #: code:addons/account_sepa/models/account_batch_payment.py:90
@@ -225,6 +252,8 @@ msgstr ""
 msgid ""
 "The creditor bank account %s used in payment %s is not identified by a BIC"
 msgstr ""
+"គណនីធនាគារម្ចាស់បំណុលដែលបាន%sប្រើក្នុងការទូទាត់មិនត្រូវបានបញ្ជាក់ដោយ BIC "
+"ទេ%s"
 
 #. module: account_sepa
 #: code:addons/account_sepa/models/account_batch_payment.py:92
@@ -232,6 +261,8 @@ msgstr ""
 msgid ""
 "The creditor bank account %s used in payment %s is not identified by an IBAN"
 msgstr ""
+"គណនីធនាគារម្ចាស់បំណុលដែលត្រូវបានប្រើក្នុង%sការទូទាត់មិនត្រូវបានកំណត់អត្តសញ្ញាណដោយ"
+" IBAN ឡើយ%s"
 
 #. module: account_sepa
 #: code:addons/account_sepa/models/account_batch_payment.py:111
@@ -240,6 +271,8 @@ msgid ""
 "The following payments have no recipient bank account set: %s. \n"
 "\n"
 msgstr ""
+"ការទូទាត់ខាងក្រោមនេះមិនមានគណនីធនាគារអ្នកទទួលទេ: ។%s\n"
+"\n"
 
 #. module: account_sepa
 #: code:addons/account_sepa/models/account_payment.py:45
@@ -248,6 +281,8 @@ msgid ""
 "The journal '%s' requires a proper IBAN account to pay via SEPA. Please "
 "configure it first."
 msgstr ""
+"ទិនានុប្បវត្តិ '%s' តម្រូវឱ្យមានគណនី IBAN ត្រឹមត្រូវដើម្បីទូទាត់តាមរយៈ SEPA "
+"។ សូមកំណត់រចនាសម្ព័ន្ធវាជាមុន។"
 
 #. module: account_sepa
 #: code:addons/account_sepa/models/account_payment.py:56
@@ -256,6 +291,8 @@ msgid ""
 "The partner account '%s' requires a Bank Identification Code (BIC) to pay "
 "via SEPA. Please configure it first."
 msgstr ""
+"គណនីដៃគូ \"តម្រូវឱ្យមានលេខ%sសម្គាល់អត្តសញ្ញាណធនាគារ (BIC) ដើម្បីទូទាត់តាម "
+"SEPA ។ សូមកំណត់រចនាសម្ព័ន្ធវាជាមុន។"
 
 #. module: account_sepa
 #: code:addons/account_sepa/models/account_batch_payment.py:18
@@ -268,18 +305,23 @@ msgid ""
 "0 1 2 3 4 5 6 7 8 9\n"
 "/ - ? : ( ) . , ' + (space)"
 msgstr ""
+"អត្ថបទដែលប្រើក្នុងឯកសារ SEPA អាចមានតួអក្សរដូចខាងក្រោម: b c d e f g h "
+"៉៉ប៉ប៉ោកអ័រ w x y z A B C D E F G H I I J K L M N O P Q R S T U V W X Y Z 0 "
+"1 2 3 4 5 6 7 8 9 / -? : () ។ , '+ (ចន្លោះ)"
 
 #. module: account_sepa
 #: code:addons/account_sepa/models/account_batch_payment.py:88
 #, python-format
 msgid "The transaction %s is instructed in another currency than EUR"
-msgstr ""
+msgstr "ប្រតិបត្តការ%sត្រូវបានណែនាំក្នុងរូបិយប័ណ្ណផ្សេងទៀតជាងអឺរ៉ូ"
 
 #. module: account_sepa
 #: code:addons/account_sepa/models/account_batch_payment.py:347
 #, python-format
 msgid "There is no Bank Identifier Code recorded for bank account '%s'"
 msgstr ""
+"ទាំងនេះមិនមែនជាការបញ្ជាក់អំពីនិយមន័យគណី "
+"លេខកូដសម្រាក់ការចុះចូលក្នុងរបាយការណ៌គណនីធានាគារ%s"
 
 #. module: account_sepa
 #: code:addons/account_sepa/models/account_batch_payment.py:191
@@ -288,12 +330,14 @@ msgid ""
 "There is no Bank Identifier Code recorded for bank account '%s' of journal "
 "'%s'"
 msgstr ""
+"មិនមានលេខសម្គាល់អត្តសញ្ញាណប័ត្រដែលបានកត់ត្រាសម្រាប់គណនីធនាគារ '' "
+"%sនៃទិនានុប្បវត្តិ %s''"
 
 #. module: account_sepa
 #: code:addons/account_sepa/models/account_batch_payment.py:189
 #, python-format
 msgid "Too many transactions for a single file."
-msgstr ""
+msgstr "ប្រតិបត្តិការច្រើនពេកសម្រាប់ឯកសារតែមួយ។"
 
 #. module: account_sepa
 #: model:ir.model.fields,help:account_sepa.field_res_company__sepa_initiating_party_name
@@ -302,15 +346,17 @@ msgid ""
 "Will appear in SEPA payments as the name of the party initiating the "
 "payment. Limited to 70 characters."
 msgstr ""
+"នឹងបង្ហាញនៅក្នុងការទូទាត់ SEPA ជាឈ្មោះរបស់ភាគីដែលផ្ដើមការទូទាត់។ កំណត់ត្រឹម "
+"70 តួអក្សរ។"
 
 #. module: account_sepa
 #: model:ir.model.fields,field_description:account_sepa.field_res_company__sepa_initiating_party_name
 #: model:ir.model.fields,field_description:account_sepa.field_res_config_settings__sepa_initiating_party_name
 msgid "Your Company Name"
-msgstr ""
+msgstr "ឈ្មោះក្រុមហ៊ុនរបស់អ្នក"
 
 #. module: account_sepa
 #: code:addons/account_sepa/models/account_batch_payment.py:84
 #, python-format
 msgid "Your bank account is not labelled in EUR"
-msgstr ""
+msgstr "គណនីធនាគាររបស់អ្នកមិនត្រូវបានដាក់ស្លាកនៅក្នុងអឺរ៉ូ"

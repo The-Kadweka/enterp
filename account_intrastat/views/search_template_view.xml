@@ -38,22 +38,6 @@
                 </a>
             </div>
         </template>
-        
-        <template id="search_template_vat">
-            <a type="button" class="dropdown-toggle" data-toggle="dropdown">
-                <span class="fa fa-filter"/> Partners:
-                <t t-if="options['with_vat']">With VAT numbers</t>
-                <t t-if="not options['with_vat']">All</t>
-                <span class="caret"/>
-            </a>
-            <div class="dropdown-menu o_filters_menu" role="menu">
-                <a role="menuitem" title="Include VAT" data-filter="with_vat"
-                    class="dropdown-item js_account_report_bool_filter">
-                    Only with VAT numbers
-                </a>
-            </div>
-        </template>
-
         <template id="search_template" inherit_id="account_reports.search_template">
             <xpath expr="." position="inside">
                 <div class="btn-group o_dropdown o_account_reports_filter_intrastat_type"
@@ -63,10 +47,6 @@
                 <div class="btn-group o_dropdown o_account_reports_filter_intrastat_extended"
                      t-if="options.get('intrastat_extended') != None">
                     <t t-call="account_intrastat.search_template_intrastat_extended"/>
-                </div>
-                <div class="btn-group o_dropdown o_account_reports_filter_vat" 
-                     t-if="options.get('with_vat') != None">
-                    <t t-call="account_intrastat.search_template_vat"/>
                 </div>
             </xpath>
         </template>

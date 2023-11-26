@@ -22,19 +22,6 @@ class ResPartner(models.Model):
         help='In Mexico, the Single Code of Population Registration (CURP)'
         'is a unique alphanumeric code of 18 characters used to officially identify '
         'both residents and Mexican citizens throughout the country.')
-    l10n_mx_edi_external_trade = fields.Boolean(
-        'Need external trade?', help='check this box to add by default '
-        'the external trade complement in invoices for this customer.')
-    l10n_mx_edi_colony_code = fields.Char(
-        string='Colony Code',
-        help='Note: Only use this field if this partner is the company '
-        'address or if it is a branch office.\nColony code that will be '
-        'used in the CFDI with the external trade as Emitter colony. It must '
-        'be a code from the SAT catalog.')
-    l10n_mx_edi_locality_id = fields.Many2one(
-        'l10n_mx_edi.res.locality', string='Locality',
-        help='Optional attribute used in the XML that serves to define the '
-        'locality where the domicile is located.')
 
     @api.model
     def l10n_mx_edi_get_customer_rfc(self):
@@ -58,12 +45,11 @@ class ResPartner(models.Model):
         # otherwise it returns what customer says and if False xml validation will be solving other cases.
         return self.vat.strip()
 
-    @api.model
-    def _formatting_address_fields(self):
-        """Returns the list of address fields usable to format addresses."""
-        return super(ResPartner, self)._formatting_address_fields() + ['l10n_mx_edi_colony',
-               'l10n_mx_edi_colony_code', 'l10n_mx_edi_locality']
 
-    @api.onchange('l10n_mx_edi_locality_id')
-    def _onchange_l10n_mx_edi_locality_id(self):
-        self.l10n_mx_edi_locality = self.l10n_mx_edi_locality_id.name
+class AccountFiscalPosition(models.Model):
+    _inherit = 'account.fiscal.position'
+
+    l10n_mx_edi_code = fields.Char(
+        'Code', help='Code defined to this position. If this record will be '
+        'used as fiscal regime to CFDI, here must be assigned the code '
+        'defined to this fiscal regime in the SAT catalog')

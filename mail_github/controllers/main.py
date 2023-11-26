@@ -115,10 +115,10 @@ class GithubController(http.Controller):
         channels = repository_target.channel_ids.filtered(lambda channel: channel.github_enabled)
         repository_target.message_post(
             body=rendered_template,
-            subtype="mail.mt_comment",  # correct?
+            subtype="mail.mt_comment",
             author_id=partner.id,
             email_from=partner_email,
-            channel_ids=channels.ids
+            channel_ids=[(4, cid, False) for cid in channels.ids]
         )
 
         return 'OK'

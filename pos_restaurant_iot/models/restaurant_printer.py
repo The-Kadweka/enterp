@@ -6,6 +6,6 @@ class RestaurantPrinter(models.Model):
 
     _inherit = 'restaurant.printer'
 
-    device_id = fields.Many2one('iot.device', 'IoT Device', domain="[('type', '=', 'printer')]")
-    device_identifier = fields.Char(related="device_id.identifier")
-    proxy_ip = fields.Char(string='IP Address', size=45, related='device_id.iot_ip', store=True)
+    iotbox_id = fields.Many2one('iot.box', 'IoT Box')
+    proxy_ip = fields.Char(string='IP Address', size=45, related='iotbox_id.ip', store=True,
+        help='The hostname or ip address of the hardware proxy, Will be autodetected if left empty.')

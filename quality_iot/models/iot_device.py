@@ -9,11 +9,11 @@ class IotDevice(models.Model):
 
     @api.depends('type')
     def _compute_qcp_test_type(self):
-        types = {'device': 'measure', 'scale': 'measure', 'camera': 'picture', 'printer': 'print_label'}
+        types = {'device': 'measure', 'camera': 'picture', 'printer': 'print_label'}
         self.qcp_test_type = types.get(self.type, '')
 
 
 class QualityPoint(models.Model):
     _inherit = "quality.point"
 
-    device_id = fields.Many2one('iot.device', ondelete='restrict', domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+    device_id = fields.Many2one('iot.device', ondelete='restrict')

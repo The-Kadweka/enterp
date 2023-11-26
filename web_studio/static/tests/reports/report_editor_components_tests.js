@@ -1,13 +1,9 @@
 odoo.define('web_studio.ReportEditorComponents_tests', function (require) {
 "use strict";
 
-var ajax = require('web.ajax');
-
 var testUtils = require('web.test_utils');
-var studioTestUtils = require('web_studio.testUtils');
 var Widget = require('web.Widget');
 
-var studioTestUtils = require('web_studio.testUtils');
 var editComponentsRegistry = require('web_studio.reportEditComponentsRegistry');
 var reportNewComponentsRegistry = require('web_studio.reportNewComponentsRegistry');
 
@@ -15,14 +11,6 @@ var reportNewComponentsRegistry = require('web_studio.reportNewComponentsRegistr
 QUnit.module('Studio', {}, function () {
 
 QUnit.module('ReportComponents', {
-    before: function() {
-        return new Promise(function (resolve, reject) {
-            studioTestUtils.createSidebar({}).then(function (sidebar) {
-                sidebar.destroy();
-                resolve();
-            });
-        });
-    },
     beforeEach: function () {
         this.widgetsOptions = {
             monetary: {
@@ -212,7 +200,7 @@ QUnit.module('ReportComponents', {
                 }
             }
         };
-        this.data = studioTestUtils.getData({
+        this.data = {
             'model.test': {
                 fields: {
                     name: {string: "Name", type: "char"},
@@ -244,22 +232,18 @@ QUnit.module('ReportComponents', {
                 },
                 records: [],
             },
-        });
-        studioTestUtils.patch();
-    },
-    afterEach: function () {
-        studioTestUtils.unpatch();
-    },
+        };
+    }
 }, function () {
     QUnit.module('New');
 
-    QUnit.test('field', async function (assert) {
+    QUnit.test('field', function (assert) {
         assert.expect(2);
         var parent = new Widget();
-        testUtils.mock.addMockEnvironment(parent, {
+        testUtils.addMockEnvironment(parent, {
             data: this.data,
         });
-        await parent.appendTo($('#qunit-fixture'));
+        parent.appendTo($('#qunit-fixture'));
         var InlineField = reportNewComponentsRegistry.get('Inline')[1];
         var tOptions = new InlineField(parent, {
             models: {
@@ -290,31 +274,30 @@ QUnit.module('ReportComponents', {
                 [{content: '<span t-field="toto.child"></span>', xpath: '/my/node/path/', view_id: 99, position: undefined}],
                 "Should send the operation");
         });
-        await testUtils.nextTick();
 
-        await testUtils.dom.triggerEvents($('.o_web_studio_field_modal .o_field_selector'), ['focusin']);
-        await testUtils.dom.click($('.o_web_studio_field_modal .o_field_selector_item[data-name="toto"]'));
-        await testUtils.dom.click($('.o_web_studio_field_modal .o_field_selector_close'));
-        await testUtils.dom.click($('.o_web_studio_field_modal .btn-primary'));
+        $('.o_web_studio_field_modal .o_field_selector').trigger('focusin');
+        $('.o_web_studio_field_modal .o_field_selector_item[data-name="toto"]').trigger('click');
+        $('.o_web_studio_field_modal .o_field_selector_close').trigger('click');
+        $('.o_web_studio_field_modal .btn-primary').trigger('click');
 
         assert.strictEqual($('.modal main[role="alert"]').length, 1,
             "Should display an alert because the field name of the record is wrong");
-        await testUtils.dom.click($('.modal:has(main[role="alert"]) .btn-primary'));
+        $('.modal:has(main[role="alert"]) .btn-primary').trigger('click');
 
-        await testUtils.dom.triggerEvents($('.o_web_studio_field_modal .o_field_selector'), ['focusin']);
-        await testUtils.dom.click($('.o_web_studio_field_modal .o_field_selector_item[data-name="child"]'));
-        await testUtils.dom.click($('.o_web_studio_field_modal .btn-primary'));
+        $('.o_web_studio_field_modal .o_field_selector').trigger('focusin');
+        $('.o_web_studio_field_modal .o_field_selector_item[data-name="child"]').trigger('click');
+        $('.o_web_studio_field_modal .btn-primary').trigger('click');
 
         parent.destroy();
     });
 
-    QUnit.test('add a binary field', async function (assert) {
+    QUnit.test('add a binary field', function (assert) {
         assert.expect(1);
         var parent = new Widget();
-        testUtils.mock.addMockEnvironment(parent, {
+        testUtils.addMockEnvironment(parent, {
             data: this.data,
         });
-        await parent.appendTo($('#qunit-fixture'));
+        parent.appendTo($('#qunit-fixture'));
         var InlineField = reportNewComponentsRegistry.get('Inline')[1];
         var tOptions = new InlineField(parent, {
             models: {
@@ -345,22 +328,21 @@ QUnit.module('ReportComponents', {
                 [{content: '<span t-field="toto.image" t-options-widget="&quot;image&quot;"></span>', xpath: '/my/node/path/', view_id: 99, position: undefined}],
                 "image widget should be set");
         });
-        await testUtils.nextTick();
 
-        await testUtils.dom.triggerEvents($('.o_web_studio_field_modal .o_field_selector'), ['focusin']);
-        await testUtils.dom.click($('.o_web_studio_field_modal .o_field_selector_item[data-name="toto"]'));
-        await testUtils.dom.click($('.o_web_studio_field_modal .o_field_selector_item[data-name="image"]'));
-        await testUtils.dom.click($('.o_web_studio_field_modal .btn-primary'));
+        $('.o_web_studio_field_modal .o_field_selector').trigger('focusin');
+        $('.o_web_studio_field_modal .o_field_selector_item[data-name="toto"]').trigger('click');
+        $('.o_web_studio_field_modal .o_field_selector_item[data-name="image"]').trigger('click');
+        $('.o_web_studio_field_modal .btn-primary').trigger('click');
 
         parent.destroy();
     });
 
     QUnit.module('Edit');
 
-    QUnit.test('column component with valid classes', async function (assert) {
+    QUnit.test('column component with valid classes', function (assert) {
         assert.expect(2);
         var parent = new Widget();
-        await parent.appendTo($('#qunit-fixture'));
+        parent.appendTo($('#qunit-fixture'));
         var column = new (editComponentsRegistry.get('column'))(parent, {
             node: {
                 attrs: {
@@ -368,7 +350,7 @@ QUnit.module('ReportComponents', {
                 },
             },
         });
-        await column.appendTo(parent.$el);
+        column.appendTo(parent.$el);
 
         assert.strictEqual(column.$('input[name="size"]').val(), "5",
             "the size should be correctly set");
@@ -378,10 +360,10 @@ QUnit.module('ReportComponents', {
         parent.destroy();
     });
 
-    QUnit.test('column component with invalid classes', async function (assert) {
+    QUnit.test('column component with invalid classes', function (assert) {
         assert.expect(2);
         var parent = new Widget();
-        await parent.appendTo($('#qunit-fixture'));
+        parent.appendTo($('#qunit-fixture'));
         var column = new (editComponentsRegistry.get('column'))(parent, {
             node: {
                 attrs: {
@@ -389,7 +371,7 @@ QUnit.module('ReportComponents', {
                 },
             },
         });
-        await column.appendTo(parent.$el);
+        column.appendTo(parent.$el);
 
         assert.strictEqual(column.$('input[name="size"]').val(), "",
             "the size should be unkown");
@@ -399,32 +381,10 @@ QUnit.module('ReportComponents', {
         parent.destroy();
     });
 
-    QUnit.test('hidden "width" for layout component with col nodes', async function (assert) {
-        assert.expect(1);
-        var parent = new Widget();
-        testUtils.mock.addMockEnvironment(parent, this);
-        await parent.appendTo($('#qunit-fixture'));
-        var layout = new (editComponentsRegistry.get('layout'))(parent, {
-            node: {
-                tag: 'div',
-                attrs: {
-                    class: 'col- offset-kikou',
-                },
-                $nodes: $(),
-            },
-        });
-        await layout.appendTo(parent.$el);
-
-        assert.containsNone(layout.$('.o_web_studio_width'),
-            "the width attribute shouldn't be displayed for div.col nodes");
-
-        parent.destroy();
-    });
-
-    QUnit.test('tOptions component', async function (assert) {
+    QUnit.test('tOptions component', function (assert) {
         assert.expect(3);
         var parent = new Widget();
-        await parent.appendTo($('#qunit-fixture'));
+        parent.appendTo($('#qunit-fixture'));
         var tOptions = new (editComponentsRegistry.get('tOptions'))(parent, {
             widgetsOptions: this.widgetsOptions,
             node: {
@@ -440,14 +400,14 @@ QUnit.module('ReportComponents', {
             state: null,
             models: null,
         });
-        await tOptions.appendTo(parent.$el);
+        tOptions.appendTo(parent.$el);
         assert.strictEqual(tOptions.$('select').val(), 'image',
             "Should select the image widget");
-        assert.containsNone(tOptions, '.o_web_studio_toption_option',
+        assert.strictEqual(tOptions.$('.o_web_studio_toption_option').length, 0,
             "there should be no available option");
 
         // unset the `widget`
-        testUtils.mock.addMockEnvironment(parent, {
+        testUtils.addMockEnvironment(parent, {
             intercepts: {
                 view_change: function (ev) {
                     assert.deepEqual(ev.data.operation.new_attrs, {'t-options-widget': '""'},
@@ -460,16 +420,16 @@ QUnit.module('ReportComponents', {
         parent.destroy();
     });
 
-    QUnit.test('tOptions component parse expression', async function (assert) {
+    QUnit.test('tOptions component parse expression', function (assert) {
         assert.expect(5);
         var parent = new Widget();
-        await parent.appendTo($('#qunit-fixture'));
+        parent.appendTo($('#qunit-fixture'));
 
         var fields = this.data['model.test.child'].fields;
         fields.company_id = {string: "Company", type: "many2one", relation: 'res.company', searchable: true};
         fields.currency_id = {string: "Currency", type: "many2one", relation: 'res.currency', searchable: true};
         fields.date = {string: "Date", type: "datetime", searchable: true};
-        testUtils.mock.addMockEnvironment(parent, {
+        testUtils.addMockEnvironment(parent, {
             data: this.data,
         });
 
@@ -490,10 +450,10 @@ QUnit.module('ReportComponents', {
             models: {"model.test": "Model Test"},
         });
 
-        await tOptions.appendTo(parent.$el);
+        tOptions.appendTo(parent.$el);
         assert.strictEqual(tOptions.$('select').val(), 'monetary',
             "Should select the image widget");
-        assert.containsN(tOptions, '.o_web_studio_toption_option', 4,
+        assert.strictEqual(tOptions.$('.o_web_studio_toption_option').length, 4,
             "there should be 4 available options for the monetary widget");
         assert.strictEqual(tOptions.$('.o_web_studio_toption_option_monetary_from_currency .o_field_selector_value').text().replace(/\s+/g, ''),
             "o(ModelTest)ChildCurrency",
@@ -508,12 +468,12 @@ QUnit.module('ReportComponents', {
         parent.destroy();
     });
 
-    QUnit.test('tEsc component with parsable expression', async function (assert) {
+    QUnit.test('tEsc component with parsable expression', function (assert) {
         assert.expect(1);
         var parent = new Widget();
-        await parent.appendTo($('#qunit-fixture'));
+        parent.appendTo($('#qunit-fixture'));
 
-        testUtils.mock.addMockEnvironment(parent, {
+        testUtils.addMockEnvironment(parent, {
             data: this.data,
         });
 
@@ -530,8 +490,7 @@ QUnit.module('ReportComponents', {
             state: null,
             models: {"model.test": "Model Test"},
         });
-        await tOptions.appendTo(parent.$el);
-        await testUtils.nextTick();
+        tOptions.appendTo(parent.$el);
         // the component value is parsable so we display it with ModelFieldSelector
         assert.strictEqual(tOptions.$('.o_field_selector_value').text().replace(/\s+/g, ''),
             "o(ModelTest)ChildCompany",
@@ -540,12 +499,12 @@ QUnit.module('ReportComponents', {
         parent.destroy();
     });
 
-    QUnit.test('tEsc component with non-parsable expression', async function (assert) {
+    QUnit.test('tEsc component with non-parsable expression', function (assert) {
         assert.expect(1);
         var parent = new Widget();
-        await parent.appendTo($('#qunit-fixture'));
+        parent.appendTo($('#qunit-fixture'));
 
-        testUtils.mock.addMockEnvironment(parent, {
+        testUtils.addMockEnvironment(parent, {
             data: this.data,
         });
 
@@ -562,8 +521,7 @@ QUnit.module('ReportComponents', {
             state: null,
             models: {"model.test": "Model Test"},
         });
-        await tOptions.appendTo(parent.$el);
-        await testUtils.nextTick();
+        tOptions.appendTo(parent.$el);
         // the component can not parse the value so we display a simple input
         assert.strictEqual(tOptions.$('input[name="t-esc"]').val(),
             "o.child.getCompany()",
@@ -572,14 +530,12 @@ QUnit.module('ReportComponents', {
         parent.destroy();
     });
 
-    QUnit.test('contact: many2many_select', async function (assert) {
+    QUnit.test('contact: many2many_select', function (assert) {
         assert.expect(11);
         var parent = new Widget();
 
-        $('ul.ui-autocomplete').remove(); // clean the body to avoid errors due to another test
-
         var optionsFields;
-        testUtils.mock.addMockEnvironment(parent, {
+        testUtils.addMockEnvironment(parent, {
             intercepts: {
                 view_change: function (ev) {
                     assert.deepEqual(ev.data.operation.new_attrs['t-options-fields'], optionsFields,
@@ -589,7 +545,7 @@ QUnit.module('ReportComponents', {
                 },
             },
         });
-        await parent.appendTo($('#qunit-fixture'));
+        parent.appendTo($('#qunit-fixture'));
 
         var params = {
             widgetsOptions: this.widgetsOptions,
@@ -607,43 +563,41 @@ QUnit.module('ReportComponents', {
         };
 
         var tOptions = new (editComponentsRegistry.get('tOptions'))(parent, params);
-        await tOptions.appendTo(parent.$el);
-        assert.containsN(tOptions, '.o_web_studio_toption_option', 3,
+        tOptions.appendTo(parent.$el);
+        assert.strictEqual(tOptions.$('.o_web_studio_toption_option').length, 3,
             "there should be 3 available options for the contact widget (they are filtered)");
         assert.strictEqual(tOptions.$('.o_badge_text').text(), 'nameaddressphonemobileemail', 'Should display default value');
-        await testUtils.dom.click(tOptions.$('.o_input_dropdown input'));
+        tOptions.$('.o_input_dropdown input').click();
         assert.strictEqual($('ul.ui-autocomplete .ui-menu-item').length, 5, 'Should not display the unselected items');
         assert.strictEqual($('ul.ui-autocomplete .o_m2o_dropdown_option').length, 0, 'Should not display create button');
 
         optionsFields = ["name", "address", "phone", "mobile", "email", "city"];
-        await testUtils.dom.click($('ul.ui-autocomplete .ui-menu-item:contains(city)'));
+        $('ul.ui-autocomplete .ui-menu-item:contains(city)').click();
         tOptions.destroy();
 
         tOptions = new (editComponentsRegistry.get('tOptions'))(parent, params);
-        await tOptions.appendTo(parent.$el);
+        tOptions.appendTo(parent.$el);
+        tOptions.$('.o_studio_option_show').click();
         assert.strictEqual(tOptions.$('.o_badge_text').text(), 'nameaddresscityphonemobileemail', 'Should display the new value');
-        await testUtils.dom.click(tOptions.$('.o_input_dropdown input'));
+        tOptions.$('.o_input_dropdown input').click();
         assert.strictEqual($('ul.ui-autocomplete .ui-menu-item').length, 4, 'Should not display the unselected items');
-        await testUtils.dom.click(tOptions.$('.o_input_dropdown input'));
+        tOptions.$('.o_input_dropdown input').click();
 
         optionsFields = ["address", "phone", "mobile", "email", "city"];
-        await testUtils.dom.click(tOptions.$('.o_field_many2manytags .o_delete:first'));
+        tOptions.$('.o_field_many2manytags .o_delete:first').click();
         assert.strictEqual(tOptions.$('.o_badge_text').text(), 'addresscityphonemobileemail', 'Should display the new value without "name"');
 
         optionsFields = ["phone", "mobile", "email", "city"];
-        await testUtils.dom.click(tOptions.$('.o_field_many2manytags .o_delete:first'));
+        tOptions.$('.o_field_many2manytags .o_delete:first').click();
         assert.strictEqual(tOptions.$('.o_badge_text').text(), 'cityphonemobileemail', 'Should display the new value without "name"');
 
         parent.destroy();
     });
 
-    QUnit.test('no search more in many2many_select', async function (assert) {
+    QUnit.test('no search more in many2many_select', function (assert) {
         assert.expect(3);
         var parent = new Widget();
-
-        $('ul.ui-autocomplete').remove(); // clean the body to avoid errors due to another test
-
-        await parent.appendTo($('#qunit-fixture'));
+        parent.appendTo($('#qunit-fixture'));
 
         // to display more options in the many2many_select
         this.widgetsOptions.contact.fields.default_value = [];
@@ -662,20 +616,20 @@ QUnit.module('ReportComponents', {
             state: null,
             models: null,
         });
-        await tOptions.appendTo(parent.$el);
+        tOptions.appendTo(parent.$el);
 
         assert.strictEqual(tOptions.$('.o_badge_text').text(), '', 'Should display default value');
-        await testUtils.dom.click(tOptions.$('.o_input_dropdown input'));
+        tOptions.$('.o_input_dropdown input').click();
         assert.strictEqual($('ul.ui-autocomplete .ui-menu-item').length, 10, 'Should not display the unselected items');
         assert.strictEqual($('ul.ui-autocomplete .o_m2o_dropdown_option').length, 0, 'Should not display create button nor the search more');
 
         parent.destroy();
     });
 
-    QUnit.test('groups component', async function (assert) {
+    QUnit.test('groups component', function (assert) {
         assert.expect(3);
         var parent = new Widget();
-        await parent.appendTo($('#qunit-fixture'));
+        parent.appendTo($('#qunit-fixture'));
         var groups = new (editComponentsRegistry.get('groups'))(parent, {
             widgets: this.widgets,
             node: {
@@ -688,15 +642,15 @@ QUnit.module('ReportComponents', {
                 },
             },
         });
-        await groups.appendTo(parent.$el);
+        groups.appendTo(parent.$el);
 
-        assert.containsN(groups, '.o_field_many2manytags .o_badge_text', 2,
+        assert.strictEqual(groups.$('.o_field_many2manytags .o_badge_text').length, 2,
             "there should be displayed two groups");
         assert.strictEqual(groups.$('.o_field_many2manytags').text().replace(/\s/g, ''), "MyAwesomeGroupKikou",
             "the groups should be correctly set");
 
         // delete a group
-        testUtils.mock.addMockEnvironment(parent, {
+        testUtils.addMockEnvironment(parent, {
             intercepts: {
                 view_change: function (ev) {
                     assert.deepEqual(ev.data.operation.new_attrs, {groups: [13]},
@@ -704,7 +658,7 @@ QUnit.module('ReportComponents', {
                 },
             },
         });
-        await testUtils.dom.click(groups.$('.o_field_many2manytags .o_delete:first'));
+        groups.$('.o_field_many2manytags .o_delete:first').click();
 
         parent.destroy();
     });

@@ -68,7 +68,7 @@ class TaxCloudRequest(TaxCloudRequest):
     def _rank_discount_line(self, line):
         return [
             line.coupon_program_id.reward_type != 'product',
-            line.coupon_program_id.discount_apply_on != 'specific_products',
+            line.coupon_program_id.discount_apply_on != 'specific_product',
             line.coupon_program_id.discount_apply_on != 'cheapest_product',
             line.coupon_program_id.discount_type != 'fixed_amount',
         ]
@@ -78,8 +78,8 @@ class TaxCloudRequest(TaxCloudRequest):
         lines = lines.filtered(lambda l: l.price_taxcloud > 0 and l._get_qty() > 0)
         if program.reward_type == 'product':
             lines = lines.filtered(lambda l: l.product_id == program.reward_product_id)
-        elif program.discount_apply_on == 'specific_products':
-            lines = lines.filtered(lambda l: l.product_id in program.discount_specific_product_ids)
+        elif program.discount_apply_on == 'specific_product':
+            lines = lines.filtered(lambda l: l.product_id == program.discount_specific_product_id)
         elif program.discount_apply_on == 'cheapest_product':
             lines = self._get_cheapest_line(lines)
         return lines

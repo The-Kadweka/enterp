@@ -61,33 +61,35 @@ class InvoiceTransactionCase(AccountingTestCase):
 
     def test_dont_handle_non_colombian(self):
         self.company.country_id = self.env.ref('base.us')
-        product = self.env.ref('product.product_product_4')
-        invoice = self.env['account.move'].with_context(default_type='out_invoice').create({
+        invoice = self.env['account.invoice'].create({
             'partner_id': self.partner.id,
             'account_id': self.account_receivable.id,
-            'invoice_line_ids': [
-                (0, 0, {
-                    'product_id': product.id,
-                    'quantity': 1,
-                    'price_unit': 42,
-                    'name': 'something',
-                    'account_id': self.account_revenue.id,
-                })
-            ]
+            'type': 'out_invoice',
         })
 
-        invoice.post()
+        product = self.env.ref('product.product_product_4')
+        self.env['account.invoice.line'].create({
+            'product_id': product.id,
+            'quantity': 1,
+            'price_unit': 42,
+            'invoice_id': invoice.id,
+            'name': 'something',
+            'account_id': self.account_revenue.id,
+        })
+
+        invoice.action_invoice_open()
         self.assertEqual(invoice.l10n_co_edi_invoice_status, 'not_sent',
                          'Invoices belonging to a non-Colombian company should not be sent.')
 
     def _validate_and_compare(self, invoice, invoice_number, filename_expected):
+        invoice.compute_taxes()
 
         return_value = {
             'message': 'mocked success',
             'transactionId': 'mocked_success',
         }
         with patch('odoo.addons.l10n_co_edi.models.carvajal_request.CarvajalRequest.upload', new=Mock(return_value=return_value)):
-            invoice.post()
+            invoice.action_invoice_open()
 
         invoice.number = invoice_number
         generated_xml = invoice._l10n_co_edi_generate_xml().decode()
@@ -103,32 +105,34 @@ class InvoiceTransactionCase(AccountingTestCase):
 
     def test_invoice(self):
         '''Tests if we generate an accepted XML for an invoice and a credit note.'''
-        product = self.env.ref('product.product_product_4')
-        invoice = self.env['account.move'].create({
+        invoice = self.env['account.invoice'].create({
             'partner_id': self.partner.id,
             'account_id': self.account_receivable.id,
             'type': 'out_invoice',
-            'invoice_user_id': self.salesperson.id,
+            'user_id': self.salesperson.id,
             'name': 'OC 123',
-            'invoice_line_ids': [
-                (0, 0, {
-                    'product_id': product.id,
-                    'quantity': 150,
-                    'price_unit': 250,
-                    'discount': 10,
-                    'name': 'Line 1',
-                    'account_id': self.account_revenue.id,
-                    'tax_ids': [(6, 0, (self.tax.id, self.retention_tax.id))],
-                }),
-                (0, 0, {
-                    'quantity': 1,
-                    'price_unit': 0.2,
-                    'name': 'Line 2',
-                    'account_id': self.account_revenue.id,
-                    'tax_ids': [(6, 0, (self.tax.id, self.retention_tax.id))],
-                    'uom_id': self.env.ref('uom.product_uom_unit').id,
-                })
-            ]
+        })
+
+        product = self.env.ref('product.product_product_4')
+        self.env['account.invoice.line'].create({
+            'product_id': product.id,
+            'quantity': 150,
+            'price_unit': 250,
+            'invoice_id': invoice.id,
+            'discount': 10,
+            'name': 'Line 1',
+            'account_id': self.account_revenue.id,
+            'invoice_line_tax_ids': [(6, 0, (self.tax.id, self.retention_tax.id))],
+        })
+        self.env['account.invoice.line'].create({
+            'product_id': product.id,
+            'quantity': 1,
+            'price_unit': 0.2,
+            'invoice_id': invoice.id,
+            'name': 'Line 2',
+            'account_id': self.account_revenue.id,
+            'invoice_line_tax_ids': [(6, 0, (self.tax.id, self.retention_tax.id))],
+            'uom_id': self.env.ref('uom.product_uom_unit').id,
         })
 
         self._validate_and_compare(invoice, 'TEST/00001', 'accepted_invoice.xml')

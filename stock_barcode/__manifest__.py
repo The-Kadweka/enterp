@@ -4,9 +4,9 @@
     'name': "Barcode",
     'summary': "Use barcode scanners to process logistics operations",
     'description': """
-This module enables the barcode scanning feature for the warehouse management system.
+        This module adds support for barcodes scanning to the warehouse management system.
     """,
-    'category': 'Operations/Inventory',
+    'category': 'Warehouse',
     'version': '1.0',
     'depends': ['barcodes', 'stock', 'web_tour'],
     'data': [
@@ -17,7 +17,6 @@ This module enables the barcode scanning feature for the warehouse management sy
         'views/stock_barcode_views.xml',
         'views/res_config_settings_views.xml',
         'views/stock_scrap_views.xml',
-        'views/stock_location_views.xml',
         'wizard/stock_barcode_lot_view.xml',
         'data/data.xml',
     ],

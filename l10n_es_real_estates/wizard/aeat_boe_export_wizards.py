@@ -28,7 +28,6 @@ class Mod347BOEWizard(models.TransientModel):
 
 class Mod347BOERealEstatesVATData(models.TransientModel):
     _name = 'l10n_es_reports.aeat.mod347.real.estates.vat'
-    _description = 'BOE Real Estates VAT Data for (mod347)'
     _inherit = 'l10n_es_reports.aeat.mod347.manual.partner.data'
 
     trimester = fields.Selection(selection=[('1', '1st'), ('2','2nd'), ('3','3rd'), ('4', '4th')], required=True)

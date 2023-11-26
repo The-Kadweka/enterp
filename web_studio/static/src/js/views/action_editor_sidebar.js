@@ -22,7 +22,7 @@ var ActionEditorSidebar = Widget.extend(StandaloneFieldManagerMixin, {
         this._super.apply(this, arguments);
         StandaloneFieldManagerMixin.init.call(this);
 
-        this.debug = config.isDebug();
+        this.debug = config.debug;
         this.action = action;
         this.action_attrs = {
             name: action.display_name || action.name,
@@ -50,7 +50,7 @@ var ActionEditorSidebar = Widget.extend(StandaloneFieldManagerMixin, {
             self.groupsHandle = recordID;
         });
         var def2 = this._super.apply(this, arguments);
-        return Promise.all([def1, def2]);
+        return $.when(def1, def2);
     },
     /**
      * @override
@@ -64,7 +64,7 @@ var ActionEditorSidebar = Widget.extend(StandaloneFieldManagerMixin, {
         var many2many = new Many2ManyTags(this, 'groups_id', record, options);
         this._registerWidget(this.groupsHandle, 'groups_id', many2many);
         var def2 = many2many.appendTo(this.$('.o_groups'));
-        return Promise.all([def1, def2]);
+        return $.when(def1, def2);
     },
 
     //--------------------------------------------------------------------------
@@ -97,14 +97,12 @@ var ActionEditorSidebar = Widget.extend(StandaloneFieldManagerMixin, {
      * @override
      */
     _onFieldChanged: function () {
-        var self = this;
-        return StandaloneFieldManagerMixin._onFieldChanged.apply(this, arguments).then(function () {
-            var record = self.model.get(self.groupsHandle);
-            var args = {
-                groups_id: record.data.groups_id.res_ids,
-            };
-            self.trigger_up('studio_edit_action', {args: args});
-        });
+        StandaloneFieldManagerMixin._onFieldChanged.apply(this, arguments);
+        var record = this.model.get(this.groupsHandle);
+        var args = {
+            groups_id: record.data.groups_id.res_ids,
+        };
+        this.trigger_up('studio_edit_action', {args: args});
     },
 });
 

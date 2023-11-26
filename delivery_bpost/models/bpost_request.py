@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-import base64
 from binascii import a2b_base64
-import io
 import logging
 import re
 import requests
 from lxml import html
-from PyPDF2 import PdfFileWriter, PdfFileReader
 from xml.etree import ElementTree as etree
 from werkzeug.urls import url_join
+
 
 from odoo import _
 from odoo.exceptions import UserError
@@ -69,8 +67,8 @@ class BpostRequest():
                 return _("The estimated shipping price cannot be computed because all your products are service/digital.")
             if not order.order_line:
                 return _("Please provide at least one item to ship.")
-            if order.order_line.filtered(lambda line: not line.product_id.weight and not line.is_delivery and line.product_id.type not in ['service', 'digital'] and not line.display_type):
-                line = order.order_line.filtered(lambda line: not line.product_id.weight and not line.is_delivery and line.product_id.type not in ['service', 'digital'] and not line.display_type)[0]
+            if order.order_line.filtered(lambda line: not line.product_id.weight and not line.is_delivery and line.product_id.type not in ['service', 'digital']):
+                line = order.order_line.filtered(lambda line: not line.product_id.weight and not line.is_delivery and line.product_id.type not in ['service', 'digital'])[0]
                 return _('The estimated shipping cannot be computed because the weight of your product %s is missing.') % line.product_id.display_name
         return False
 
@@ -88,7 +86,7 @@ class BpostRequest():
         return (street, street_number)
 
     def rate(self, order, carrier):
-        weight = sum([(line.product_id.weight * line.product_qty) for line in order.order_line if not line.display_type]) or 0.0
+        weight = sum([(line.product_id.weight * line.product_qty) for line in order.order_line]) or 0.0
         weight_in_kg = carrier._bpost_convert_weight(weight)
         return self._get_rate(carrier, weight_in_kg, order.partner_shipping_id.country_id)
 
@@ -142,14 +140,9 @@ class BpostRequest():
         else:
             raise UserError(_("Packages over 30 Kg are not accepted by bpost."))
 
-    def send_shipping(self, picking, carrier, with_return_label, is_return_label=False):
+    def send_shipping(self, picking, carrier):
         # Get price of label
-        if is_return_label:
-            shipping_weight_in_kg = 0.0
-            for move in picking.move_lines:
-                shipping_weight_in_kg += move.product_qty * move.product_id.weight
-        else:
-            shipping_weight_in_kg = carrier._bpost_convert_weight(picking.shipping_weight)
+        shipping_weight_in_kg = carrier._bpost_convert_weight(picking.shipping_weight)
         price = self._get_rate(carrier, shipping_weight_in_kg, picking.partner_id.country_id)
 
         # Announce shipment to bpost
@@ -200,7 +193,7 @@ class BpostRequest():
                   'is_domestic': carrier.bpost_delivery_nature == 'Domestic',
                   'weight': str(_grams(shipping_weight_in_kg)),
                   # domestic
-                  'product': 'bpack Easy Retour' if is_return_label else carrier.bpost_domestic_deliver_type,
+                  'product': carrier.bpost_domestic_deliver_type,
                   'saturday': carrier.bpost_saturday,
                   # international
                   'international_product': carrier.bpost_international_deliver_type,
@@ -211,11 +204,6 @@ class BpostRequest():
                   'shipmentType': carrier.bpost_shipment_type,
                   'parcelReturnInstructions': carrier.bpost_parcel_return_instructions,
                   }
-        if is_return_label:
-            tmp = values['sender']
-            values['sender'] = values['receiver']
-            values['receiver'] = tmp
-            values['receiver']['company'] = picking.company_id.name
         xml = carrier.env['ir.qweb'].render('delivery_bpost.bpost_shipping_request', values)
         code, response = self._send_request('send', xml, carrier)
         if code != 201 and response:
@@ -228,56 +216,17 @@ class BpostRequest():
                     raise UserError(response)
 
         # Grab printable label and tracking code
-        code, response2 = self._send_request('label', None, carrier, reference=reference_id, with_return_label=with_return_label)
+        code, response2 = self._send_request('label', None, carrier, reference=reference_id)
         root = etree.fromstring(response2)
         ns = {'ns1': 'http://schema.post.be/shm/deepintegration/v3/'}
         for labels in root.findall('ns1:label', ns):
-            if with_return_label:
-                main_label, return_label = self._split_labels(labels, ns)
-            else:
-                main_label = {
-                    'tracking_code': labels.find("ns1:barcode", ns).text,
-                    'label': a2b_base64(labels.find("ns1:bytes", ns).text)
-                }
-                return_label = False
-        return {
-            'price': price,
-            'main_label': main_label,
-            'return_label': return_label
-        }
+            tracking_code = labels.find("ns1:barcode", ns).text
+            databytes = labels.find("ns1:bytes", ns).text
+            label = databytes
 
-    def _split_labels(self, labels, ns):
+        return {'price': price, 'tracking_code': tracking_code, 'label': a2b_base64(label)}
 
-        def _get_page(src_pdf, num):
-            with io.BytesIO(base64.b64decode(src_pdf)) as stream:
-                try:
-                    pdf = PdfFileReader(stream)
-                    writer = PdfFileWriter()
-                    writer.addPage(pdf.getPage(num))
-                    stream2 = io.BytesIO()
-                    writer.write(stream2)
-                    return a2b_base64(base64.b64encode(stream2.getvalue()))
-                except Exception:
-                    _logger.error('Error ')
-                    return False
-
-        barcodes = labels.findall("ns1:barcode", ns)
-        src_pdf = labels.find("ns1:bytes", ns).text
-        main_barcode = {
-            'tracking_code': barcodes[0].text,
-            'label': _get_page(src_pdf, 0)
-        }
-
-        return_barcode = False
-        if len(barcodes) > 1:
-            return_barcode = {
-                'tracking_code': barcodes[1].text,
-                'label': _get_page(src_pdf, 1)
-            }
-
-        return (main_barcode, return_barcode)
-
-    def _send_request(self, action, xml, carrier, reference=None, with_return_label=False):
+    def _send_request(self, action, xml, carrier, reference=None):
         supercarrier = carrier.sudo()
         passphrase = supercarrier._bpost_passphrase()
         METHODS = {'rate': 'GET',
@@ -290,12 +239,10 @@ class BpostRequest():
                    'label': {'authorization': 'Basic %s' % passphrase,
                              'accept': 'application/vnd.bpost.shm-label-%s-v3+XML' % ('pdf' if carrier.bpost_label_format == 'PDF' else 'image'),
                              'content-Type': 'application/vnd.bpost.shm-labelRequest-v3+XML'}}
-        label_url = url_join(self.base_url, '%s/orders/%s/labels/%s' % (supercarrier.bpost_account_number, reference, carrier.bpost_label_stock_type))
-        if with_return_label:
-            label_url += '/withReturnLabels'
         URLS = {'rate': url_join(self.base_url, '%s/productconfig' % supercarrier.bpost_account_number),
                 'send': url_join(self.base_url, '%s/orders' % supercarrier.bpost_account_number),
-                'label': label_url}
+                'label': url_join(self.base_url, '%s/orders/%s/labels/%s' % (supercarrier.bpost_account_number, reference, carrier.bpost_label_stock_type))}
+
         self.debug_logger("%s\n%s\n%s" % (URLS[action], HEADERS[action], xml.decode('utf-8') if xml else None), 'bpost_request_%s' % action)
         try:
             response = requests.request(METHODS[action], URLS[action], headers=HEADERS[action], data=xml, timeout=15)

@@ -1,29 +1,26 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_budget
+# * account_budget
 # 
 # Translators:
-# Martin Trigaux, 2019
-# Dariusz Żbikowski <darek@krokus.com.pl>, 2019
-# Grzegorz Grzelak <grzegorz.grzelak@openglobe.pl>, 2019
-# Judyta Kaźmierczak <judyta.kazmierczak@openglobe.pl>, 2019
-# Tomasz Leppich <t.leppich@gmail.com>, 2019
-# Piotr Szlązak <szlazakpiotr@gmail.com>, 2019
-# Slawomir Adamus <melthalion@gmail.com>, 2019
-# Marcin Młynarczyk <mlynarczyk@gmail.com>, 2019
-# Maciej Wichowski <maciej.wichowski@openglobe.pl>, 2019
-# Andrzej Donczew <a.donczew@hadron.eu.com>, 2019
+# Martin Trigaux, 2018
+# zbik2607 <darek@krokus.com.pl>, 2018
+# Grzegorz Grzelak <grzegorz.grzelak@openglobe.pl>, 2018
+# Judyta Kaźmierczak <judyta.kazmierczak@openglobe.pl>, 2018
+# Piotr Szlązak <szlazakpiotr@gmail.com>, 2018
+# Slawomir Adamus <melthalion@gmail.com>, 2018
+# Marcin Młynarczyk <mlynarczyk@gmail.com>, 2018
+# Andrzej Donczew <a.donczew@hadron.eu.com>, 2018
+# Wiktor Kaźmierczak <wik92tor@wp.pl>, 2018
 # Piotr Cierkosz <piotr.w.cierkosz@gmail.com>, 2019
-# Wiktor Kaźmierczak <wik92tor@wp.pl>, 2019
-# Natalia Gros <nag@odoo.com>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-27 09:32+0000\n"
-"PO-Revision-Date: 2019-08-26 09:34+0000\n"
-"Last-Translator: Natalia Gros <nag@odoo.com>, 2019\n"
+"POT-Creation-Date: 2019-01-15 15:18+0000\n"
+"PO-Revision-Date: 2018-08-24 09:15+0000\n"
+"Last-Translator: Piotr Cierkosz <piotr.w.cierkosz@gmail.com>, 2019\n"
 "Language-Team: Polish (https://www.transifex.com/odoo/teams/41243/pl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -32,7 +29,7 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
 
 #. module: account_budget
-#: code:addons/account_budget/models/account_budget.py:0
+#: code:addons/account_budget/models/account_budget.py:279
 #, python-format
 msgid ""
 "\"End Date\" of the budget line should be included in the Period of the "
@@ -40,7 +37,7 @@ msgid ""
 msgstr ""
 
 #. module: account_budget
-#: code:addons/account_budget/models/account_budget.py:0
+#: code:addons/account_budget/models/account_budget.py:274
 #, python-format
 msgid ""
 "\"Start Date\" of the budget line should be included in the Period of the "
@@ -67,21 +64,6 @@ msgstr "Osiągnięcie"
 #: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__message_needaction
 msgid "Action Needed"
 msgstr "Wymagana akcja"
-
-#. module: account_budget
-#: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__activity_ids
-msgid "Activities"
-msgstr "Czynności"
-
-#. module: account_budget
-#: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__activity_exception_decoration
-msgid "Activity Exception Decoration"
-msgstr "Dekoracja wyjątku aktywności"
-
-#. module: account_budget
-#: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__activity_state
-msgid "Activity State"
-msgstr "Stan czynności"
 
 #. module: account_budget
 #: model:ir.model.fields,help:account_budget.field_crossovered_budget_lines__practical_amount
@@ -126,7 +108,6 @@ msgstr "Ilość Załączników"
 #: model:ir.model.fields,field_description:account_budget.field_crossovered_budget_lines__crossovered_budget_id
 #: model_terms:ir.ui.view,arch_db:account_budget.crossovered_budget_view_form
 #: model_terms:ir.ui.view,arch_db:account_budget.crossovered_budget_view_tree
-#: model_terms:ir.ui.view,arch_db:account_budget.view_account_analytic_account_form_inherit_budget
 #: model_terms:ir.ui.view,arch_db:account_budget.view_crossovered_budget_search
 msgid "Budget"
 msgstr "Budżet"
@@ -177,6 +158,7 @@ msgstr "Składnik budżetu"
 #. module: account_budget
 #: model:ir.actions.act_window,name:account_budget.open_budget_post_form
 #: model:ir.ui.menu,name:account_budget.menu_budget_post_form
+#: model_terms:ir.ui.view,arch_db:account_budget.res_config_settings_view_form
 msgid "Budgetary Positions"
 msgstr "Składniki budżetowe"
 
@@ -199,7 +181,7 @@ msgid "Cancel Budget"
 msgstr "Anuluj budżet"
 
 #. module: account_budget
-#: model:ir.model.fields.selection,name:account_budget.selection__crossovered_budget__state__cancel
+#: selection:crossovered.budget,state:0
 msgid "Cancelled"
 msgstr "Anulowano"
 
@@ -228,7 +210,7 @@ msgid "Confirm"
 msgstr "Potwierdź"
 
 #. module: account_budget
-#: model:ir.model.fields.selection,name:account_budget.selection__crossovered_budget__state__confirm
+#: selection:crossovered.budget,state:0
 msgid "Confirmed"
 msgstr "Potwierdzone"
 
@@ -259,13 +241,13 @@ msgid "Display Name"
 msgstr "Nazwa wyświetlana"
 
 #. module: account_budget
-#: model:ir.model.fields.selection,name:account_budget.selection__crossovered_budget__state__done
+#: selection:crossovered.budget,state:0
 #: model_terms:ir.ui.view,arch_db:account_budget.crossovered_budget_view_form
 msgid "Done"
 msgstr "Wykonano"
 
 #. module: account_budget
-#: model:ir.model.fields.selection,name:account_budget.selection__crossovered_budget__state__draft
+#: selection:crossovered.budget,state:0
 #: model_terms:ir.ui.view,arch_db:account_budget.view_crossovered_budget_search
 msgid "Draft"
 msgstr "Projekt"
@@ -302,11 +284,6 @@ msgid "Followers (Partners)"
 msgstr "Obserwatorzy (partnerzy)"
 
 #. module: account_budget
-#: model_terms:ir.ui.view,arch_db:account_budget.view_crossovered_budget_search
-msgid "Future Activities"
-msgstr "Przyszłe czynności"
-
-#. module: account_budget
 #: model_terms:ir.ui.view,arch_db:account_budget.view_crossovered_budget_line_search
 msgid "Group By"
 msgstr "Grupuj wg"
@@ -319,28 +296,20 @@ msgid "ID"
 msgstr "ID"
 
 #. module: account_budget
-#: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__activity_exception_icon
-msgid "Icon"
-msgstr "Ikona"
-
-#. module: account_budget
-#: model:ir.model.fields,help:account_budget.field_crossovered_budget__activity_exception_icon
-msgid "Icon to indicate an exception activity."
-msgstr "Ikona wskazująca na wyjątkową aktywność"
+#: model:ir.model.fields,help:account_budget.field_crossovered_budget__message_unread
+msgid "If checked new messages require your attention."
+msgstr "Jeśli zaznaczone, to wiadomość wymaga twojej uwagi"
 
 #. module: account_budget
 #: model:ir.model.fields,help:account_budget.field_crossovered_budget__message_needaction
-#: model:ir.model.fields,help:account_budget.field_crossovered_budget__message_unread
 msgid "If checked, new messages require your attention."
 msgstr "Jeśli zaznaczone, to nowa wiadomość wymaga twojej uwagi."
 
 #. module: account_budget
 #: model:ir.model.fields,help:account_budget.field_crossovered_budget__message_has_error
-#: model:ir.model.fields,help:account_budget.field_crossovered_budget__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr ""
-"Jeśli zaznaczone, to część wiadomości napotkało na błąd przy próbie "
-"doręczenia."
+"Jesli zaznaczone, część wiadomości napotkało na błąd przy próbie doręczenia."
 
 #. module: account_budget
 #: model:ir.model.fields,field_description:account_budget.field_crossovered_budget_lines__is_above_budget
@@ -374,11 +343,6 @@ msgid "Last Updated on"
 msgstr "Data ostatniej aktualizacji"
 
 #. module: account_budget
-#: model_terms:ir.ui.view,arch_db:account_budget.view_crossovered_budget_search
-msgid "Late Activities"
-msgstr "Spóźnione czynności"
-
-#. module: account_budget
 #: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__message_main_attachment_id
 msgid "Main Attachment"
 msgstr "Główny Załącznik"
@@ -386,7 +350,7 @@ msgstr "Główny Załącznik"
 #. module: account_budget
 #: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__message_has_error
 msgid "Message Delivery error"
-msgstr "Błąd Doręczenia wiadomości"
+msgstr "Błąd Doręczenia wiadomosci"
 
 #. module: account_budget
 #: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__message_ids
@@ -400,21 +364,6 @@ msgid "Name"
 msgstr "Nazwa"
 
 #. module: account_budget
-#: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__activity_date_deadline
-msgid "Next Activity Deadline"
-msgstr "Termin następnej czynności"
-
-#. module: account_budget
-#: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__activity_summary
-msgid "Next Activity Summary"
-msgstr "Następne podsumowanie aktywności"
-
-#. module: account_budget
-#: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__activity_type_id
-msgid "Next Activity Type"
-msgstr "Typ następnej czynności"
-
-#. module: account_budget
 #: model_terms:ir.ui.view,arch_db:account_budget.view_crossovered_budget_line_search
 msgid "Not Cancelled"
 msgstr ""
@@ -426,8 +375,8 @@ msgstr "Liczba akcji"
 
 #. module: account_budget
 #: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__message_has_error_counter
-msgid "Number of errors"
-msgstr "Liczba błędów"
+msgid "Number of error"
+msgstr "Numer błedu"
 
 #. module: account_budget
 #: model:ir.model.fields,help:account_budget.field_crossovered_budget__message_needaction_counter
@@ -437,7 +386,7 @@ msgstr "Liczba wiadomości wymagających akcji"
 #. module: account_budget
 #: model:ir.model.fields,help:account_budget.field_crossovered_budget__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr "Ilość wiadomości z błędami przy doręczeniu"
+msgstr "Ilośc wiadomości z błedami przy doręczeniu"
 
 #. module: account_budget
 #: model:ir.model.fields,help:account_budget.field_crossovered_budget__message_unread_counter
@@ -490,21 +439,6 @@ msgid "Responsible"
 msgstr "Odpowiedzialny"
 
 #. module: account_budget
-#: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__activity_user_id
-msgid "Responsible User"
-msgstr "Użytkownik odpowiedzialny"
-
-#. module: account_budget
-#: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__message_has_sms_error
-msgid "SMS Delivery error"
-msgstr "Błąd dostarczenia wiadomości SMS"
-
-#. module: account_budget
-#: model_terms:ir.ui.view,arch_db:account_budget.view_crossovered_budget_search
-msgid "Show all records which has next action date is before today"
-msgstr "Pokaż wszystkie rekordy, które mają następną akcję przed dzisiaj"
-
-#. module: account_budget
 #: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__date_from
 #: model:ir.model.fields,field_description:account_budget.field_crossovered_budget_lines__date_from
 msgid "Start Date"
@@ -516,20 +450,7 @@ msgid "Status"
 msgstr "Status"
 
 #. module: account_budget
-#: model:ir.model.fields,help:account_budget.field_crossovered_budget__activity_state
-msgid ""
-"Status based on activities\n"
-"Overdue: Due date is already passed\n"
-"Today: Activity date is today\n"
-"Planned: Future activities."
-msgstr ""
-"Status bazuje na aktywnościach\n"
-"Opóźnione: Data \"do\" minęła\n"
-"Dziś: Aktywnośc przewidziana na dziś\n"
-"Zaplanowane: Przyszłe aktywności."
-
-#. module: account_budget
-#: code:addons/account_budget/models/account_budget.py:0
+#: code:addons/account_budget/models/account_budget.py:29
 #, python-format
 msgid "The budget must have at least one account."
 msgstr "Budżet musi mieć co najmniej jedno konto."
@@ -562,16 +483,6 @@ msgid "To Approve Budgets"
 msgstr "Budżety do aprobowania"
 
 #. module: account_budget
-#: model_terms:ir.ui.view,arch_db:account_budget.view_crossovered_budget_search
-msgid "Today Activities"
-msgstr "Dzisiejsze czynności"
-
-#. module: account_budget
-#: model:ir.model.fields,help:account_budget.field_crossovered_budget__activity_exception_decoration
-msgid "Type of the exception activity on record."
-msgstr "Wyjątkowa aktywność w historii."
-
-#. module: account_budget
 #: model:ir.model.fields,field_description:account_budget.field_crossovered_budget__message_unread
 msgid "Unread Messages"
 msgstr "Nieprzeczytane wiadomości"
@@ -587,7 +498,7 @@ msgid "Use budgets to compare actual with expected revenues and costs"
 msgstr ""
 
 #. module: account_budget
-#: model:ir.model.fields.selection,name:account_budget.selection__crossovered_budget__state__validate
+#: selection:crossovered.budget,state:0
 msgid "Validated"
 msgstr "Zatwierdzone"
 
@@ -602,7 +513,7 @@ msgid "Website communication history"
 msgstr "Historia komunikacji"
 
 #. module: account_budget
-#: code:addons/account_budget/models/account_budget.py:0
+#: code:addons/account_budget/models/account_budget.py:241
 #, python-format
 msgid ""
 "You have to enter at least a budgetary position or analytic account on a "

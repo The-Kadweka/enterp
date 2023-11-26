@@ -1,20 +1,20 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_3way_match
+# * account_3way_match
 # 
 # Translators:
-# Jeanphy <hzh0292@qq.com>, 2019
-# Felix Yuen <fyu@odoo.com>, 2019
-# Felix Yang/杨孟泽 <felixyangsh@aliyun.com>, 2020
-# Jeffery CHEN Fan <jeffery9@gmail.com>, 2020
+# Martin Trigaux, 2018
+# Jeffery CHEN Fan <jeffery9@gmail.com>, 2018
+# inspur qiuguodong <qiuguodong@inspur.com>, 2018
+# ChinaMaker <liuct@chinamaker.net>, 2018
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~12.5+e\n"
+"Project-Id-Version: Odoo Server saas~11.5+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-09 11:58+0000\n"
-"PO-Revision-Date: 2019-08-26 09:34+0000\n"
-"Last-Translator: Jeffery CHEN Fan <jeffery9@gmail.com>, 2020\n"
+"POT-Creation-Date: 2018-09-18 10:05+0000\n"
+"PO-Revision-Date: 2018-08-24 11:36+0000\n"
+"Last-Translator: ChinaMaker <liuct@chinamaker.net>, 2018\n"
 "Language-Team: Chinese (China) (https://www.transifex.com/odoo/teams/41243/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -23,17 +23,15 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: account_3way_match
-#: model:ir.model.fields,help:account_3way_match.field_account_move__release_to_pay_manual
+#: model:ir.model.fields,help:account_3way_match.field_account_invoice__release_to_pay_manual
 msgid ""
 "  * Yes: you should pay the bill, you have received the products\n"
 "  * No, you should not pay the bill, you have not received the products\n"
-"  * Exception, there is a difference between received and billed quantities\n"
-"This status is defined automatically, but you can force it by ticking the 'Force Status' checkbox."
+"  * Exception, there is a difference between received and billed quantities."
 msgstr ""
-"  * 是的：您应该支付账单，您已收到产品\n"
-"  * 不，你不应该支付账单，你还没有收到产品\n"
-"  * 异常，收货和开票数量之间存在差异\n"
-"此状态是自动定义的，但您可以通过勾选“强制状态”复选框来强制它。"
+"* 是：您应该支付账单，您已收到产品了 \n"
+" * 否，您不应该支付账单，您还没收到产品 \n"
+" * 例外情况，已收到产品与账单上产品数量有差别。"
 
 #. module: account_3way_match
 #: model_terms:ir.ui.view,arch_db:account_3way_match.account_invoice_filter_inherit_account_3way_match
@@ -46,23 +44,33 @@ msgid "Bills to Pay"
 msgstr "待付账单"
 
 #. module: account_3way_match
-#: model:ir.model.fields.selection,name:account_3way_match.selection__account_move__release_to_pay__exception
-#: model:ir.model.fields.selection,name:account_3way_match.selection__account_move__release_to_pay_manual__exception
-#: model:ir.model.fields.selection,name:account_3way_match.selection__account_move_line__can_be_paid__exception
+#: selection:account.invoice,release_to_pay:0
+#: selection:account.invoice,release_to_pay_manual:0
+#: selection:account.invoice.line,can_be_paid:0
 msgid "Exception"
 msgstr "异常"
 
 #. module: account_3way_match
-#: model:ir.model.fields,field_description:account_3way_match.field_account_move__force_release_to_pay
-msgid "Force Status"
+#: model:ir.model.fields,field_description:account_3way_match.field_account_invoice__force_release_to_pay
+msgid "Force status"
 msgstr "强制状态"
 
 #. module: account_3way_match
-#: model:ir.model.fields,help:account_3way_match.field_account_move__force_release_to_pay
+#: model:ir.model.fields,help:account_3way_match.field_account_invoice__force_release_to_pay
 msgid ""
-"Indicates whether the 'Should Be Paid' status is defined automatically or "
+"Indicates whether the 'Can be paid' status is defined automatically or "
 "manually."
-msgstr "指示是否自动或手动定义“应该付费”状态。"
+msgstr "指示“可支付”状态是否是自动或手动定义的。"
+
+#. module: account_3way_match
+#: model:ir.model,name:account_3way_match.model_account_invoice
+msgid "Invoice"
+msgstr "发票"
+
+#. module: account_3way_match
+#: model:ir.model,name:account_3way_match.model_account_invoice_line
+msgid "Invoice Line"
+msgstr "发票明细"
 
 #. module: account_3way_match
 #: model:ir.model,name:account_3way_match.model_account_journal
@@ -70,39 +78,29 @@ msgid "Journal"
 msgstr "日记账"
 
 #. module: account_3way_match
-#: model:ir.model,name:account_3way_match.model_account_move
-msgid "Journal Entries"
-msgstr "会计凭证"
-
-#. module: account_3way_match
-#: model:ir.model,name:account_3way_match.model_account_move_line
-msgid "Journal Item"
-msgstr "会计分录"
-
-#. module: account_3way_match
-#: model:ir.model.fields.selection,name:account_3way_match.selection__account_move__release_to_pay__no
-#: model:ir.model.fields.selection,name:account_3way_match.selection__account_move__release_to_pay_manual__no
-#: model:ir.model.fields.selection,name:account_3way_match.selection__account_move_line__can_be_paid__no
+#: selection:account.invoice,release_to_pay:0
+#: selection:account.invoice,release_to_pay_manual:0
+#: selection:account.invoice.line,can_be_paid:0
 msgid "No"
 msgstr "否"
 
 #. module: account_3way_match
-#: model:ir.model.fields,field_description:account_3way_match.field_account_move__release_to_pay
-msgid "Release To Pay"
-msgstr "释放付款"
-
-#. module: account_3way_match
-#: model:ir.model.fields,field_description:account_3way_match.field_account_move_line__can_be_paid
+#: model:ir.model.fields,field_description:account_3way_match.field_account_invoice_line__can_be_paid
 msgid "Release to Pay"
 msgstr "释放待支付"
 
 #. module: account_3way_match
-#: model:ir.model.fields,field_description:account_3way_match.field_account_move__release_to_pay_manual
-msgid "Should Be Paid"
-msgstr "应被支付"
+#: model:ir.model.fields,field_description:account_3way_match.field_account_invoice__release_to_pay
+msgid "Should be paid"
+msgstr "将被支付"
 
 #. module: account_3way_match
-#: model:ir.model.fields,help:account_3way_match.field_account_move__release_to_pay
+#: model:ir.model.fields,field_description:account_3way_match.field_account_invoice__release_to_pay_manual
+msgid "Should be paid Manual"
+msgstr "需要手动支付"
+
+#. module: account_3way_match
+#: model:ir.model.fields,help:account_3way_match.field_account_invoice__release_to_pay
 msgid ""
 "This field can take the following values :\n"
 "  * Yes: you should pay the bill, you have received the products\n"
@@ -112,13 +110,13 @@ msgid ""
 msgstr ""
 "该字段可采取下列值：\n"
 " * 是：您应该支付账单，在您收到产品后 \n"
-" * 否，您不应该支付账单，在您没收到产品时 \n"
-" * 例外情况，已收到和账单上产品的数量有差别 \n"
-" 该状态是自动定义的，但是您可以通过单击“强制状态”复选框强制更改。"
+" * 否，您不应该支付账单，您还没收到产品\n"
+" * 例外情况，已收到产品和账单上产品数量有差别 \n"
+" 该状态是自动定义的，但是您可以通过单击“强制状态”选项强制更改。"
 
 #. module: account_3way_match
-#: model:ir.model.fields.selection,name:account_3way_match.selection__account_move__release_to_pay__yes
-#: model:ir.model.fields.selection,name:account_3way_match.selection__account_move__release_to_pay_manual__yes
-#: model:ir.model.fields.selection,name:account_3way_match.selection__account_move_line__can_be_paid__yes
+#: selection:account.invoice,release_to_pay:0
+#: selection:account.invoice,release_to_pay_manual:0
+#: selection:account.invoice.line,can_be_paid:0
 msgid "Yes"
 msgstr "是"

@@ -24,14 +24,18 @@
                             <field name="token" widget="CopyClipboardChar" readonly="1"/>
                         </group>
                     </div>
-                    <div class="col-4 pl-5">
-                        <widget name="iot_scan_progress"/>
+                    <div class="col-4 pl-5 scan_progress" style="display: none;">
+                        <h4>Scanning range(s)</h4>
+                        <ul class="scan_ranges mb-4 list-group"/>
+
+                        <h4>Found IoT Box(s)</h4>
+                        <ul class="found_devices list-group"/>
                     </div>
                 </div>
                 <footer>
                     <widget name='iot_detect_button' string="Detect and Add IoT devices in the network"/>
                     <button type="object" name="reload_page" string="OK" />
-                </footer>
+                </footer> 
             </form>
         </field>
     </record>
@@ -39,6 +43,7 @@
         <field name="name">Connect an IoT Box</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">add.iot.box</field>
+        <field name="view_type">form</field>
         <field name="view_mode">form</field>
         <field name="view_id" ref="view_add_iot_box"/>
         <field name="target">new</field>

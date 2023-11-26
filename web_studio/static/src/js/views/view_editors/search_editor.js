@@ -1,23 +1,20 @@
 odoo.define('web_studio.SearchEditor', function (require) {
 "use strict";
 
-var config = require('web.config');
-const core = require('web.core');
 var Domain = require('web.Domain');
 var DomainSelectorDialog = require("web.DomainSelectorDialog");
+var session = require('web.session');
 
 var EditorMixin = require('web_studio.EditorMixin');
 var FormEditorHook = require('web_studio.FormEditorHook');
 var SearchRenderer = require('web_studio.SearchRenderer');
 var utils = require('web_studio.utils');
 
-const _t = core._t;
-
 var SearchEditor = SearchRenderer.extend(EditorMixin, {
     nearest_hook_tolerance: 50,
     className: SearchRenderer.prototype.className + ' o_web_studio_search_view_editor',
     custom_events: _.extend({}, SearchRenderer.prototype.custom_events, {
-        'on_hook_selected': function () {
+        'on_hook_selected': function() {
             this.selected_node_id = false;
         },
     }),
@@ -53,14 +50,11 @@ var SearchEditor = SearchRenderer.extend(EditorMixin, {
 
         var $nearest_form_hook = this.$('.o_web_studio_hook')
             .touching({
-                    x: position.pageX - this.nearest_hook_tolerance,
-                    y: position.pageY - this.nearest_hook_tolerance,
-                    w: this.nearest_hook_tolerance*2,
-                    h: this.nearest_hook_tolerance*2
-                },{
-                    container: document.body
-                }
-            ).nearest({x: position.pageX, y: position.pageY}, {container: document.body}).eq(0);
+                x: position.pageX - this.nearest_hook_tolerance,
+                y: position.pageY - this.nearest_hook_tolerance,
+                w: this.nearest_hook_tolerance*2,
+                h: this.nearest_hook_tolerance*2})
+            .nearest({x: position.pageX, y: position.pageY}).eq(0);
         if ($nearest_form_hook.length) {
             // We check what is being dropped and in which table
             // since in the autocompletion fields and group_by tables
@@ -75,8 +69,8 @@ var SearchEditor = SearchRenderer.extend(EditorMixin, {
             // We check if the field dropped is a groupabble field
             // if dropped in the group_by table
             if (table_type === 'group_by' && is_field_droppable) {
-                var type = $helper.data('new_attrs').type;
-                var store = $helper.data('new_attrs').store;
+                var type = $($helper.context).data('new_attrs').type;
+                var store = $($helper.context).data('new_attrs').store;
                 is_field_droppable =  _.contains(this.GROUPABLE_TYPES, type) && store === 'true';
             }
             if (is_field_droppable || is_component_droppable){
@@ -120,7 +114,8 @@ var SearchEditor = SearchRenderer.extend(EditorMixin, {
             };
         }
         var formEditorHook = this._renderHook(node, 'inside', 'tr', type);
-        this.defs.push(formEditorHook.appendTo($parent));
+        formEditorHook.appendTo($('<div>')); // start the widget
+        $parent.append(formEditorHook.$el);
     },
     /**
      * Add hook before the first child of a table.
@@ -132,7 +127,8 @@ var SearchEditor = SearchRenderer.extend(EditorMixin, {
      */
     _addHookBeforeFirstChild: function ($result, first_child, type) {
         var formEditorHook = this._renderHook(first_child, 'before', 'tr', type);
-        this.defs.push(formEditorHook.insertBefore($result));
+        formEditorHook.appendTo($('<div>')); // start the widget
+        $result.before(formEditorHook.$el);
     },
     /**
      * Check for each table if it is empty.
@@ -184,7 +180,8 @@ var SearchEditor = SearchRenderer.extend(EditorMixin, {
         });
         // Add hook after this field
         var formEditorHook = this._renderHook(node, 'after', 'tr', type);
-        this.defs.push(formEditorHook.insertAfter($result));
+        formEditorHook.appendTo($('<div>')); // start the widget
+        $result.after(formEditorHook.$el);
         this._renderHookBeforeFirstChild($result, type);
     },
     /**
@@ -192,8 +189,7 @@ var SearchEditor = SearchRenderer.extend(EditorMixin, {
      * @private
      */
     _render: function () {
-        var prom = this._super.apply(this, arguments);
-
+        var result = this._super.apply(this, arguments);
         var self = this;
         this.$('.ui-droppable').droppable({
             accept: ".o_web_studio_component",
@@ -210,20 +206,17 @@ var SearchEditor = SearchRenderer.extend(EditorMixin, {
                         // in order to be able to get the value
                         // easily in the event trigger below
                         var $domain_div = $("<div><label>Label:</label></div>");
-                        self.$domain_label_input = $("<input type='text' id='domain_label' class='o_input mb8'/>");
+                        self.$domain_label_input = $("<input type='text' id='domain_label'/>");
                         $domain_div.append(self.$domain_label_input);
                         var domain_dialog = self._openDomainDialog(
                             self.model,
                             [["id","=",1]],
                             {
-                                title: _t("New Filter"),
-                                size: 'medium',
                                 readonly: false,
-                                debugMode: config.isDebug(),
+                                debugMode: session.debug,
                                 $content: $domain_div,
                             }
                         );
-                        domain_dialog.opened().then(() => self.$domain_label_input.focus());
                         // Add the node when clicking on the dialog 'save' button
                         domain_dialog.on('domain_selected', self, function (event) {
                             new_attrs = {
@@ -277,37 +270,8 @@ var SearchEditor = SearchRenderer.extend(EditorMixin, {
                 }
             },
         });
-        // Visually indicate the 'undroppable' portion
-        this.$el.droppable({
-            accept: ".o_web_studio_component",
-            tolerance: "touch",
-            over: function (ev, ui) {
-                var $autocompletionFields = self.$('.o_web_studio_search_autocompletion_fields');
-                var $filters = self.$('.o_web_studio_search_filters');
-                var $grouBy = self.$('.o_web_studio_search_group_by');
-                switch (ui.draggable.data('structure')) {
-                    case 'field':
-                        $filters.addClass('text-muted');
-                        var type = ui.draggable.data('new_attrs').type;
-                        var store = ui.draggable.data('new_attrs').store;
-                        if (!(_.contains(self.GROUPABLE_TYPES, type) && store === 'true')) {
-                            $grouBy.addClass('text-muted');
-                        }
-                        break;
-                    case 'filter':
-                    case 'separator':
-                        $grouBy.addClass('text-muted');
-                        $autocompletionFields.addClass('text-muted');
-                        break;
-                }
-            },
-            deactivate: function (ev, ui) {
-                self.$('.ui-droppable').removeClass('text-muted');
-            },
-        });
         this._addHookEmptyTable();
-
-        return prom;
+        return result;
     },
     /**
      * @override

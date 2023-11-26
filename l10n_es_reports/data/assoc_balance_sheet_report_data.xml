@@ -266,7 +266,7 @@
             <field name="code">l10n_es_assoc_debits_sum_12400</field>
             <field name="domain" eval="['|', ('account_id.code','=like','5523%'),
                                         ('account_id.code','=like','5524%')]"/>
-            <field name="formulas">balance = sum_if_pos.balance</field>
+            <field name="formulas">balance = sum.debit</field>
             <field name="level" eval="2" />
         </record>
 
@@ -319,7 +319,7 @@
             <field name="code">l10n_es_assoc_debits_sum_12500</field>
             <field name="domain" eval="['|', ('account_id.code','=like','551%'),
                                         ('account_id.code','=like','5525%')]"/>
-            <field name="formulas">balance = sum_if_pos.balance</field>
+            <field name="formulas">balance = sum.debit</field>
             <field name="level" eval="2" />
         </record>
 
@@ -678,7 +678,7 @@
             <field name="code">l10n_es_assoc_credits_sum_32230</field>
             <field name="domain" eval="['|', ('account_id.code','=like','551%'),
                                         ('account_id.code','=like','5525%')]"/>
-            <field name="formulas">balance = -sum_if_neg.balance</field>
+            <field name="formulas">balance = sum.credit</field>
             <field name="groupby">account_id</field>
             <field name="show_domain">foldable</field>
             <field name="level" eval="4"/>
@@ -719,7 +719,7 @@
             <field name="code">l10n_es_assoc_credits_sum_32300</field>
             <field name="domain" eval="['|', ('account_id.code','=like','5523%'),
                                         ('account_id.code','=like','5524%')]"/>
-            <field name="formulas">balance = -sum_if_neg.balance</field>
+            <field name="formulas">balance = sum.credit</field>
             <field name="groupby">account_id</field>
             <field name="show_domain">foldable</field>
             <field name="level" eval="3"/>

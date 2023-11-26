@@ -2,7 +2,6 @@ odoo.define('web_grid.GridController', function (require) {
 "use strict";
 
 var AbstractController = require('web.AbstractController');
-var config = require('web.config');
 var core = require('web.core');
 var dialogs = require('web.view_dialogs');
 var utils = require('web.utils');
@@ -25,6 +24,7 @@ var GridController = AbstractController.extend({
      */
     init: function (parent, model, renderer, params) {
         this._super.apply(this, arguments);
+        this.set('title', params.title);
         this.context = params.context;
         this.navigationButtons = params.navigationButtons;
         this.ranges = params.ranges;
@@ -50,9 +50,7 @@ var GridController = AbstractController.extend({
             _ranges: this.ranges,
             _buttons: this.navigationButtons,
             allowCreate: this.canCreate,
-        },
-            isMobile: config.device.isMobile
-        }));
+        }}));
         this.$buttons.appendTo($node);
         this._updateButtons();
         this.$buttons.on('click', '.o_grid_button_add', this._onAddLine.bind(this));
@@ -78,7 +76,7 @@ var GridController = AbstractController.extend({
         // 1e-6 is probably an overkill, but that way milli-values are usable
         if (Math.abs(difference) < 1e-6) {
             // cell value was set to itself, don't hit the server
-            return Promise.resolve();
+            return $.when($.Deferred());
         }
         // convert row values to a domain, concat to action domain
         var state = this.model.get();
@@ -134,7 +132,7 @@ var GridController = AbstractController.extend({
     /**
      * @override
      * @private
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _update: function () {
         return this._super.apply(this, arguments)
@@ -149,8 +147,9 @@ var GridController = AbstractController.extend({
             this.$buttons.find('.grid_arrow_previous').toggleClass('d-none', !state.prev);
             this.$buttons.find('.grid_arrow_next').toggleClass('d-none', !state.next);
             this.$buttons.find('.grid_button_initial').toggleClass('d-none', !state.initial);
-            this.$buttons.find('.grid_arrow_range').removeClass('active');
-            this.$buttons.find('.grid_arrow_range[data-name=' + this.currentRange + ']').addClass('active');
+            this.$buttons.find('.grid_arrow_range[data-name=' + this.currentRange + ']')
+                    .addClass('active')
+                    .siblings().removeClass('active');
         }
     },
 
@@ -190,12 +189,7 @@ var GridController = AbstractController.extend({
             col: utils.into(state, event.data.col_path),
             value: utils.into(state, event.data.cell_path).value,
         }, event.data.value)
-        .then(function () {
-            if (event.data.doneCallback !== undefined) {
-                event.data.doneCallback();
-            }
-        })
-        .guardedCatch(function () {
+        .always(function () {
             if (event.data.doneCallback !== undefined) {
                 event.data.doneCallback();
             }
@@ -221,7 +215,7 @@ var GridController = AbstractController.extend({
                     model: self.modelName,
                     resIDs: ids,
                 },
-                on_closed: self.reload.bind(self, {}),
+                on_closed: self.reload.bind(self),
             });
         });
     },
@@ -246,15 +240,7 @@ var GridController = AbstractController.extend({
         // pass group by, section and col fields as default in context
         var cols_path = cell_path.slice(0, -3).concat(['cols'], cell_path.slice(-1));
         var col = utils.into(state, cols_path);
-        var column_value = col.values[state.colField][0];
-        if(!column_value)
-        {
-            column_value = false;
-        }
-        else if(!_.isNumber(column_value))
-        {
-            column_value = column_value.split("/")[0]
-        }
+        var column_value = col.values[state.colField][0] ? col.values[state.colField][0].split("/")[0] : false;
         var ctx = _.extend({}, this.context);
 
         var sectionField = _.find(this.renderer.fields ,function(res) {
@@ -270,8 +256,6 @@ var GridController = AbstractController.extend({
 
         ctx['default_'+state.colField] = column_value;
 
-        ctx['create'] = !cell.readonly
-        ctx['edit'] = !cell.readonly
         this.do_action({
             type: 'ir.actions.act_window',
             name: label,
@@ -310,9 +294,6 @@ var GridController = AbstractController.extend({
     _onRangeChange: function (e) {
         e.stopPropagation();
         var $target = $(e.target);
-        if (config.device.isMobile) {
-            $target.closest(".dropdown-menu").prev().dropdown("toggle");
-        }
         if ($target.hasClass('active')) {
             return;
         }

@@ -1,66 +1,40 @@
-odoo.define('voip.UserAgent', function (require) {
+odoo.define('voip.user_agent', function (require) {
 "use strict";
 
-const Class = require('web.Class');
-const core = require('web.core');
-const Dialog = require('web.Dialog');
-const mixins = require('web.mixins');
-const ServicesMixin = require('web.ServicesMixin');
+var ajax = require('web.ajax');
+var Class = require('web.Class');
+var core = require('web.core');
+var Dialog = require('web.Dialog');
+var mixins = require('web.mixins');
+var ServicesMixin = require('web.ServicesMixin');
 
-const _t = core._t;
+var _t = core._t;
 
-/**
- * @param {string} number
- * @return {string}
- */
-function cleanNumber(number) {
+var clean_number = function(number) {
     return number.replace(/[\s-/.\u00AD]/g, '');
-}
+};
 
-const CALL_STATE = {
+var CALL_STATE = {
     NO_CALL: 0,
     RINGING_CALL: 1,
     ONGOING_CALL: 2,
-    CANCELING_CALL: 3,
-    REJECTING_CALL: 4,
 };
 
-const UserAgent = Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
-    /**
-     * Determine whether audio media can be played or not. This is useful in
-     * test, to prevent "NotAllowedError". This may be triggered if no DOM
-     * manipulation is detected before playing the media (chrome policy to
-     * prevent from autoplaying)
-     */
-    PLAY_MEDIA: true,
+var UserAgent = Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
     /**
      * @constructor
      */
-    init(parent) {
+    init: function (parent) {
         mixins.EventDispatcherMixin.init.call(this);
         this.setParent(parent);
-        this._audioDialRingtone = undefined;
-        this._audioIncomingRingtone = undefined;
-        this._audioRingbackTone = undefined;
-        this._callState = CALL_STATE.NO_CALL;
-        this._currentNumber = undefined;
-        this._dialog = undefined;
-        this._currentCallParams = false;
-        this._currentInviteSession = false;
-        this._isOutgoing = false;
-        this._mode = undefined;
-        this._progressCount = 0;
-        this._sipSession = undefined;
-        this._timerAcceptedTimeout = undefined;
-        this._userAgent = undefined;
-
-
-        this._rpc({
+        this.callState = CALL_STATE.NO_CALL;
+        ajax.rpc('/web/dataset/call_kw/voip.configurator/get_pbx_config', {
             model: 'voip.configurator',
             method: 'get_pbx_config',
             args: [],
             kwargs: {},
-        }).then(result => this._initUserAgent(result));
+        }).then(this._initUa.bind(this));
+        this.blocked = false;
     },
 
     //--------------------------------------------------------------------------
@@ -68,42 +42,25 @@ const UserAgent = Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
     //--------------------------------------------------------------------------
 
     /**
-     * Accept an incoming Call
-     */
-    acceptIncomingCall() {
-        this._answerCall();
-    },
-    /**
-     * Returns PBX Configuration.
-     *
-     * @return {Object} result user and pbx configuration return by the rpc
-     */
-    getPbxConfiguration() {
-        return this.infoPbxConfiguration;
-    },
-    /**
      * Hangs up the current call.
      */
-    hangup() {
-        if (this._mode === 'demo') {
-            if (this._callState === CALL_STATE.ONGOING_CALL) {
+    hangup: function () {
+        if (this.mode === "demo") {
+            if (this.callState === CALL_STATE.ONGOING_CALL) {
                 this._onBye();
             } else {
-                this._callState = CALL_STATE.CANCELING_CALL;
                 this._onCancel();
             }
         }
-        if (this._callState !== CALL_STATE.NO_CALL) {
-            if (this._callState === CALL_STATE.RINGING_CALL) {
-                this._callState = CALL_STATE.CANCELING_CALL;
+        if (this.callState !== CALL_STATE.NO_CALL) {
+            if (this.callState === CALL_STATE.RINGING_CALL) {
                 try {
-                    this._sipSession.cancel();
+                    this.sipSession.cancel();
                 } catch (err) {
-                    console.error(
-                        _.str.sprintf(_t("Cancel failed: %s"), err));
+                    console.error('Cancel failed:', err);
                 }
             } else {
-                this._sipSession.bye();
+                this.sipSession.bye();
             }
         }
     },
@@ -112,15 +69,13 @@ const UserAgent = Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
      *
      * @param {string} number
      */
-    makeCall(number) {
-        this._progressCount = 0;
-        if (this._mode === 'demo') {
-            if (this.PLAY_MEDIA) {
-                this._audioRingbackTone.play().catch(() => {});
-            }
-            this._timerAcceptedTimeout = this._demoTimeout(() =>
-                this._onAccepted());
-            this._isOutgoing = true;
+    makeCall: function (number) {
+        this.ringbacktone.play();
+        if (this.mode === "demo") {
+            var self = this;
+            this.timerAccepted = setTimeout(function () {
+                self._onAccepted();
+            },3000);
             return;
         }
         this._makeCall(number);
@@ -128,25 +83,9 @@ const UserAgent = Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
     /**
      * Mutes the current call
      */
-    muteCall() {
-        if (this._mode === 'demo') {
-            return;
-        }
-        if (this._callState !== CALL_STATE.ONGOING_CALL) {
-            return;
-        }
-        this._setMute(true);
-    },
-    /**
-     * Reject an incoming Call
-     */
-    rejectIncomingCall() {
-        this._callState = CALL_STATE.REJECTING_CALL;
-        if (this._mode === 'demo') {
-            this.trigger_up('sip_rejected', this._currentCallParams);
-        }
-        if (!this._isOutgoing) {
-            this._currentInviteSession.reject({ statusCode: 603 });
+    muteCall: function () {
+        if (this.callState === CALL_STATE.ONGOING_CALL && this.mode !== "demo") {
+            this._toggleMute(true);
         }
     },
     /**
@@ -154,61 +93,54 @@ const UserAgent = Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
      *
      * @param {string} number number clicked
      */
-    sendDtmf(number) {
-        if (this._mode === 'demo') {
-            return;
+    sendDtmf: function (number) {
+        if (this.callState === CALL_STATE.ONGOING_CALL && this.mode !== "demo") {
+            this.sipSession.dtmf(number);
         }
-        if (this._callState !== CALL_STATE.ONGOING_CALL) {
-            return;
-        }
-        this._sipSession.dtmf(number);
     },
     /**
      * Transfers the call to the given number.
      *
      * @param {string} number
      */
-    transfer(number) {
-        if (this._mode === 'demo') {
-            return;
+    transfer: function (number) {
+        if (this.callState === CALL_STATE.ONGOING_CALL && this.mode !== "demo") {
+            this.sipSession.refer(number);
         }
-        if (this._callState !== CALL_STATE.ONGOING_CALL) {
-            return;
-        }
-        this._sipSession.refer(number);
     },
-    unmuteCall() {
-        if (this._mode === 'demo') {
-            return;
+    /**
+     * Unmutes the current call
+     */
+    unmuteCall: function () {
+       if (this.callState === CALL_STATE.ONGOING_CALL && this.mode !== "demo") {
+            this._toggleMute(false);
         }
-        if (this._callState !== CALL_STATE.ONGOING_CALL) {
-            return;
-        }
-        this._setMute(false);
     },
-
+    /**
+     * Returns PBX Configuration.
+     *
+     * @return {Object} result user and pbx configuration return by the rpc
+     */
+    getPbxConfiguration: function() {
+        return this.infoPbxConfiguration;
+    },
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
+
     /**
      * Answer to a INVITE message and accept the call.
      *
      * @private
+     * @param {SIP.Session} inviteSession invite SIP session to answer
+     * @param {Object} params Params for the incomming call
      */
-    _answerCall() {
-        const inviteSession = this._currentInviteSession;
-        const incomingCallParams = this._currentCallParams;
-
-        if (this._mode === 'demo') {
-            this._callState = CALL_STATE.ONGOING_CALL;
-            this.trigger_up('sip_incoming_call', incomingCallParams);
-            return;
+    _answerCall: function (inviteSession, incomingCallParams) {
+        this.incomingtone.pause();
+        if (this.callState === CALL_STATE.ONGOING_CALL) {
+            this.hangup();
         }
-        if (!inviteSession) {
-            return;
-        }
-        this._audioIncomingRingtone.pause();
-        const callOptions = {
+        var callOptions = {
             sessionDescriptionHandlerOptions: {
                 constraints: {
                     audio: true,
@@ -217,36 +149,21 @@ const UserAgent = Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
             }
         };
         inviteSession.accept(callOptions);
-        this._isOutgoing = false;
-        this._sipSession = inviteSession;
+        this.incomingCall = true;
+        this.sipSession = inviteSession;
+        this.callState = CALL_STATE.ONGOING_CALL;
         this._configureRemoteAudio();
-        this.trigger_up('sip_error', {
-            isConnecting: true,
-            message: _t("Please accept the use of the microphone."),
-        });
-        this._sipSession.sessionDescriptionHandler.on('userMedia', () =>
-            this._onMicrophoneAccepted(incomingCallParams));
-        this._sipSession.sessionDescriptionHandler.on('userMediaFailed', () =>
-            this._onMicrophoneRefused());
-        this._sipSession.sessionDescriptionHandler.on('addTrack', () =>
-            this._configureRemoteAudio());
-        this._sipSession.on('bye', () => this._onBye());
-    },
-    /**
-     * If the caller cancels the phonecall, this is called
-     *
-     * @private
-     */
-    _canceledIncomingCall() {
-        this._callState = CALL_STATE.CANCELING_CALL;
-        this._onCancel();
+        this.sipSession.sessionDescriptionHandler.on('addTrack',_.bind(this._configureRemoteAudio,this));
+        this.trigger_up('sip_incoming_call', incomingCallParams);
+        //Bind action when the call is hanged up
+        this.sipSession.on('bye', _.bind(this._onBye, this));
     },
     /**
      * Clean the audio media stream after a call.
      *
      * @private
      */
-    _cleanRemoteAudio() {
+    _cleanRemoteAudio: function () {
         this.$remoteAudio.srcObject = null;
         this.$remoteAudio.pause();
     },
@@ -255,47 +172,41 @@ const UserAgent = Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
      *
      * @private
      */
-    _configureDomElements() {
-        this.$remoteAudio = document.createElement('audio');
+    _configureDomElements: function () {
+        this.$remoteAudio = document.createElement("audio");
         this.$remoteAudio.autoplay = true;
-        $('html').append(this.$remoteAudio);
-        this._audioRingbackTone = document.createElement('audio');
-        this._audioRingbackTone.loop = 'true';
-        this._audioRingbackTone.src = '/voip/static/src/sounds/ringbacktone.mp3';
-        $('html').append(this._audioRingbackTone);
-        this._audioIncomingRingtone = document.createElement('audio');
-        this._audioIncomingRingtone.loop = 'true';
-        this._audioIncomingRingtone.src = '/voip/static/src/sounds/incomingcall.mp3';
-        $('html').append(this._audioincomingRingtone);
-        this._audioDialRingtone = document.createElement('audio');
-        this._audioDialRingtone.loop = 'true';
-        this._audioDialRingtone.src = '/voip/static/src/sounds/dialtone.mp3';
-        $('html').append(this._audioDialRingtone);
+        $("html").append(this.$remoteAudio);
+        this.ringbacktone = document.createElement("audio");
+        this.ringbacktone.loop = "true";
+        this.ringbacktone.src = "/voip/static/src/sounds/ringbacktone.mp3";
+        $("html").append(this.ringbacktone);
+        this.incomingtone = document.createElement("audio");
+        this.incomingtone.loop = "true";
+        this.incomingtone.src = "/voip/static/src/sounds/incomingcall.mp3";
+        $("html").append(this.incomingtone);
     },
     /**
      * Configure the audio media stream, at the begining of a call.
      *
      * @private
      */
-    _configureRemoteAudio() {
-        const call = this._sipSession;
-        const peerConnection = call.sessionDescriptionHandler.peerConnection;
-        let remoteStream = undefined;
+    _configureRemoteAudio: function () {
+        var call = this.sipSession;
+        var peerConnection = call.sessionDescriptionHandler.peerConnection;
+        var remoteStream = undefined;
         if (peerConnection.getReceivers) {
             remoteStream = new window.MediaStream();
-            for (const receiver of peerConnection.getReceivers()) {
-                const track = receiver.track;
+            peerConnection.getReceivers().forEach(function (receiver) {
+                var track = receiver.track;
                 if (track) {
                     remoteStream.addTrack(track);
                 }
-            }
+            });
         } else {
             remoteStream = peerConnection.getRemoteStream()[0];
         }
         this.$remoteAudio.srcObject = remoteStream;
-        if (this.PLAY_MEDIA) {
-            this.$remoteAudio.play().catch(() => {});
-        }
+        this.$remoteAudio.play();
     },
     /**
      * Returns the ua after initialising it.
@@ -304,15 +215,15 @@ const UserAgent = Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
      * @param {Object} params user and pbx configuration parameters
      * @return {Object} the initialised ua
      */
-    _createUserAgent(params) {
+    _createUa: function (params) {
         if (!(params.pbx_ip && params.wsServer)) {
-            this._triggerError(
-                _t("PBX or Websocket address is missing. Please check your settings."));
+            //TODO master: PBX or Websocket address is missing. Please check your settings.
+            this._triggerError(_t('One or more parameter is missing. Please check your configuration.'))
             return false;
         }
         if (!(params.login && params.password)) {
-            this._triggerError(
-                _t("Your credentials are not correctly set. Please contact your administrator."));
+            //TODO master: Your credentials are not correctly set. Please check your configuration.
+            this._triggerError(_t('One or more parameter is missing. Please check your configuration.'));
             return false;
         }
         if (params.debug) {
@@ -320,38 +231,31 @@ const UserAgent = Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
             params.log = {
                 level: 3,
                 builtinEnabled: true
-            };
+            }
         } else {
             params.traceSip = false;
             params.log = {
                 level: 2,
                 builtinEnabled: false
-            };
+            }
         }
+        var uaConfig = this._getUaConfig(params);
         try {
-            return new window.SIP.UA(this._getUaConfig(params));
+            return new SIP.UA(uaConfig);
         } catch (err) {
-            this._triggerError(
-                _t("The server configuration could be wrong. Please check your configuration."));
+            this._triggerError(_t('The server configuration could be wrong. Please check your configuration.'));
             return false;
         }
     },
     /**
-     * @private
-     * @param {function} func
-     */
-    _demoTimeout(func) {
-        return setTimeout(func, 3000);
-    },
-    /**
-     * Returns the UA configuration required.
-     *
-     * @private
-     * @param {Object} params user and pbx configuration parameters
-     * @return {Object} the ua configuration parameters
-     */
-    _getUaConfig(params) {
-        const sessionDescriptionHandlerFactoryOptions = {
+    * Returns the ua configuration required.
+    *
+    * @private
+    * @param {Object} params user and pbx configuration parameters
+    * @return {Object} the ua configuration parameters
+    */
+    _getUaConfig: function (params) {
+        var sessionDescriptionHandlerFactoryOptions = {
             constraints: {
                 audio: true,
                 video: false
@@ -359,17 +263,18 @@ const UserAgent = Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
             iceCheckingTimeout: 1000,
         };
         return {
-            authorizationUser: params.login,
-            hackIpInContact: true,
-            log: params.log,
-            password: params.password,
-            register: true,
-            sessionDescriptionHandlerFactoryOptions,
+            uri: params.login + '@' + params.pbx_ip,
             transportOptions: {
                 wsServers: params.wsServer || null,
                 traceSip: params.traceSip
             },
-            uri: `${params.login}@${params.pbx_ip}`,
+            authorizationUser: params.login,
+            password: params.password,
+            hackIpInContact: true,
+            registerExpires: 3600,
+            register: true,
+            sessionDescriptionHandlerFactoryOptions: sessionDescriptionHandlerFactoryOptions,
+            log: params.log,
         };
     },
     /**
@@ -378,121 +283,68 @@ const UserAgent = Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
      * @private
      * @param {Object} result user and pbx configuration return by the rpc
      */
-    _initUserAgent(result) {
+    _initUa: function (result) {
         this.infoPbxConfiguration = result;
-        this._mode = result.mode;
-        if (this._mode === 'prod') {
-            this.trigger_up('sip_error', {
-                isConnecting: true,
-                message: _t("Connecting..."),
-            });
-            if (!window.RTCPeerConnection || !window.MediaStream || !navigator.mediaDevices) {
-                this._triggerError(
-                    _t("Your browser could not support WebRTC. Please check your configuration."));
+        this.mode = result.mode;
+        if (this.mode === "prod") {
+            this.trigger_up('sip_error', {msg: _t("Connecting..."), connecting: true});
+            if (!window.RTCPeerConnection) {
+                //TODO: In master, change the error message (Your browser does not support WebRTC. You will not be able to make or receive calls.)
+                this._triggerError(_t('Your browser could not support WebRTC. Please check your configuration.'));
                 return;
             }
-            this._userAgent = this._createUserAgent(result);
-            if (!this._userAgent) {
+            this.userAgent = this._createUa(result);
+            if (!this.userAgent) {
                 return;
             }
-            this._alwaysTransfer = result.always_transfer;
-            this._ignoreIncoming = result.ignore_incoming;
+            this.alwaysTransfer = result.always_transfer;
+            this.ignoreIncoming = result.ignore_incoming;
             if (result.external_phone) {
-                this._externalPhone = cleanNumber(result.external_phone);
+                this.externalPhone = clean_number(result.external_phone);
             }
+            var self = this;
             // catch the error if the ws uri is wrong
-            this._userAgent.transport.ws.onerror = () => this._triggerError(
-                _t("The websocket uri could be wrong. Please check your configuration."));
-            this._userAgent.on('registrationFailed', this._onRegistrationFailed.bind(this));
-            this._userAgent.on('registered', this._onRegistered.bind(this));
-            this._userAgent.on('invite', this._onInvite.bind(this));
+            this.userAgent.transport.ws.onerror = function () {
+                self._triggerError(_t('The websocket uri could be wrong.') +
+                    _t(' Please check your configuration.'));
+            };
+            this.userAgent.on('registered', _.bind(this._onRegistered,this));
+            this.userAgent.on('invite', _.bind(this._onInvite,this));
         }
-        this._configureDomElements();
+        this._configureDomElements()
     },
     /**
      * Triggers the sip invite.
      *
-     * @private
-     * @param {string} number
+     *  @param {String} number
+     *  @private
      */
-    _makeCall(number) {
-        if (this._callState !== CALL_STATE.NO_CALL) {
+    _makeCall: function (number) {
+        if (this.callState !== CALL_STATE.NO_CALL) {
             return;
         }
         try {
-            number = cleanNumber(number);
-            this._currentCallParams = { number };
-            if (this._alwaysTransfer && this._externalPhone) {
-                this._sipSession = this._userAgent.invite(this._externalPhone);
-                this._currentNumber = number;
+            number = clean_number(number);
+            if (this.alwaysTransfer && this.externalPhone){
+                this.sipSession = this.userAgent.invite(this.externalPhone);
+                this.currentNumber = number;
             } else {
-                this._sipSession = this._userAgent.invite(number);
+                this.sipSession = this.userAgent.invite(number);
             }
-            this._setupOutCall();
         } catch (err) {
-            this._triggerError(
-                _.string.sprintf(
-                    _t("The connection cannot be made.</br> Please check your configuration.</br> (Reason received: %s)"),
-                    err.reason_phrase));
+            this._triggerError(_t('the connection cannot be made. ') +
+                _t('Please check your configuration.</br> (Reason receives :') +
+                err.reason_phrase + ')');
             return;
         }
+        this._setupOutCall();
     },
-    /**
-     * Reject the inviteSession
-     *
-     * @private
-     * @param {Object} inviteSession
-     */
-    _rejectInvite(inviteSession) {
-        if (!this._isOutgoing) {
-            this._audioIncomingRingtone.pause();
-            inviteSession.reject({ statusCode: 603 });
-        }
-    },
-    /**
-     * TODO when the _sendNotification is moved into utils instead of mail.utils
-     * remove this function and use the one in utils
-     *
-     * @private
-     * @param {string} title
-     * @param {string} content
-     */
-    _sendNotification(title, content) {
-        if (
-            window.Notification &&
-            window.Notification.permission === 'granted' &&
-            // Only send notifications in master tab, so that the user doesn't
-            // get a notification for every open tab.
-            this.call('bus_service', 'isMasterTab')
-        ) {
-            return new window.Notification(title, {
-                body: content,
-                icon: '/mail/static/src/img/odoo_o.png',
-                silent: true,
-            });
-        }
-    },
-    /**
-     * (Un)set the sound of audio media stream
-     *
-     * @private
-     * @param {boolean} mute
-     */
-    _setMute(mute) {
-        const call = this._sipSession;
-        const peerConnection = call.sessionDescriptionHandler.peerConnection;
-        if (peerConnection.getSenders) {
-            for (const sender of peerConnection.getSenders()) {
-                if (sender.track) {
-                    sender.track.enabled = !mute;
-                }
-            }
-        } else {
-            for (const stream of peerConnection.getLocalStreams()) {
-                for (const track of stream.getAudioTracks()) {
-                    track.enabled = !mute;
-                }
-            }
+    // TODO when the _sendNotification is moved into utils instead of mail.utils
+    // remove this function and use the one in utils
+    _sendNotification: function (title, content) {
+        if (window.Notification && Notification.permission === "granted") {
+            return new Notification(title,
+                {body: content, icon: "/mail/static/src/img/odoo_o.png", silent: true});
         }
     },
     /**
@@ -500,40 +352,45 @@ const UserAgent = Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
      *
      * @private
      */
-    _setupOutCall() {
-        this._isOutgoing = true;
-        this._callState = CALL_STATE.RINGING_CALL;
-        this.trigger_up('sip_error', {
-            isConnecting: true,
-            message: _t("Please accept the use of the microphone."),
-        });
-        this._sipSession.on('accepted', () => this._onAccepted());
-        this._sipSession.on('cancel', () => this._onCancel());
-        this._sipSession.on('rejected', response => this._onRejected(response));
-        this._sipSession.on('progress', () => this._onTry());
-        this._sipSession.on('SessionDescriptionHandler-created', () =>
-            this._onInviteSentHelper());
+    _setupOutCall: function () {
+        this.callState = CALL_STATE.RINGING_CALL;
+        this.sipSession.on('accepted',_.bind(this._onAccepted,this));
+        this.sipSession.on('cancel',_.bind(this._onCancel,this));
+        this.sipSession.on('rejected',_.bind(this._onRejected,this));
     },
     /**
+     * Toggle the sound of audio media stream
+     *
      * @private
+     * @param {boolean} mute
      */
-    _stopRingtones() {
-        this._audioRingbackTone.pause();
-        this._audioDialRingtone.pause();
+    _toggleMute: function (mute) {
+        var call = this.sipSession;
+        var peerConnection = call.sessionDescriptionHandler.peerConnection;
+        if (peerConnection.getSenders) {
+            peerConnection.getSenders().forEach(function (sender) {
+                if (sender.track) {
+                    sender.track.enabled = !mute;
+                }
+            });
+        } else {
+            peerConnection.getLocalStreams().forEach(function (stream) {
+                stream.getAudioTracks().forEach(function (track) {
+                    track.enabled = !mute;
+                });
+            });
+        }
     },
     /**
      * Triggers up an error.
      *
      * @private
-     * @param {string} message message diplayed
-     * @param {Object} [param1={}]
-     * @param {boolean} [param1.isTemporary] if the message can be discarded or not
+     * @param {string} msg message diplayed
+     * @param {boolean} temporary if the message can be discarded or not
      */
-    _triggerError(message, { isTemporary }={}) {
-        this.trigger_up('sip_error', {
-            isTemporary,
-            message,
-        });
+    _triggerError: function (msg, temporary) {
+        this.trigger_up('sip_error', {msg:msg, temporary:temporary});
+        this.blocked = true;
     },
 
     //--------------------------------------------------------------------------
@@ -545,17 +402,16 @@ const UserAgent = Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
      *
      * @private
      */
-    async _onAccepted() {
-        this._callState = CALL_STATE.ONGOING_CALL;
-        const call = this._sipSession;
-        this._stopRingtones();
-        if (this._mode === 'prod') {
+    _onAccepted: function () {
+        this.callState = CALL_STATE.ONGOING_CALL;
+        var call = this.sipSession;
+        this.ringbacktone.pause();
+        if (this.mode === 'prod') {
             this._configureRemoteAudio();
-            call.sessionDescriptionHandler.on('addTrack', () =>
-                this._configureRemoteAudio());
-            call.on('bye', () => this._onBye());
-            if (this._alwaysTransfer && this._currentNumber) {
-                call.refer(this._currentNumber);
+            call.sessionDescriptionHandler.on('addTrack',_.bind(this._configureRemoteAudio,this));
+            call.on('bye',_.bind(this._onBye,this));
+            if (this.alwaysTransfer && this.currentNumber){
+                call.refer(this.currentNumber);
             }
         }
         this.trigger_up('sip_accepted');
@@ -565,330 +421,150 @@ const UserAgent = Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
      *
      * @private
      */
-    _onBye() {
+    _onBye: function () {
         this._cleanRemoteAudio();
-        this._audioDialRingtone.pause();
-        this._sipSession = false;
-        this._callState = CALL_STATE.NO_CALL;
-        if (this._mode === 'demo') {
-            clearTimeout(this._timerAcceptedTimeout);
-        }
+        this.sipSession = false;
+        this.callState = CALL_STATE.NO_CALL;
         this.trigger_up('sip_bye');
+        if (this.mode === "demo") {
+            clearTimeout(this.timerAccepted);
+        }
     },
     /**
      * Handles the sip session cancel.
      *
      * @private
      */
-    _onCancel() {
-        if (this._callState !== CALL_STATE.CANCELING_CALL) {
-            return;
+    _onCancel: function () {
+        this.sipSession = false;
+        this.callState = CALL_STATE.NO_CALL;
+        this.ringbacktone.pause();
+        this.trigger_up('sip_cancel');
+        if (this.mode === "demo") {
+            clearTimeout(this.timerAccepted);
         }
-        if (this._isOutgoing) {
-            this.trigger_up('sip_cancel_outgoing');
-        } else {
-            this.trigger_up('sip_cancel_incoming', this._currentCallParams);
-        }
-        this._sipSession = false;
-        this._callState = CALL_STATE.NO_CALL;
-        this._stopRingtones();
-        if (this._mode === 'demo') {
-            clearTimeout(this._timerAcceptedTimeout);
-        }
-    },
-    /**
-     * @private
-     * @param {Object} inviteSession
-     */
-    _onCurrentInviteSessionRejected(inviteSession) {
-        if (this._notification) {
-            this._notification.removeEventListener('close', this._rejectInvite, inviteSession);
-            this._notification.close();
-            this._notification = undefined;
-            this._audioIncomingRingtone.pause();
-        }
-        if ((typeof this._dialog !== 'undefined') && (this._dialog.$el.is(":visible"))) {
-            this._dialog.close();
-            this._audioIncomingRingtone.pause();
-        }
-        if (this._callState === CALL_STATE.REJECTING_CALL) {
-            this.trigger_up('sip_rejected', this._currentCallParams);
-            this._callState = CALL_STATE.NO_CALL;
-        } else {
-            this._canceledIncomingCall();
-        }
-    },
-    /**
-     * handle the fact that the user does not give the right to use the mic
-     *
-     * @private
-     */
-    _onErrorMicrophone() {
-        this._triggerError(
-            _t("Please Allow the use of the microphone"),
-            { isTemporary: true });
-        this.hangup();
     },
     /**
      * Handles the invite event.
      *
-     * @private
      * @param {Object} inviteSession
      */
-    async _onInvite(inviteSession) {
-        if (
-            this._ignoreIncoming ||
-            this._callState === CALL_STATE.ONGOING_CALL
-        ) {
+    _onInvite: function (inviteSession) {
+        if (this.ignoreIncoming || this.callState === CALL_STATE.ONGOING_CALL) {
             inviteSession.reject({ statusCode: 603 });
             return;
         }
-
-        function sanitizedPhone(prefix, number) {
-            if (number.startsWith("00")){
-                return "+" + number.substr(2, number.length);
-            }
-            else if (number.startsWith("0")) {
-                return "+" + prefix + number.substr(1, number.length);
-            }
-            /* USA exception for domestic numbers : In the US, the convention is 1 (area code)
-             * extension, while in Europe it is (0 area code)/extension.
-             */
-            else if (number.startsWith("1")) {
-                return "+" + number;
-            }
-        }
-
-        let name = inviteSession.remoteIdentity.displayName;
-        const number = inviteSession.remoteIdentity.uri.user;
-        let numberSanitized = sanitizedPhone(inviteSession.remoteIdentity.uri.type, number);
-        this._currentInviteSession = inviteSession;
-        let domain;
-        if (numberSanitized) {
-            domain = [
-                '|', '|',
-                ['sanitized_phone', 'ilike', number],
-                ['sanitized_mobile', 'ilike', number],
-                '|',
-                ['sanitized_phone', 'ilike', numberSanitized],
-                ['sanitized_mobile', 'ilike', numberSanitized],
-            ];
-        } else {
-            domain = [
-                '|',
-                ['sanitized_phone', 'ilike', number],
-                ['sanitized_mobile', 'ilike', number],
-            ];
-        }
-        let contacts = await this._rpc({
+        var self = this;
+        var name = inviteSession.remoteIdentity.displayName;
+        var number = inviteSession.remoteIdentity.uri.user;
+        this._rpc({
             model: 'res.partner',
             method: 'search_read',
-            domain: domain,
+            domain: [
+                '|',
+                ['sanitized_phone', 'ilike', number],
+                ['sanitized_mobile', 'ilike', number],
+            ],
             fields: ['id', 'display_name'],
             limit: 1,
-        });
-        /* Fallback if inviteSession.remoteIdentity.uri.type didn't give the correct country prefix
-        */
-        if (!contacts.length) {
-            let lastSixDigitsNumber = number.substr(number.length - 6)
-            contacts = await this._rpc({
-                model: 'res.partner',
-                method: 'search_read',
-                domain: [
-                    '|',
-                    ['sanitized_phone', '=like', '%'+lastSixDigitsNumber],
-                    ['sanitized_mobile', '=like', '%'+lastSixDigitsNumber],
-                ],
-                fields: ['id', 'display_name'],
-                limit: 1,
-            });
-        }
-        const incomingCallParams = { number };
-        let contact = false;
-        if (contacts.length) {
-            contact = contacts[0];
-            name = contact.display_name;
-            incomingCallParams.partnerId = contact.id;
-        }
-        let content;
-        if (name) {
-            content = _.str.sprintf(_t("Incoming call from %s (%s)"), name, number);
-        } else {
-            content = _.str.sprintf(_t("Incoming call from %s"), number);
-        }
-        this._isOutgoing = false;
-        this._callState = CALL_STATE.RINGING_CALL;
-        this._audioIncomingRingtone.currentTime = 0;
-        if (this.PLAY_MEDIA && this.call('bus_service', 'isMasterTab')) {
-            this._audioIncomingRingtone.play().catch(() => {});
-        }
-        this._notification = this._sendNotification('Odoo', content);
-        this._currentCallParams = incomingCallParams;
-        this.trigger_up('incomingCall', incomingCallParams);
+        }).then(function (contacts) {
+            var incomingCallParams = {
+                number: number
+            };
+            var contact = false;
+            if (contacts.length) {
+                contact = contacts[0];
+                name = contact.display_name;
+                incomingCallParams.partnerId = contact.id;
+            }
+            var content = _t("Incoming call from ");
+            if (name) {
+                content += name + ' (' + number + ')';
+            } else {
+                content += number;
+            }
+            self.incomingtone.currentTime = 0;
+            self.incomingtone.play();
 
-        this._currentInviteSession.on('rejected', () =>
-            this._onCurrentInviteSessionRejected(inviteSession));
-        if (!window.Notifcation || !window.Notification.requestPermission) {
-           this._onWindowNotificationPermissionRequested({ content, inviteSession });
-           return;
-        }
-        const res = window.Notification.requestPermission();
-        if (!res) {
-           this._onWindowNotificationPermissionRequested({ content, inviteSession });
-           return;
-        }
-        res
-            .then(permission => this._onWindowNotificationPermissionRequested({ content, inviteSession, permission }))
-            .catch(() => this._onWindowNotificationPermissionRequested({ content, inviteSession }));
-    },
-    /**
-     * Starts the first ringing tone
-     *
-     * @private
-     */
-    _onInviteSent() {
-        this.trigger_up('sip_error_resolved');
-        if (this.PLAY_MEDIA) {
-            this._audioDialRingtone.play().catch(() => {});
-        }
-    },
-    /**
-     * This function is needed to ensure that the sessionDescriptionHandler exists
-     * Indeed, he is created before the event SessionDescriptionHandler-created
-     * Also used to catch the error when there is an error with the mic.
-     *
-     * @private
-     */
-    _onInviteSentHelper() {
-        this._sipSession.sessionDescriptionHandler.on('userMedia', () =>
-            this._onInviteSent());
-        this._sipSession.sessionDescriptionHandler.on('userMediaFailed', () =>
-            this._onErrorMicrophone());
-    },
-    /**
-     * Once it is confirmed the user gave acces to the mic, we start the call and unblock the widget
-     *
-     * @private
-     * @param {Object} incomingCallParams contains the name and partnerID
-     * @param {string} incomingCallParams.number
-     * @param {integer} incomingCallParams.partnerId
-     */
-    _onMicrophoneAccepted(incomingCallParams) {
-        this._callState = CALL_STATE.ONGOING_CALL;
-        this.trigger_up('sip_incoming_call', incomingCallParams);
-    },
-    /**
-     * User refused the use of the microphone, the call is rejected and a notification is send to the user
-     *
-     * @private
-     */
-    _onMicrophoneRefused() {
-        this.rejectIncomingCall();
-        this._triggerError(
-            _t("The call was rejected as access rights to the microphone were not given"),
-            { isTemporary: true });
+            self.notification = self._sendNotification('Odoo', content);
+            function _rejectInvite () {
+                if (!self.incomingCall) {
+                    self.incomingtone.pause();
+                    inviteSession.reject({ statusCode: 603 });
+                }
+            }
+            inviteSession.on('rejected', function () {
+                if (self.notification) {
+                    self.notification.removeEventListener('close', _rejectInvite);
+                    self.notification.close('rejected');
+                    self.notification = undefined;
+                    self.incomingtone.pause();
+                } else if (self.dialog.$el.is(":visible")){
+                    self.dialog.close();
+                }
+            });
+            if (self.notification) {
+                self.notification.onclick = function () {
+                    window.focus();
+                    this.close();
+                };
+            }
+            var options = {
+                confirm_callback: function () {
+                    self._answerCall(inviteSession, incomingCallParams);
+                },
+                cancel_callback: function () {
+                    try {
+                        inviteSession.reject({ statusCode: 603 });
+                    } catch (err) {
+                        console.error('Reject failed:', err);
+                    }
+                    self.incomingtone.pause();
+                },
+            };
+            self.dialog = Dialog.confirm(self, content, options);
+            self.dialog.on('closed', self, function () {
+                if (inviteSession && self.callState !== CALL_STATE.ONGOING_CALL) {
+                    try {
+                        inviteSession.reject({ statusCode: 603 });
+                    } catch (err) {
+                        console.error('Reject failed:', err);
+                    }
+                }
+                self.incomingtone.pause();
+            });
+        });
     },
     /**
      * Triggered when the user agent is connected.
      * This function will trigger the event 'sip_error_resolved' to unblock the
      * overlay
      *
-     * @private
+     *  @private
      */
-    _onRegistered() {
+    _onRegistered: function (){
         this.trigger_up('sip_error_resolved');
-    },
-    /**
-     * User registration failed. A notification of the error is send in the widget and it stays blocked
-     *
-     * @private
-     */
-    _onRegistrationFailed() {
-        this._triggerError(
-            _t("There was an error with your registration: Please check your configuration."));
     },
     /**
      * Handles the sip session rejection.
      *
      * @private
-     * @param {Object} response is emitted by sip.js lib
-     * @param {string} response.reasonPhrase
-     * @param {integer} response.statusCode used in this function respectively
-     *   stand for:
-     * - 404 : Not Found
-     * - 488 : Not Acceptable Here
-     * - 603 : Decline
+     * @param {Object} response
      */
-    _onRejected(response) {
-        this._callState = CALL_STATE.REJECTING_CALL;
-        this._stopRingtones();
-        this._sipSession = false;
-        this._callState = CALL_STATE.NO_CALL;
-        if (
-            response.statusCode === 404 ||
-            response.statusCode === 488 ||
-            response.statusCode === 603
-        ) {
-            this._triggerError(
-                _.str.sprintf(
-                    "The number is incorrect, the user credentials could be wrong or the connection cannot be made. Please check your configuration.</br> (Reason received: %s)",
-                    response.reasonPhrase),
-                { isTemporary: true });
-            this.trigger_up('sip_cancel_outgoing');
-        }
-    },
-    /**
-     * Triggered when the call tries to connect.
-     * Two tries are received before the phone start ringing
-     *
-     * @private
-     */
-    _onTry() {
-        if (this._progressCount === 2) {
-            this._progressCount = 0;
-            this._stopRingtones();
-            if (this.PLAY_MEDIA) {
-                this._audioRingbackTone.play().catch(() => {});
+    _onRejected: function (response) {
+        if (this.sipSession) {
+            this.sipSession = false;
+            this.callState = CALL_STATE.NO_CALL;
+            this.trigger_up('sip_rejected');
+            this.ringbacktone.pause();
+            if (response.status_code === 404 || response.status_code === 488) {
+                this._triggerError(
+                    _.str.sprintf(_t('The number is incorrect, the user credentials ' +
+                                     'could be wrong or the connection cannot be made. ' +
+                                     'Please check your configuration.</br> (Reason received: %s)'),
+                        response.reason_phrase),
+                    true);
             }
-            this.trigger_up('changeStatus');
-        } else {
-            this._progressCount++;
-        }
-    },
-    /**
-     * @private
-     * @param {Object} param0
-     * @param {string} param0.content
-     * @param {Object} param0.inviteSession
-     * @param {string} [param0.permission]
-     */
-    _onWindowNotificationPermissionRequested({
-        content,
-        inviteSession,
-        permission,
-    }) {
-        if (permission === 'granted') {
-            this._notification = this._sendNotification("Odoo", content);
-            if (this._notification) {
-                this._notification.onclick = function () {
-                    window.focus();
-                    this.close();
-                };
-                this._notification.removeEventListener('close', this._rejectInvite, inviteSession);
-            }
-        } else {
-            this._dialog = Dialog.confirm(this, content, {
-                confirm_callback: () => this._answerCall(),
-                cancel_callback: () => {
-                    try {
-                        this.rejectIncomingCall();
-                    } catch (err) {
-                        console.error(
-                            _.str.sprintf(_t("Reject failed: %s"), err));
-                    }
-                    this._audioIncomingRingtone.pause();
-                },
-            });
         }
     },
 });

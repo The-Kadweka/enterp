@@ -31,7 +31,7 @@
             <cfdi:Emisor
                 t-att-Rfc="supplier.vat"
                 t-att-Nombre="invoice._get_string_cfdi(supplier.name, 254)"
-                t-att-RegimenFiscal="fiscal_regime"/>
+                t-att-RegimenFiscal="fiscal_position.l10n_mx_edi_code"/>
             <cfdi:Receptor
                 t-att-Rfc="customer.l10n_mx_edi_get_customer_rfc()"
                 t-att-Nombre="invoice._get_string_cfdi(customer.commercial_partner_id.name, 254)"
@@ -71,18 +71,21 @@
                         t-att-SelloPago="pay_stamp">
                         <t t-set="writeoff_vals" t-value="record._l10n_mx_edi_get_payment_write_off()"/>
                         <t t-foreach="record.invoice_ids" t-as="invoice">
-                            <t t-set="amount" t-value="[p for p in invoice._get_reconciled_info_JSON_values() if (p.get('account_payment_id', False) == record.id or not p.get('account_payment_id') and (not p.get('move_id') or p.get('move_id') == invoice.id))]"/>
-                            <t t-set="amount_payment" t-value="sum([data.get('amount', 0.0) for data in amount]) - writeoff_vals.get(invoice.id, 0)"/>
-                            <t t-set="amount_insoluto" t-value="invoice.amount_residual"/>
+                            <t t-set="amount" t-value="[p for p in invoice._get_payments_vals() if (p.get('account_payment_id', False) == record.id or not p.get('account_payment_id') and (not p.get('invoice_id') or p.get('invoice_id') == invoice.id))]"/>
+                            <t t-set="amount_payment" t-value="sum([data.get('amount', 0.0) for data in amount])"/>
+                            <t t-set="amount" t-value="[p for p in invoice._get_payments_vals() if (p.get('account_payment_id', False) != record.id or not p.get('account_payment_id') and (not p.get('invoice_id') or p.get('invoice_id') == invoice.id))]"/>
+                            <t t-set="previous_amount" t-value="sum([data.get('amount', 0.0) for data in amount])"/>
+                            <t t-set="amount_payment" t-value="amount_payment if round(sum([p.get('amount') for p in invoice._get_payments_vals()]), invoice.currency_id.decimal_places) &lt;= invoice.amount_total else invoice.amount_total - previous_amount"/>
+                            <t t-set="amount_insoluto" t-value="invoice.residual"/>
                             <pago10:DoctoRelacionado
                                 t-att-IdDocumento="invoice.l10n_mx_edi_cfdi_uuid"
-                                t-att-Serie="invoice._get_string_cfdi(invoice._l10n_mx_get_serie_and_folio(invoice.name).get('serie', False), 25)"
-                                t-att-Folio="invoice._get_string_cfdi(invoice._l10n_mx_get_serie_and_folio(invoice.name).get('folio', False), 40)"
+                                t-att-Serie="invoice._get_string_cfdi(invoice._l10n_mx_get_serie_and_folio(invoice.number).get('serie', False), 25)"
+                                t-att-Folio="invoice._get_string_cfdi(invoice._l10n_mx_get_serie_and_folio(invoice.number).get('folio', False), 40)"
                                 t-att-MonedaDR="invoice.currency_id.name"
                                 t-att-TipoCambioDR="inv_rate if record.currency_id != invoice.currency_id else False"
                                 t-att-MetodoDePagoDR="invoice.l10n_mx_edi_get_payment_method_cfdi()"
-                                t-att-NumParcialidad="len(invoice._get_reconciled_payments().filtered(lambda p: p.state not in ('draft', 'cancelled') and not p.move_line_ids.mapped('move_id.reversed_entry_id')).ids)"
-                                t-att-ImpSaldoAnt="'%0.*f' % (decimal_precision, invoice.amount_residual + amount_payment)"
+                                t-att-NumParcialidad="len(invoice.payment_ids.filtered(lambda p: p.state not in ('draft', 'cancelled') and not p.move_line_ids.mapped('move_id.reverse_entry_id')).ids)"
+                                t-att-ImpSaldoAnt="'%0.*f' % (decimal_precision, invoice.residual + amount_payment)"
                                 t-att-ImpPagado="'%0.*f' % (decimal_precision, amount_payment - (writeoff_vals.get(invoice.id, 0) if invoice.currency_id == record.currency_id else 0))"
                                 t-att-ImpSaldoInsoluto="'%0.*f' % (decimal_precision, amount_insoluto + (writeoff_vals.get(invoice.id, 0) if invoice.currency_id == record.currency_id else 0))"/>
                         </t>

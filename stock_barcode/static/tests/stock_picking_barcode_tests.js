@@ -4,40 +4,13 @@ odoo.define('stock_barcode.stock_picking_barcode_tests', function (require) {
 var testUtils = require('web.test_utils');
 var FormView = require('web.FormView');
 
-var createActionManager = testUtils.createActionManager;
 var createView = testUtils.createView;
-var triggerKeypressEvent = testUtils.dom.triggerKeypressEvent;
+var triggerKeypressEvent = testUtils.triggerKeypressEvent;
 
 QUnit.module('stock_barcode', {}, function () {
 
 QUnit.module('Barcode', {
     beforeEach: function () {
-        var self = this;
-
-        this.clientData = {
-            action: {
-                tag: 'stock_barcode_picking_client_action',
-                type: 'ir.actions.client',
-                params: {
-                    model: "stock.inventory",
-                },
-                context: {},
-            },
-            currentState: [{
-                location_id: {},
-                location_dest_id: {},
-                move_line_ids: [],
-            }],
-        };
-        this.mockRPC = function (route, args) {
-            if (route === '/stock_barcode/get_set_barcode_view_state') {
-                return Promise.resolve(self.clientData.currentState);
-            } else if (args.method === "get_all_products_by_barcode") {
-                return Promise.resolve({});
-            } else if (args.method === "get_all_locations_by_barcode") {
-                return Promise.resolve({});
-            }
-        };
         this.data = {
             product: {
                 fields: {
@@ -94,10 +67,10 @@ QUnit.module('Barcode', {
     }
 });
 
-QUnit.test('scan a product (no tracking)', async function (assert) {
+QUnit.test('scan a product (no tracking)', function (assert) {
     assert.expect(5);
 
-    var form = await createView({
+    var form = createView({
         View: FormView,
         model: 'stock_picking',
         data: this.data,
@@ -133,7 +106,6 @@ QUnit.test('scan a product (no tracking)', async function (assert) {
         "quantity done should be 0");
 
     _.each(['5','4','3','9','8','2','6','7','1','2','5','2','Enter'], triggerKeypressEvent);
-    await testUtils.nextTick();
     assert.strictEqual(form.$('.o_data_row .o_data_cell:nth(2)').text(), '1.0',
         "quantity done should be 1");
     assert.verifySteps(['read', 'read'], "no RPC should have been done for the barcode scanned");
@@ -141,13 +113,13 @@ QUnit.test('scan a product (no tracking)', async function (assert) {
     form.destroy();
 });
 
-QUnit.test('scan a product tracked by lot', async function (assert) {
+QUnit.test('scan a product tracked by lot', function (assert) {
     assert.expect(8);
 
     // simulate a PO for a tracked by lot product
     this.data['stock.move.line'].records[0].lots_visible = true;
 
-    var form = await createView({
+    var form = createView({
         View: FormView,
         model: 'stock_picking',
         data: this.data,
@@ -174,7 +146,7 @@ QUnit.test('scan a product tracked by lot', async function (assert) {
         mockRPC: function (route, args) {
             assert.step(args.method);
             if (args.method === 'get_po_to_split_from_barcode') {
-                return Promise.resolve({action_id: 1});
+                return $.when({action_id: 1});
             }
             return this._super.apply(this, arguments);
         },
@@ -193,9 +165,8 @@ QUnit.test('scan a product tracked by lot', async function (assert) {
 
     // trigger a change on a field to be able to check that the record is correctly
     // saved before calling get_po_to_split_from_barcode
-    await testUtils.fields.editInput(form.$('.o_field_widget[name="display_name"]'), 'new value');
+    form.$('.o_field_widget[name="display_name"]').val('new value').trigger('input');
     _.each(['5','4','3','9','8','2','6','7','1','2','5','2','Enter'], triggerKeypressEvent);
-    await testUtils.nextTick();
     assert.strictEqual(form.$('.o_data_row .o_data_cell:nth(2)').text(), '0.0',
         "quantity done should still be 0");
     assert.verifySteps(['read', 'read', 'write', 'get_po_to_split_from_barcode'],
@@ -204,7 +175,7 @@ QUnit.test('scan a product tracked by lot', async function (assert) {
     form.destroy();
 });
 
-QUnit.test('scan a product verify onChange', async function (assert) {
+QUnit.test('scan a product verify onChange', function (assert) {
     assert.expect(7);
 
     this.data.stock_picking.onchanges = {
@@ -213,7 +184,7 @@ QUnit.test('scan a product verify onChange', async function (assert) {
     this.data['stock.move.line'].onchanges = {
         qty_done: function () {},
     };
-    var form = await createView({
+    var form = createView({
         View: FormView,
         model: 'stock_picking',
         data: this.data,
@@ -253,9 +224,8 @@ QUnit.test('scan a product verify onChange', async function (assert) {
 
     // trigger a change on a field to be able to check that the record is correctly
     // saved before calling get_po_to_split_from_barcode
-    await testUtils.fields.editInput(form.$('.o_field_widget[name="display_name"]'), 'new value');
+    form.$('.o_field_widget[name="display_name"]').val('new value').trigger('input');
     _.each(['5','4','3','9','8','2','6','7','1','2','5','2','Enter'], triggerKeypressEvent);
-    await testUtils.nextTick();
     assert.strictEqual(form.$('.o_data_row .o_data_cell:nth(2)').text(), '1.0',
         "quantity done should be 1");
     // We won't be able to block onchange calls on x2many since the notifyChange
@@ -263,29 +233,6 @@ QUnit.test('scan a product verify onChange', async function (assert) {
     assert.verifySteps(['read', 'read', 'onchange']);
 
     form.destroy();
-});
-
-QUnit.test('exclamation-triangle when picking is done', async function (assert) {
-    assert.expect(1);
-    this.clientData.currentState[0].state = 'done';
-    var actionManager = await createActionManager({
-        mockRPC: this.mockRPC,
-    });
-    await actionManager.doAction(this.clientData.action);
-    assert.containsOnce(actionManager, '.o_js_has_warning_msg', "Should have warning icon");
-    actionManager.destroy();
-});
-
-QUnit.test('barcode pic when picking is not done or cancelled', async function (assert) {
-    assert.expect(2);
-    this.clientData.currentState[0].group_stock_multi_locations = false;
-    var actionManager = await createActionManager({
-        mockRPC: this.mockRPC,
-    });
-    await actionManager.doAction(this.clientData.action);
-    assert.containsOnce(actionManager, '.o_barcode_pic', "Should have barcode picture");
-    assert.containsNone(actionManager, '.o_js_has_warning_msg', "Should not have warning icon");
-    actionManager.destroy();
 });
 
 });

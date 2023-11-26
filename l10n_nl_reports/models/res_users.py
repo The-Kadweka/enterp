@@ -4,7 +4,7 @@ from odoo import api, models, fields
 class Users(models.Model):
     _inherit = 'res.users'
 
-    l10n_nl_report_xaf_userid = fields.Char(compute='_get_l10n_nl_report_xaf_userid', stored=False, compute_sudo=True)
+    l10n_nl_report_xaf_userid = fields.Char(compute='_get_l10n_nl_report_xaf_userid', stored=False)
 
     @api.depends('login', 'display_name')
     def _get_l10n_nl_report_xaf_userid(self):

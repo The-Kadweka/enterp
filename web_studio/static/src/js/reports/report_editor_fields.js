@@ -87,40 +87,39 @@ var FieldMany2ManySelection = relationalFields.FieldMany2ManyTags.extend({
      * @overwrite
      */
     _setValue: function (value, options) {
-        var self = this;
+        var def = $.Deferred();
         var selection = this.value.res_ids;
 
-        return new Promise(function (resolve, reject) {
-            switch (value.operation) {
-                case "ADD_M2M":
-                    selection = selection.concat([value.ids.id]);
-                    break;
-                case "FORGET":
-                    selection = _.difference(selection, value.ids);
-                    break;
-                default: throw Error('Not implemented');
-            }
+        switch (value.operation) {
+            case "ADD_M2M":
+                selection = selection.concat([value.ids.id]);
+                break;
+            case "FORGET":
+                selection = _.difference(selection, value.ids);
+                break;
+            default: throw Error('Not implemented');
+        }
 
-            if (!(options && options.forceChange) && self._isSameValue(selection)) {
-                return Promise.resolve();
-            }
+        if (!(options && options.forceChange) && this._isSameValue(selection)) {
+            return $.when();
+        }
 
-            self.value.res_ids = selection;
-            self._render();
+        this.value.res_ids = selection;
+        this._render();
 
-            self.trigger_up('field_changed', {
-                dataPointID: self.dataPointID,
-                changes: _.object([self.name], [{
-                    operation: 'REPLACE_WITH',
-                    ids: selection,
-                }]),
-                viewType: self.viewType,
-                doNotSetDirty: options && options.doNotSetDirty,
-                notifyChange: !options || options.notifyChange !== false,
-                onSuccess: resolve,
-                onFailure: reject,
-            });
+        this.trigger_up('field_changed', {
+            dataPointID: this.dataPointID,
+            changes: _.object([this.name], [{
+                operation: 'REPLACE_WITH',
+                ids: selection,
+            }]),
+            viewType: this.viewType,
+            doNotSetDirty: options && options.doNotSetDirty,
+            notifyChange: !options || options.notifyChange !== false,
+            onSuccess: def.resolve.bind(def),
+            onFailure: def.reject.bind(def),
         });
+        return def;
     },
 });
 

@@ -20,14 +20,14 @@ class TestTimesheetValidation(TestCommonTimesheet):
     def setUp(self):
         super(TestTimesheetValidation, self).setUp()
         today = fields.Date.today()
-        self.timesheet1 = self.env['account.analytic.line'].with_user(self.user_employee).create({
+        self.timesheet1 = self.env['account.analytic.line'].sudo(self.user_employee.id).create({
             'name': "my timesheet 1",
             'project_id': self.project_customer.id,
             'task_id': self.task1.id,
             'date': today,
             'unit_amount': 2.0,
         })
-        self.timesheet2 = self.env['account.analytic.line'].with_user(self.user_employee).create({
+        self.timesheet2 = self.env['account.analytic.line'].sudo(self.user_employee.id).create({
             'name': "my timesheet 2",
             'project_id': self.project_customer.id,
             'task_id': self.task2.id,
@@ -39,7 +39,7 @@ class TestTimesheetValidation(TestCommonTimesheet):
         """ Employee record its timesheets and Officer validate them. Then try to modify/delete it and get Access Error """
         # Officer validate timesheet of 'user_employee' through wizard
         timesheet_to_validate = self.timesheet1 | self.timesheet2
-        validate_action = timesheet_to_validate.with_user(self.user_manager).action_validate_timesheet()
+        validate_action = timesheet_to_validate.sudo(self.user_manager).action_validate_timesheet()
         wizard = self.env['timesheet.validation'].browse(validate_action['res_id'])
         wizard.action_validate()
 
@@ -49,14 +49,14 @@ class TestTimesheetValidation(TestCommonTimesheet):
 
         # Employee can not modify validated timesheet
         with self.assertRaises(AccessError):
-            self.timesheet1.with_user(self.user_employee).write({'unit_amount': 5})
+            self.timesheet1.sudo(self.user_employee.id).write({'unit_amount': 5})
         # Employee can not delete validated timesheet
         with self.assertRaises(AccessError):
-            self.timesheet2.with_user(self.user_employee).unlink()
+            self.timesheet2.sudo(self.user_employee.id).unlink()
         # Employee can not create new timesheet in the validated period
         with self.assertRaises(AccessError):
             last_month = fields.Date.to_string(datetime.now() - relativedelta(months=1))
-            self.env['account.analytic.line'].with_user(self.user_employee).create({
+            self.env['account.analytic.line'].sudo(self.user_employee.id).create({
                 'name': "my timesheet 3",
                 'project_id': self.project_customer.id,
                 'task_id': self.task2.id,
@@ -66,7 +66,7 @@ class TestTimesheetValidation(TestCommonTimesheet):
 
         # Employee can still create timesheet after validated date
         next_month = fields.Date.to_string(datetime.now() + relativedelta(months=1))
-        timesheet4 = self.env['account.analytic.line'].with_user(self.user_employee).create({
+        timesheet4 = self.env['account.analytic.line'].sudo(self.user_employee.id).create({
             'name': "my timesheet 4",
             'project_id': self.project_customer.id,
             'task_id': self.task2.id,
@@ -80,12 +80,12 @@ class TestTimesheetValidation(TestCommonTimesheet):
         """ Officer can see timesheets and modify the ones of other employees """
        # Officer validate timesheet of 'user_employee' through wizard
         timesheet_to_validate = self.timesheet1 | self.timesheet2
-        validate_action = timesheet_to_validate.with_user(self.user_manager).action_validate_timesheet()
+        validate_action = timesheet_to_validate.sudo(self.user_manager.id).action_validate_timesheet()
         wizard = self.env['timesheet.validation'].browse(validate_action['res_id'])
         wizard.action_validate()
 
         # manager modify validated timesheet
-        self.timesheet1.with_user(self.user_manager).write({'unit_amount': 5})
+        self.timesheet1.sudo(self.user_manager.id).write({'unit_amount': 5})
 
     def _test_next_date(self, now, result, delay, interval):
 

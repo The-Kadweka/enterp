@@ -16,8 +16,10 @@
             <field name="model">uom.uom</field>
             <field name="inherit_id" ref="uom.product_uom_form_view"/>
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='uom_type']" position="after">
-                    <field name="unspsc_code_id"/>
+                <xpath expr="//form/group" position="inside">
+                    <group string="UNSPSC">
+                        <field name="unspsc_code_id"/>
+                    </group>
                 </xpath>
             </field>
         </record>

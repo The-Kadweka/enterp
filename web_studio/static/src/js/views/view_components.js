@@ -1,8 +1,8 @@
 odoo.define('web_studio.view_components', function (require) {
 "use strict";
 
-var config = require('web.config');
 var core = require('web.core');
+var config = require('web.config');
 var Registry = require('web.Registry');
 var Widget = require('web.Widget');
 
@@ -16,11 +16,10 @@ var AbstractComponent = Widget.extend({
      * @override
      */
     start: function () {
-        var self = this;
         this.$el.addClass('o_web_studio_component');
         this.$el.data('structure', this.structure);
         this.$el.text(this.label);
-        if (config.isDebug() && this.description) {
+        if (config.debug && this.description) {
             this.$el.addClass('o_web_studio_debug');
             this.$el.append($('<div>')
                 .addClass('o_web_studio_component_description')
@@ -35,8 +34,7 @@ var AbstractComponent = Widget.extend({
             revertDuration: 200,
             refreshPositions: true,
             start: function (e, ui) {
-                ui.helper.data(self.$el.data());
-                ui.helper.addClass("ui-draggable-helper");
+                $(ui.helper).addClass("ui-draggable-helper");
             }
         });
         return this._super.apply(this, arguments);
@@ -78,7 +76,7 @@ var AbstractNewFieldComponent = AbstractComponent.extend({
             type: this.type,
             field_description: 'New ' + this.label,
         });
-        return this._super.apply(this, arguments);
+        return this._super();
     },
 });
 var CharFieldComponent = AbstractNewFieldComponent.extend({
@@ -93,12 +91,12 @@ var TextFieldComponent = AbstractNewFieldComponent.extend({
 });
 var IntegerFieldComponent = AbstractNewFieldComponent.extend({
     type: 'integer',
-    label: _lt('Integer'),
+    label: _lt('Integer number'),
     className: 'o_web_studio_field_integer',
 });
 var DecimalFieldComponent = AbstractNewFieldComponent.extend({
     type: 'float',
-    label: _lt('Decimal'),
+    label: _lt('Decimal Number'),
     className: 'o_web_studio_field_float',
 });
 var HtmlFieldComponent = AbstractNewFieldComponent.extend({
@@ -179,7 +177,6 @@ var ExistingFieldComponent = AbstractComponent.extend({
             type: this.type,
             store: this.store ? "true":"false",
         });
-        this.$el.attr("title", this.label);
         return this._super.apply(this, arguments);
     },
 });
@@ -210,12 +207,6 @@ var PriorityWidgetComponent = AbstractNewWidgetComponent.extend({
     label: _lt('Priority'),
     className: 'o_web_studio_field_priority',
     attrs: {widget: 'priority'},
-});
-var SignatureWidgetComponent = AbstractNewWidgetComponent.extend({
-    type: 'binary',
-    label: _lt('Signature'),
-    className: 'o_web_studio_field_signature',
-    attrs: {widget: 'signature'},
 });
 var RelatedFieldComponent = AbstractNewFieldComponent.extend({
     type: 'related',
@@ -250,7 +241,6 @@ form_component_widget_registry
         ImageWidgetComponent,
         TagWidgetComponent,
         PriorityWidgetComponent,
-        SignatureWidgetComponent,
         RelatedFieldComponent,
     ])
     .add('existing_field', ExistingFieldComponent);

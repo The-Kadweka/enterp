@@ -11,7 +11,7 @@ MockServer.include({
     /**
      * @override
      * @private
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _performRpc: function (route, args) {
         if (args.method === 'get_cohort_data') {
@@ -25,7 +25,7 @@ MockServer.include({
      * @private
      * @param {string} model
      * @param {Object} kwargs
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _mockGetCohortData: function (model, kwargs) {
         var self = this;
@@ -161,7 +161,7 @@ MockServer.include({
             });
         });
 
-        return Promise.resolve({
+        return $.when({
             'rows': rows,
             'avg': {'avg_value': totalCount ? (totalValue / totalCount) : 0, 'columns_avg': columnsAvg},
         });

@@ -50,13 +50,11 @@ class Certificate(models.Model):
     content = fields.Binary(
         string='Certificate',
         help='Certificate in der format',
-        required=True,
-        attachment=False,)
+        required=True,)
     key = fields.Binary(
         string='Certificate Key',
         help='Certificate Key in der format',
-        required=True,
-        attachment=False,)
+        required=True,)
     password = fields.Char(
         string='Certificate Password',
         help='Password for the Certificate Key',
@@ -75,20 +73,23 @@ class Certificate(models.Model):
         help='The date on which the certificate expires',
         readonly=True)
 
+    @api.multi
     @tools.ormcache('content')
     def get_pem_cer(self, content):
         '''Get the current content in PEM format
         '''
         self.ensure_one()
-        return ssl.DER_cert_to_PEM_cert(base64.decodebytes(content)).encode('UTF-8')
+        return ssl.DER_cert_to_PEM_cert(base64.decodestring(content)).encode('UTF-8')
 
+    @api.multi
     @tools.ormcache('key', 'password')
     def get_pem_key(self, key, password):
         '''Get the current key in PEM format
         '''
         self.ensure_one()
-        return convert_key_cer_to_pem(base64.decodebytes(key), password.encode('UTF-8'))
+        return convert_key_cer_to_pem(base64.decodestring(key), password.encode('UTF-8'))
 
+    @api.multi
     def get_data(self):
         '''Return the content (b64 encoded) and the certificate decrypted
         '''
@@ -99,12 +100,14 @@ class Certificate(models.Model):
             cer_pem = cer_pem.replace(to_del.encode('UTF-8'), b'')
         return cer_pem, certificate
 
+    @api.multi
     def get_mx_current_datetime(self):
         '''Get the current datetime with the Mexican timezone.
         '''
         return fields.Datetime.context_timestamp(
             self.with_context(tz='America/Mexico_City'), fields.Datetime.now())
 
+    @api.multi
     def get_valid_certificate(self):
         '''Search for a valid certificate that is available and not expired.
         '''
@@ -116,6 +119,7 @@ class Certificate(models.Model):
                 return record
         return None
 
+    @api.multi
     def get_encrypted_cadena(self, cadena):
         '''Encrypt the cadena using the private key.
         '''
@@ -126,6 +130,7 @@ class Certificate(models.Model):
         cadena_crypted = crypto.sign(private_key, cadena, encrypt)
         return base64.b64encode(cadena_crypted)
 
+    @api.multi
     @api.constrains('content', 'key', 'password')
     def _check_credentials(self):
         '''Check the validity of content/key/password and fill the fields
@@ -166,13 +171,15 @@ class Certificate(models.Model):
         self.clear_caches()
         return res
 
+    @api.multi
     def write(self, data):
         res = super(Certificate, self).write(data)
         self.clear_caches()
         return res
 
+    @api.multi
     def unlink(self):
-        if self.env['account.move'].sudo().search(
+        if self.env['account.invoice'].sudo().search(
                 [('l10n_mx_edi_cfdi_name', '!=', False)], limit=1):
             raise UserError(_(
                 'You cannot remove a certificate if at least an invoice has been signed. '

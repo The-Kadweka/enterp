@@ -10,23 +10,6 @@
     <record id="group_helpdesk_user" model="res.groups">
         <field name="users" eval="[(4,ref('base.user_demo'))]"/>
     </record>
-
-    <!-- SLA's -->
-    <record id="helpdesk_sla_1" model="helpdesk.sla">
-        <field name="name">2 days to start</field>
-        <field name="team_id" ref="helpdesk_team1"/>
-        <field name="stage_id" ref="stage_in_progress"/>
-        <field name="time_days">2</field>
-    </record>
-
-    <record id="helpdesk_sla_2" model="helpdesk.sla">
-        <field name="name">7 days to finish</field>
-        <field name="team_id" ref="helpdesk_team1"/>
-        <field name="stage_id" ref="stage_solved"/>
-        <field name="time_days">7</field>
-    </record>
-
-    <!-- Tickets -->
     <record id="helpdesk_ticket_1" model="helpdesk.ticket">
         <field name="name">Kitchen collapsing</field>
         <field name="user_id" ref="base.user_admin"/>

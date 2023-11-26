@@ -24,12 +24,12 @@
                 <ENC_3 t-esc="invoice_partner._get_vat_without_verification_code()"/>
                 <ENC_4>UBL 2.0</ENC_4>
                 <ENC_5>DIAN 1.0</ENC_5>
-                <ENC_6 t-esc="invoice.name"/>
-                <ENC_7 t-esc="invoice.invoice_date"/>
+                <ENC_6 t-esc="invoice.number"/>
+                <ENC_7 t-esc="invoice.date_invoice"/>
                 <ENC_8 t-esc="invoice._l10n_co_edi_get_validation_time()"/>
                 <ENC_9 t-esc="invoice.l10n_co_edi_type if invoice.type not in ('out_refund', 'in_refund') else '9'"/>
                 <ENC_10 t-esc="invoice.currency_id.name"/>
-                <ENC_16 t-esc="invoice.invoice_date_due"/>
+                <ENC_16 t-esc="invoice.date_due"/>
                 <ENC_17 t-esc="invoice.l10n_co_edi_attachment_url"/>
             </ENC>
 
@@ -121,12 +121,12 @@
 
             <ORC>
                 <ORC_1 t-esc="invoice.name"/>
-                <ORC_4 t-esc="invoice.invoice_origin"/>
+                <ORC_4 t-esc="invoice.origin"/>
             </ORC>
 
             <REF>
                 <REF_1 t-esc="invoice_type_to_ref_1[invoice.type]"/>
-                <REF_2 t-esc="invoice.invoice_origin or 'N/A'"/>
+                <REF_2 t-esc="invoice.origin or 'N/A'"/>
             </REF>
 
             <IEN>
@@ -165,10 +165,10 @@
             <t t-set="ite_counter" t-value="1"/>
             <ITE t-foreach="invoice.invoice_line_ids" t-as="line">
                     <ITE_1 t-esc="ite_counter"/>
-                    <ITE_2 t-if="line.currency_id and float_compare(line.price_subtotal, 0, precision_rounding=line.currency_id.rounding) &lt; 1">true</ITE_2>
+                    <ITE_2 t-if="float_compare(line.price_subtotal, 0, precision_rounding=line.currency_id.rounding) &lt; 1">true</ITE_2>
                     <ITE_2 t-else="">false</ITE_2>
                     <ITE_3 t-esc="line.quantity"/>
-                    <ITE_4 t-esc="line.product_uom_id.l10n_co_edi_ubl"/>
+                    <ITE_4 t-esc="line.uom_id.l10n_co_edi_ubl"/>
                     <ITE_5 t-esc="line.price_subtotal"/>
                     <ITE_6 t-esc="invoice.currency_id.name"/>
                     <ITE_7 t-esc="line.price_unit"/>
@@ -183,7 +183,7 @@
 
                     <IRF>
                         <IRF_1 t-esc="invoice_type_to_ref_1[invoice.type]"/>
-                        <IRF_2 t-esc="invoice.name"/>
+                        <IRF_2 t-esc="invoice.number"/>
                         <IRF_3 t-esc="ite_counter"/>
                     </IRF>
 
@@ -193,8 +193,8 @@
                     </MYM>
 
                     <IDE>
-                        <IDE_1 t-esc="'false' if line.currency_id and float_compare(line.price_subtotal, 0, precision_rounding=line.currency_id.rounding) &gt;= 0 else 'true'">
-                            <t t-if="line.currency_id and float_compare(line.price_subtotal, 0, precision_rounding=line.currency_id.rounding) &gt;= 0">false</t>
+                        <IDE_1 t-esc="'false' if float_compare(line.price_subtotal, 0, precision_rounding=line.currency_id.rounding) &gt;= 0 else 'true'">
+                            <t t-if="float_compare(line.price_subtotal, 0, precision_rounding=line.currency_id.rounding) &gt;= 0">false</t>
                             <t t-else="">true</t>
                         </IDE_1>
                         <IDE_2 t-esc="invoice.currency_id.round((line.discount / 100) * line.price_unit * line.quantity) or 0.0"/>

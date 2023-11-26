@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import api, models
-from odoo.tools.misc import formatLang, format_date
+from odoo.tools.misc import formatLang
 
 class AccountReconciliation(models.AbstractModel):
     _inherit = 'account.reconciliation.widget'
@@ -50,7 +50,6 @@ class AccountReconciliation(models.AbstractModel):
             batch_payments.append({
                 'id': batch_payment.id,
                 'name': batch_payment.name,
-                'date': format_date(self.env, batch_payment.date),
                 'journal_id': journal.id,
                 'amount_str': amount_journal_currency,
                 'amount_currency_str': amount_payment_currency,
@@ -58,8 +57,8 @@ class AccountReconciliation(models.AbstractModel):
         return batch_payments
 
     @api.model
-    def get_bank_statement_data(self, bank_statement_line_ids, srch_domain=[]):
+    def get_bank_statement_data(self, bank_statement_ids):
         """ Add batch payments data to the dict returned """
-        res = super(AccountReconciliation, self).get_bank_statement_data(bank_statement_line_ids, srch_domain)
-        res.update({'batch_payments': self.get_batch_payments_data(bank_statement_line_ids)})
+        res = super(AccountReconciliation, self).get_bank_statement_data(bank_statement_ids)
+        res.update({'batch_payments': self.get_batch_payments_data(bank_statement_ids)})
         return res

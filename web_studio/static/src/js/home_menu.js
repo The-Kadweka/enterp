@@ -106,7 +106,6 @@ HomeMenu.include({
         ev.preventDefault();
         ev.stopPropagation();  // do not open the menu
 
-        var self = this;
         var menuID = $(ev.currentTarget).closest('.o_app').data('menu');
         var app = _.findWhere(this._state.apps, {id: menuID});
         this.iconCreator = new IconCreator(this, {
@@ -116,22 +115,22 @@ HomeMenu.include({
             webIconData: app.web_icon_data,
         });
         var fragment = document.createDocumentFragment();
-        this.iconCreator.appendTo(fragment).then(function () {
-            new Dialog(self, {
-                dialogClass: 'o_web_studio_edit_menu_icon_modal',
-                size: 'medium',
-                title: _t('Edit Application Icon'),
-                $content: $('<div>').append(self.iconCreator.$el),
-                buttons: [{
-                    text: _t("Confirm"),
-                    classes: 'btn-primary',
-                    click: self._onIconSaved.bind(self, menuID),
-                }, {
-                    text: _t("Cancel"),
-                    close: true,
-                }],
-            }).open();
-        });
+        this.iconCreator.appendTo(fragment);
+
+        new Dialog(this, {
+            dialogClass: 'o_web_studio_edit_menu_icon_modal',
+            size: 'medium',
+            title: _t('Edit Application Icon'),
+            $content: $('<div>').append(this.iconCreator.$el),
+            buttons: [{
+                text: _t("Confirm"),
+                classes: 'btn-primary',
+                click: this._onIconSaved.bind(this, menuID),
+            }, {
+                text: _t("Cancel"),
+                close: true,
+            }],
+        }).open();
     },
     /**
      * @private

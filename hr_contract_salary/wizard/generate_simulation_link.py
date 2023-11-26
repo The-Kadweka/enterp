@@ -111,9 +111,6 @@ class GenerateSimulationLink(models.TransientModel):
             self.vehicle_id = self.contract_id.car_id
         return {'domain': {'contract_id': self.get_contract_domain()}}
 
-    def name_get(self):
-        return [(w.id, w.employee_id.name or w.applicant_id.partner_name) for w in self]
-
     def send_offer(self):
         try:
             template_id = self.env.ref('hr_contract_salary.mail_template_send_offer').id
@@ -173,6 +170,7 @@ class GenerateSimulationLink(models.TransientModel):
         }
         return {
             'type': 'ir.actions.act_window',
+            'view_type': 'form',
             'view_mode': 'form',
             'res_model': 'mail.compose.message',
             'views': [(compose_form_id, 'form')],

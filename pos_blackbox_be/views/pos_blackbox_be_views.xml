@@ -4,10 +4,10 @@
         <record id="res_users_form_view" model="ir.ui.view">
             <field name="name">res.users.form.view</field>
             <field name="model">res.users</field>
-            <field name="inherit_id" ref="base.view_users_form_simple_modif" />
+            <field name="inherit_id" ref="point_of_sale.res_users_view_form" />
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='email']" position="after">
-                    <field name="insz_or_bis_number"/>
+                <xpath expr="//field[@name='pos_security_pin']" position="after">
+                    <field name="insz_or_bis_number" />
                 </xpath>
             </field>
         </record>
@@ -47,6 +47,7 @@
             <field name="name">Log book</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">pos_blackbox_be.log</field>
+            <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" eval="False"/>
             <field name="domain">[]</field>
@@ -73,6 +74,7 @@
             <field name="name">Orders Pro Forma (PS)</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">pos.order_pro_forma</field>
+            <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" eval="False"/>
             <field name="domain">[]</field>
@@ -107,7 +109,7 @@
                             <field name="name"/>
                             <field name="date_order"/>
                             <field name="session_id" />
-                            <field name="partner_id" context="{'res_partner_search_mode': 'customer'}"/>
+                            <field name="partner_id" domain="[('customer', '=', True)]" context="{'search_default_customer':1}"/>
                             <field name="fiscal_position_id" options="{'no_create': True}"/>
                             <field name="table_id"/>
                         </group>
@@ -118,8 +120,8 @@
                                         <field name="product_id"/>
                                         <field name="qty"/>
                                         <field name="price_unit" widget="monetary"/>
-                                        <field name="discount"/>
-                                        <field name="tax_ids" widget="many2many_tags"/>
+                                        <field name="discount" widget="monetary"/>
+                                        <field name="tax_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
                                         <field name="price_subtotal" widget="monetary"/>
                                         <field name="price_subtotal_incl" widget="monetary"/>
                                     </tree>
@@ -127,7 +129,7 @@
                                         <group col="4">
                                             <field name="product_id"/>
                                             <field name="qty"/>
-                                            <field name="discount"/>
+                                            <field name="discount" widget="monetary"/>
                                             <field name="price_unit" widget="monetary"/>
                                             <field name="price_subtotal" invisible="1" widget="monetary"/>
                                             <field name="price_subtotal_incl" invisible="1" widget="monetary"/>
@@ -255,24 +257,39 @@
         <record id="pos_config_view_form_inherit_blackbox_be" model="ir.ui.view">
             <field name="name">pos.config.form.inherit.blackbox.be</field>
             <field name="model">pos.config</field>
-            <field name="inherit_id" ref="pos_iot.pos_iot_config_view_form"/>
+            <field name="inherit_id" ref="pos_restaurant.pos_config_view_form_inherit_restaurant"/>
             <field name="arch" type="xml">
                 <xpath position="inside"
                     expr="//div[@id='posbox_reference']/div/div[hasclass('o_setting_right_pane')]/div[hasclass('content-group')]">
                     <div class="row mt16">
-                        <label string="Certified IoT Box Ref."
+                        <label string="Certified PosBox Ref."
                             for="blackbox_pos_production_id"
                             class="col-md-3 o_light_label"/>
                         <field name="blackbox_pos_production_id"/>
                     </div>
                 </xpath>
 
-                <xpath expr="//div[@name='row_scale']" position="after">
-                    <div class="row">
-                        <label string="Fiscal Data Module" for="iface_fiscal_data_module" class="col-lg-4 o_light_label"/>
-                        <field name="iface_fiscal_data_module"/>
-                    </div>
+                <!-- module_pos_discount -->
+                <xpath expr="//div[hasclass('o_settings_container')][5]/div[hasclass('o_setting_box')][2]" position="attributes">
+                    <attribute name="invisible">1</attribute>
                 </xpath>
+                <!-- module_pos_loyalty -->
+                <xpath expr="//div[hasclass('o_settings_container')][5]/div[hasclass('o_setting_box')][4]" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <!-- restrict_price_control -->
+                <xpath expr="//div[hasclass('o_settings_container')][5]/div[hasclass('o_setting_box')][5]" position="attributes">
+                    <attribute name="attrs">{'invisible': [('blackbox_pos_production_id', '!=', False)]}</attribute>
+                </xpath>
+                <!-- reprint -->
+                <xpath expr="//div[@id='receipt']/div[hasclass('o_setting_box')][4]" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <!-- iface_splitbill -->
+                <xpath expr="//div[@id='receipt']/div[hasclass('o_setting_box')][6]" position="attributes">
+                    <attribute name="attrs">{'invisible': ['|', ('blackbox_pos_production_id', '!=', False), ('module_pos_restaurant', '=', False)]}</attribute>
+                </xpath>
+
             </field>
         </record>
 
@@ -456,12 +473,6 @@
                                     <span t-field="o.total_corrections"/>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-12">
-                                    <strong>Total rounding applied (NS)</strong>:
-                                    <span t-field="o.total_rounding_applied"/>
-                                </div>
-                            </div>
                         </div>
                     </t>
                 </t>
@@ -591,6 +602,25 @@
             <t t-call="pos_blackbox_be.user_report_template"/>
         </template>
 
+        <template id="include_vat_notice_report_external_header" inherit_id="web.external_layout_standard">
+            <xpath expr="//div[@name='moto']" position="replace">
+                <div class="col-5 text-center" style="margin-top:20px;">
+                    <strong>THIS IS NOT A VALID VAT TICKET</strong>
+                </div>
+                <div class="col-4 text-right" style="margin-top:20px;" t-field="company.report_header"/>
+            </xpath>
+        </template>
+
+        <template id="include_vat_notice_report_internal" inherit_id="web.internal_layout">
+            <xpath expr="//div[hasclass('row')]" position="before">
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <strong>THIS IS NOT A VALID VAT TICKET</strong>
+                    </div>
+                </div>
+            </xpath>
+        </template>
+
         <record id="view_pos_pro_forma_filter" model="ir.ui.view">
             <field name="name">Pro forma orders (PS)</field>
             <field name="model">pos.order_pro_forma</field>
@@ -606,13 +636,11 @@
             name="Pro forma orders (PS)"
             context="{'search_default_partner_id': [active_id]}"
             res_model="pos.order_pro_forma"
-            binding_model="res.partner"
-            binding_views="form"/>
+            src_model="res.partner"/>
 
         <template id="fdm_source">
 SIGNATURES:
 --------------------------------------------------------------------
-GLOBAL HASH: <t t-esc="main_hash" />
             <t t-foreach="files" t-as="current_file">
 <t t-raw="current_file['name']"/>: <t t-raw="current_file['hash']"/> (size in bytes: <t t-raw="current_file['size_in_bytes']"/>)
             </t>

@@ -3,7 +3,7 @@
 
 from odoo import fields
 from odoo.addons.account.tests.account_test_classes import AccountingTestCase
-from odoo.tests import tagged, Form
+from odoo.tests import tagged
 
 
 @tagged('post_install', '-at_install')
@@ -41,17 +41,22 @@ class TestReleaseToPayInvoice(AccountingTestCase):
 
         invoices_list = []
         purchase_line = purchase_order.order_line[-1]
-        AccountMove = self.env['account.move'].with_context(default_type='in_invoice')
         for (action, params) in scenario:
             if action == 'invoice':
-                move_form = Form(AccountMove)
-                move_form.purchase_id = purchase_order
-                with move_form.invoice_line_ids.edit(0) as line_form:
+                new_invoice = self.env['account.invoice'].create({
+                    'partner_id': partner.id,
+                    'purchase_id': purchase_order.id,
+                    'account_id': partner.property_account_payable_id.id,
+                    'type': 'in_invoice'
+                })
+
+                new_invoice.purchase_order_change()
+
+                for invoice_line in new_invoice.invoice_line_ids:
                     if 'price' in params:
-                        line_form.price_unit = params['price']
-                    if 'qty' in params:
-                        line_form.quantity = params['qty']
-                new_invoice = move_form.save()
+                        invoice_line.write({'price_unit': params['price']})
+                    invoice_line.write({'quantity': params['qty']})
+
                 invoices_list.append(new_invoice)
 
                 self.assertEquals(new_invoice.release_to_pay, params['rslt'], "Wrong invoice release to pay status for scenario " + str(scenario))

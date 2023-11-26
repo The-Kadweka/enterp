@@ -43,7 +43,7 @@ HomeMenu.include({
         if (this._hasCustomBackground) {
             var url = session.url('/web/image', {
                 model: 'res.company',
-                id: session.user_context.allowed_company_ids[0],
+                id: session.company_id,
                 field: 'background_image',
             });
             this.$el.css({

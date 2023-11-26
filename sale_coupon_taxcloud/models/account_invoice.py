@@ -5,16 +5,16 @@ from .taxcloud_request import TaxCloudRequest
 from odoo import api, models, fields
 
 
-class AccountMove(models.Model):
-    _inherit = 'account.move'
+class AccountInvoice(models.Model):
+    _inherit = 'account.invoice'
 
     @api.model
     def _get_TaxCloudRequest(self, api_id, api_key):
         return TaxCloudRequest(api_id, api_key)
 
 
-class AccountMoveLine(models.Model):
-    _inherit = 'account.move.line'
+class AccountInvoiceLine(models.Model):
+    _inherit = 'account.invoice.line'
 
     coupon_program_id = fields.Many2one('sale.coupon.program',
         string='Discount Program', readonly=True,

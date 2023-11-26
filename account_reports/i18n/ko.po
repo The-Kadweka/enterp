@@ -1,21 +1,22 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_reports
+# * account_reports
 # 
 # Translators:
-# Seongseok Shin <shinss61@hotmail.com>, 2019
-# Martin Trigaux, 2019
-# Link Up링크업 <linkup.way@gmail.com>, 2019
+# Spike Lee <rurouni24@gmail.com>, 2018
+# Martin Trigaux, 2018
+# Link Up링크업 <linkup.way@gmail.com>, 2018
+# Seongseok Shin <shinss61@hotmail.com>, 2018
+# Mark Lee <odoos@soti.33mail.com>, 2018
 # Linkup <link-up@naver.com>, 2019
-# Mark Lee <odoos@soti.33mail.com>, 2019
 # JH CHOI <hwangtog@gmail.com>, 2020
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~12.5+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-27 09:18+0000\n"
-"PO-Revision-Date: 2019-08-26 09:34+0000\n"
+"POT-Creation-Date: 2019-11-14 07:49+0000\n"
+"PO-Revision-Date: 2018-08-24 11:36+0000\n"
 "Last-Translator: JH CHOI <hwangtog@gmail.com>, 2020\n"
 "Language-Team: Korean (https://www.transifex.com/odoo/teams/41243/ko/)\n"
 "MIME-Version: 1.0\n"
@@ -25,54 +26,81 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: account_reports
-#: model_terms:ir.ui.view,arch_db:account_reports.line_template_aged_payable_report
-#: model_terms:ir.ui.view,arch_db:account_reports.line_template_aged_receivable_report
+#: code:addons/account_reports/models/account_followup_report.py:240
+#, python-format
+msgid "%s Payment Reminder"
+msgstr "%s 결제 알림"
+
+#. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.line_template_general_ledger_report
-#: model_terms:ir.ui.view,arch_db:account_reports.line_template_partner_ledger_report
 msgid "&amp;nbsp;"
 msgstr "&amp;nbsp;"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_report.py:0
+#. openerp-web
+#: code:addons/account_reports/static/src/xml/account_report_template.xml:30
+#, python-format
+msgid "&times;"
+msgstr "&times;"
+
+#. module: account_reports
+#: code:addons/account_reports/models/account_report.py:582
 #, python-format
 msgid "(No Group)"
 msgstr "(그룹 없음)"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_financial_report.py:0
-#: code:addons/account_reports/models/account_financial_report.py:0
+#: code:addons/account_reports/models/account_financial_report.py:355
+#: code:addons/account_reports/models/account_financial_report.py:357
 #, python-format
 msgid "(copy)"
 msgstr "(복사)"
 
 #. module: account_reports
-#: model_terms:ir.ui.view,arch_db:account_reports.view_move_form_vat_return
-msgid "-> Refresh"
-msgstr "-> 새로 고침"
-
-#. module: account_reports
-#: code:addons/account_reports/models/account_aged_partner_balance.py:0
+#: code:addons/account_reports/models/account_aged_partner_balance.py:22
 #, python-format
 msgid "1 - 30"
 msgstr "1 - 30"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_aged_partner_balance.py:0
+#: code:addons/account_reports/models/account_aged_partner_balance.py:22
 #, python-format
 msgid "31 - 60"
 msgstr "31 - 60"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_aged_partner_balance.py:0
+#: code:addons/account_reports/models/account_aged_partner_balance.py:22
 #, python-format
 msgid "61 - 90"
 msgstr "61 - 90"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_aged_partner_balance.py:0
+#: code:addons/account_reports/models/account_aged_partner_balance.py:22
 #, python-format
 msgid "91 - 120"
 msgstr "91 - 120"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.search_template_analytic
+msgid "<b>Accounts</b><br/>"
+msgstr "<b>계정</b><br/>"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.template_followup_report
+msgid "<b>Next Reminder Date:</b>"
+msgstr "<b>다음 알림 날짜 :</b>"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.search_template_analytic
+msgid "<b>Tags</b><br/>"
+msgstr "<b>태그</b><br/>"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.main_template
+msgid ""
+"<br/>\n"
+"                <span>You can visualize their impact by activating the option to view unposted entries, or post them to remove this warning.</span>"
+msgstr ""
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.filter_info_template
@@ -89,13 +117,34 @@ msgid "<br/>Companies:"
 msgstr "<br/>회사 :"
 
 #. module: account_reports
-#: model_terms:ir.ui.view,arch_db:account_reports.line_template
-msgid ""
-"<i class=\"fa fa-caret-right invisible\" role=\"img\" aria-"
-"label=\"Unfolded\" title=\"Unfolded\"/>"
-msgstr ""
-"<i class=\"fa fa-caret-right invisible\" role=\"img\" aria-"
-"label=\"Unfolded\" title=\"Unfolded\"/>"
+#: model_terms:ir.ui.view,arch_db:account_reports.template_followup_report
+msgid "<i class=\"fa fa-circle\" style=\"color: green;\"/> Good Debtor"
+msgstr "<i class=\"fa fa-circle\" style=\"color: green;\"/> 우량 채무자"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.template_followup_report
+msgid "<i class=\"fa fa-circle\" style=\"color: grey;\"/> Normal Debtor"
+msgstr "<i class=\"fa fa-circle\" style=\"color: grey;\"/> 일반 채무자"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.template_followup_report
+msgid "<i class=\"fa fa-circle\" style=\"color: red;\"/> Bad Debtor"
+msgstr "<i class=\"fa fa-circle\" style=\"color: red;\"/> 불량 채무자"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.template_followup_report
+msgid "<i class=\"fa fa-envelope\" role=\"img\" aria-label=\"Email\"/>"
+msgstr "<i class=\"fa fa-envelope\" role=\"img\" aria-label=\"Email\"/>"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.template_followup_report
+msgid "<i class=\"fa fa-mobile fa-fw\" role=\"img\" aria-label=\"Mobile\" title=\"Mobile\"/>"
+msgstr "<i class=\"fa fa-mobile fa-fw\" role=\"img\" aria-label=\"Mobile\" title=\"Mobile\"/>"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.template_followup_report
+msgid "<i class=\"fa fa-phone fa-fw\" role=\"img\" aria-label=\"Phone\" title=\"Phone\"/>"
+msgstr "<i class=\"fa fa-phone fa-fw\" role=\"img\" aria-label=\"Phone\" title=\"Phone\"/>"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.search_template_comparison
@@ -109,7 +158,7 @@ msgid ""
 "            Journals:"
 msgstr ""
 "<span class=\"fa fa-book\"/>\n"
-"            분개장 :"
+"            분개장:"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.search_template_date_filter
@@ -171,6 +220,15 @@ msgstr ""
 "aria-label=\"Partner ledger is normal\" title=\"Partner ledger is normal\"/>"
 
 #. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.search_template_multi_company
+msgid ""
+"<span class=\"fa fa-filter\"/>\n"
+"            Companies:"
+msgstr ""
+"<span class=\"fa fa-filter\"/>\n"
+"            회사:"
+
+#. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.search_template_ir_filters
 msgid ""
 "<span class=\"fa fa-filter\"/>\n"
@@ -182,7 +240,12 @@ msgstr ""
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.search_template_extra_options
 msgid "<span class=\"fa fa-filter\"/> Options:"
-msgstr "<span class=\"fa fa-filter\"/> 선택사항 :"
+msgstr "<span class=\"fa fa-filter\"/> 옵션:"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.followup_search_template
+msgid "<span class=\"fa fa-filter\"/> Partners:"
+msgstr "<span class=\"fa fa-filter\"/> 협력사:"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.search_template_analytic
@@ -210,7 +273,7 @@ msgid ""
 "            Account:"
 msgstr ""
 "<span class=\"fa fa-user\"/>\n"
-"            계정 :"
+"            계정:"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.footnotes_template
@@ -224,11 +287,14 @@ msgstr ""
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.res_config_settings_view_form
 msgid ""
-"<span class=\"o_form_label\">Tax Return Periodicity</span>\n"
+"<span class=\"o_form_label\">Payment Follow-up</span>\n"
 "                        <span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-specific.\" role=\"img\" aria-label=\"Values set here are company-specific.\" groups=\"base.group_multi_company\"/>"
 msgstr ""
-"<span class=\"o_form_label\">세금 환급 주기</span>\n"
-"                        <span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-specific.\" role=\"img\" aria-label=\"Values set here are company-specific.\" groups=\"base.group_multi_company\"/>"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.res_partner_view_form
+msgid "<span class=\"o_stat_text\">Due</span>"
+msgstr "<span class=\"o_stat_text\">지급 금액</span>"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.main_template
@@ -245,9 +311,15 @@ msgid "<span title=\"Latest Statement\">Latest Statement</span>"
 msgstr "<span title=\"Latest Statement\">최신 명세서</span>"
 
 #. module: account_reports
-#: model:ir.model.constraint,message:account_reports.constraint_account_financial_html_report_line_code_uniq
+#: model_terms:ir.ui.view,arch_db:account_reports.template_followup_report
+msgid ""
+"<strong>Warning!</strong> No action needs to be taken for this partner."
+msgstr "<strong>경고!</strong> 이 협력사는 조치를 취할 필요가 없습니다."
+
+#. module: account_reports
+#: sql_constraint:account.financial.html.report.line:0
 msgid "A report line with the same code already exists."
-msgstr "동일한 코드가 있는 보고서 명세가 이미 존재합니다."
+msgstr "동일한 코드가 있는 보고서 라인이 이미 존재합니다."
 
 #. module: account_reports
 #: model:account.financial.html.report.line,name:account_reports.account_financial_report_total_assets0
@@ -255,8 +327,8 @@ msgid "ASSETS"
 msgstr "자산"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_aged_partner_balance.py:0
-#: code:addons/account_reports/models/account_partner_ledger.py:0
+#: code:addons/account_reports/models/account_aged_partner_balance.py:21
+#: code:addons/account_reports/models/account_partner_ledger.py:31
 #, python-format
 msgid "Account"
 msgstr "계정"
@@ -294,22 +366,20 @@ msgid "Account Report Footnote"
 msgstr "계정 보고서 각주"
 
 #. module: account_reports
-#: model:ir.model.fields,field_description:account_reports.field_res_company__account_tax_next_activity_type
-msgid "Account Tax Next Activity Type"
-msgstr "계정 세금 다음 활동 유형"
-
-#. module: account_reports
-#. openerp-web
-#: code:addons/account_reports/static/src/js/account_reports.js:0
-#, python-format
-msgid "Accounts"
-msgstr "계정"
-
-#. module: account_reports
-#: code:addons/account_reports/models/account_analytic_report.py:0
+#: code:addons/account_reports/models/account_analytic_report.py:79
 #, python-format
 msgid "Accounts without a group"
 msgstr "그룹이 없는 계정"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.search_template_extra_options
+msgid "Accrual Basis"
+msgstr "발생주의"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.filter_info_template
+msgid "Accrual Basis<br/>"
+msgstr "발생주의<br/>"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report_line__action_id
@@ -317,30 +387,9 @@ msgid "Action"
 msgstr "추가 작업"
 
 #. module: account_reports
-#: model:ir.model.fields,field_description:account_reports.field_mail_activity_type__category
-msgid "Action to Perform"
-msgstr "수행할 작업"
-
-#. module: account_reports
-#: model:ir.model.fields,help:account_reports.field_mail_activity_type__category
-msgid ""
-"Actions may trigger specific behavior like opening calendar view or "
-"automatically mark as done when a document is uploaded"
-msgstr "작업은 일정 관리보기 열기와 같은 특정 동작을 트리거하거나 문서가 업로드될 때 자동으로 완료로 표시할 수 있습니다."
-
-#. module: account_reports
-#: model:ir.model,name:account_reports.model_mail_activity
-msgid "Activity"
-msgstr "활동"
-
-#. module: account_reports
-#: model:ir.model,name:account_reports.model_mail_activity_type
-msgid "Activity Type"
-msgstr "활동 유형"
-
-#. module: account_reports
 #. openerp-web
-#: code:addons/account_reports/static/src/js/account_reports.js:0
+#: code:addons/account_reports/static/src/js/account_reports.js:360
+#: model_terms:ir.ui.view,arch_db:account_reports.main_template
 #, python-format
 msgid "Add a note"
 msgstr "노트 추가"
@@ -352,14 +401,12 @@ msgid "Add totals below sections"
 msgstr "영역 아래에 총계 추가"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_cash_flow_report.py:0
-#, python-format
+#: model:account.financial.html.report.line,name:account_reports.account_financial_report_cashsummary_prepayments_received0
 msgid "Advance Payments received from customers"
 msgstr "고객 선수금"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_cash_flow_report.py:0
-#, python-format
+#: model:account.financial.html.report.line,name:account_reports.account_financial_report_cashsummary_cash_paid0
 msgid "Advance payments made to suppliers"
 msgstr "공급업체 선지불금"
 
@@ -369,7 +416,7 @@ msgid "Aged Partner Balances"
 msgstr "협력사 미지급 잔액"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_aged_partner_balance.py:0
+#: code:addons/account_reports/models/account_aged_partner_balance.py:118
 #: model:ir.actions.client,name:account_reports.action_account_report_ap
 #: model:ir.model,name:account_reports.model_account_aged_payable
 #: model:ir.ui.menu,name:account_reports.menu_action_account_report_aged_payable
@@ -383,7 +430,7 @@ msgid "Aged Payables"
 msgstr "미지급금"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_aged_partner_balance.py:0
+#: code:addons/account_reports/models/account_aged_partner_balance.py:98
 #: model:ir.actions.client,name:account_reports.action_account_report_ar
 #: model:ir.model,name:account_reports.model_account_aged_receivable
 #: model:ir.ui.menu,name:account_reports.menu_action_account_report_aged_receivable
@@ -398,13 +445,19 @@ msgstr "미수금"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.search_template_journals
+#: model_terms:ir.ui.view,arch_db:account_reports.search_template_multi_company
 msgid "All"
-msgstr "전체"
+msgstr "모두"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report__analytic
 msgid "Allow analytic filters"
 msgstr "분석 필터 허용"
+
+#. module: account_reports
+#: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report__cash_basis
+msgid "Allow cash basis mode"
+msgstr "현금주의 모드 허용"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report__comparison
@@ -414,29 +467,29 @@ msgstr "비교 허용"
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report__show_journal_filter
 msgid "Allow filtering by journals"
-msgstr "분개장별 필터링 허용"
+msgstr "분개별 필터링 허용"
 
 #. module: account_reports
-#: model:ir.model.fields.selection,name:account_reports.selection__account_financial_html_report_line__show_domain__always
+#: selection:account.financial.html.report.line,show_domain:0
 msgid "Always"
 msgstr "항상"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_bank_reconciliation_report.py:0
+#: code:addons/account_reports/models/account_bank_reconciliation_report.py:24
 #, python-format
 msgid "Amount"
 msgstr "금액"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_partner_ledger.py:0
+#: code:addons/account_reports/models/account_partner_ledger.py:40
 #, python-format
 msgid "Amount Currency"
-msgstr "통화 합계"
+msgstr "화폐 액수"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.filter_info_template
 msgid "Analytic Accounts:"
-msgstr "분석 계정 :"
+msgstr "분석 계정 \""
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.line_caret_options
@@ -444,7 +497,7 @@ msgid "Analytic Entries"
 msgstr "분석 항목"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_analytic_report.py:0
+#: code:addons/account_reports/models/account_analytic_report.py:29
 #: model:ir.actions.client,name:account_reports.action_account_report_analytic
 #: model:ir.ui.menu,name:account_reports.menu_action_report_account_analytic
 #, python-format
@@ -473,19 +526,13 @@ msgid "Apply"
 msgstr "적용"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_report.py:0
+#: code:addons/account_reports/models/account_report.py:770
 #, python-format
 msgid "As of %s"
 msgstr "%s 기준"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_aged_partner_balance.py:0
-#, python-format
-msgid "As of: %s"
-msgstr "기준 : %s"
-
-#. module: account_reports
-#: model:ir.model.fields.selection,name:account_reports.selection__account_financial_html_report_line__special_date_changer__to_beginning_of_period
+#: selection:account.financial.html.report.line,special_date_changer:0
 msgid "At the beginning of the period"
 msgstr "기간 시작 시"
 
@@ -498,6 +545,11 @@ msgstr "감사"
 #: model:ir.ui.menu,name:account_reports.account_reports_audit_reports_menu
 msgid "Audit Reports"
 msgstr "감사보고서"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.template_followup_report
+msgid "Auto"
+msgstr "자동"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.view_account_financial_report_form
@@ -515,13 +567,15 @@ msgid "Average debtors days"
 msgstr "평균 채무자 기간(일)"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_analytic_report.py:0
-#: code:addons/account_reports/models/account_cash_flow_report.py:0
-#: code:addons/account_reports/models/account_consolidated_journals.py:0
-#: code:addons/account_reports/models/account_general_ledger.py:0
-#: code:addons/account_reports/models/account_generic_tax_report.py:0
-#: code:addons/account_reports/models/account_generic_tax_report.py:0
-#: code:addons/account_reports/models/account_partner_ledger.py:0
+#: model_terms:ir.ui.view,arch_db:account_reports.template_followup_report
+msgid "Bad debtor"
+msgstr "악성 채무자"
+
+#. module: account_reports
+#: code:addons/account_reports/models/account_analytic_report.py:25
+#: code:addons/account_reports/models/account_consolidated_journals.py:29
+#: code:addons/account_reports/models/account_general_ledger.py:35
+#: code:addons/account_reports/models/account_partner_ledger.py:42
 #, python-format
 msgid "Balance"
 msgstr "잔액"
@@ -536,26 +590,8 @@ msgid "Balance Sheet"
 msgstr "대차대조표"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_generic_tax_report.py:0
-#, python-format
-msgid "Balance tax advance payment account"
-msgstr "잔액 세금 선급 계정"
-
-#. module: account_reports
-#: code:addons/account_reports/models/account_generic_tax_report.py:0
-#, python-format
-msgid "Balance tax current account (payable)"
-msgstr "잔액 세금 경상 계정 (미지급)"
-
-#. module: account_reports
-#: code:addons/account_reports/models/account_generic_tax_report.py:0
-#, python-format
-msgid "Balance tax current account (receivable)"
-msgstr "잔액 세금 경상 계정 (미수금)"
-
-#. module: account_reports
-#: code:addons/account_reports/models/account_bank_reconciliation_report.py:0
-#: code:addons/account_reports/models/account_bank_reconciliation_report.py:0
+#: code:addons/account_reports/models/account_bank_reconciliation_report.py:211
+#: code:addons/account_reports/models/account_bank_reconciliation_report.py:212
 #: model:ir.actions.client,name:account_reports.action_account_report_bank_reconciliation
 #: model:ir.actions.client,name:account_reports.action_account_report_bank_reconciliation_with_journal
 #, python-format
@@ -573,7 +609,7 @@ msgid "Bank and Cash Accounts"
 msgstr "은행 및 현금 계정"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_general_ledger.py:0
+#: code:addons/account_reports/models/account_general_ledger.py:432
 #, python-format
 msgid "Base Amount"
 msgstr "기준 금액"
@@ -584,96 +620,77 @@ msgid "Based on date ranges"
 msgstr "기간 기준"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_activity.py:0
-#, python-format
-msgid ""
-"Can't post the move with reference %s as its ending date %s does not "
-"correspond to end date of the period."
-msgstr "참조 %s로 이동을 게시할 수 없는 것은 %s가 해당 기간의 종료일과 일치하지 않기 때문입니다."
-
-#. module: account_reports
-#. openerp-web
-#: code:addons/account_reports/static/src/js/account_reports.js:0
-#: model_terms:ir.ui.view,arch_db:account_reports.view_report_export_wizard
-#, python-format
-msgid "Cancel"
-msgstr "취소"
-
-#. module: account_reports
 #: model:account.financial.html.report.line,name:account_reports.account_financial_report_executivesummary_cash0
 msgid "Cash"
 msgstr "현금"
 
 #. module: account_reports
-#: model:ir.model,name:account_reports.model_account_cash_flow_report
-msgid "Cash Flow Report"
-msgstr "현금 흐름표 보고서"
+#: model_terms:ir.ui.view,arch_db:account_reports.filter_info_template
+#: model_terms:ir.ui.view,arch_db:account_reports.search_template_extra_options
+msgid "Cash Basis"
+msgstr "현금주의"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_cash_flow_report.py:0
+#: model_terms:ir.ui.view,arch_db:account_reports.search_template_extra_options
+msgid "Cash Basis Method"
+msgstr "현금주의법"
+
+#. module: account_reports
+#: model:account.financial.html.report,name:account_reports.account_financial_report_cashsummary0
+#: model:ir.actions.client,name:account_reports.account_financial_html_report_action_3
 #: model:ir.actions.client,name:account_reports.action_account_report_cs
-#: model:ir.ui.menu,name:account_reports.menu_action_account_report_cash_flow
-#, python-format
+#: model:ir.ui.menu,name:account_reports.account_financial_html_report_menu_3
 msgid "Cash Flow Statement"
 msgstr "현금 흐름표"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_cash_flow_report.py:0
-#, python-format
+#: model:account.financial.html.report.line,name:account_reports.account_financial_report_cashsummary_opening_balance0
 msgid "Cash and cash equivalents, beginning of period"
 msgstr "현금 및 현금 등가물, 기간 시작"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_cash_flow_report.py:0
-#, python-format
+#: model:account.financial.html.report.line,name:account_reports.account_financial_report_cashsummary_closing_balance0
 msgid "Cash and cash equivalents, closing balance"
 msgstr "현금 및 현금 등가물, 결산 잔액"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_cash_flow_report.py:0
-#, python-format
+#: model:account.financial.html.report.line,name:account_reports.account_financial_report_cashsummary_financing0
 msgid "Cash flows from financing activities"
 msgstr "재무 활동으로 인한 현금 흐름"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_cash_flow_report.py:0
-#, python-format
+#: model:account.financial.html.report.line,name:account_reports.account_financial_report_cashsummary_investing0
 msgid "Cash flows from investing & extraordinary activities"
 msgstr "투자 및 특별 활동으로 인한 현금 흐름"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_cash_flow_report.py:0
-#, python-format
+#: model:account.financial.html.report.line,name:account_reports.account_financial_report_cashsummary_operating0
 msgid "Cash flows from operating activities"
 msgstr "영업 활동으로 인한 현금 흐름"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_cash_flow_report.py:0
-#, python-format
+#: model:account.financial.html.report.line,name:account_reports.account_financial_report_cashsummary_unclassified0
 msgid "Cash flows from unclassified activities"
 msgstr "미분류 활동으로 인한 현금 흐름"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_cash_flow_report.py:0
-#: code:addons/account_reports/models/account_cash_flow_report.py:0
-#: code:addons/account_reports/models/account_cash_flow_report.py:0
-#, python-format
+#: model:account.financial.html.report.line,name:account_reports.account_financial_report_cashsummary_financing_in0
+#: model:account.financial.html.report.line,name:account_reports.account_financial_report_cashsummary_investing_in0
+#: model:account.financial.html.report.line,name:account_reports.account_financial_report_cashsummary_unclassified_in0
 msgid "Cash in"
 msgstr "현금 유입"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_cash_flow_report.py:0
-#: code:addons/account_reports/models/account_cash_flow_report.py:0
-#: code:addons/account_reports/models/account_cash_flow_report.py:0
-#, python-format
+#: model:account.financial.html.report.line,name:account_reports.account_financial_report_cashsummary_financing_out0
+#: model:account.financial.html.report.line,name:account_reports.account_financial_report_cashsummary_investing_out0
+#: model:account.financial.html.report.line,name:account_reports.account_financial_report_cashsummary_unclassified_out0
 msgid "Cash out"
 msgstr "현금 유출"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_cash_flow_report.py:0
-#, python-format
+#: model:account.financial.html.report.line,name:account_reports.account_financial_report_cashsummary_cash_spent0
 msgid "Cash paid for operating activities"
-msgstr "영업 활동으로 인한 현금 지불"
+msgstr "영업 활동에 대해 지불한 현금"
 
 #. module: account_reports
 #: model:account.financial.html.report.line,name:account_reports.account_financial_report_executivesummary_cash_received0
@@ -681,8 +698,7 @@ msgid "Cash received"
 msgstr "현금 수령"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_cash_flow_report.py:0
-#, python-format
+#: model:account.financial.html.report.line,name:account_reports.account_financial_report_cashsummary_cash_received0
 msgid "Cash received from operating activities"
 msgstr "영업 활동으로 인한 현금 수령"
 
@@ -697,30 +713,24 @@ msgid "Cash surplus"
 msgstr "잉여 현금"
 
 #. module: account_reports
-#: model_terms:ir.ui.view,arch_db:account_reports.template_aged_partner_balance_line_report
+#: model_terms:ir.ui.view,arch_db:account_reports.line_template_followup_report
 msgid "Change expected payment date"
 msgstr "예상 결제 날짜 변경"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_coa_report
 msgid "Chart of Account Report"
-msgstr "계정과목 일람표 보고서"
+msgstr "계정 보고서 차트"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report_line__children_ids
 msgid "Children"
-msgstr "하위"
+msgstr "아동"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.view_account_financial_report_line_form
 msgid "Children Lines"
-msgstr "하위 내역"
-
-#. module: account_reports
-#: code:addons/account_reports/models/account_generic_tax_report.py:0
-#, python-format
-msgid "Closing Journal Entry"
-msgstr "결산 분개장 기입 하목"
+msgstr "아동 라인"
 
 #. module: account_reports
 #: model:account.financial.html.report.line,name:account_reports.account_financial_report_executivesummary_closing_bank_balance0
@@ -733,20 +743,22 @@ msgid "Code"
 msgstr "코드"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_general_ledger.py:0
+#: code:addons/account_reports/models/account_followup_report.py:32
+#: code:addons/account_reports/models/account_general_ledger.py:30
 #, python-format
 msgid "Communication"
-msgstr "의사소통"
+msgstr "커뮤니케이션"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_res_company
 msgid "Companies"
-msgstr "회사"
+msgstr "회사들"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.filter_info_template
+#: model_terms:ir.ui.view,arch_db:account_reports.main_template
 msgid "Companies:"
-msgstr "회사 :"
+msgstr "회사:"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report__company_id
@@ -760,24 +772,17 @@ msgid "Computation"
 msgstr "계산"
 
 #. module: account_reports
+#: model:account.financial.html.report.line,name:account_reports.account_financial_report_cashsummary_regulator0
+msgid "Computation Error: unexplained difference"
+msgstr ""
+
+#. module: account_reports
 #: model:ir.model,name:account_reports.model_res_config_settings
 msgid "Config Settings"
 msgstr "설정 구성"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_generic_tax_report.py:0
-#, python-format
-msgid "Configure your TAX accounts"
-msgstr "세금 계정 구성"
-
-#. module: account_reports
-#: model_terms:ir.ui.view,arch_db:account_reports.res_config_settings_view_form
-#: model_terms:ir.ui.view,arch_db:account_reports.setup_financial_year_opening_form
-msgid "Configure your tax accounts"
-msgstr "세금 계정 구성"
-
-#. module: account_reports
-#: code:addons/account_reports/models/account_consolidated_journals.py:0
+#: code:addons/account_reports/models/account_consolidated_journals.py:26
 #: model:ir.actions.client,name:account_reports.action_account_report_cj
 #: model:ir.ui.menu,name:account_reports.menu_action_account_report_cj
 #, python-format
@@ -795,12 +800,6 @@ msgid "Contact"
 msgstr "연락처"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_generic_tax_report.py:0
-#, python-format
-msgid "Controls failed"
-msgstr "제어 실패함"
-
-#. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.view_account_financial_report_line_form
 msgid "Cosmetics"
 msgstr "화장품"
@@ -812,49 +811,53 @@ msgid "Cost of Revenue"
 msgstr "수익 원가"
 
 #. module: account_reports
+#: code:addons/account_reports/models/account_followup_report.py:248
+#, python-format
+msgid ""
+"Could not send mail to partner because it does not have any email address "
+"defined"
+msgstr "지정된 이메일 주소가 없어 협력사에게 메일을 발송할 수 없습니다."
+
+#. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report__create_uid
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report_line__create_uid
 #: model:ir.model.fields,field_description:account_reports.field_account_report_footnote__create_uid
 #: model:ir.model.fields,field_description:account_reports.field_account_report_manager__create_uid
-#: model:ir.model.fields,field_description:account_reports.field_account_reports_export_wizard__create_uid
-#: model:ir.model.fields,field_description:account_reports.field_account_reports_export_wizard_format__create_uid
 msgid "Created by"
-msgstr "작성인"
+msgstr "작성자"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report__create_date
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report_line__create_date
 #: model:ir.model.fields,field_description:account_reports.field_account_report_footnote__create_date
 #: model:ir.model.fields,field_description:account_reports.field_account_report_manager__create_date
-#: model:ir.model.fields,field_description:account_reports.field_account_reports_export_wizard__create_date
-#: model:ir.model.fields,field_description:account_reports.field_account_reports_export_wizard_format__create_date
 msgid "Created on"
 msgstr "작성일"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_financial_report.py:0
+#: code:addons/account_reports/models/account_financial_report.py:93
 #, python-format
 msgid "Crebit"
 msgstr "대변"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_consolidated_journals.py:0
-#: code:addons/account_reports/models/account_financial_report.py:0
-#: code:addons/account_reports/models/account_general_ledger.py:0
-#: code:addons/account_reports/models/account_partner_ledger.py:0
-#: code:addons/account_reports/models/account_report_coa.py:0
-#: code:addons/account_reports/models/account_report_coa.py:0
-#: code:addons/account_reports/models/account_report_coa.py:0
-#: code:addons/account_reports/models/account_report_coa.py:0
+#: code:addons/account_reports/models/account_consolidated_journals.py:50
+#: code:addons/account_reports/models/account_financial_report.py:142
+#: code:addons/account_reports/models/account_general_ledger.py:34
+#: code:addons/account_reports/models/account_partner_ledger.py:38
+#: code:addons/account_reports/models/account_report_coa.py:32
+#: code:addons/account_reports/models/account_report_coa.py:37
+#: code:addons/account_reports/models/account_report_coa.py:41
+#: code:addons/account_reports/models/account_report_coa.py:43
 #, python-format
 msgid "Credit"
 msgstr "대변"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_general_ledger.py:0
+#: code:addons/account_reports/models/account_general_ledger.py:32
 #, python-format
 msgid "Currency"
-msgstr "통화"
+msgstr "환율"
 
 #. module: account_reports
 #: model:account.financial.html.report.line,name:account_reports.account_financial_report_current_assets0
@@ -876,7 +879,7 @@ msgstr "당기 할당 순이익"
 #. module: account_reports
 #: model:account.financial.html.report.line,name:account_reports.account_financial_current_year_earnings_line_1
 msgid "Current Year Earnings"
-msgstr "당해년도 이익"
+msgstr "당기 순이익"
 
 #. module: account_reports
 #: model:account.financial.html.report.line,name:account_reports.account_financial_current_year_earnings0
@@ -889,13 +892,13 @@ msgid "Current assets to liabilities"
 msgstr "유동 부채 대비 유동 자산 비"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_bank_reconciliation_report.py:0
+#: code:addons/account_reports/models/account_bank_reconciliation_report.py:155
 #, python-format
 msgid "Current balance of account %s"
 msgstr "%s 계정의 현재 잔고"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_bank_reconciliation_report.py:0
+#: code:addons/account_reports/models/account_bank_reconciliation_report.py:157
 #, python-format
 msgid "Current balance of accounts %s"
 msgstr "%s 계정의 현재 잔고"
@@ -907,8 +910,25 @@ msgid "Custom"
 msgstr "맞춤"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_bank_reconciliation_report.py:0
-#: code:addons/account_reports/models/account_general_ledger.py:0
+#: code:addons/account_reports/models/res_partner.py:87
+#, python-format
+msgid "Customer Ledger"
+msgstr "고객관리대장"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.followup_filter_info_template
+msgid "Customer ref:"
+msgstr "고객 참조:"
+
+#. module: account_reports
+#: model:ir.actions.client,name:account_reports.action_account_followup
+msgid "Customers Statement"
+msgstr "고객 명세서"
+
+#. module: account_reports
+#: code:addons/account_reports/models/account_bank_reconciliation_report.py:22
+#: code:addons/account_reports/models/account_followup_report.py:29
+#: code:addons/account_reports/models/account_general_ledger.py:29
 #, python-format
 msgid "Date"
 msgstr "날짜"
@@ -917,12 +937,19 @@ msgstr "날짜"
 #: model_terms:ir.ui.view,arch_db:account_reports.search_template_comparison
 #: model_terms:ir.ui.view,arch_db:account_reports.search_template_date_filter
 msgid "Date :"
-msgstr "날짜 :"
+msgstr "날짜:"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.template_followup_report
+msgid ""
+"Date at which Odoo will remind you to take care of that follow-up if you "
+"choose \"remind me later\" button."
+msgstr "\"나중에 알림\" 버튼을 선택한 경우 Odoo가 후속 조치를 처리하도록 상기시켜 주는 날짜입니다."
 
 #. module: account_reports
 #. openerp-web
-#: code:addons/account_reports/static/src/js/account_reports.js:0
-#: code:addons/account_reports/static/src/js/account_reports.js:0
+#: code:addons/account_reports/static/src/js/account_reports.js:225
+#: code:addons/account_reports/static/src/js/account_reports.js:275
 #, python-format
 msgid "Date cannot be empty"
 msgstr "날짜는 비워둘 수 없습니다."
@@ -932,32 +959,32 @@ msgstr "날짜는 비워둘 수 없습니다."
 msgid ""
 "Date where the next action should be taken for a receivable item. Usually, "
 "automatically set when sending reminders through the customer statement."
-msgstr "미수 항목에 대해 다음으로 조치를 취할 날짜입니다. 일반적으로 고객 명세서를 통해 미리 알림이 발송되면 자동 설정됩니다."
+msgstr "미수 항목에 대해 다음으로 조치를 취할 날짜입니다. 일반적으로 고객 명세서를 통해 알림이 발송되면 자동 설정됩니다."
 
 #. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.followup_filter_info_template
 #: model_terms:ir.ui.view,arch_db:account_reports.search_template_comparison
 #: model_terms:ir.ui.view,arch_db:account_reports.search_template_date_filter
 msgid "Date:"
-msgstr "날짜 :"
+msgstr "날짜:"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_consolidated_journals.py:0
-#: code:addons/account_reports/models/account_financial_report.py:0
-#: code:addons/account_reports/models/account_financial_report.py:0
-#: code:addons/account_reports/models/account_general_ledger.py:0
-#: code:addons/account_reports/models/account_partner_ledger.py:0
-#: code:addons/account_reports/models/account_report_coa.py:0
-#: code:addons/account_reports/models/account_report_coa.py:0
-#: code:addons/account_reports/models/account_report_coa.py:0
-#: code:addons/account_reports/models/account_report_coa.py:0
+#: model:ir.model.fields,field_description:account_reports.field_res_config_settings__days_between_two_followups
+msgid "Days between two follow-ups"
+msgstr ""
+
+#. module: account_reports
+#: code:addons/account_reports/models/account_consolidated_journals.py:29
+#: code:addons/account_reports/models/account_financial_report.py:134
+#: code:addons/account_reports/models/account_general_ledger.py:33
+#: code:addons/account_reports/models/account_partner_ledger.py:36
+#: code:addons/account_reports/models/account_report_coa.py:31
+#: code:addons/account_reports/models/account_report_coa.py:36
+#: code:addons/account_reports/models/account_report_coa.py:40
+#: code:addons/account_reports/models/account_report_coa.py:42
 #, python-format
 msgid "Debit"
 msgstr "차변"
-
-#. module: account_reports
-#: model:ir.model.fields,field_description:account_reports.field_res_company__account_tax_periodicity
-msgid "Delay units"
-msgstr "지연 단위"
 
 #. module: account_reports
 #: model:account.financial.html.report.line,name:account_reports.account_financial_report_depreciation0
@@ -970,7 +997,7 @@ msgid "Detailed Net Profit"
 msgstr "세부 순이익"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_consolidated_journals.py:0
+#: code:addons/account_reports/models/account_consolidated_journals.py:86
 #, python-format
 msgid "Details per month"
 msgstr "월별 세부 정보"
@@ -981,26 +1008,35 @@ msgid "Difference"
 msgstr "차액"
 
 #. module: account_reports
+#: code:addons/account_reports/models/account_bank_reconciliation_report.py:190
+#, python-format
+msgid ""
+"Difference between Virtual GL Balance and Last Bank Statement Ending Balance.\n"
+"\n"
+"If non-zero, it could be due to\n"
+"  1) some bank statements being not yet encoded into Odoo\n"
+"  2) payments double-encoded"
+msgstr ""
+
+#. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_aged_partner__display_name
 #: model:ir.model.fields,field_description:account_reports.field_account_aged_payable__display_name
 #: model:ir.model.fields,field_description:account_reports.field_account_aged_receivable__display_name
 #: model:ir.model.fields,field_description:account_reports.field_account_analytic_report__display_name
 #: model:ir.model.fields,field_description:account_reports.field_account_bank_reconciliation_report__display_name
-#: model:ir.model.fields,field_description:account_reports.field_account_cash_flow_report__display_name
 #: model:ir.model.fields,field_description:account_reports.field_account_coa_report__display_name
 #: model:ir.model.fields,field_description:account_reports.field_account_consolidated_journal__display_name
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report__display_name
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report_line__display_name
+#: model:ir.model.fields,field_description:account_reports.field_account_followup_report__display_name
 #: model:ir.model.fields,field_description:account_reports.field_account_general_ledger__display_name
 #: model:ir.model.fields,field_description:account_reports.field_account_generic_tax_report__display_name
 #: model:ir.model.fields,field_description:account_reports.field_account_partner_ledger__display_name
 #: model:ir.model.fields,field_description:account_reports.field_account_report__display_name
 #: model:ir.model.fields,field_description:account_reports.field_account_report_footnote__display_name
 #: model:ir.model.fields,field_description:account_reports.field_account_report_manager__display_name
-#: model:ir.model.fields,field_description:account_reports.field_account_reports_export_wizard__display_name
-#: model:ir.model.fields,field_description:account_reports.field_account_reports_export_wizard_format__display_name
 msgid "Display Name"
-msgstr "표시 이름"
+msgstr "제목"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_financial_html_report__hierarchy_option
@@ -1008,31 +1044,38 @@ msgid "Display the hierarchy choice in the report options"
 msgstr "보고서 옵션에서 계층 선택을 표시합니다."
 
 #. module: account_reports
-#: model:ir.model.fields,field_description:account_reports.field_account_reports_export_wizard__doc_name
-msgid "Documents Name"
-msgstr "문서 이름"
-
-#. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report_line__domain
 msgid "Domain"
 msgstr "도메인"
 
 #. module: account_reports
-#: model_terms:ir.ui.view,arch_db:account_reports.res_config_settings_view_form
-msgid "Download the Data Inalterability Check Report"
-msgstr "데이터 변경 불가 검사 보고서 다운로드"
+#. openerp-web
+#: code:addons/account_reports/static/src/xml/account_report_template.xml:16
+#, python-format
+msgid "Done"
+msgstr "완료"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_aged_partner_balance.py:0
-#: code:addons/account_reports/models/account_partner_ledger.py:0
+#: code:addons/account_reports/models/account_followup_report.py:30
+#: code:addons/account_reports/models/account_partner_ledger.py:33
 #, python-format
 msgid "Due Date"
 msgstr "만기일 "
 
 #. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.res_config_settings_view_form
+msgid "Duration between two reminders"
+msgstr "두 알림 사이의 기간"
+
+#. module: account_reports
 #: model:account.financial.html.report.line,name:account_reports.account_financial_report_equity0
 msgid "EQUITY"
 msgstr "자기 자본"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.main_template
+msgid "Edit Summary"
+msgstr ""
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report__hierarchy_option
@@ -1043,7 +1086,7 @@ msgstr "계층 옵션 활성화"
 #: model_terms:ir.ui.view,arch_db:account_reports.search_template_comparison
 #: model_terms:ir.ui.view,arch_db:account_reports.search_template_date_filter
 msgid "End Date :"
-msgstr "종료일 :"
+msgstr "종료일:"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.search_template_date_filter
@@ -1061,42 +1104,34 @@ msgid "End of Last Quarter"
 msgstr "전 분기 말"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_financial_report.py:449
+#: code:addons/account_reports/models/account_followup_report.py:34
 #, python-format
-msgid ""
-"Error while validating the domain of line %s:\n"
-"%s"
-msgstr ""
+msgid "Excluded"
+msgstr "제외됨"
 
 #. module: account_reports
 #: model:account.financial.html.report,name:account_reports.account_financial_report_executivesummary0
-#: model:ir.actions.client,name:account_reports.account_financial_html_report_action_3
-#: model:ir.ui.menu,name:account_reports.account_financial_html_report_menu_3
+#: model:ir.actions.client,name:account_reports.account_financial_html_report_action_4
+#: model:ir.ui.menu,name:account_reports.account_financial_html_report_menu_4
 msgid "Executive Summary"
 msgstr "종합 요약"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_aged_partner_balance.py:0
+#: code:addons/account_reports/models/account_followup_report.py:33
 #, python-format
-msgid "Exp. Date"
-msgstr "만기일"
+msgid "Expected Date"
+msgstr "예상된 날짜"
 
 #. module: account_reports
 #. openerp-web
-#: code:addons/account_reports/static/src/xml/account_report_template.xml:0
+#: code:addons/account_reports/static/src/xml/account_report_template.xml:55
 #: model:ir.model.fields,field_description:account_reports.field_account_move_line__expected_pay_date
 #, python-format
 msgid "Expected Payment Date"
 msgstr "예상 지급일"
 
 #. module: account_reports
-#: code:addons/account_reports/models/res_partner.py:0
-#, python-format
-msgid "Expected pay date has been changed from %s to %s"
-msgstr "예상 지급일이 %s에서 %s로 변경되었습니다"
-
-#. module: account_reports
-#: code:addons/account_reports/models/res_partner.py:0
+#: code:addons/account_reports/models/res_partner.py:147
 #, python-format
 msgid "Expected pay date has been changed from %s to %s for invoice %s"
 msgstr "예상 지급일이 %s에서 %s로 변경되었으며 해당 송장은 %s입니다."
@@ -1118,32 +1153,10 @@ msgid "Expenses"
 msgstr "경비"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_report.py:0
-#: model_terms:ir.ui.view,arch_db:account_reports.view_report_export_wizard
-#, python-format
-msgid "Export"
-msgstr "내보내기"
-
-#. module: account_reports
-#: code:addons/account_reports/models/account_report.py:0
+#: code:addons/account_reports/models/account_report.py:701
 #, python-format
 msgid "Export (XLSX)"
 msgstr "내보내기(XLSX)"
-
-#. module: account_reports
-#: model:ir.model,name:account_reports.model_account_reports_export_wizard_format
-msgid "Export format for accounting's reports"
-msgstr "회계 보고서의 내보내기 형식"
-
-#. module: account_reports
-#: model:ir.model.fields,field_description:account_reports.field_account_reports_export_wizard__export_format_ids
-msgid "Export to"
-msgstr "다음으로 내보내기"
-
-#. module: account_reports
-#: model:ir.model,name:account_reports.model_account_reports_export_wizard
-msgid "Export wizard for accounting's reports"
-msgstr "회계 보고서 내보내기 마법사"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.filter_info_template
@@ -1152,10 +1165,8 @@ msgstr "필터 :"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_financial_html_report__applicable_filters_ids
-msgid ""
-"Filters that can be used to filter and group lines in this report. This uses"
-" saved filters on journal items."
-msgstr "이 보고서에서 행을 필터링하고 그룹화하는 데 사용할 수있는 필터. 분개장 항목에 저장된 필터를 사용합니다."
+msgid "Filters that can be used to filter and group lines in this report."
+msgstr ""
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report_line__financial_report_id
@@ -1170,19 +1181,71 @@ msgid "Financial Reports"
 msgstr "재무보고서"
 
 #. module: account_reports
-#: model:ir.model.fields.selection,name:account_reports.selection__account_financial_html_report_line__figure_type__float
+#: selection:account.financial.html.report.line,figure_type:0
 msgid "Float"
 msgstr "부동 소수점"
 
 #. module: account_reports
-#: model:ir.model.fields.selection,name:account_reports.selection__account_financial_html_report_line__show_domain__foldable
+#: selection:account.financial.html.report.line,show_domain:0
 msgid "Foldable"
 msgstr "접이식"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.line_template
 msgid "Folded"
-msgstr "접음"
+msgstr "접이식"
+
+#. module: account_reports
+#: model:ir.model,name:account_reports.model_account_followup_report
+msgid "Follow-up Report"
+msgstr "후속 조치 보고서"
+
+#. module: account_reports
+#: model:ir.actions.act_window,name:account_reports.action_view_list_customer_statements
+#: model:ir.ui.menu,name:account_reports.customer_statements_menu
+msgid "Follow-up Reports"
+msgstr "후속 조치 보고서"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.customer_statements_tree_view
+msgid "Follow-up Reports Tree View"
+msgstr "후속 조치 보고서 트리 보기"
+
+#. module: account_reports
+#: code:addons/account_reports/models/account_followup_report.py:235
+#, python-format
+msgid "Follow-up email sent to %s"
+msgstr ""
+
+#. module: account_reports
+#: code:addons/account_reports/models/account_followup_report.py:257
+#, python-format
+msgid "Follow-up letter printed"
+msgstr "후속 조치 보고서 인쇄됨"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.account_reports_journal_dashboard_kanban_view
+msgid "Follow-up reports"
+msgstr "후속 조치 보고서"
+
+#. module: account_reports
+#. openerp-web
+#: code:addons/account_reports/static/src/xml/account_report_template.xml:35
+#, python-format
+msgid "Follow-ups Done / Total Follow-ups"
+msgstr "후속 관리 완료 / 총 후속 관리"
+
+#. module: account_reports
+#: code:addons/account_reports/models/account_followup_report.py:201
+#, python-format
+msgid "Followup Report"
+msgstr "후속 관리 보고서"
+
+#. module: account_reports
+#: model:ir.model.fields,field_description:account_reports.field_res_partner__followup_status
+#: model:ir.model.fields,field_description:account_reports.field_res_users__followup_status
+msgid "Followup status"
+msgstr ""
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_manager__footnotes_ids
@@ -1190,7 +1253,7 @@ msgid "Footnotes"
 msgstr "각주"
 
 #. module: account_reports
-#: model:ir.model.fields.selection,name:account_reports.selection__account_financial_html_report_line__special_date_changer__strict_range
+#: selection:account.financial.html.report.line,special_date_changer:0
 msgid "Force given dates for all accounts and account types"
 msgstr "모든 계정과 계정 유형에 특정 기간 강제 지정"
 
@@ -1200,37 +1263,30 @@ msgid "Formulas"
 msgstr "공식"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_report.py:0
+#: code:addons/account_reports/models/account_report.py:783
 #, python-format
 msgid ""
-"From %s\n"
-"to  %s"
+"From %s \n"
+" to  %s"
 msgstr ""
-"시작 %s\n"
-"종료 %s"
 
 #. module: account_reports
-#: model:ir.model.fields.selection,name:account_reports.selection__account_financial_html_report_line__special_date_changer__from_beginning
+#: selection:account.financial.html.report.line,special_date_changer:0
 msgid "From the beginning"
 msgstr "시작부터"
 
 #. module: account_reports
-#: model:ir.model.fields.selection,name:account_reports.selection__account_financial_html_report_line__special_date_changer__from_fiscalyear
+#: selection:account.financial.html.report.line,special_date_changer:0
 msgid "From the beginning of the fiscal year"
 msgstr "회계연도 시작부터"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.search_template_date_filter
 msgid "From:"
-msgstr "시작 :"
+msgstr "시작:"
 
 #. module: account_reports
-#: model:ir.model.fields,field_description:account_reports.field_account_reports_export_wizard_format__fun_to_call
-msgid "Function to Call"
-msgstr "전화 기능"
-
-#. module: account_reports
-#: code:addons/account_reports/models/account_general_ledger.py:0
+#: code:addons/account_reports/models/account_general_ledger.py:453
 #: model:ir.actions.client,name:account_reports.action_account_report_general_ledger
 #: model:ir.ui.menu,name:account_reports.menu_action_account_report_general_ledger
 #: model_terms:ir.ui.view,arch_db:account_reports.line_caret_options
@@ -1244,21 +1300,21 @@ msgid "General Ledger Report"
 msgstr "총 계정 원장 보고서"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_report.py:0
+#: code:addons/account_reports/models/account_report.py:160
 #, python-format
 msgid "General Report"
 msgstr "일반 보고서"
 
 #. module: account_reports
-#: code:addons/account_reports/wizard/report_export_wizard.py:0
-#, python-format
-msgid "Generated Documents"
-msgstr "생성된 문서"
-
-#. module: account_reports
+#: model:ir.actions.client,name:account_reports.action_account_report_gt
 #: model:ir.model,name:account_reports.model_account_generic_tax_report
 msgid "Generic Tax Report"
 msgstr "일반 세금 보고서"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.template_followup_report
+msgid "Good debtor"
+msgstr "우량 채무자"
 
 #. module: account_reports
 #: model:account.financial.html.report.line,name:account_reports.account_financial_report_gross_profit0
@@ -1276,33 +1332,23 @@ msgid "Gross profit margin (gross profit / operating income)"
 msgstr "매출총이익률(총이익/영업 수입)"
 
 #. module: account_reports
-#: model_terms:ir.ui.view,arch_db:account_reports.search_template_extra_options_generic_tax_report
-msgid "Group amounts by tax grid"
-msgstr "세금 그리드 별 금액"
-
-#. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report_line__groupby
 msgid "Group by"
-msgstr "그룹별"
+msgstr "그룹화"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_financial_report.py:0
-#: code:addons/account_reports/models/account_financial_report.py:0
-#: code:addons/account_reports/models/account_financial_report.py:0
+#: code:addons/account_reports/models/account_financial_report.py:291
+#: code:addons/account_reports/models/account_financial_report.py:867
+#: code:addons/account_reports/models/account_financial_report.py:981
 #, python-format
 msgid "Groupby should be a field from account.move.line"
 msgstr "그룹화는 account.move.line의 필드여야 합니다."
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_financial_report.py:0
+#: code:addons/account_reports/models/account_financial_report.py:831
 #, python-format
 msgid "Groupby should be a journal item field"
 msgstr "그룹화는 분개 항목 필드여야 합니다."
-
-#. module: account_reports
-#: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report_line__hide_if_empty
-msgid "Hide If Empty"
-msgstr "비었으면 숨기기"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report_line__hide_if_zero
@@ -1320,31 +1366,35 @@ msgid "Hierarchy and Subtotals"
 msgstr "계층 및 소계"
 
 #. module: account_reports
-#: model_terms:ir.ui.view,arch_db:account_reports.res_config_settings_view_form
-msgid "How often tax returns have to be made"
-msgstr "세금 신고를 얼마나 자주해야 합니까"
-
-#. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_aged_partner__id
 #: model:ir.model.fields,field_description:account_reports.field_account_aged_payable__id
 #: model:ir.model.fields,field_description:account_reports.field_account_aged_receivable__id
 #: model:ir.model.fields,field_description:account_reports.field_account_analytic_report__id
 #: model:ir.model.fields,field_description:account_reports.field_account_bank_reconciliation_report__id
-#: model:ir.model.fields,field_description:account_reports.field_account_cash_flow_report__id
 #: model:ir.model.fields,field_description:account_reports.field_account_coa_report__id
 #: model:ir.model.fields,field_description:account_reports.field_account_consolidated_journal__id
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report__id
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report_line__id
+#: model:ir.model.fields,field_description:account_reports.field_account_followup_report__id
 #: model:ir.model.fields,field_description:account_reports.field_account_general_ledger__id
 #: model:ir.model.fields,field_description:account_reports.field_account_generic_tax_report__id
 #: model:ir.model.fields,field_description:account_reports.field_account_partner_ledger__id
 #: model:ir.model.fields,field_description:account_reports.field_account_report__id
 #: model:ir.model.fields,field_description:account_reports.field_account_report_footnote__id
 #: model:ir.model.fields,field_description:account_reports.field_account_report_manager__id
-#: model:ir.model.fields,field_description:account_reports.field_account_reports_export_wizard__id
-#: model:ir.model.fields,field_description:account_reports.field_account_reports_export_wizard_format__id
 msgid "ID"
 msgstr "ID"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.followup_search_template
+msgid "In Need of Action"
+msgstr "작업 필요"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.customer_statements_search_view
+#: selection:res.partner,followup_status:0
+msgid "In need of action"
+msgstr "작업 필요"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.search_template_extra_options
@@ -1360,12 +1410,12 @@ msgstr "전기되지 않은 항목 포함"
 #: model:account.financial.html.report.line,name:account_reports.account_financial_report_executivesummary_income0
 #: model:account.financial.html.report.line,name:account_reports.account_financial_report_totalincome0
 msgid "Income"
-msgstr "수익"
+msgstr "소득"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_general_ledger.py:0
-#: code:addons/account_reports/models/account_partner_ledger.py:0
-#: code:addons/account_reports/models/account_report_coa.py:0
+#: code:addons/account_reports/models/account_general_ledger.py:308
+#: code:addons/account_reports/models/account_partner_ledger.py:35
+#: code:addons/account_reports/models/account_report_coa.py:50
 #: model_terms:ir.ui.view,arch_db:account_reports.template_coa_table_header
 #, python-format
 msgid "Initial Balance"
@@ -1373,7 +1423,7 @@ msgstr "기초 잔고"
 
 #. module: account_reports
 #. openerp-web
-#: code:addons/account_reports/static/src/xml/account_report_template.xml:0
+#: code:addons/account_reports/static/src/xml/account_report_template.xml:43
 #, python-format
 msgid "Insert foot note here"
 msgstr "여기에 각주 삽입"
@@ -1381,53 +1431,19 @@ msgstr "여기에 각주 삽입"
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_move_line__internal_note
 msgid "Internal Note"
-msgstr "내부 노트"
-
-#. module: account_reports
-#: model:ir.model.fields,field_description:account_reports.field_account_move__is_tax_closing
-msgid "Is Tax Closing"
-msgstr "세금 마감 여부"
+msgstr "내부 메모"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report_line__green_on_positive
 msgid "Is growth good when positive"
-msgstr "플러스가 우량 성장인지 여부"
+msgstr "플러스일 때 우량 성장"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_generic_tax_report.py:0
-#, python-format
-msgid ""
-"It seems that you have no entries to post, are you sure you correctly "
-"configured the accounts on your tax groups?"
-msgstr "게시할 항목이 없는 것 같습니다. 세금 그룹에서 계정을 올바르게 구성했습니까?"
-
-#. module: account_reports
-#: code:addons/account_reports/models/account_partner_ledger.py:0
+#: code:addons/account_reports/models/account_aged_partner_balance.py:21
+#: code:addons/account_reports/models/account_partner_ledger.py:30
 #, python-format
 msgid "JRNL"
 msgstr "JRNL"
-
-#. module: account_reports
-#: code:addons/account_reports/models/account_aged_partner_balance.py:0
-#: model:ir.model.fields,field_description:account_reports.field_account_financial_year_op__account_tax_periodicity_journal_id
-#: model:ir.model.fields,field_description:account_reports.field_res_company__account_tax_periodicity_journal_id
-#: model:ir.model.fields,field_description:account_reports.field_res_config_settings__account_tax_periodicity_journal_id
-#: model_terms:ir.ui.view,arch_db:account_reports.res_config_settings_view_form
-#: model_terms:ir.ui.view,arch_db:account_reports.setup_financial_year_opening_form
-#, python-format
-msgid "Journal"
-msgstr "분개장"
-
-#. module: account_reports
-#: model:ir.model,name:account_reports.model_account_move
-msgid "Journal Entries"
-msgstr "분개장 기입 항목"
-
-#. module: account_reports
-#: code:addons/account_reports/models/account_report.py:0
-#, python-format
-msgid "Journal Groups"
-msgstr "분개장 그룹"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_move_line
@@ -1440,7 +1456,7 @@ msgid "Journal Items"
 msgstr "분개 항목"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_report.py:0
+#: code:addons/account_reports/models/account_report.py:309
 #, python-format
 msgid "Journal Items (%s)"
 msgstr "분개 항목 (%s)"
@@ -1451,7 +1467,7 @@ msgid "Journal Items by tax"
 msgstr "세금별 분개 항목"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_consolidated_journals.py:0
+#: code:addons/account_reports/models/account_consolidated_journals.py:29
 #, python-format
 msgid "Journal Name (Code)"
 msgstr "분개명 (코드)"
@@ -1465,7 +1481,7 @@ msgstr "분개장 감사"
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.filter_info_template
 msgid "Journals:"
-msgstr "분개장 :"
+msgstr "분개장:"
 
 #. module: account_reports
 #: model:account.financial.html.report.line,name:account_reports.account_financial_report_liabilities_view0
@@ -1478,7 +1494,7 @@ msgid "LIABILITIES + EQUITY"
 msgstr "부채 + 자본"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_bank_reconciliation_report.py:0
+#: code:addons/account_reports/models/account_bank_reconciliation_report.py:188
 #, python-format
 msgid "Last Bank Statement Ending Balance"
 msgstr "마지막 은행 계좌 명세서 잔액"
@@ -1494,21 +1510,19 @@ msgstr "작년 회계연도"
 #: model:ir.model.fields,field_description:account_reports.field_account_aged_receivable____last_update
 #: model:ir.model.fields,field_description:account_reports.field_account_analytic_report____last_update
 #: model:ir.model.fields,field_description:account_reports.field_account_bank_reconciliation_report____last_update
-#: model:ir.model.fields,field_description:account_reports.field_account_cash_flow_report____last_update
 #: model:ir.model.fields,field_description:account_reports.field_account_coa_report____last_update
 #: model:ir.model.fields,field_description:account_reports.field_account_consolidated_journal____last_update
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report____last_update
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report_line____last_update
+#: model:ir.model.fields,field_description:account_reports.field_account_followup_report____last_update
 #: model:ir.model.fields,field_description:account_reports.field_account_general_ledger____last_update
 #: model:ir.model.fields,field_description:account_reports.field_account_generic_tax_report____last_update
 #: model:ir.model.fields,field_description:account_reports.field_account_partner_ledger____last_update
 #: model:ir.model.fields,field_description:account_reports.field_account_report____last_update
 #: model:ir.model.fields,field_description:account_reports.field_account_report_footnote____last_update
 #: model:ir.model.fields,field_description:account_reports.field_account_report_manager____last_update
-#: model:ir.model.fields,field_description:account_reports.field_account_reports_export_wizard____last_update
-#: model:ir.model.fields,field_description:account_reports.field_account_reports_export_wizard_format____last_update
 msgid "Last Modified on"
-msgstr "최근 수정일"
+msgstr "최근 수정"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.search_template_date_filter
@@ -1525,8 +1539,6 @@ msgstr "전 분기"
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report_line__write_uid
 #: model:ir.model.fields,field_description:account_reports.field_account_report_footnote__write_uid
 #: model:ir.model.fields,field_description:account_reports.field_account_report_manager__write_uid
-#: model:ir.model.fields,field_description:account_reports.field_account_reports_export_wizard__write_uid
-#: model:ir.model.fields,field_description:account_reports.field_account_reports_export_wizard_format__write_uid
 msgid "Last Updated by"
 msgstr "최근 갱신한 사람"
 
@@ -1535,10 +1547,8 @@ msgstr "최근 갱신한 사람"
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report_line__write_date
 #: model:ir.model.fields,field_description:account_reports.field_account_report_footnote__write_date
 #: model:ir.model.fields,field_description:account_reports.field_account_report_manager__write_date
-#: model:ir.model.fields,field_description:account_reports.field_account_reports_export_wizard__write_date
-#: model:ir.model.fields,field_description:account_reports.field_account_reports_export_wizard_format__write_date
 msgid "Last Updated on"
-msgstr "최근 갱신일"
+msgstr "최근 갱신 날짜"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report_line__level
@@ -1548,16 +1558,16 @@ msgstr "수준"
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_footnote__line
 msgid "Line"
-msgstr "명세"
+msgstr "라인"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report__line_ids
 msgid "Lines"
-msgstr "명세"
+msgstr "라인"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_general_ledger.py:0
-#: code:addons/account_reports/models/account_partner_ledger.py:0
+#: code:addons/account_reports/models/account_general_ledger.py:384
+#: code:addons/account_reports/models/account_partner_ledger.py:206
 #, python-format
 msgid "Load more... (%s remaining)"
 msgstr "추가 불러오기... (%s 남음)"
@@ -1578,7 +1588,12 @@ msgid "Manager"
 msgstr "관리자"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_partner_ledger.py:0
+#: model_terms:ir.ui.view,arch_db:account_reports.template_followup_report
+msgid "Manual"
+msgstr "수동"
+
+#. module: account_reports
+#: code:addons/account_reports/models/account_partner_ledger.py:34
 #, python-format
 msgid "Matching Number"
 msgstr "일치하는 번호"
@@ -1589,29 +1604,28 @@ msgid "Menu Item"
 msgstr "메뉴 항목"
 
 #. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.res_config_settings_view_form
+msgid "Minimum"
+msgstr "최소"
+
+#. module: account_reports
 #: model:ir.model,name:account_reports.model_ir_module_module
 msgid "Module"
 msgstr "모듈"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_generic_tax_report.py:0
-#: code:addons/account_reports/models/account_generic_tax_report.py:0
+#: code:addons/account_reports/models/account_generic_tax_report.py:19
+#: code:addons/account_reports/models/account_generic_tax_report.py:22
 #, python-format
 msgid "NET"
 msgstr "순"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_general_ledger.py:0
+#: code:addons/account_reports/models/account_general_ledger.py:431
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report__name
-#: model:ir.model.fields,field_description:account_reports.field_account_reports_export_wizard_format__name
 #, python-format
 msgid "Name"
 msgstr "이름"
-
-#. module: account_reports
-#: model:ir.model.fields,help:account_reports.field_account_reports_export_wizard__doc_name
-msgid "Name to give to the generated documents."
-msgstr "생성된 문서에 부여할 이름입니다."
 
 #. module: account_reports
 #: model:account.financial.html.report.line,name:account_reports.account_financial_report_net_assets0
@@ -1630,8 +1644,7 @@ msgid "Net assets"
 msgstr "순자산"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_cash_flow_report.py:0
-#, python-format
+#: model:account.financial.html.report.line,name:account_reports.account_financial_report_cashsummary_net_increase0
 msgid "Net increase in cash and cash equivalents"
 msgstr "현금 및 현금 등가물의 순증가"
 
@@ -1641,14 +1654,22 @@ msgid "Net profit margin (net profit / income)"
 msgstr "순이익률(순이익/수입)"
 
 #. module: account_reports
-#: model:ir.model.fields.selection,name:account_reports.selection__account_financial_html_report_line__show_domain__never
+#: selection:account.financial.html.report.line,show_domain:0
 msgid "Never"
-msgstr "하지않음"
+msgstr "절대"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_move_line__next_action_date
+#: model:ir.model.fields,field_description:account_reports.field_res_partner__payment_next_action_date
+#: model:ir.model.fields,field_description:account_reports.field_res_users__payment_next_action_date
 msgid "Next Action Date"
 msgstr "다음 조치 날짜"
+
+#. module: account_reports
+#: code:addons/account_reports/models/res_partner.py:171
+#, python-format
+msgid "Next action date: "
+msgstr "다음 작업 날짜 :"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.search_template_comparison
@@ -1656,9 +1677,51 @@ msgid "No Comparison"
 msgstr "비교 안 함"
 
 #. module: account_reports
-#: model:ir.model.fields.selection,name:account_reports.selection__account_financial_html_report_line__figure_type__no_unit
+#: selection:account.financial.html.report.line,figure_type:0
 msgid "No Unit"
 msgstr "단위 없음"
+
+#. module: account_reports
+#: selection:res.partner,followup_status:0
+msgid "No action needed"
+msgstr "작업 불필요함"
+
+#. module: account_reports
+#: code:addons/account_reports/models/account_financial_report.py:582
+#, python-format
+msgid ""
+"No bank account found. Please set Default Debit and Default Credit accounts "
+"in journal(s): %s."
+msgstr ""
+
+#. module: account_reports
+#: code:addons/account_reports/models/account_report.py:933
+#, python-format
+msgid "No comparison"
+msgstr "비교 안 함"
+
+#. module: account_reports
+#: model_terms:ir.actions.act_window,help:account_reports.action_view_list_customer_statements
+msgid "No follow-up to send!"
+msgstr "발송할 후속 조치가 없습니다!"
+
+#. module: account_reports
+#. openerp-web
+#: code:addons/account_reports/static/src/xml/account_report_template.xml:23
+#, python-format
+msgid "No followup to send!"
+msgstr "발송할 후속 조치가 없습니다!"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.template_followup_report
+msgid "Normal debtor"
+msgstr "일반 채무자"
+
+#. module: account_reports
+#: code:addons/account_reports/models/account_aged_partner_balance.py:21
+#, python-format
+msgid "Not due on: %s"
+msgstr ""
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_move_line__internal_note
@@ -1668,31 +1731,26 @@ msgid ""
 msgstr "고객 명세서에서 미수 분개 항목에 대해 설정할 수 있습니다."
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_generic_tax_report.py:0
-#, python-format
-msgid "Nothing to process"
-msgstr "처리할 것이 없습니다"
+#: model:ir.model.fields,field_description:account_reports.field_res_company__days_between_two_followups
+msgid "Number of days between two follow-ups"
+msgstr "두 후속 관리 사이의 기간(일)"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.search_template_comparison
 msgid "Number of periods :"
-msgstr "기간 :"
-
-#. module: account_reports
-#: model:account.financial.html.report.line,name:account_reports.account_financial_report_off_sheet
-msgid "OFF BALANCE SHEET ACCOUNTS"
-msgstr "대차대조표 상에 계상되지 않는 계정"
+msgstr "기간:"
 
 #. module: account_reports
 #. openerp-web
-#: code:addons/account_reports/static/src/js/account_reports.js:0
-#: code:addons/account_reports/static/src/js/account_reports.js:0
+#: code:addons/account_reports/static/src/xml/account_report_template.xml:13
 #, python-format
-msgid "Odoo Warning"
-msgstr "Odoo 경고"
+msgid ""
+"Odoo will remind you to take care of this follow-up on the next reminder "
+"date."
+msgstr "Odoo는 다음 알림 날짜에 이 후속 조치를 처리하도록 상기시켜 줄 것입니다."
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_aged_partner_balance.py:0
+#: code:addons/account_reports/models/account_aged_partner_balance.py:22
 #, python-format
 msgid "Older"
 msgstr "오래된"
@@ -1703,17 +1761,12 @@ msgid "Only Show Unreconciled Entries"
 msgstr "미조정 분개만 표시"
 
 #. module: account_reports
-#: model:ir.model,name:account_reports.model_account_financial_year_op
-msgid "Opening Balance of Financial Year"
-msgstr "회계연도 대차대조표 개시"
-
-#. module: account_reports
 #: model:account.financial.html.report.line,name:account_reports.account_financial_report_income0
 msgid "Operating Income"
 msgstr "영업 이익"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_bank_reconciliation_report.py:0
+#: code:addons/account_reports/models/account_bank_reconciliation_report.py:163
 #, python-format
 msgid "Operations to Process"
 msgstr "처리할 작업"
@@ -1724,10 +1777,15 @@ msgid "Other Income"
 msgstr "기타 소득"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_report.py:0
+#: model_terms:ir.ui.view,arch_db:account_reports.customer_statements_search_view
+msgid "Overdue Invoices"
+msgstr "연체 송장"
+
+#. module: account_reports
+#: code:addons/account_reports/models/res_partner.py:174
 #, python-format
-msgid "PDF"
-msgstr "PDF"
+msgid "Overdue Payments for %s"
+msgstr "%s에 대한 연체 지불금"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report_line__parent_id
@@ -1745,18 +1803,9 @@ msgid "Parent Path"
 msgstr "상위 경로"
 
 #. module: account_reports
-#: model:ir.model.fields,field_description:account_reports.field_account_reports_export_wizard__report_id
-msgid "Parent Report Id"
-msgstr "상위 보고서 ID"
-
-#. module: account_reports
-#: model:ir.model.fields,field_description:account_reports.field_account_reports_export_wizard_format__export_wizard_id
-msgid "Parent Wizard"
-msgstr "상위 마법사"
-
-#. module: account_reports
-#: code:addons/account_reports/models/account_analytic_report.py:0
-#: code:addons/account_reports/models/account_general_ledger.py:0
+#: code:addons/account_reports/models/account_analytic_report.py:24
+#: code:addons/account_reports/models/account_general_ledger.py:31
+#: model:ir.model.fields,field_description:account_reports.field_account_report_manager__partner_id
 #, python-format
 msgid "Partner"
 msgstr "협력사"
@@ -1767,14 +1816,21 @@ msgid "Partner Categories:"
 msgstr "협렵사 범주 :"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_partner_ledger.py:0
+#: code:addons/account_reports/models/account_partner_ledger.py:228
+#: code:addons/account_reports/models/res_partner.py:83
+#: code:addons/account_reports/models/res_partner.py:185
 #: model:ir.actions.client,name:account_reports.action_account_report_partner_ledger
 #: model:ir.model,name:account_reports.model_account_partner_ledger
 #: model:ir.ui.menu,name:account_reports.menu_action_account_report_partner_ledger
-#: model_terms:ir.ui.view,arch_db:account_reports.partner_view_buttons
 #, python-format
 msgid "Partner Ledger"
 msgstr "협력사 원장"
+
+#. module: account_reports
+#: model:ir.model.fields,field_description:account_reports.field_res_partner__partner_ledger_label
+#: model:ir.model.fields,field_description:account_reports.field_res_users__partner_ledger_label
+msgid "Partner Ledger Label"
+msgstr "협력사 원장 라벨"
 
 #. module: account_reports
 #: model:ir.ui.menu,name:account_reports.account_reports_partners_reports_menu
@@ -1783,7 +1839,7 @@ msgstr "협력사 보고서"
 
 #. module: account_reports
 #. openerp-web
-#: code:addons/account_reports/static/src/js/account_reports.js:0
+#: code:addons/account_reports/static/src/js/account_reports.js:410
 #, python-format
 msgid "Partners"
 msgstr "협력사"
@@ -1794,25 +1850,20 @@ msgid "Partners:"
 msgstr "협력사 :"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_partner_ledger.py:0
+#: code:addons/account_reports/models/account_partner_ledger.py:19
+#: code:addons/account_reports/models/account_partner_ledger.py:25
 #, python-format
 msgid "Payable"
-msgstr "미지급금"
-
-#. module: account_reports
-#: code:addons/account_reports/models/account_generic_tax_report.py:0
-#, python-format
-msgid "Payable tax amount"
-msgstr "미지급 세금 계정"
+msgstr "지급금"
 
 #. module: account_reports
 #: model:account.financial.html.report.line,name:account_reports.account_financial_report_current_liabilities_payable
 #: model:account.financial.html.report.line,name:account_reports.account_financial_report_executivesummary_creditors0
 msgid "Payables"
-msgstr "미지급금"
+msgstr "지급금"
 
 #. module: account_reports
-#: model:ir.model.fields.selection,name:account_reports.selection__account_financial_html_report_line__figure_type__percents
+#: selection:account.financial.html.report.line,figure_type:0
 msgid "Percents"
 msgstr "비율"
 
@@ -1822,21 +1873,16 @@ msgid "Performance"
 msgstr "실적"
 
 #. module: account_reports
-#: code:addons/account_reports/models/res_config_settings.py:0
+#: code:addons/account_reports/models/account_report.py:886
 #, python-format
-msgid "Periodic Tax Return"
-msgstr "정기 세금 신고"
+msgid "Please specify a start and end date."
+msgstr ""
 
 #. module: account_reports
-#: model:ir.model.fields,field_description:account_reports.field_account_financial_year_op__account_tax_periodicity
-#: model:ir.model.fields,field_description:account_reports.field_res_config_settings__account_tax_periodicity
-#: model:ir.model.fields,help:account_reports.field_account_financial_year_op__account_tax_periodicity
-#: model:ir.model.fields,help:account_reports.field_res_company__account_tax_periodicity
-#: model:ir.model.fields,help:account_reports.field_res_config_settings__account_tax_periodicity
-#: model_terms:ir.ui.view,arch_db:account_reports.res_config_settings_view_form
-#: model_terms:ir.ui.view,arch_db:account_reports.setup_financial_year_opening_form
-msgid "Periodicity"
-msgstr "주기"
+#: code:addons/account_reports/models/account_report.py:884
+#, python-format
+msgid "Please specify an end date."
+msgstr ""
 
 #. module: account_reports
 #: model:account.financial.html.report.line,name:account_reports.account_financial_report_fixed_assets_view0
@@ -1859,6 +1905,7 @@ msgid "Position"
 msgstr "위치"
 
 #. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.filter_info_template
 #: model_terms:ir.ui.view,arch_db:account_reports.search_template_extra_options
 msgid "Posted Entries Only"
 msgstr "전기된 항목만"
@@ -1879,15 +1926,32 @@ msgid "Previous Years Unallocated Earnings"
 msgstr "전년도 미할당 순이익"
 
 #. module: account_reports
+#: model:ir.actions.report,name:account_reports.action_report_followup
+msgid "Print Follow-up Letter"
+msgstr "후속 조치서 인쇄"
+
+#. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report_line__print_on_new_page
 msgid "Print On New Page"
 msgstr "새 페이지에 인쇄"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_report.py:0
+#: code:addons/account_reports/models/account_report.py:701
 #, python-format
 msgid "Print Preview"
 msgstr "인쇄 미리보기"
+
+#. module: account_reports
+#. openerp-web
+#: code:addons/account_reports/static/src/xml/account_report_template.xml:7
+#, python-format
+msgid "Print letter"
+msgstr "조치서 인쇄"
+
+#. module: account_reports
+#: model:ir.actions.server,name:account_reports.action_account_reports_customer_statements_do_followup
+msgid "Process Follow-ups"
+msgstr ""
 
 #. module: account_reports
 #: model:ir.actions.client,name:account_reports.action_account_report_pnl
@@ -1907,21 +1971,10 @@ msgid "Profitability"
 msgstr "수익성"
 
 #. module: account_reports
-#: model_terms:ir.ui.view,arch_db:account_reports.view_move_form_vat_return
-msgid "Proposition of tax closing journal entry."
-msgstr "세금 결산 분개장 기입항목 제안."
-
-#. module: account_reports
-#: code:addons/account_reports/models/account_partner_ledger.py:0
+#: code:addons/account_reports/models/account_partner_ledger.py:18
 #, python-format
 msgid "Receivable"
 msgstr "미수금"
-
-#. module: account_reports
-#: code:addons/account_reports/models/account_generic_tax_report.py:0
-#, python-format
-msgid "Receivable tax amount"
-msgstr "미수 세금 계정"
 
 #. module: account_reports
 #: model:account.financial.html.report.line,name:account_reports.account_financial_report_executivesummary_debtors0
@@ -1930,37 +1983,30 @@ msgid "Receivables"
 msgstr "미수금"
 
 #. module: account_reports
-#: model_terms:ir.ui.view,arch_db:account_reports.line_template_aged_payable_report
-#: model_terms:ir.ui.view,arch_db:account_reports.line_template_aged_receivable_report
-#: model_terms:ir.ui.view,arch_db:account_reports.line_template_partner_ledger_report
-msgid "Reconcile"
-msgstr "조정"
-
-#. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_reports_journal_dashboard_kanban_view
 msgid "Reconciliation Report"
 msgstr "조정 보고서"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_partner_ledger.py:0
+#: code:addons/account_reports/models/account_partner_ledger.py:32
 #, python-format
 msgid "Ref"
 msgstr "참조"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_analytic_report.py:0
-#: code:addons/account_reports/models/account_bank_reconciliation_report.py:0
+#: code:addons/account_reports/models/account_aged_partner_balance.py:21
+#: code:addons/account_reports/models/account_analytic_report.py:23
+#: code:addons/account_reports/models/account_bank_reconciliation_report.py:23
 #, python-format
 msgid "Reference"
 msgstr "참조"
 
 #. module: account_reports
-#: model:ir.model.fields,field_description:account_reports.field_account_financial_year_op__account_tax_periodicity_reminder_day
-#: model:ir.model.fields,field_description:account_reports.field_res_config_settings__account_tax_periodicity_reminder_day
-#: model_terms:ir.ui.view,arch_db:account_reports.res_config_settings_view_form
-#: model_terms:ir.ui.view,arch_db:account_reports.setup_financial_year_opening_form
-msgid "Reminder"
-msgstr "미리 알림"
+#. openerp-web
+#: code:addons/account_reports/static/src/xml/account_report_template.xml:13
+#, python-format
+msgid "Remind me later"
+msgstr "나중에 알림"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.view_account_financial_report_form
@@ -1970,18 +2016,13 @@ msgstr "보고서 정의"
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.view_account_financial_report_line_form
 msgid "Report Line"
-msgstr "보고서 명세"
+msgstr "보고서 라인"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.view_account_financial_report_form
 #: model_terms:ir.ui.view,arch_db:account_reports.view_account_financial_report_line_tree
 msgid "Report Lines"
-msgstr "보고서 명세"
-
-#. module: account_reports
-#: model:ir.model.fields,field_description:account_reports.field_account_reports_export_wizard__report_model
-msgid "Report Model"
-msgstr "보고서 모델"
+msgstr "보고서 라인"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_manager__report_name
@@ -2009,10 +2050,8 @@ msgid "Same Period Last Year"
 msgstr "동기 전년도"
 
 #. module: account_reports
-#. openerp-web
-#: code:addons/account_reports/models/account_report.py:0
-#: code:addons/account_reports/static/src/js/account_reports.js:0
-#, python-format
+#: model_terms:ir.ui.view,arch_db:account_reports.main_template
+#: model_terms:ir.ui.view,arch_db:account_reports.template_followup_report
 msgid "Save"
 msgstr "저장"
 
@@ -2024,12 +2063,30 @@ msgstr "계정 검색"
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report_line__name
 msgid "Section Name"
-msgstr "영역 이름"
+msgstr "섹션 이름"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.template_followup_report
+msgid ""
+"Select this option if you want to manually define the next reminder date."
+msgstr ""
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.template_followup_report
+msgid "Send an email"
+msgstr "이메일 발송"
+
+#. module: account_reports
+#. openerp-web
+#: code:addons/account_reports/static/src/xml/account_report_template.xml:10
+#, python-format
+msgid "Send by email"
+msgstr "이메일 전송"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report_line__sequence
 msgid "Sequence"
-msgstr "순서"
+msgstr "순차적"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_financial_html_report__tax_report
@@ -2059,30 +2116,21 @@ msgid "Show unfold all filter"
 msgstr "모든 필터 펼치기"
 
 #. module: account_reports
-#: model_terms:ir.ui.view,arch_db:account_reports.view_move_form_vat_return
-msgid "Some controls failed"
-msgstr "일부 제어 실패함"
+#: code:addons/account_reports/models/account_followup_report.py:31
+#, python-format
+msgid "Source Document"
+msgstr "원본 문서"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report_line__special_date_changer
 msgid "Special Date Changer"
-msgstr "특정 날짜 변경기"
+msgstr "특별 날짜 변경기"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.search_template_comparison
 #: model_terms:ir.ui.view,arch_db:account_reports.search_template_date_filter
 msgid "Start Date :"
-msgstr "시작일 :"
-
-#. module: account_reports
-#: model:ir.model.fields,field_description:account_reports.field_res_company__account_tax_periodicity_reminder_day
-msgid "Start from"
-msgstr "다음에서 시작"
-
-#. module: account_reports
-#: model:ir.model.fields,field_description:account_reports.field_res_company__account_tax_original_periodicity_reminder_day
-msgid "Start from original"
-msgstr "원본에서 시작"
+msgstr "시작일:"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_manager__summary
@@ -2090,92 +2138,56 @@ msgid "Summary"
 msgstr "요약"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_generic_tax_report.py:0
-#: code:addons/account_reports/models/account_generic_tax_report.py:0
+#: code:addons/account_reports/models/account_generic_tax_report.py:20
+#: code:addons/account_reports/models/account_generic_tax_report.py:23
 #, python-format
 msgid "TAX"
 msgstr "세금"
 
 #. module: account_reports
-#: code:addons/account_reports/models/res_config_settings.py:0
-#, python-format
-msgid "TAX Report"
-msgstr "세금 보고서"
-
-#. module: account_reports
 #. openerp-web
-#: code:addons/account_reports/static/src/js/account_reports.js:0
-#: code:addons/account_reports/static/src/js/account_reports.js:0
+#: code:addons/account_reports/static/src/js/account_reports.js:417
 #, python-format
 msgid "Tags"
 msgstr "태그"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_general_ledger.py:0
+#: code:addons/account_reports/models/account_general_ledger.py:445
 #, python-format
 msgid "Tax Amount"
 msgstr "세액"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_general_ledger.py:0
+#: code:addons/account_reports/models/account_general_ledger.py:436
 #, python-format
 msgid "Tax Declaration"
 msgstr "세금 신고"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_generic_tax_report.py:0
-#, python-format
-msgid "Tax Paid Adjustment"
-msgstr ""
-
-#. module: account_reports
-#: code:addons/account_reports/models/account_generic_tax_report.py:0
-#, python-format
-msgid "Tax Received Adjustment"
-msgstr ""
-
-#. module: account_reports
-#: code:addons/account_reports/models/account_generic_tax_report.py:0
-#: model:ir.actions.client,name:account_reports.action_account_report_gt
+#: code:addons/account_reports/models/account_generic_tax_report.py:153
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_html_report__tax_report
 #: model:ir.ui.menu,name:account_reports.menu_action_account_report_gt
-#: model_terms:ir.ui.view,arch_db:account_reports.view_move_form_vat_return
 #, python-format
 msgid "Tax Report"
 msgstr "세금 보고서"
 
 #. module: account_reports
-#: model:ir.model.fields,field_description:account_reports.field_account_move__tax_report_control_error
-msgid "Tax Report Control Error"
-msgstr "세금 보고서 제어 오류"
-
-#. module: account_reports
-#: code:addons/account_reports/models/res_config_settings.py:0
-#, python-format
-msgid "Tax Report for company %s"
-msgstr "%s 회사에 대한 세금 보고서"
-
-#. module: account_reports
-#: model_terms:ir.ui.view,arch_db:account_reports.setup_financial_year_opening_form
-msgid "Tax Return Periodicity"
-msgstr "세금 환급 주기"
-
-#. module: account_reports
-#: code:addons/account_reports/models/res_config_settings.py:0
-#: code:addons/account_reports/models/res_config_settings.py:0
-#, python-format
-msgid "Tax Return for %s"
-msgstr "%s에 대한 환급 세금"
-
-#. module: account_reports
-#: model:ir.model.fields.selection,name:account_reports.selection__mail_activity_type__category__tax_report
-msgid "Tax report"
-msgstr "세금 보고서"
-
-#. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_footnote__text
 msgid "Text"
-msgstr "문자"
+msgstr "텍스트"
+
+#. module: account_reports
+#: model:ir.model.fields,help:account_reports.field_res_partner__payment_next_action_date
+#: model:ir.model.fields,help:account_reports.field_res_users__payment_next_action_date
+msgid "The date before which no action should be taken."
+msgstr "조치를 취해서는 안 되는 기한(날짜)입니다."
+
+#. module: account_reports
+#. openerp-web
+#: code:addons/account_reports/static/src/xml/account_report_template.xml:30
+#, python-format
+msgid "The follow-up report was successfully emailed!"
+msgstr "후속 보고서가 이메일로 발송되었습니다!"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_financial_html_report__generated_menu_id
@@ -2183,10 +2195,10 @@ msgid "The menu item generated for this report, or None if there isn't any."
 msgstr "이 보고서용으로 생성된 메뉴 항목입니다. 없을 경우에는 생성되지 않습니다."
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_generic_tax_report.py:0
+#: model_terms:ir.ui.view,arch_db:account_reports.template_followup_report
 msgid ""
-"The multi-company option of the tax report does not allow opening it for "
-"companies in different currencies."
+"The next reminder date is computed based on what you have defined in the "
+"accounting settings."
 msgstr ""
 
 #. module: account_reports
@@ -2216,41 +2228,57 @@ msgid ""
 msgstr "이를 통해 재무 보고서에서 총계의 위치를 ​​선택할 수 있습니다."
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_generic_tax_report.py:0
-#, python-format
-msgid "This period is already closed"
-msgstr "이 기간은 이미 마감되었습니다"
-
-#. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.search_template_date_filter
 msgid "Today"
 msgstr "오늘"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_aged_partner_balance.py:0
-#: code:addons/account_reports/models/account_aged_partner_balance.py:0
-#: code:addons/account_reports/models/account_cash_flow_report.py:0
-#: code:addons/account_reports/models/account_consolidated_journals.py:0
-#: code:addons/account_reports/models/account_financial_report.py:0
-#: code:addons/account_reports/models/account_financial_report.py:0
-#: code:addons/account_reports/models/account_general_ledger.py:0
-#: code:addons/account_reports/models/account_general_ledger.py:0
-#: code:addons/account_reports/models/account_partner_ledger.py:0
-#: code:addons/account_reports/models/account_report_coa.py:0
-#: code:addons/account_reports/models/account_report_coa.py:0
+#: code:addons/account_reports/models/account_aged_partner_balance.py:22
+#: code:addons/account_reports/models/account_aged_partner_balance.py:80
+#: code:addons/account_reports/models/account_consolidated_journals.py:85
+#: code:addons/account_reports/models/account_financial_report.py:1108
+#: code:addons/account_reports/models/account_financial_report.py:1193
+#: code:addons/account_reports/models/account_general_ledger.py:426
+#: code:addons/account_reports/models/account_partner_ledger.py:262
+#: code:addons/account_reports/models/account_report_coa.py:52
+#: code:addons/account_reports/models/account_report_coa.py:113
+#: model_terms:ir.ui.view,arch_db:account_reports.customer_statements_tree_view
 #: model_terms:ir.ui.view,arch_db:account_reports.template_coa_table_header
 #, python-format
 msgid "Total"
 msgstr "합계"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_bank_reconciliation_report.py:0
+#: code:addons/account_reports/models/account_general_ledger.py:417
+#, python-format
+msgid "Total "
+msgstr "총계"
+
+#. module: account_reports
+#: code:addons/account_reports/models/account_followup_report.py:44
+#: code:addons/account_reports/models/account_followup_report.py:126
+#: model:ir.model.fields,field_description:account_reports.field_res_partner__total_due
+#: model:ir.model.fields,field_description:account_reports.field_res_users__total_due
+#, python-format
+msgid "Total Due"
+msgstr "총 만기일"
+
+#. module: account_reports
+#: code:addons/account_reports/models/account_followup_report.py:137
+#: model:ir.model.fields,field_description:account_reports.field_res_partner__total_overdue
+#: model:ir.model.fields,field_description:account_reports.field_res_users__total_overdue
+#, python-format
+msgid "Total Overdue"
+msgstr "총 기한 초과"
+
+#. module: account_reports
+#: code:addons/account_reports/models/account_bank_reconciliation_report.py:46
 #, python-format
 msgid "Total Virtual GL Balance"
 msgstr "총 가상 GL 잔액"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_report_coa.py:0
+#: code:addons/account_reports/models/account_report_coa.py:151
 #: model:ir.actions.client,name:account_reports.action_account_report_coa
 #: model:ir.ui.menu,name:account_reports.menu_action_account_report_coa
 #, python-format
@@ -2268,38 +2296,17 @@ msgid "Unallocated Earnings"
 msgstr "미할당 순이익"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_financial_report.py:0
-#: code:addons/account_reports/models/account_financial_report.py:0
+#: code:addons/account_reports/models/account_financial_report.py:45
+#: code:addons/account_reports/models/account_financial_report.py:905
 #, python-format
 msgid "Undefined"
 msgstr "미지정"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_bank_reconciliation_report.py:0
-#: code:addons/account_reports/models/account_cash_flow_report.py:0
+#: code:addons/account_reports/models/account_bank_reconciliation_report.py:189
 #, python-format
 msgid "Unexplained Difference"
 msgstr "설명 할 수 없는 차이"
-
-#. module: account_reports
-#: code:addons/account_reports/models/account_bank_reconciliation_report.py:0
-#, python-format
-msgid ""
-"Unexplained Difference = Virtual GL Balance - Last Bank Statement Ending Balance\n"
-"\n"
-"%s + Operations to Process SHOULD BE EQUAL TO Last Bank Statement Ending Balance.\n"
-"\n"
-"If it’s not equal, there is an unexplained difference. It could be due to:\n"
-"  1) Some bank statements not encoded in Odoo yet,\n"
-"  2) Duplicated payments."
-msgstr ""
-"설명 할 수없는 차이 = 가상 GL 잔액-마지막 은행 계좌 명세서 잔액\n"
-"\n"
-"%s + 처리 작업은 마지막 은행 계좌 명세서 잔고와 동일해야 합니다.\n"
-"\n"
-"같지 않으면 설명할 수 없는 차이가 있습니다. 다음과 같은 원인일 수 있습니다 :\n"
-"  1) 일부 은행 명세서는 아직 Odoo로 인코딩되지 않았습니다.\n"
-"  2) 중복 결제."
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.search_template_extra_options
@@ -2322,32 +2329,33 @@ msgid "Unreconciled"
 msgstr "미조정"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_bank_reconciliation_report.py:0
+#: model:ir.model.fields,field_description:account_reports.field_res_partner__unreconciled_aml_ids
+#: model:ir.model.fields,field_description:account_reports.field_res_users__unreconciled_aml_ids
+msgid "Unreconciled Aml"
+msgstr "미조정된 Aml"
+
+#. module: account_reports
+#: code:addons/account_reports/models/account_bank_reconciliation_report.py:194
 #, python-format
 msgid "Unreconciled Bank Statement Lines"
 msgstr "미 조정 은행 계좌 명세서 내역"
 
 #. module: account_reports
-#: model_terms:ir.ui.view,arch_db:account_reports.search_template_extra_options_generic_tax_report
-msgid "Use Tax Grid"
-msgstr "세금표 사용"
-
-#. module: account_reports
-#: model:ir.model.fields.selection,name:account_reports.selection__account_financial_html_report_line__special_date_changer__normal
+#: selection:account.financial.html.report.line,special_date_changer:0
 msgid "Use given dates"
 msgstr "특정 날짜 부여"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_bank_reconciliation_report.py:0
+#: code:addons/account_reports/models/account_bank_reconciliation_report.py:174
 #, python-format
 msgid "Validated Payments not Linked with a Bank Statement Line"
 msgstr "승인된 지불은 예금거래명세서와 연결되지 않습니다"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_activity.py:0
+#: code:addons/account_reports/models/res_partner.py:85
 #, python-format
-msgid "Vat closing from %s to %s"
-msgstr "%s에서 %s까지 마감된 부가가치세"
+msgid "Vendor Ledger"
+msgstr ""
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.line_caret_options
@@ -2361,13 +2369,18 @@ msgstr "청구 보기"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.line_caret_options
+#: model_terms:ir.ui.view,arch_db:account_reports.line_template_followup_report
 msgid "View Invoice"
 msgstr "청구서 보기"
 
 #. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.line_template_aged_payable_report
+#: model_terms:ir.ui.view,arch_db:account_reports.line_template_aged_receivable_report
+#: model_terms:ir.ui.view,arch_db:account_reports.line_template_followup_report
 #: model_terms:ir.ui.view,arch_db:account_reports.line_template_general_ledger_report
+#: model_terms:ir.ui.view,arch_db:account_reports.line_template_partner_ledger_report
 msgid "View Journal Entry"
-msgstr "분개장 기입 항목 보기"
+msgstr "분개 보기"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.line_caret_options
@@ -2380,22 +2393,10 @@ msgid "View Payment"
 msgstr "결제금 보기"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_bank_reconciliation_report.py:0
+#: code:addons/account_reports/models/account_bank_reconciliation_report.py:151
 #, python-format
 msgid "Virtual GL Balance"
 msgstr "가상 GL 잔액"
-
-#. module: account_reports
-#: code:addons/account_reports/models/account_bank_reconciliation_report.py:0
-#, python-format
-msgid ""
-"Virtual GL Balance = %s + operations to process\n"
-"\n"
-"The Virtual GL Balance represents the cash you'll have once all operations to process will be done."
-msgstr ""
-"가상 GL 잔액 = %s + 처리할 작업\n"
-"\n"
-"가상 GL 잔액은 처리할 모든 작업이 완료되면 얻게 될 현금을 나타냅니다."
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_financial_html_report_line__print_on_new_page
@@ -2405,47 +2406,46 @@ msgid ""
 msgstr "이 줄과 그 이후의 모든 내용을 확인하면 새 페이지에 인쇄됩니다."
 
 #. module: account_reports
-#: model_terms:ir.ui.view,arch_db:account_reports.res_config_settings_view_form
-msgid ""
-"When ticked, totals and subtotals appear below the sections of the report"
-msgstr "체크하면 총계 및 소계가 보고서 영역 아래에 나타납니다."
-
-#. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_res_company__totals_below_sections
 #: model:ir.model.fields,help:account_reports.field_res_config_settings__totals_below_sections
+#: model_terms:ir.ui.view,arch_db:account_reports.res_config_settings_view_form
 msgid ""
 "When ticked, totals and subtotals appear below the sections of the report."
 msgstr "선택하면 총계 및 소계가 보고서 영역 아래에 나타납니다."
 
 #. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.filter_info_template
 #: model_terms:ir.ui.view,arch_db:account_reports.search_template_extra_options
 msgid "With Draft Entries"
 msgstr "초안 순이익이 있습니다."
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_report.py:0
-#, python-format
-msgid "XLSX"
-msgstr "XLSX"
+#: model_terms:ir.ui.view,arch_db:account_reports.followup_search_template
+msgid "With Overdue Invoices"
+msgstr "연체 청구서 사용"
 
 #. module: account_reports
-#: code:addons/account_reports/models/account_generic_tax_report.py:0
-#, python-format
-msgid "You can only post tax entries for one company at a time"
-msgstr "한 번에 한 회사의 세금 입력만 게시할 수 있습니다"
+#: selection:res.partner,followup_status:0
+msgid "With overdue invoices"
+msgstr "연체 청구서 사용"
 
 #. module: account_reports
-#: code:addons/account_reports/models/res_partner.py:0
-#: code:addons/account_reports/models/res_partner.py:0
+#. openerp-web
+#: code:addons/account_reports/static/src/js/followup_form/followup_form_controller.js:69
+#, python-format
+msgid "You are done with the follow-ups!<br/>You have skipped %s partner(s)."
+msgstr "후속 조치를 완료했습니다! %s 협력사는 제외하였습니다."
+
+#. module: account_reports
+#: code:addons/account_reports/models/res_partner.py:147
 #, python-format
 msgid "any"
 msgstr "전혀"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.res_config_settings_view_form
-#: model_terms:ir.ui.view,arch_db:account_reports.setup_financial_year_opening_form
-msgid "days after period"
-msgstr "기간 이후 일"
+msgid "days between each reminder"
+msgstr "각 알림 간 기간"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_financial_html_report__analytic
@@ -2463,17 +2463,17 @@ msgid "display the journal filter in the report"
 msgstr "보고서의 분개 필터 표시"
 
 #. module: account_reports
+#: model:ir.model.fields,help:account_reports.field_account_financial_html_report__cash_basis
+msgid "display the option to switch to cash basis mode"
+msgstr "현금주의 모드로 전환하는 옵션 표시"
+
+#. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_financial_html_report__unfold_all_filter
 msgid "display the unfold all options in report"
 msgstr "보고서에서 모든 옵션 표시"
 
 #. module: account_reports
-#: model:ir.model.fields.selection,name:account_reports.selection__res_company__account_tax_periodicity__monthly
-msgid "monthly"
-msgstr "월간"
-
-#. module: account_reports
-#: code:addons/account_reports/models/account_financial_report.py:0
+#: code:addons/account_reports/models/account_financial_report.py:923
 #, python-format
 msgid "n/a"
 msgstr "n/a"
@@ -2485,8 +2485,8 @@ msgstr "보고서 모델 이름"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.main_template
-msgid "prior or included in this period"
-msgstr "이전 또는 이 기간에 포함"
+msgid "prior or included in this period."
+msgstr ""
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_financial_html_report__date_range
@@ -2494,30 +2494,9 @@ msgid "specify if the report use date_range or single date"
 msgstr "보고서가 date_range를 사용하는지 단일 날짜를 사용하는지 지정"
 
 #. module: account_reports
-#: model:ir.model.fields,help:account_reports.field_account_move__tax_report_control_error
-msgid "technical field used to know if there was a failed control check"
-msgstr "제어 점검 실패 여부를 알기 위해 사용되는 기술 필드"
-
-#. module: account_reports
-#: model:ir.model.fields,help:account_reports.field_account_move__is_tax_closing
-msgid "technical field used to know if this move is the vat closing move"
-msgstr "이 이동이 부가가치세 마감 이동지 알기 위해 사용되는 기술 필드"
-
-#. module: account_reports
-#: model:ir.model.fields,help:account_reports.field_res_company__account_tax_original_periodicity_reminder_day
-msgid ""
-"technical helper to prevent rewriting activity date when saving settings"
-msgstr "설정을 저장할 때 활동일 다시 쓰기를 방지하는 기술 도우미"
-
-#. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.search_template_date_filter
 msgid "to:"
-msgstr "종료 :"
-
-#. module: account_reports
-#: model:ir.model.fields.selection,name:account_reports.selection__res_company__account_tax_periodicity__trimester
-msgid "trimester"
-msgstr "삼개월간"
+msgstr "수신:"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.main_template

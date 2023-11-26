@@ -11,7 +11,7 @@ class ResPartner(models.Model):
 
     def _subscription_count(self):
         # retrieve all children partners and prefetch 'parent_id' on them
-        all_partners = self.with_context(active_test=False).search([('id', 'child_of', self.ids)])
+        all_partners = self.search([('id', 'child_of', self.ids)])
         all_partners.read(['parent_id'])
 
         subscription_data = self.env['sale.subscription'].read_group(
@@ -19,7 +19,6 @@ class ResPartner(models.Model):
             fields=['partner_id'], groupby=['partner_id']
         )
 
-        self.subscription_count = 0
         for group in subscription_data:
             partner = self.browse(group['partner_id'][0])
             while partner:

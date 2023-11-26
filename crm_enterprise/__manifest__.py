@@ -4,20 +4,19 @@
 {
     'name': "CRM enterprise",
     'version': "1.0",
-    'category': "Sales/CRM",
+    'category': "Sales",
     'summary': "Advanced features for CRM",
     'description': """
 Contains advanced features for CRM such as new views
     """,
-    'depends': ['crm', 'web_dashboard', 'web_cohort', 'web_map'],
+    'depends': ['crm', 'web_dashboard', 'web_cohort'],
     'data': [
         'views/crm_lead_views.xml',
-        'report/crm_activity_report_views.xml',
     ],
     'demo': [
     ],
     'installable': True,
     'application': False,
-    'auto_install': ['crm'],
+    'auto_install': True,
     'license': 'OEEL-1',
 }

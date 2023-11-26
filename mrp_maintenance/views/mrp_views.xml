@@ -42,9 +42,9 @@
         <field name="model">mrp.production</field>
         <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
         <field name="arch" type="xml">
-            <button name="action_cancel" position="before">
+            <xpath expr="//header" position="inside">
                 <button name="button_maintenance_req" type="object" string="Maintenance Request"/>
-            </button>
+            </xpath>
             <div name="button_box" position="inside">
                 <button name="open_maintenance_request_mo" type="object" class="oe_stat_button" icon="fa-wrench" attrs="{'invisible': [('maintenance_count', '=', 0)]}" context="{'search_default_production_id': active_id}">
                     <div class="o_field_widget o_stat_info">

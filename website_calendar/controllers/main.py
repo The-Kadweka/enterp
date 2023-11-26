@@ -11,7 +11,6 @@ from werkzeug.urls import url_encode
 from odoo import http, _, fields
 from odoo.http import request
 from odoo.tools import html2plaintext, DEFAULT_SERVER_DATETIME_FORMAT as dtf
-from odoo.tools.misc import get_lang
 
 
 class WebsiteCalendar(http.Controller):
@@ -34,7 +33,7 @@ class WebsiteCalendar(http.Controller):
         else:
             suggested_appointment_types = appointment_type
         suggested_employees = []
-        if employee_id and int(employee_id) in appointment_type.sudo().employee_ids.ids:
+        if employee_id and int(employee_id) in appointment_type.employee_ids.ids:
             suggested_employees = request.env['hr.employee'].sudo().browse(int(employee_id)).name_get()
         elif appointment_type.assignation_method == 'chosen':
             suggested_employees = appointment_type.sudo().employee_ids.name_get()
@@ -79,8 +78,8 @@ class WebsiteCalendar(http.Controller):
         partner_data = {}
         if request.env.user.partner_id != request.env.ref('base.public_partner'):
             partner_data = request.env.user.partner_id.read(fields=['name', 'mobile', 'country_id', 'email'])[0]
-        day_name = format_datetime(datetime.strptime(date_time, dtf), 'EEE', locale=get_lang(request.env).code)
-        date_formated = format_datetime(datetime.strptime(date_time, dtf), locale=get_lang(request.env).code)
+        day_name = format_datetime(datetime.strptime(date_time, dtf), 'EEE', locale=request.env.context.get('lang', 'en_US'))
+        date_formated = format_datetime(datetime.strptime(date_time, dtf), locale=request.env.context.get('lang', 'en_US'))
         return request.render("website_calendar.appointment_form", {
             'partner_data': partner_data,
             'appointment_type': appointment_type,
@@ -104,8 +103,7 @@ class WebsiteCalendar(http.Controller):
             if not Employee.user_id.partner_id.calendar_verify_availability(date_start, date_end):
                 return request.redirect('/website/calendar/%s/appointment?failed=employee' % appointment_type.id)
 
-        country_id = int(country_id) if country_id else None
-        country_name = country_id and request.env['res.country'].browse(country_id).name or ''
+        country_name = country_id and request.env['res.country'].browse(int(country_id)).name or ''
         Partner = request.env['res.partner'].sudo().search([('email', '=like', email)], limit=1)
         if Partner:
             if not Partner.calendar_verify_availability(date_start, date_end):
@@ -139,7 +137,7 @@ class WebsiteCalendar(http.Controller):
         categ_id = request.env.ref('website_calendar.calendar_event_type_data_online_appointment')
         alarm_ids = appointment_type.reminder_ids and [(6, 0, appointment_type.reminder_ids.ids)] or []
         partner_ids = list(set([Employee.user_id.partner_id.id] + [Partner.id]))
-        event = request.env['calendar.event'].sudo().with_context(allowed_company_ids=Employee.user_id.company_ids.ids).create({
+        event = request.env['calendar.event'].sudo().create({
             'state': 'open',
             'name': _('%s with %s') % (appointment_type.name, name),
             'start': date_start.strftime(dtf),
@@ -188,7 +186,7 @@ class WebsiteCalendar(http.Controller):
             format_func = format_date
             date_start_suffix = _(', All Day')
 
-        locale = get_lang(request.env).code
+        locale = request.env.context.get('lang', 'en_US')
         day_name = format_func(date_start, 'EEE', locale=locale)
         date_start = day_name + ' ' + format_func(date_start, locale=locale) + date_start_suffix
         details = event.appointment_type_id and event.appointment_type_id.message_confirmation or event.description or ''
@@ -218,8 +216,9 @@ class WebsiteCalendar(http.Controller):
             return request.not_found()
         if fields.Datetime.from_string(event.allday and event.start or event.start_datetime) < datetime.now() + relativedelta(hours=event.appointment_type_id.min_cancellation_hours):
             return request.redirect('/website/calendar/view/' + access_token + '?message=no-cancel')
+        appointment_type_id = event.appointment_type_id.id
         event.unlink()
-        return request.redirect('/website/calendar?message=cancel')
+        return request.redirect('/website/calendar/%s?message=cancel' % appointment_type_id)
 
     @http.route(['/website/calendar/ics/<string:access_token>.ics'], type='http', auth="public", website=True)
     def calendar_appointment_ics(self, access_token, **kwargs):

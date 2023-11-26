@@ -3,7 +3,7 @@
 {
     'name': 'Live Currency Exchange Rate',
     'version': '1.0',
-    'category': 'Accounting/Accounting',
+    'category': 'Accounting',
     'description': """Import exchange rates from the Internet.
 """,
     'depends': [
@@ -13,6 +13,9 @@
         'views/res_config_settings_views.xml',
         'views/service_cron_data.xml',
         'data/data.xml',
+    ],
+    'demo': [
+        'demo/res_company_demo.xml',
     ],
     'installable': True,
     'auto_install': True,

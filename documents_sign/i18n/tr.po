@@ -1,19 +1,19 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* documents_sign
+# * documents_sign
 # 
 # Translators:
-# Murat Kaplan <muratk@projetgrup.com>, 2019
+# Buket Şeker <buket_skr@hotmail.com>, 2018
 # Umur Akın <umura@projetgrup.com>, 2019
-# Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2020
+# Murat Kaplan <muratk@projetgrup.com>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-27 09:32+0000\n"
-"PO-Revision-Date: 2019-08-26 09:35+0000\n"
-"Last-Translator: Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2020\n"
+"POT-Creation-Date: 2019-11-14 07:49+0000\n"
+"PO-Revision-Date: 2018-08-24 11:37+0000\n"
+"Last-Translator: Murat Kaplan <muratk@projetgrup.com>, 2019\n"
 "Language-Team: Turkish (https://www.transifex.com/odoo/teams/41243/tr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -29,20 +29,31 @@ msgid ""
 msgstr "Koşullara uyan tüm eklerde kullanılabilecek bir koşul ve eylem dizisi"
 
 #. module: documents_sign
+#: model:ir.model.fields,field_description:documents_sign.field_sign_request__folder_id
+#: model:ir.model.fields,field_description:documents_sign.field_sign_template__folder_id
+msgid "Attachment Folder"
+msgstr "Ek Dosya"
+
+#. module: documents_sign
+#: model:ir.model.fields,field_description:documents_sign.field_sign_request__documents_tag_ids
+#: model:ir.model.fields,field_description:documents_sign.field_sign_template__documents_tag_ids
+msgid "Attachment Tags"
+msgstr "Eklenti Etiketleri"
+
+#. module: documents_sign
 #: model:ir.model.fields,field_description:documents_sign.field_documents_workflow_rule__create_model
 msgid "Create"
 msgstr "Oluştur"
 
 #. module: documents_sign
-#: model:ir.model.fields.selection,name:documents_sign.selection__documents_workflow_rule__create_model__sign_template_new
-msgid "Create signature request"
-msgstr "İmza talebi oluştur"
+#: selection:documents.workflow.rule,create_model:0
+msgid "Credit note"
+msgstr "Kredi notu"
 
 #. module: documents_sign
-#: model:documents.workflow.rule,name:documents_sign.documents_sign_rule_sign_request
-#: model:documents.workflow.rule,name:documents_sign.documents_sign_rule_sign_request_finance
-msgid "Create signature template(s)"
-msgstr "İmza şablonu(ları) oluşturma"
+#: model:ir.model,name:documents_sign.model_ir_attachment
+msgid "Document"
+msgstr "Doküman"
 
 #. module: documents_sign
 #: model:ir.model.fields,field_description:documents_sign.field_documents_workflow_rule__has_business_option
@@ -50,25 +61,19 @@ msgid "Has Business Option"
 msgstr "İşletme Seçeneği Mevcut"
 
 #. module: documents_sign
-#: code:addons/documents_sign/models/workflow.py:0
-#, python-format
-msgid "New templates"
-msgstr "Yeni şablonlar"
+#: selection:documents.workflow.rule,create_model:0
+msgid "Product template"
+msgstr "Ürün Şablonu"
 
 #. module: documents_sign
-#: model:documents.workflow.rule,name:documents_sign.documents_sign_rule_sign_directly
-msgid "Request a signature and sign directly"
-msgstr "İmza talep edin ve doğrudan imzalayın"
-
-#. module: documents_sign
-#: model:ir.model.fields.selection,name:documents_sign.selection__documents_workflow_rule__create_model__sign_template_direct
-msgid "Sign directly"
-msgstr "Doğrudan imzala"
+#: model:documents.workflow.rule,name:documents_sign.Sign_rule
+msgid "Request a Signature"
+msgstr "Bir İmza Gerekli"
 
 #. module: documents_sign
 #: model:ir.model,name:documents_sign.model_sign_request
 msgid "Signature Request"
-msgstr "İmza Talebi"
+msgstr "İmza İsteği"
 
 #. module: documents_sign
 #: model:ir.model,name:documents_sign.model_sign_template
@@ -76,11 +81,21 @@ msgid "Signature Template"
 msgstr "İmza Şablonu"
 
 #. module: documents_sign
-#: model:ir.model.fields,field_description:documents_sign.field_sign_template__documents_tag_ids
-msgid "Signed Document Tags"
-msgstr "İmzalı Belge Etiketleri"
+#: selection:documents.workflow.rule,create_model:0
+msgid "Signature template"
+msgstr "İmza Şablonu"
 
 #. module: documents_sign
-#: model:ir.model.fields,field_description:documents_sign.field_sign_template__folder_id
-msgid "Signed Document Workspace"
-msgstr "İmzalı Belge Çalışma Alanı"
+#: selection:documents.workflow.rule,create_model:0
+msgid "Task"
+msgstr "Görev"
+
+#. module: documents_sign
+#: selection:documents.workflow.rule,create_model:0
+msgid "Vendor Credit Note"
+msgstr "Tedarikçi İade/Fiyat Farkı"
+
+#. module: documents_sign
+#: selection:documents.workflow.rule,create_model:0
+msgid "Vendor bill"
+msgstr "Satış Faturası"

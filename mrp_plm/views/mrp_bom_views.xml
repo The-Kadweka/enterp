@@ -6,11 +6,11 @@
         <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
         <field name="groups_id" eval="[(4, ref('mrp_plm.group_plm_user'))]"/>
         <field name="arch" type="xml">
-            <div name="button_box" position="inside">
+            <button name="toggle_active" position="before">
                 <button class="oe_stat_button" name= "button_mrp_eco" type="object" icon="fa-cogs">
                     <field string="ECO(s)" name="eco_count" widget="statinfo" />
                 </button>
-            </div>
+            </button>
             <field name="ready_to_produce" position="after">
                 <field name="version" string="Version"/>
             </field>
@@ -23,6 +23,7 @@
         <field name="arch" type="xml">
             <kanban>
                 <field name="id"/>
+                <field name="image_small"/>
                 <field name="display_name"/>
                 <field name="type"/>
                 <field name="eco_inprogress_count"/>
@@ -30,7 +31,7 @@
                     <t t-name="kanban-box">
                         <div class="oe_kanban_global_click">
                             <div class="o_kanban_image">
-                                <img t-att-src="kanban_image('product.template', 'image_128', record.id.raw_value)" alt="Product" class="o_image_64_contain"/>
+                                <img t-att-src="kanban_image('product.template', 'image_small', record.id.raw_value)" alt="Product"/>
                             </div>
                             <div class="oe_kanban_details">
                                 <strong>
@@ -49,27 +50,17 @@
         </field>
     </record>
 
-    <record id="mrp_bom_tree_view_tree" model="ir.ui.view">
-        <field name="name">mrp.bom.tree.inherit.mrp.plm</field>
-        <field name="model">mrp.bom</field>
-        <field name="inherit_id" ref="mrp.mrp_bom_tree_view"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='routing_id']" position="after">
-                <field name="version" optional="show"/>
-            </xpath>
-        </field>
-    </record>
-
     <record model="ir.actions.act_window" id="mrp_bom_action_kanban">
         <field name="name">Bill of Materials</field>
         <field name="res_model">mrp.bom</field>
+        <field name="view_type">form</field>
         <field name="view_mode">kanban,tree,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
               Create a bill of materials
             </p><p>
-              Bills of materials allow you to define the list of required components
-              used to make a finished product; through a manufacturing
+              Bills of materials allow you to define the list of required raw
+              materials used to make a finished product; through a manufacturing
               order or a pack of products.
             </p>
         </field>

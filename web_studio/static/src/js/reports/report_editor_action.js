@@ -12,6 +12,7 @@ var ReportEditorManager = require('web_studio.ReportEditorManager');
 var _t = core._t;
 
 var ReportEditorAction = AbstractAction.extend({
+    className: 'o_web_studio_client_action',
     custom_events: _.extend({}, AbstractAction.prototype.custom_events, {
         'open_record_form_view': '_onOpenRecordFormView',
         'studio_edit_report': '_onEditReport',
@@ -24,11 +25,11 @@ var ReportEditorAction = AbstractAction.extend({
     init: function (parent, context, options) {
         this._super.apply(this, arguments);
 
-        this._title = _t("Report Editor");
+        this.set('title', _t("Report Editor"));
         this.handle = options.report;
         this.reportName = this.handle.data.report_name;
-        this.controllerState = options.controllerState;
 
+        this.studioActionEnv = options.studioActionEnv;
         this.env = {};
     },
     /**
@@ -39,13 +40,12 @@ var ReportEditorAction = AbstractAction.extend({
         defs.push(this._readReport().then(this._loadEnvironment.bind(this)));
         defs.push(this._readModels());
         defs.push(this._readWidgetsOptions());
-        return Promise.all(defs);
+        return $.when.apply($, defs);
     },
     /**
      * @override
      */
     start: function () {
-        this.$el.addClass('o_web_studio_client_action');
         var defs = [this._super.apply(this, arguments)];
         if (this.env.currentId) {
             defs.push(this._renderEditor());
@@ -54,25 +54,25 @@ var ReportEditorAction = AbstractAction.extend({
             this.do_warn(_t('Error: Preview not available because there is no existing record.'));
             this.trigger_up('studio_history_back');
         }
-        return Promise.all(defs);
+        return $.when.apply($, defs);
     },
     /**
      * We need to use on_attach_callback because we need to the iframe to be
      * in the DOM to update it. Using on_reverse_breacrumb would have make more
      * sense but it's called too soon.
      *
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     on_attach_callback: function () {
         if (!this.reportEditorManager) {
             // the preview was not availble (see @start) so the manager hasn't
             // been instantiated
-            return Promise.resolve();
+            return $.when();
         }
-        if (this.reportEditorManager.editorIframeResolved === false) {
+        if (this.reportEditorManager.editorIframeDef.state() === 'pending') {
             // this is the first rendering of the editor but we only want to
             // update the editor when going back with the breadcrumb
-            return Promise.resolve();
+            return $.when();
         }
         return this.reportEditorManager.updateEditor();
     },
@@ -84,7 +84,7 @@ var ReportEditorAction = AbstractAction.extend({
     /**
      * @private
      * @param {Object} values
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _editReport: function (values) {
         return this._rpc({
@@ -98,7 +98,7 @@ var ReportEditorAction = AbstractAction.extend({
     },
     /**
      * @private
-     * @returns {Promise<Object>}
+     * @returns {Deferred<Object>}
      */
     _getReportViews: function () {
         var self = this;
@@ -121,27 +121,29 @@ var ReportEditorAction = AbstractAction.extend({
      * performed.
      *
      * @private
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _loadEnvironment: function () {
         var self = this;
         this.env.modelName = this.report.model;
 
-        // TODO: Since 13.0, journal entries are also considered as 'account.move',
-        // therefore must filter result to remove them; otherwise not possible
-        // to print invoices and hard to lookup for them if lot of journal entries.
-        var domain = [];
-        if (self.report.model === 'account.move') {
-            domain = [['type', '!=', 'entry']];
+        if (this.studioActionEnv.modelName === this.report.model) {
+            // we can use the ids coming from the action
+            this.env.ids = this.studioActionEnv.ids;
         }
 
-        return this._rpc({
-            model: self.report.model,
-            method: 'search',
-            args: [domain],
-            context: session.user_context,
-        }).then(function (result) {
-            self.env.ids = result;
+        var def;
+        if (!this.env.ids || !this.env.ids.length) {
+            def = this._rpc({
+                model: self.report.model,
+                method: 'search',
+                args: [[]],
+                context: session.user_context,
+            }).then(function (result) {
+                self.env.ids = result;
+            });
+        }
+        return $.when(def).then(function () {
             self.env.currentId = self.env.ids && self.env.ids[0];
         });
     },
@@ -150,7 +152,7 @@ var ReportEditorAction = AbstractAction.extend({
      * user-friendly way in the sidebar (see AbstractReportComponent).
      *
      * @private
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _readModels: function () {
         var self = this;
@@ -169,7 +171,7 @@ var ReportEditorAction = AbstractAction.extend({
     },
     /**
      * @private
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _readReport: function () {
         var self = this;
@@ -184,7 +186,7 @@ var ReportEditorAction = AbstractAction.extend({
     },
     /**
      * @private
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _readPaperFormat: function () {
         var self = this;
@@ -202,7 +204,7 @@ var ReportEditorAction = AbstractAction.extend({
      * Load the widgets options for t-options directive in sidebar.
      *
      * @private
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _readWidgetsOptions: function () {
         var self = this;
@@ -219,12 +221,12 @@ var ReportEditorAction = AbstractAction.extend({
      * @private
      * @param {Object} [state]
      * @param {string} [state.sidebarMode] among ['add', 'report']
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _renderEditor: function (state) {
         var self = this;
         var defs = [this._getReportViews(), this._readPaperFormat()];
-        return Promise.all(defs).then(function () {
+        return $.when.apply($, defs).then(function () {
             var params = {
                 env: self.env,
                 initialState: state,
@@ -243,7 +245,7 @@ var ReportEditorAction = AbstractAction.extend({
             var fragment = document.createDocumentFragment();
             return self.reportEditorManager.appendTo(fragment).then(function () {
                 // dom is used to correctly call on_attach_callback
-                dom.append(self.$('.o_content'), [fragment], {
+                dom.append(self.$el, [fragment], {
                     in_DOM: self.isInDOM,
                     callbacks: [{widget: self.reportEditorManager}],
                 });

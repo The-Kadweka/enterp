@@ -2,11 +2,10 @@
 <odoo>
 
     <record id="total_tax_payable_l10n_in_report" model="account.financial.html.report">
-        <field name="name">GSTR-3</field>
+        <field name="name">GST Tax</field>
         <field name="date_range" eval="1" />
         <field name='parent_id' ref='l10n_in.account_reports_in_statements_menu'/>
         <field name="tax_report" eval="1"/>
-        <field name="show_journal_filter" eval="1"/>
     </record>
 
     <record id="total_output_liability_l10n_in_line_0" model="account.financial.html.report.line">
@@ -258,17 +257,9 @@
     </record>
 
     <record id="action_account_report_tax_payable" model="ir.actions.client">
-        <field name="name">GSTR-3</field>
+        <field name="name">Tax Payable</field>
         <field name="tag">account_report</field>
         <field name="context" eval="{'model': 'account.financial.html.report', 'id': ref('total_tax_payable_l10n_in_report')}" />
     </record>
-
-    <record id="action_l10n_in_report_account" model="ir.actions.client">
-        <field name="name">GSTR-1 Sales Return</field>
-        <field name="tag">account_report</field>
-        <field name="context" eval="{'model': 'l10n.in.report.account'}" />
-    </record>
-
-    <menuitem id="menu_l10n_in_report_account" name="GSTR-1 Sales Return" action="action_l10n_in_report_account" parent="l10n_in.account_reports_in_statements_menu" sequence="1"/>
-    
+        
 </odoo>

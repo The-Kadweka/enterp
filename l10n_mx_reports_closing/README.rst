@@ -1,7 +1,7 @@
 Fiscal Reports for Closing Entry
 ================================
 
-Trial Balance report is complemented to generate the closing entry
+Trial Balance report is complemented to allow generate the closing entry
 (A.K.A Month 13th move)
 
 Configuration

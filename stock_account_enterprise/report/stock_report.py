@@ -5,6 +5,7 @@ import re
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError
+from odoo.fields import Date
 from odoo.osv.expression import expression
 
 
@@ -64,10 +65,19 @@ class StockReport(models.Model):
             res = [{}]
 
         if stock_value:
-            products = self.env['product.product'].with_context(active_test=False).search([
-                ("product_tmpl_id.type", "=", "product")
-            ])
-            value = sum(products.mapped('value_svl'))
+            date = Date.from_string(
+                next((d[2] for d in domain if d[0] == 'date_done' and d[1] in ['<', '<=', '=']), Date.context_today(self))
+            )
+            if date != Date.context_today(self):
+                products = self.env['product.product'].with_context(to_date=Date.to_string(date))
+            else:
+                products = self.env['product.product']
+            # Split the recordset for faster computing.
+            value = 0
+            for products_split in self.env.cr.split_for_in_conditions(
+                products.search([('type', '=', 'product'), ('qty_available', '!=', 0)]).ids
+            ):
+                value += sum(product.stock_value for product in products.browse(products_split))
 
             res[0].update({
                 '__count': 1,
@@ -80,21 +90,29 @@ class StockReport(models.Model):
                     SUM(move_valuation.valuation) as valuation
                 FROM (
                     SELECT
-                        sum(svl.value) AS valuation
+                        CASE property.value_text -- cost method
+                            WHEN 'fifo' THEN abs(move.value)
+                            WHEN 'average' THEN abs(move.value)
+                            ELSE move.product_qty * product_property.value_float -- standard price
+                        END as valuation
                     FROM
                         stock_move move
-                        INNER JOIN stock_valuation_layer AS svl ON svl.stock_move_id = move.id
+                        INNER JOIN product_product product ON move.product_id = product.id
+                        INNER JOIN product_template ON product.product_tmpl_id = product_template.id
+                        INNER JOIN product_category category ON product_template.categ_id = category.id
+                        LEFT JOIN ir_property property ON property.res_id = CONCAT('product.category,', category.id) AND property.name = 'property_cost_method'
+                        INNER JOIN ir_property product_property ON product_property.res_id = CONCAT('product.product,', product.id)
                     WHERE
                         move.id IN (
                             SELECT id
                             FROM stock_report
                             WHERE %s )
-                 GROUP BY
-                        move.id
+                        AND (property.company_id is null or property.company_id = move.company_id)
+                        AND product_property.company_id = move.company_id
                 ) as move_valuation
             """
 
-            where, args = expression(domain + [('company_id', '=', self.env.company.id)], self).to_sql()
+            where, args = expression(domain + [('company_id', '=', self.env.user.company_id.id)], self).to_sql()
             self.env.cr.execute(query % where, args)
             res[0].update({
                 '__count': 1,

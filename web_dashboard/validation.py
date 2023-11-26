@@ -10,10 +10,8 @@ from odoo.tools import misc, view_validation
 _logger = logging.getLogger(__name__)
 
 _dashboard_validator = None
-
-
 @view_validation.validate('dashboard')
-def schema_dashboard(arch, **kwargs):
+def schema_dashboard(arch):
     """ Check the dashboard view against its schema
 
     :type arch: etree._Element

@@ -16,6 +16,7 @@ def run_after_commit(function, *args, **kwargs):
     E.g. send email, sign invoice, web services methods for other systems...
     Such a method::
         @api.run_after_commit
+        @api.multi
         def method(self):
             ...
     """

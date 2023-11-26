@@ -1,19 +1,19 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_taxcloud
+# * account_taxcloud
 # 
 # Translators:
-# Martin Trigaux, 2019
-# Linkup <link-up@naver.com>, 2019
-# Seongseok Shin <shinss61@hotmail.com>, 2019
+# Martin Trigaux, 2018
+# Linkup <link-up@naver.com>, 2018
+# Seongseok Shin <shinss61@hotmail.com>, 2018
 # JH CHOI <hwangtog@gmail.com>, 2020
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-27 09:32+0000\n"
-"PO-Revision-Date: 2019-08-26 09:34+0000\n"
+"POT-Creation-Date: 2018-12-19 09:12+0000\n"
+"PO-Revision-Date: 2018-08-24 11:37+0000\n"
 "Last-Translator: JH CHOI <hwangtog@gmail.com>, 2020\n"
 "Language-Team: Korean (https://www.transifex.com/odoo/teams/41243/ko/)\n"
 "MIME-Version: 1.0\n"
@@ -59,7 +59,7 @@ msgstr "설정 구성"
 #. module: account_taxcloud
 #: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category__create_uid
 msgid "Created by"
-msgstr "작성인"
+msgstr "작성자"
 
 #. module: account_taxcloud
 #: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category__create_date
@@ -69,7 +69,7 @@ msgstr "작성일"
 #. module: account_taxcloud
 #: model_terms:ir.ui.view,arch_db:account_taxcloud.res_config_settings_view_form
 msgid "Default Category"
-msgstr "기본 범주"
+msgstr "기본 카테고리"
 
 #. module: account_taxcloud
 #: model:ir.model.fields,field_description:account_taxcloud.field_res_company__tic_category_id
@@ -78,27 +78,32 @@ msgid "Default TIC Code"
 msgstr "기본 TIC 코드"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category__display_name
-msgid "Display Name"
-msgstr "표시 이름"
+#: model:ir.model.fields,help:account_taxcloud.field_res_company__tic_category_id
+#: model:ir.model.fields,help:account_taxcloud.field_res_config_settings__tic_category_id
+msgid ""
+"Default TICs(Taxability information codes) code to get sales tax from "
+"TaxCloud by product category."
+msgstr ""
 
 #. module: account_taxcloud
-#: model_terms:ir.ui.view,arch_db:account_taxcloud.account_position_taxcloud_inherit_from_view
+#: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category__display_name
+msgid "Display Name"
+msgstr "제목"
+
+#. module: account_taxcloud
+#: model:ir.model.fields,help:account_taxcloud.field_product_product__tic_category_id
+#: model:ir.model.fields,help:account_taxcloud.field_product_template__tic_category_id
 msgid ""
-"Enable <b>Detect Automatically</b> to automatically use TaxCloud when "
-"selling to American customers."
-msgstr "미국 고객에게 판매할 때 자동으로 TaxCloud를 사용할 수 있도록 <b>자동으로 탐지</b>합니다."
+"Each product falls into a category which has specific taxes predermined by "
+"the government.The system will use the Tax Cloud category set on the "
+"internal category of the product. If thereisn't any, the one on the product "
+"itself will be used. Only used in United States."
+msgstr ""
 
 #. module: account_taxcloud
 #: model:ir.model,name:account_taxcloud.model_account_fiscal_position
 msgid "Fiscal Position"
-msgstr "재정 상태"
-
-#. module: account_taxcloud
-#: model_terms:ir.ui.view,arch_db:account_taxcloud.account_position_taxcloud_inherit_from_view
-#: model_terms:ir.ui.view,arch_db:account_taxcloud.invoice_form_inherit
-msgid "Go to Settings."
-msgstr "설정으로 이동하기."
+msgstr "재정 포지션"
 
 #. module: account_taxcloud
 #: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category__id
@@ -106,26 +111,14 @@ msgid "ID"
 msgstr "ID"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_account_fiscal_position__is_taxcloud_configured
-#: model:ir.model.fields,field_description:account_taxcloud.field_account_move__is_taxcloud_configured
-#: model:ir.model.fields,field_description:account_taxcloud.field_res_company__is_taxcloud_configured
-msgid "Is Taxcloud Configured"
-msgstr "Taxcloud 구성 여부"
-
-#. module: account_taxcloud
-#: model:ir.model,name:account_taxcloud.model_account_move
-msgid "Journal Entries"
-msgstr "분개장 기입 항목"
-
-#. module: account_taxcloud
-#: model:ir.model,name:account_taxcloud.model_account_move_line
-msgid "Journal Item"
-msgstr "분개장 항목"
+#: model:ir.model,name:account_taxcloud.model_account_invoice
+msgid "Invoice"
+msgstr "청구서"
 
 #. module: account_taxcloud
 #: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category____last_update
 msgid "Last Modified on"
-msgstr "최근 수정일"
+msgstr "최근 수정"
 
 #. module: account_taxcloud
 #: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category__write_uid
@@ -135,24 +128,17 @@ msgstr "최근 갱신한 사람"
 #. module: account_taxcloud
 #: model:ir.model.fields,field_description:account_taxcloud.field_product_tic_category__write_date
 msgid "Last Updated on"
-msgstr "최근 갱신일"
-
-#. module: account_taxcloud
-#: model_terms:ir.ui.view,arch_db:account_taxcloud.account_position_taxcloud_inherit_from_view
-#: model_terms:ir.ui.view,arch_db:account_taxcloud.invoice_form_inherit
-msgid ""
-"Please enter your Taxcloud credentials to compute tax rates automatically."
-msgstr "세율을 자동으로 계산하려면 Taxcloud 자격 증명을 입력하십시오."
+msgstr "최근 갱신 날짜"
 
 #. module: account_taxcloud
 #: model:ir.model,name:account_taxcloud.model_product_category
 msgid "Product Category"
-msgstr "상품 종류"
+msgstr "상품 범주"
 
 #. module: account_taxcloud
 #: model_terms:ir.ui.view,arch_db:account_taxcloud.account_taxcloud_tic_category_search
 msgid "Product TIC Categories"
-msgstr "상품 TIC 범주"
+msgstr "제품 TIC 범주"
 
 #. module: account_taxcloud
 #: model:ir.model,name:account_taxcloud.model_product_tic_category
@@ -162,21 +148,7 @@ msgstr "상품 TIC 범주"
 #. module: account_taxcloud
 #: model:ir.model,name:account_taxcloud.model_product_template
 msgid "Product Template"
-msgstr "상품 서식"
-
-#. module: account_taxcloud
-#: model:ir.model.fields,help:account_taxcloud.field_res_company__tic_category_id
-#: model:ir.model.fields,help:account_taxcloud.field_res_config_settings__tic_category_id
-msgid ""
-"TIC (Taxability Information Codes) allow to get specific tax rates for each "
-"product type. This default value applies if no product is used in the "
-"order/invoice, or if no TIC is set on the product or its product category. "
-"By default, TaxCloud relies on the TIC *[0] Uncategorized* default referring"
-" to general goods and services."
-msgstr ""
-"TIC (Taxability Information Code)는 각 제품 유형에 대한 특정 세율을 얻을 수 있습니다. 이 기본값은 "
-"주문/송장에 제품이 사용되지 않거나 제품 또는 제품 범주에 TIC가 설정되지 않은 경우에 적용됩니다. 기본적으로 TaxCloud는 일반 "
-"상품 및 서비스를 나타내는 TIC *[0] Uncategorized* 기본값을 사용합니다."
+msgstr "상품 양식"
 
 #. module: account_taxcloud
 #: model_terms:ir.ui.view,arch_db:account_taxcloud.account_taxcloud_tic_category_tree
@@ -202,16 +174,14 @@ msgstr "TIC 설명"
 #. module: account_taxcloud
 #: model_terms:ir.ui.view,arch_db:account_taxcloud.product_category_view_form_inherit_account_taxcloud
 msgid "TaxCloud"
-msgstr "TaxCloud"
+msgstr "택스클라우드"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_res_company__taxcloud_api_id
 #: model:ir.model.fields,field_description:account_taxcloud.field_res_config_settings__taxcloud_api_id
 msgid "TaxCloud API ID"
 msgstr "TaxCloud API ID"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_res_company__taxcloud_api_key
 #: model:ir.model.fields,field_description:account_taxcloud.field_res_config_settings__taxcloud_api_key
 msgid "TaxCloud API KEY"
 msgstr "TaxCloud API 키"
@@ -231,18 +201,31 @@ msgid "TaxCloud Category"
 msgstr "TaxCloud API 범주"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,help:account_taxcloud.field_account_move__is_taxcloud
-msgid "Technical field to determine whether to hide taxes in views or not."
-msgstr "화면에서 세금을 숨길 지 여부를 결정하는 기술 필드입니다."
+#: model:ir.model.fields,help:account_taxcloud.field_product_category__tic_category_id
+msgid ""
+"TaxCloud uses Taxability Information Codes (TIC) to make sure each item in "
+"your catalog is taxed at the right rate (or, for tax-exempt items, not taxed"
+" at all), so it's important to make sure that each item is assigned a TIC. "
+"If you can't find the right tax category for an item in your catalog, you "
+"can assign it to the 'General Goods and Services' TIC, 00000. TaxCloud "
+"automatically assigns products to this TIC as a default, so unless you've "
+"changed an item's TIC in the past, it should already be set to 00000."
+msgstr ""
 
 #. module: account_taxcloud
 #: model:ir.model,name:account_taxcloud.model_account_fiscal_position_template
 msgid "Template for Fiscal Position"
-msgstr "재정 상태 서식"
+msgstr "재정 포지션 템플릿"
 
 #. module: account_taxcloud
-#: code:addons/account_taxcloud/models/account_invoice.py:0
-#: code:addons/account_taxcloud/models/account_invoice.py:0
+#: code:addons/account_taxcloud/models/account_invoice.py:43
+#: code:addons/account_taxcloud/models/res_config_settings.py:23
+#, python-format
+msgid "The configuration of TaxCloud is in the Accounting app, Settings menu."
+msgstr "TaxCloud의 설정은 회계 앱의 설정 메뉴에 있습니다."
+
+#. module: account_taxcloud
+#: code:addons/account_taxcloud/models/account_invoice.py:115
 #, python-format
 msgid ""
 "The source document on the refund is not valid and thus the refunded cart "
@@ -250,59 +233,32 @@ msgid ""
 msgstr "환불의 소스 문서가 유효하지 않아서 환불된 장바구니가 taxcloud 계정에 기록되지 않습니다"
 
 #. module: account_taxcloud
-#: code:addons/account_taxcloud/models/account_invoice.py:0
+#: code:addons/account_taxcloud/models/account_invoice.py:85
 #, python-format
 msgid ""
 "The tax rates have been updated, you may want to check it before validation"
 msgstr "세율이 업데이트되었습니다. 승인하기 전에 확인해야 할 수 있습니다"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,help:account_taxcloud.field_product_product__tic_category_id
-#: model:ir.model.fields,help:account_taxcloud.field_product_template__tic_category_id
-msgid ""
-"This refers to TIC (Taxability Information Codes), these are used by "
-"TaxCloud to compute specific tax rates for each product type. The value set "
-"here prevails over the one set on the product category."
-msgstr ""
-"이는 TIC (Taxability Information Code)를 의미하며 TaxCloud는 각 제품 유형에 대한 특정 세율을 계산하는"
-" 데 사용됩니다. 여기에 설정된 값이 제품 범주에 설정된 값보다 우선합니다."
-
-#. module: account_taxcloud
-#: model:ir.model.fields,help:account_taxcloud.field_product_category__tic_category_id
-msgid ""
-"This refers to TIC (Taxability Information Codes), these are used by "
-"TaxCloud to compute specific tax rates for each product type. This value is "
-"used when no TIC is set on the product. If no value is set here, the default"
-" value set in Invoicing settings is used."
-msgstr ""
-"이는 TIC (Taxability Information Code)를 의미하며 TaxCloud는 각 제품 유형에 대한 특정 세율을 계산하는"
-" 데 사용됩니다. 이 값은 제품에 TIC가 설정되지 않은 경우에 사용됩니다. 여기에 값을 설정하지 않으면 송장 설정에 설정된 기본값이 "
-"사용됩니다."
-
-#. module: account_taxcloud
-#: code:addons/account_taxcloud/models/account_invoice.py:0
-#: code:addons/account_taxcloud/models/res_config_settings.py:0
+#: code:addons/account_taxcloud/models/account_invoice.py:43
+#: code:addons/account_taxcloud/models/res_config_settings.py:23
 #, python-format
 msgid "Unable to retrieve taxes from TaxCloud: "
 msgstr "TaxCloud에서 세금을 검색할 수 없습니다 :"
 
 #. module: account_taxcloud
+#: model:ir.actions.server,name:account_taxcloud.action_account_invoice_update_taxes
+msgid "Update taxes with Taxcloud"
+msgstr "Taxcloud로 세금 업데이트"
+
+#. module: account_taxcloud
 #: model:ir.model.fields,field_description:account_taxcloud.field_account_fiscal_position__is_taxcloud
 #: model:ir.model.fields,field_description:account_taxcloud.field_account_fiscal_position_template__is_taxcloud
-#: model:ir.model.fields,field_description:account_taxcloud.field_account_move__is_taxcloud
 msgid "Use TaxCloud API"
 msgstr "TaxCloud API 사용"
 
 #. module: account_taxcloud
-#: model:ir.model.fields,help:account_taxcloud.field_account_fiscal_position__is_taxcloud_configured
-#: model:ir.model.fields,help:account_taxcloud.field_account_move__is_taxcloud_configured
-#: model:ir.model.fields,help:account_taxcloud.field_res_company__is_taxcloud_configured
-msgid ""
-"Used to determine whether or not to warn the user to configure TaxCloud."
-msgstr "TaxCloud를 구성하도록 사용자에게 경고할지 여부를 판별하는 데 사용됩니다."
-
-#. module: account_taxcloud
-#: code:addons/account_taxcloud/models/account_invoice.py:0
+#: code:addons/account_taxcloud/models/account_invoice.py:24
 #, python-format
 msgid ""
 "You cannot cancel an invoice sent to TaxCloud.\n"
@@ -314,7 +270,7 @@ msgstr ""
 "이 방법으로 TaxCloud에서 세금 항목이 취소됩니다."
 
 #. module: account_taxcloud
-#: code:addons/account_taxcloud/models/product.py:0
+#: code:addons/account_taxcloud/models/product.py:28
 #, python-format
 msgid "[%s] %s"
 msgstr "[%s] %s"

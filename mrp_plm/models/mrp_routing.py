@@ -13,19 +13,20 @@ class MrpRouting(models.Model):
     eco_ids = fields.One2many('mrp.eco', 'new_routing_id', 'ECOs')
     eco_count = fields.Integer('# ECOs', compute='_compute_eco_data')
 
+    @api.one
     def _compute_revision_ids(self):
-        for rec in self:
-            previous_routings = self.env['mrp.routing']
-            current = self
-            while current.previous_routing_id:
-                previous_routings |= current
-                current = current.previous_routing_id
-            rec.revision_ids = previous_routings.ids
+        previous_routings = self.env['mrp.routing']
+        current = self
+        while current.previous_routing_id:
+            previous_routings |= current
+            current = current.previous_routing_id
+        self.revision_ids = previous_routings.ids
 
+    @api.one
     def _compute_eco_data(self):
-        for rec in self:
-            rec.eco_count = len(rec.eco_ids)
+        self.eco_count = len(self.eco_ids)
 
+    @api.multi
     def apply_new_version(self):
         """ Put old routing as deprecated - TODO Set to stage that is production_ready """
         self.write({'active': True})

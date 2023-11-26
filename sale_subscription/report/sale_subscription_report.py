@@ -18,7 +18,6 @@ class sale_subscription_report(models.Model):
     quantity = fields.Float('Quantity', readonly=True)
     partner_id = fields.Many2one('res.partner', 'Customer', readonly=True)
     user_id = fields.Many2one('res.users', 'Salesperson', readonly=True)
-    team_id = fields.Many2one('crm.team', 'Sales Team', readonly=True)
     company_id = fields.Many2one('res.company', 'Company', readonly=True)
     categ_id = fields.Many2one('product.category', 'Product Category', readonly=True)
     pricelist_id = fields.Many2one('product.pricelist', 'Pricelist', readonly=True)
@@ -58,7 +57,6 @@ class sale_subscription_report(models.Model):
                     sub.date as date_end,
                     sub.partner_id as partner_id,
                     sub.user_id as user_id,
-                    sub.team_id,
                     sub.company_id as company_id,
                     sub.to_renew,
                     stage.in_progress,
@@ -100,7 +98,6 @@ class sale_subscription_report(models.Model):
                     sub.date,
                     sub.partner_id,
                     sub.user_id,
-                    sub.team_id,
                     quantity,
                     sub.company_id,
                     sub.to_renew,
@@ -118,6 +115,7 @@ class sale_subscription_report(models.Model):
         """
         return group_by_str
 
+    @api.model_cr
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
         self.env.cr.execute("""CREATE or REPLACE VIEW %s as (

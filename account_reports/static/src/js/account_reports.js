@@ -4,13 +4,14 @@ odoo.define('account_reports.account_report', function (require) {
 var core = require('web.core');
 var Context = require('web.Context');
 var AbstractAction = require('web.AbstractAction');
+var ControlPanelMixin = require('web.ControlPanelMixin');
 var Dialog = require('web.Dialog');
+var crash_manager = require('web.crash_manager');
 var datepicker = require('web.datepicker');
 var session = require('web.session');
 var field_utils = require('web.field_utils');
 var RelationalFields = require('web.relational_fields');
 var StandaloneFieldManagerMixin = require('web.StandaloneFieldManagerMixin');
-var WarningDialog = require('web.CrashManager').WarningDialog;
 var Widget = require('web.Widget');
 
 var QWeb = core.qweb;
@@ -36,17 +37,16 @@ var M2MFilters = Widget.extend(StandaloneFieldManagerMixin, {
         _.each(this.fields, function (field, fieldName) {
             defs.push(self._makeM2MWidget(field, fieldName));
         });
-        return Promise.all(defs);
+        return $.when.apply($, defs);
     },
     /**
      * @override
      */
     start: function () {
         var self = this;
-        var $content = $(QWeb.render("m2mWidgetTable", {fields: this.fields}));
-        self.$el.append($content);
         _.each(this.fields, function (field, fieldName) {
-            self.widgets[fieldName].appendTo($content.find('#'+fieldName+'_field'));
+            self.$el.append($('<p/>', {style: 'font-weight:bold;'}).text(field.label));
+            self.widgets[fieldName].appendTo(self.$el);
         });
         return this._super.apply(this, arguments);
     },
@@ -61,7 +61,7 @@ var M2MFilters = Widget.extend(StandaloneFieldManagerMixin, {
      *
      * @private
      * @override
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _confirmChange: function () {
         var self = this;
@@ -79,7 +79,7 @@ var M2MFilters = Widget.extend(StandaloneFieldManagerMixin, {
      * @private
      * @param {Object} fieldInfo
      * @param {string} fieldName
-     * @returns {Promise}
+     * @returns {Deferred}
      */
     _makeM2MWidget: function (fieldInfo, fieldName) {
         var self = this;
@@ -113,8 +113,7 @@ var M2MFilters = Widget.extend(StandaloneFieldManagerMixin, {
     },
 });
 
-var accountReportsWidget = AbstractAction.extend({
-    hasControlPanel: true,
+var accountReportsWidget = AbstractAction.extend(ControlPanelMixin, {
 
     events: {
         'input .o_account_reports_filter_input': 'filter_accounts',
@@ -125,8 +124,6 @@ var accountReportsWidget = AbstractAction.extend({
         'click .js_account_report_foldable': 'fold_unfold',
         'click [action]': 'trigger_action',
         'click .o_account_reports_load_more span': 'load_more',
-        'click .o_account_reports_table thead th': 'selected_column',
-        'click .o_change_expected_date': '_onChangeExpectedDate',
     },
 
     custom_events: {
@@ -134,11 +131,8 @@ var accountReportsWidget = AbstractAction.extend({
              var self = this;
              self.report_options.partner_ids = ev.data.partner_ids;
              self.report_options.partner_categories = ev.data.partner_categories;
-             self.report_options.analytic_accounts = ev.data.analytic_accounts;
-             self.report_options.analytic_tags = ev.data.analytic_tags;
              return self.reload().then(function () {
                  self.$searchview_buttons.find('.account_partner_filter').click();
-                 self.$searchview_buttons.find('.account_analytic_filter').click();
              });
          },
     },
@@ -173,7 +167,7 @@ var accountReportsWidget = AbstractAction.extend({
             .then(function(result){
                 return self.parse_reports_informations(result);
             });
-        return Promise.all([extra_info, this._super.apply(this, arguments)]).then(function() {
+        return $.when(extra_info, this._super.apply(this, arguments)).then(function() {
             self.render();
         });
     },
@@ -205,14 +199,9 @@ var accountReportsWidget = AbstractAction.extend({
             this.renderButtons();
         }
         var status = {
-            cp_content: {
-                $buttons: this.$buttons,
-                $searchview_buttons: this.$searchview_buttons,
-                $pager: this.$pager,
-                $searchview: this.$searchview,
-            },
+            cp_content: {$buttons: this.$buttons, $searchview_buttons: this.$searchview_buttons, $pager: this.$pager, $searchview: this.$searchview},
         };
-        return this.updateControlPanel(status, {clear: true});
+        return this.update_control_panel(status, {clear: true});
     },
     reload: function() {
         var self = this;
@@ -228,19 +217,14 @@ var accountReportsWidget = AbstractAction.extend({
             });
     },
     render: function() {
-        var self = this;
         this.render_template();
         this.render_footnotes();
         this.render_searchview_buttons();
         this.update_cp();
-        this.batch_fold(this.$('.js_account_report_foldable').filter(function() {
-            return !$(this).data('unfolded');
-        }));
     },
     render_template: function() {
-        this.$('.o_content').html(this.main_html);
-        this.$('.o_content').find('.o_account_reports_summary_edit').hide();
-        this.$('[data-toggle="tooltip"]').tooltip();
+        this.$el.html(this.main_html);
+        this.$el.find('.o_account_reports_summary_edit').hide();
         this._add_line_classes();
     },
     _add_line_classes: function() {
@@ -269,15 +253,16 @@ var accountReportsWidget = AbstractAction.extend({
         this.$('.o_account_reports_level2').each(function(index, el) {
             var $accountReportLineFoldable = $(el);
             var line_id = $accountReportLineFoldable.find('.o_account_report_line').data('id');
-            var $childs = self.$('tr[data-parent-id="'+$.escapeSelector(String(line_id))+'"]');
-            const lineNameEl = $accountReportLineFoldable.find('.account_report_line_name')[0];
-            // Only the direct text node, not text situated in other child nodes
-            const displayName = lineNameEl.childNodes[0].nodeValue.trim().toLowerCase();
-            const accountCode = (lineNameEl.dataset.accountCode || '').toLowerCase();
-            const accountName = displayName.slice(accountCode ? accountCode.length + 1 : 0);
+            var $childs = self.$('tr[data-parent-id="'+line_id+'"]');
+            var lineText = $accountReportLineFoldable.find('.account_report_line_name')
+                // Only the direct text node, not text situated in other child nodes
+                .contents().get(0).nodeValue
+                .trim();
 
             // The python does this too
-            const queryFound = accountCode.startsWith(query.split(' ')[0]) || accountName.includes(query);
+            var queryFound = lineText.split(' ').some(function (str) {
+                return str.toLowerCase().startsWith(query);
+            });
 
             $accountReportLineFoldable.toggleClass('o_account_reports_filtered_lines', !queryFound);
             $childs.toggleClass('o_account_reports_filtered_lines', !queryFound);
@@ -295,53 +280,6 @@ var accountReportsWidget = AbstractAction.extend({
         this.report_options['filter_accounts'] = query;
         this.render_footnotes();
     },
-    selected_column: function(e) {
-        var self = this;
-        if (self.report_options.selected_column !== undefined) {
-            var col_number = Array.prototype.indexOf.call(e.currentTarget.parentElement.children, e.currentTarget) + 1; // we can't have negative 0 so lets start index at 1
-            if (self.report_options.selected_column && self.report_options.selected_column == col_number) {
-                self.report_options.selected_column = -col_number;
-            } else {
-                self.report_options.selected_column = col_number;
-            }
-            self.reload()
-        }
-    },
-    _onChangeExpectedDate: function (event) {
-        var self = this;
-        var targetID = parseInt($(event.target).attr('data-id'));
-        var parentID = parseInt($(event.target).attr('parent-id').split("_")[1]);
-        var $content = $(QWeb.render("paymentDateForm", {target_id: targetID}));
-        var paymentDatePicker = new datepicker.DateWidget(this);
-        paymentDatePicker.appendTo($content.find('div.o_account_reports_payment_date_picker'));
-        var save = function () {
-            return this._rpc({
-                model: 'res.partner',
-                method: 'change_expected_date',
-                args: [[parentID], {
-                    move_line_id: parseInt($content.find("#target_id").val()),
-                    expected_pay_date: paymentDatePicker.getValue(),
-                }],
-            }).then(function() {
-                self.reload();
-            });
-        };
-        new Dialog(this, {
-            title: 'Odoo',
-            size: 'medium',
-            $content: $content,
-            buttons: [{
-                text: _t('Save'),
-                classes: 'btn-primary',
-                close: true,
-                click: save
-            },
-            {
-                text: _t('Cancel'),
-                close: true
-            }]
-        }).open();
-    },
     render_searchview_buttons: function() {
         var self = this;
         // bind searchview buttons/filter to the correct actions
@@ -355,16 +293,13 @@ var accountReportsWidget = AbstractAction.extend({
         };
         // attach datepicker
         $datetimepickers.each(function () {
-            var name = $(this).find('input').attr('name');
-            var defaultValue = $(this).data('default-value');
             $(this).datetimepicker(options);
             var dt = new datepicker.DateWidget(options);
-            dt.replace($(this)).then(function () {
-                dt.$el.find('input').attr('name', name);
-                if (defaultValue) { // Set its default value if there is one
-                    dt.setValue(moment(defaultValue));
-                }
-            });
+            dt.replace($(this));
+            dt.$el.find('input').attr('name', $(this).find('input').attr('name'));
+            if($(this).data('default-value')) { // Set its default value if there is one
+                dt.setValue(moment($(this).data('default-value')));
+            }
         });
         // format date that needs to be show in user lang
         _.each(this.$searchview_buttons.find('.js_format_date'), function(dt) {
@@ -388,23 +323,10 @@ var accountReportsWidget = AbstractAction.extend({
         _.each(this.$searchview_buttons.find('.js_account_report_choice_filter'), function(k) {
             $(k).toggleClass('selected', (_.filter(self.report_options[$(k).data('filter')], function(el){return ''+el.id == ''+$(k).data('id') && el.selected === true;})).length > 0);
         });
-        $('.js_account_report_group_choice_filter', this.$searchview_buttons).each(function (i, el) {
-            var $el = $(el);
-            var ids = $el.data('member-ids');
-            $el.toggleClass('selected', _.every(self.report_options[$el.data('filter')], function (member) {
-                // only look for actual ids, discard separators and section titles
-                if(typeof member.id == 'number'){
-                  // true if selected and member or non member and non selected
-                  return member.selected === (ids.indexOf(member.id) > -1);
-                } else {
-                  return true;
-                }
-            }));
-        });
         _.each(this.$searchview_buttons.find('.js_account_reports_one_choice_filter'), function(k) {
             $(k).toggleClass('selected', ''+self.report_options[$(k).data('filter')] === ''+$(k).data('id'));
         });
-        // click events
+        // click event
         this.$searchview_buttons.find('.js_account_report_date_filter').click(function (event) {
             self.report_options.date.filter = $(this).data('filter');
             var error = false;
@@ -418,15 +340,11 @@ var accountReportsWidget = AbstractAction.extend({
                 }
                 else {
                     error = date_to.val() === "";
-                    self.report_options.date.date_to = field_utils.parse.date(date_to.val());
+                    self.report_options.date.date = field_utils.parse.date(date_to.val());
                 }
             }
             if (error) {
-                new WarningDialog(self, {
-                    title: _t("Odoo Warning"),
-                }, {
-                    message: _t("Date cannot be empty")
-                }).open();
+                crash_manager.show_warning({data: {message: _t('Date cannot be empty')}});
             } else {
                 self.reload();
             }
@@ -437,16 +355,6 @@ var accountReportsWidget = AbstractAction.extend({
             if (option_value === 'unfold_all') {
                 self.unfold_all(self.report_options[option_value]);
             }
-            self.reload();
-        });
-        $('.js_account_report_group_choice_filter', this.$searchview_buttons).click(function () {
-            var option_value = $(this).data('filter');
-            var option_member_ids = $(this).data('member-ids') || [];
-            var is_selected = $(this).hasClass('selected');
-            _.each(self.report_options[option_value], function (el) {
-                // if group was selected, we want to uncheck all
-                el.selected = !is_selected && (option_member_ids.indexOf(Number(el.id)) > -1);
-            });
             self.reload();
         });
         this.$searchview_buttons.find('.js_account_report_choice_filter').click(function (event) {
@@ -467,7 +375,7 @@ var accountReportsWidget = AbstractAction.extend({
             self.report_options[$(this).data('filter')] = $(this).data('id');
             self.reload();
         });
-        this.$searchview_buttons.find('.js_account_report_date_cmp_filter').click(function (event) {
+        this.$searchview_buttons.find('.js_account_report_date_cmp_filter').click(function (event){
             self.report_options.comparison.filter = $(this).data('filter');
             var error = false;
             var number_period = $(this).parent().find('input[name="periods_number"]');
@@ -475,25 +383,36 @@ var accountReportsWidget = AbstractAction.extend({
             if ($(this).data('filter') === 'custom') {
                 var date_from = self.$searchview_buttons.find('.o_datepicker_input[name="date_from_cmp"]');
                 var date_to = self.$searchview_buttons.find('.o_datepicker_input[name="date_to_cmp"]');
-                if (date_from.length > 0) {
+                if (date_from.length > 0){
                     error = date_from.val() === "" || date_to.val() === "";
                     self.report_options.comparison.date_from = field_utils.parse.date(date_from.val());
                     self.report_options.comparison.date_to = field_utils.parse.date(date_to.val());
                 }
                 else {
                     error = date_to.val() === "";
-                    self.report_options.comparison.date_to = field_utils.parse.date(date_to.val());
+                    self.report_options.comparison.date = field_utils.parse.date(date_to.val());
                 }
             }
             if (error) {
-                new WarningDialog(self, {
-                    title: _t("Odoo Warning"),
-                }, {
-                    message: _t("Date cannot be empty")
-                }).open();
+                crash_manager.show_warning({data: {message: _t('Date cannot be empty')}});
             } else {
                 self.reload();
             }
+        });
+        // analytic filter
+        var option_cnt = this.$searchview_buttons.find('.js_account_reports_analytic_auto_complete').children().length;
+        var minInpLen = Math.floor(Math.log(option_cnt) / Math.log(100)); // 0-99: O, 100-9999: 1, ...
+        this.$searchview_buttons.find('.js_account_reports_analytic_auto_complete').select2({minimumInputLength: minInpLen});
+        if (self.report_options.analytic) {
+            self.$searchview_buttons.find('[data-filter="analytic_accounts"]').select2("val", self.report_options.analytic_accounts);
+            self.$searchview_buttons.find('[data-filter="analytic_tags"]').select2("val", self.report_options.analytic_tags);
+        }
+        this.$searchview_buttons.find('.js_account_reports_analytic_auto_complete').on('change', function(){
+            self.report_options.analytic_accounts = self.$searchview_buttons.find('[data-filter="analytic_accounts"]').val();
+            self.report_options.analytic_tags = self.$searchview_buttons.find('[data-filter="analytic_tags"]').val();
+            return self.reload().then(function(){
+                self.$searchview_buttons.find('.account_analytic_filter').click();
+            })
         });
 
         // partner filter
@@ -522,33 +441,6 @@ var accountReportsWidget = AbstractAction.extend({
                 this.$searchview_buttons.find('.js_account_partner_m2m').append(this.M2MFilters.$el);
             }
         }
-
-        // analytic filter
-        if (this.report_options.analytic) {
-            if (!this.M2MFilters) {
-                var fields = {};
-                if (this.report_options.analytic_accounts) {
-                    fields['analytic_accounts'] = {
-                        label: _t('Accounts'),
-                        modelName: 'account.analytic.account',
-                        value: this.report_options.analytic_accounts.map(Number),
-                    };
-                }
-                if (this.report_options.analytic_tags) {
-                    fields['analytic_tags'] = {
-                        label: _t('Tags'),
-                        modelName: 'account.analytic.tag',
-                        value: this.report_options.analytic_tags.map(Number),
-                    };
-                }
-                if (!_.isEmpty(fields)) {
-                    this.M2MFilters = new M2MFilters(this, fields);
-                    this.M2MFilters.appendTo(this.$searchview_buttons.find('.js_account_analytic_m2m'));
-                }
-            } else {
-                this.$searchview_buttons.find('.js_account_analytic_m2m').append(this.M2MFilters.$el);
-            }
-        }
     },
     format_date: function(moment_date) {
         var date_format = 'YYYY-MM-DD';
@@ -568,11 +460,9 @@ var accountReportsWidget = AbstractAction.extend({
                         context: self.odoo_context,
                     })
                     .then(function(result){
-                        var doActionProm = self.do_action(result);
-                        self.$buttons.attr('disabled', false);
-                        return doActionProm;
+                        return self.do_action(result);
                     })
-                    .guardedCatch(function() {
+                    .always(function() {
                         self.$buttons.attr('disabled', false);
                     });
             });
@@ -651,7 +541,7 @@ var accountReportsWidget = AbstractAction.extend({
         // check if we already have some footnote for this line
         var existing_footnote = _.filter(self.footnotes, function(footnote) {
             return ''+footnote.line === ''+line_id;
-        });
+        })
         var text = '';
         if (existing_footnote.length !== 0) {
             text = existing_footnote[0].text;
@@ -694,22 +584,7 @@ var accountReportsWidget = AbstractAction.extend({
                     });
             }
         };
-        new Dialog(this, {
-            title: _t('Annotate'),
-            size: 'medium',
-            $content: $content,
-            buttons: [
-                {
-                    text: _t('Save'),
-                    classes: 'btn-primary',
-                    close: true,
-                    click: save,
-                }, {
-                    text: _t('Cancel'),
-                    close: true,
-                }
-            ]
-        }).open();
+        new Dialog(this, {title: 'Annotate', size: 'medium', $content: $content, buttons: [{text: 'Save', classes: 'btn-primary', close: true, click: save}, {text: 'Cancel', close: true}]}).open();
     },
     delete_footnote: function(e) {
         var self = this;
@@ -735,60 +610,19 @@ var accountReportsWidget = AbstractAction.extend({
         e.preventDefault();
         var line = $(e.target).parents('td');
         if (line.length === 0) {line = $(e.target);}
-        var method = line.data('unfolded') === 'True' ? this.batch_fold(line) : this.unfold(line);
-        Promise.resolve(method).then(function() {
+        var method = line.data('unfolded') === 'True' ? this.fold(line) : this.unfold(line);
+        $.when(method).then(function() {
             self.render_footnotes();
             self.persist_options();
         });
     },
-    /**
-     * batch implementation of fold.
-     * Useful for 'render' function when
-     * number of lines > 5000.
-     */
-    batch_fold: function(lines) {
-        var parent_ids = new Map();
-        lines.each((it, line) => {
-            let $line = $(line);
-            $line.find('.fa-caret-down').toggleClass('fa-caret-right fa-caret-down');
-            $line.toggleClass('folded');
-            $line.parent('tr').removeClass('o_js_account_report_parent_row_unfolded');
-            parent_ids.set($line.data('id'), $line);
-            var index = this.report_options.unfolded_lines.indexOf($line.data('id'));
-            if (index > -1) {
-                this.report_options.unfolded_lines.splice(index, 1);
-            }
-        });
-        var rows = this.$el.find('tr');
-        var children = rows.map((it, row) => {
-            let $row = $(row);
-            if (parent_ids.has($row.data('parent-id'))) {
-                parent_ids.get($row.data('parent-id')).data('unfolded', 'False');
-                $row.find('.js_account_report_line_footnote').addClass('folded');
-                $row.hide();
-                var child = $row.find('[data-id]:first');
-                if (child) {
-                    return child;
-                }
-            }
-        });
-        if (children.length > 0) {
-            this.batch_fold(children);
-        }
-    },
-    /**
-     * 
-     * @deprecated 
-     * Use batch_fold to fold lines.
-     * To be removed in master.
-     */
     fold: function(line) {
         var self = this;
         var line_id = line.data('id');
         line.find('.fa-caret-down').toggleClass('fa-caret-right fa-caret-down');
         line.toggleClass('folded');
         $(line).parent('tr').removeClass('o_js_account_report_parent_row_unfolded');
-        var $lines_to_hide = this.$el.find('tr[data-parent-id="'+$.escapeSelector(String(line_id))+'"]');
+        var $lines_to_hide = this.$el.find('tr[data-parent-id="'+line_id+'"]');
         var index = self.report_options.unfolded_lines.indexOf(line_id);
         if (index > -1) {
             self.report_options.unfolded_lines.splice(index, 1);
@@ -811,7 +645,7 @@ var accountReportsWidget = AbstractAction.extend({
         var line_id = line.data('id');
         line.toggleClass('folded');
         self.report_options.unfolded_lines.push(line_id);
-        var $lines_in_dom = this.$el.find('tr[data-parent-id="'+$.escapeSelector(String(line_id))+'"]');
+        var $lines_in_dom = this.$el.find('tr[data-parent-id="'+line_id+'"]');
         if ($lines_in_dom.length > 0) {
             $lines_in_dom.find('.js_account_report_line_footnote').removeClass('folded');
             $lines_in_dom.show();
@@ -838,8 +672,7 @@ var accountReportsWidget = AbstractAction.extend({
         var id = $line.data('id');
         var offset = $line.data('offset') || 0;
         var progress = $line.data('progress') || 0;
-        var remaining = $line.data('remaining') || 0;
-        var options = _.extend({}, this.report_options, {lines_offset: offset, lines_progress: progress, lines_remaining: remaining});
+        var options = _.extend({}, this.report_options, {lines_offset: offset, lines_progress: progress});
         var self = this;
         this._rpc({
                 model: this.report_model,

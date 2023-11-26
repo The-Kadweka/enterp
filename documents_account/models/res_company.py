@@ -7,27 +7,30 @@ from odoo import fields, models, api, _
 class ResCompany(models.Model):
     _inherit = "res.company"
 
-    def _domain_company(self):
-        company = self.env.company
-        return ['|', ('company_id', '=', False), ('company_id', '=', company.id)]
-
-    documents_account_settings = fields.Boolean()
-    account_folder = fields.Many2one('documents.folder', string="Accounting Workspace", domain=_domain_company,
+    dms_account_settings = fields.Boolean()
+    account_folder = fields.Many2one('documents.folder',
                                      default=lambda self: self.env.ref('documents.documents_finance_folder',
-                                                                       raise_if_not_found=False)
-                                     )
+                                                                       raise_if_not_found=False))
+    account_tags = fields.Many2many('documents.tag', 'account_tags_table')
 
+    @api.multi
+    def write(self, values):
+        for company in self:
+            if not company.dms_account_settings and values.get('dms_account_settings'):
+                attachments = self.env['ir.attachment'].search([('folder_id', '=', False),
+                                                                ('res_model', '=', 'account.invoice')])
+                if attachments.exists():
+                    vals = {}
+                    if values.get('account_folder'):
+                        vals['folder_id'] = values['account_folder']
+                    elif company.account_folder:
+                        vals['folder_id'] = company.account_folder.id
 
-class DocumentsFolderSetting(models.Model):
-    _name = 'documents.account.folder.setting'
-    _description = 'Journal and Folder settings'
+                    if values.get('account_tags'):
+                        vals['tag_ids'] = values['account_tags']
+                    elif company.account_tags:
+                        vals['tag_ids'] = [(6, 0, company.account_tags.ids)]
+                    if len(vals):
+                        attachments.write(vals)
 
-    company_id = fields.Many2one('res.company', required=True, default=lambda self: self.env.company,
-                                 ondelete='cascade')
-    journal_id = fields.Many2one('account.journal', required=True)
-    folder_id = fields.Many2one('documents.folder', string="Workspace", required=True)
-    tag_ids = fields.Many2many('documents.tag', string="Tags")
-
-    _sql_constraints = [
-        ('journal_unique', 'unique (journal_id)', "A setting already exists for this journal"),
-    ]
+        return super(ResCompany, self).write(values)

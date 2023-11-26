@@ -3,10 +3,10 @@
 
 import re
 from datetime import datetime
-import json
 
 from odoo import models, fields
 from odoo.exceptions import UserError
+from odoo.tools import pycompat
 from odoo.tools.translate import _
 
 
@@ -46,8 +46,7 @@ class CertificationReport(models.AbstractModel):
             'docs': docs,
             'options': data['wizard_values'],
             'report_name': data['report_name'],
-            'company': self.env.company,
-            'current_year': self.env.company.compute_fiscalyear_dates(current_date)['date_from'].year,
+            'current_year': self.env.user.company_id.compute_fiscalyear_dates(current_date)['date_from'].year,
         }
 
 
@@ -58,7 +57,7 @@ class ReportCertificationReport(models.AbstractModel):
 
     filter_unfold_all = False
     filter_partner_id = False
-    filter_date = {'mode': 'range', 'filter': 'this_year'}
+    filter_date = {'date_from': '', 'date_to': '', 'filter': 'this_year'}
 
     def _get_bimonth_for_aml(self, aml):
         bimonth = aml.date.month
@@ -79,7 +78,7 @@ class ReportCertificationReport(models.AbstractModel):
         return bimonth_names[bimonth_index]
 
     def _get_domain(self, options):
-        common_domain = [('partner_id', '!=', False), ('parent_state', 'not in', ('draft', 'cancel'))]
+        common_domain = [('partner_id', '!=', False)]
         if options.get('partner_id'):
             common_domain += [('partner_id.id', '=', options.get('partner_id'))]
         if options.get('date'):
@@ -95,7 +94,7 @@ class ReportCertificationReport(models.AbstractModel):
 
     def _add_to_partner_total(self, totals, new_values):
         for column, value in new_values.items():
-            if isinstance(value, str):
+            if isinstance(value, pycompat.string_types):
                 totals[column] = ''
             else:
                 totals[column] = totals.get(column, 0) + value
@@ -160,15 +159,16 @@ class ReportCertificationReport(models.AbstractModel):
 
     def print_pdf(self, options):
         lines = self._get_lines(options)
+
         return {
             'type': 'ir.actions.act_window',
+            'view_type': 'form',
             'view_mode': 'form',
             'res_model': 'l10n_co_reports.retention_report.wizard',
             'views': [(self.env.ref('l10n_co_reports.retention_report_wizard_form').id, 'form')],
             'view_id': self.env.ref('l10n_co_reports.retention_report_wizard_form').id,
             'target': 'new',
             'context': {'lines': lines, 'report_name': self._name},
-            'data': {'options': json.dumps(options), 'output_format': 'pdf'},
         }
 
 
@@ -241,7 +241,7 @@ class ReportCertificationReportIva(models.AbstractModel):
 
     def _get_domain(self, options):
         res = super(ReportCertificationReportIva, self)._get_domain(options)
-        res += ['|', ('account_id.code', '=like', '2367%'), ('account_id.code', '=like', '2408%')]
+        res += ['|', ('account_id.code', '=', '236705'), ('account_id.code', '=like', '240810%')]
         return res
 
     def _handle_aml(self, aml, lines_per_bimonth):
@@ -254,7 +254,7 @@ class ReportCertificationReportIva(models.AbstractModel):
                 'balance_15_over_19': 0,
             }
 
-        if aml.account_id.code.startswith('2408'):
+        if aml.account_id.code.startswith('240810'):
             lines_per_bimonth[bimonth]['balance_15_over_19'] += aml.credit - aml.debit
         else:
             lines_per_bimonth[bimonth]['balance'] += aml.credit - aml.debit

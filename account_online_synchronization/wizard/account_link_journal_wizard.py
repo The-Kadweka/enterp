@@ -13,7 +13,7 @@ class AccountLinkJournalLine(models.TransientModel):
     # Deprecated
     action = fields.Selection([('create', 'Create new journal'), ('link', 'Link to existing journal')], default='create')
     journal_id = fields.Many2one('account.journal', domain="[('type', '=', 'bank'), ('account_online_account_id', '=', False)]")
-    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
+    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.user.company_id.currency_id)
     online_account_id = fields.Many2one('account.online.account')
     name = fields.Char(related='online_account_id.name', string="Account name", readonly=False)
     balance = fields.Float(related='online_account_id.balance', readonly=True)

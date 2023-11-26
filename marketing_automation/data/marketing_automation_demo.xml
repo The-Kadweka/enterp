@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <record id="mass_mailing_offer_free_trial" model="mailing.mailing">
+    <record id="mass_mailing_offer_free_trial" model="mail.mass_mailing">
         <field name="name">Offer free catalog</field>
-        <field name="subject">Welcome!</field>
         <field name="use_in_marketing_automation">True</field>
         <field name="mailing_model_id" ref="base.model_res_partner"/>
         <field name="body_html" type="xml">
@@ -67,9 +66,8 @@
         </field>
     </record>
 
-    <record id="mass_mailing_after_7_days" model="mailing.mailing">
+    <record id="mass_mailing_after_7_days" model="mail.mass_mailing">
         <field name="name">After 7 days</field>
-        <field name="subject">Join partnership!</field>
         <field name="use_in_marketing_automation">True</field>
         <field name="mailing_model_id" ref="base.model_res_partner"/>
         <field name="body_html" type="xml">
@@ -141,6 +139,7 @@
         <field name="name">Commercial prospection</field>
         <field name="state">draft</field>
         <field name="model_id" ref="base.model_res_partner" />
+        <field name="domain">[['customer', '=', True]]</field>
     </record>
 
     <record id="marketing_activity_1" model="marketing.activity">
@@ -154,7 +153,7 @@
         <field name="mass_mailing_id" ref="mass_mailing_after_7_days" />
         <field name="interval_number">7</field>
         <field name="interval_type">days</field>
-        <field name="activity_domain">[['category_id', 'not ilike', 'Partner']]</field>
+        <field name="domain">[['category_id', 'not ilike', 'Partner']]</field>
         <field name="campaign_id" ref="marketing_campaign_1"/>
     </record>
 

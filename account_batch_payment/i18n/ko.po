@@ -1,21 +1,21 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_batch_payment
+# * account_batch_payment
 # 
 # Translators:
-# Martin Trigaux, 2019
-# Spike Lee <rurouni24@gmail.com>, 2019
-# Link Up링크업 <linkup.way@gmail.com>, 2019
+# Martin Trigaux, 2018
+# Spike Lee <rurouni24@gmail.com>, 2018
+# Link Up링크업 <linkup.way@gmail.com>, 2018
+# Mark Lee <odoos@soti.33mail.com>, 2018
 # Linkup <link-up@naver.com>, 2019
-# Mark Lee <odoos@soti.33mail.com>, 2019
 # JH CHOI <hwangtog@gmail.com>, 2020
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~12.5+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-23 11:38+0000\n"
-"PO-Revision-Date: 2019-08-26 09:34+0000\n"
+"POT-Creation-Date: 2019-11-14 07:49+0000\n"
+"PO-Revision-Date: 2018-08-24 11:36+0000\n"
 "Last-Translator: JH CHOI <hwangtog@gmail.com>, 2020\n"
 "Language-Team: Korean (https://www.transifex.com/odoo/teams/41243/ko/)\n"
 "MIME-Version: 1.0\n"
@@ -35,13 +35,13 @@ msgid "Account Reconciliation widget"
 msgstr "계정 조정 위젯"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:75
 #, python-format
 msgid "All payments in the batch must belong to the same company."
 msgstr "일괄 지불의 모든 지불은 동일한 회사에 속해야 합니다."
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:86
 #, python-format
 msgid "All payments in the batch must share the same payment method."
 msgstr "일괄 지불의 모든 지불은 동일한 지불 방법을 공유해야 합니다."
@@ -93,13 +93,10 @@ msgid "Batch Payment"
 msgstr "일괄 결제"
 
 #. module: account_batch_payment
-#. openerp-web
-#: code:addons/account_batch_payment/static/src/xml/account_reconciliation.xml:0
 #: model:ir.actions.act_window,name:account_batch_payment.action_batch_payment_in
 #: model:ir.actions.act_window,name:account_batch_payment.action_batch_payment_out
 #: model:ir.ui.menu,name:account_batch_payment.menu_batch_payment_purchases
 #: model:ir.ui.menu,name:account_batch_payment.menu_batch_payment_sales
-#, python-format
 msgid "Batch Payments"
 msgstr "일괄 결제"
 
@@ -141,7 +138,8 @@ msgid "Code"
 msgstr "코드"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_journal.py:0
+#: code:addons/account_batch_payment/models/account_journal.py:57
+#: model:ir.actions.server,name:account_batch_payment.action_account_create_batch_payment
 #, python-format
 msgid "Create Batch Payment"
 msgstr "일괄 결제 작성"
@@ -149,23 +147,18 @@ msgstr "일괄 결제 작성"
 #. module: account_batch_payment
 #: model_terms:ir.actions.act_window,help:account_batch_payment.action_batch_payment_in
 msgid "Create a new customer batch payment"
-msgstr "새 고객 일괄 결제 만들기"
+msgstr "신규 고객 일괄 결제 작성"
 
 #. module: account_batch_payment
 #: model_terms:ir.actions.act_window,help:account_batch_payment.action_batch_payment_out
 msgid "Create a new vendor batch payment"
-msgstr "새 공급업체 일괄 결제 만들기"
-
-#. module: account_batch_payment
-#: model:ir.actions.server,name:account_batch_payment.action_account_create_batch_payment
-msgid "Create batch payment"
-msgstr "일괄 결제 작성"
+msgstr "신규 공급업체 일괄 결제 작성"
 
 #. module: account_batch_payment
 #: model:ir.model.fields,field_description:account_batch_payment.field_account_batch_download_wizard__create_uid
 #: model:ir.model.fields,field_description:account_batch_payment.field_account_batch_payment__create_uid
 msgid "Created by"
-msgstr "작성인"
+msgstr "작성자"
 
 #. module: account_batch_payment
 #: model:ir.model.fields,field_description:account_batch_payment.field_account_batch_download_wizard__create_date
@@ -199,7 +192,7 @@ msgstr "날짜"
 #: model:ir.model.fields,field_description:account_batch_payment.field_account_batch_payment__display_name
 #: model:ir.model.fields,field_description:account_batch_payment.field_report_account_batch_payment_print_batch_payment__display_name
 msgid "Display Name"
-msgstr "표시 이름"
+msgstr "제목"
 
 #. module: account_batch_payment
 #: model_terms:ir.ui.view,arch_db:account_batch_payment.download_xml_form
@@ -238,13 +231,6 @@ msgid "File name"
 msgstr "파일명"
 
 #. module: account_batch_payment
-#. openerp-web
-#: code:addons/account_batch_payment/static/src/xml/account_reconciliation.xml:0
-#, python-format
-msgid "Filter..."
-msgstr "필터..."
-
-#. module: account_batch_payment
 #: model:ir.model.fields,help:account_batch_payment.field_account_batch_download_wizard__export_file
 msgid "Generated XML file"
 msgstr "생성된 XML 파일"
@@ -267,25 +253,25 @@ msgid "ID"
 msgstr "ID"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:89
 #, python-format
 msgid "Id: %s"
 msgstr "Id : %s"
 
 #. module: account_batch_payment
-#: model:ir.model.fields.selection,name:account_batch_payment.selection__account_batch_payment__batch_type__inbound
+#: selection:account.batch.payment,batch_type:0
 msgid "Inbound"
 msgstr "반입"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_journal.py:0
+#: code:addons/account_batch_payment/models/account_journal.py:37
 #, python-format
 msgid "Inbound Batch Payments Sequence"
 msgstr "반입 일괄 결제 순서"
 
 #. module: account_batch_payment
 #. openerp-web
-#: code:addons/account_batch_payment/static/src/js/account_batch_payment_reconciliation.js:0
+#: code:addons/account_batch_payment/static/src/js/account_batch_payment_reconciliation.js:135
 #, python-format
 msgid "Incorrect Operation"
 msgstr "잘못된 작업"
@@ -300,7 +286,7 @@ msgstr "분개장"
 #: model:ir.model.fields,field_description:account_batch_payment.field_account_batch_payment____last_update
 #: model:ir.model.fields,field_description:account_batch_payment.field_report_account_batch_payment_print_batch_payment____last_update
 msgid "Last Modified on"
-msgstr "최근 수정일"
+msgstr "최근 수정"
 
 #. module: account_batch_payment
 #: model:ir.model.fields,field_description:account_batch_payment.field_account_batch_download_wizard__write_uid
@@ -312,7 +298,7 @@ msgstr "최근 갱신한 사람"
 #: model:ir.model.fields,field_description:account_batch_payment.field_account_batch_download_wizard__write_date
 #: model:ir.model.fields,field_description:account_batch_payment.field_account_batch_payment__write_date
 msgid "Last Updated on"
-msgstr "최근 갱신일"
+msgstr "최근 갱신 날짜"
 
 #. module: account_batch_payment
 #: model_terms:ir.ui.view,arch_db:account_batch_payment.print_batch_payment
@@ -330,17 +316,17 @@ msgid "Name of the generated XML file"
 msgstr "생성된 XML 파일의 이름"
 
 #. module: account_batch_payment
-#: model:ir.model.fields.selection,name:account_batch_payment.selection__account_batch_payment__state__draft
+#: selection:account.batch.payment,state:0
 msgid "New"
 msgstr "신규"
 
 #. module: account_batch_payment
-#: model:ir.model.fields.selection,name:account_batch_payment.selection__account_batch_payment__batch_type__outbound
+#: selection:account.batch.payment,batch_type:0
 msgid "Outbound"
 msgstr "반출"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_journal.py:0
+#: code:addons/account_batch_payment/models/account_journal.py:17
 #, python-format
 msgid "Outbound Batch Payments Sequence"
 msgstr "반출 일괄 결제 순서"
@@ -348,14 +334,14 @@ msgstr "반출 일괄 결제 순서"
 #. module: account_batch_payment
 #: model:ir.model.fields,field_description:account_batch_payment.field_account_batch_payment__payment_method_id
 msgid "Payment Method"
-msgstr "걸제 방법"
+msgstr "지급 방법"
 
 #. module: account_batch_payment
 #: model:ir.model,name:account_batch_payment.model_account_payment
 #: model:ir.model.fields,field_description:account_batch_payment.field_account_batch_payment__payment_ids
 #: model_terms:ir.ui.view,arch_db:account_batch_payment.view_batch_payment_form
 msgid "Payments"
-msgstr "결제"
+msgstr "지급금"
 
 #. module: account_batch_payment
 #: model_terms:ir.ui.view,arch_db:account_batch_payment.view_batch_payment_form
@@ -368,7 +354,12 @@ msgid "Print Batch Payment"
 msgstr "일괄 결제 인쇄"
 
 #. module: account_batch_payment
-#: model:ir.model.fields.selection,name:account_batch_payment.selection__account_batch_payment__state__reconciled
+#: model:ir.actions.server,name:account_batch_payment.action_account_print_batch_payment
+msgid "Print Batch Payments"
+msgstr "일괄 결제 인쇄"
+
+#. module: account_batch_payment
+#: selection:account.batch.payment,state:0
 msgid "Reconciled"
 msgstr "조정됨"
 
@@ -383,13 +374,20 @@ msgid "Register Payment"
 msgstr "결제 등록"
 
 #. module: account_batch_payment
-#: model:ir.model.fields.selection,name:account_batch_payment.selection__account_batch_payment__state__sent
+#. openerp-web
+#: code:addons/account_batch_payment/static/src/xml/account_reconciliation.xml:8
+#, python-format
+msgid "Select a Batch Payment"
+msgstr "일괄 결제 선택"
+
+#. module: account_batch_payment
+#: selection:account.batch.payment,state:0
 msgid "Sent"
 msgstr "전송됨"
 
 #. module: account_batch_payment
 #. openerp-web
-#: code:addons/account_batch_payment/static/src/js/account_batch_payment_reconciliation.js:0
+#: code:addons/account_batch_payment/static/src/js/account_batch_payment_reconciliation.js:133
 #, python-format
 msgid ""
 "Some journal items from the selected batch payment are already selected in "
@@ -400,23 +398,23 @@ msgstr "선택한 일괄 지불의 일부 분개 항목은 이미 다른 조정�
 #: model:ir.model.fields,field_description:account_batch_payment.field_account_batch_payment__state
 #: model_terms:ir.ui.view,arch_db:account_batch_payment.view_batch_payment_search
 msgid "State"
-msgstr "시/도"
+msgstr "상태"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:88
 #, python-format
 msgid ""
 "The batch must have the same payment method as the payments it contains."
 msgstr "일괄 작업에는 포함된 지불 방법과 동일한 지불 방법이 있어야 합니다."
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:83
 #, python-format
 msgid "The batch must have the same type as the payments it contains."
 msgstr "일괄 작업에는 포함된 지불과 동일한 유형이 있어야 합니다."
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:78
 #, python-format
 msgid ""
 "The journal of the batch payment and of the payments it contains must be the"
@@ -441,7 +439,7 @@ msgstr "미조정"
 #. module: account_batch_payment
 #: model_terms:ir.ui.view,arch_db:account_batch_payment.view_batch_payment_form
 msgid "Validate"
-msgstr "검증"
+msgstr "승인"
 
 #. module: account_batch_payment
 #: model:ir.model.fields,field_description:account_batch_payment.field_account_batch_download_wizard__warning_message
@@ -461,7 +459,7 @@ msgid ""
 msgstr "이 일괄 결제가 양식 보기에서 '인쇄' 대신 '파일 생성' 버튼을 표시해야하는지 여부."
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:0
+#: code:addons/account_batch_payment/models/account_batch_payment.py:90
 #, python-format
 msgid ""
 "You cannot add payments with zero amount in a Batch Payment.\n"
@@ -473,20 +471,12 @@ msgstr ""
 "%s"
 
 #. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_payment.py:0
+#: code:addons/account_batch_payment/models/account_payment.py:38
 #, python-format
 msgid ""
 "You cannot make a batch payment with internal transfers. Internal transfers "
 "ids: %s"
 msgstr "내부 송금으로 일괄 결제할 수 없습니다. 내부 이체 ID : %s"
-
-#. module: account_batch_payment
-#: code:addons/account_batch_payment/models/account_batch_payment.py:131
-#, python-format
-msgid ""
-"You cannot validate a batch containing payments that are not in 'posted' "
-"state."
-msgstr ""
 
 #. module: account_batch_payment
 #: model_terms:ir.ui.view,arch_db:account_batch_payment.view_batch_payment_form

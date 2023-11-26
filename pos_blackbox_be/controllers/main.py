@@ -6,7 +6,6 @@ import os
 
 from odoo import http
 from odoo.http import request
-from odoo.osv.expression import AND
 
 from odoo.addons.point_of_sale.controllers.main import PosController
 
@@ -14,7 +13,6 @@ class GovCertificationController(http.Controller):
     @http.route('/fdm_source', auth='public')
     def handler(self):
         data = {'files': []}
-        main_hash = ""
         relative_file_paths_to_show = [
             "pos_blackbox_be/data/pos_blackbox_be_data.xml",
             "pos_blackbox_be/models/pos_blackbox_be.py",
@@ -27,11 +25,6 @@ class GovCertificationController(http.Controller):
             "pos_blackbox_be/views/pos_blackbox_be_assets.xml",
             "pos_blackbox_be/views/pos_blackbox_be_views.xml",
             "pos_blackbox_be/controllers/main.py",
-            "pos_hr_l10n_be/data/pos_hr_l10n_be_data.xml",
-            "pos_hr_l10n_be/models/hr_employee.py",
-            "pos_hr_l10n_be/static/src/js/pos_hr_l10n_be.js",
-            "pos_hr_l10n_be/views/hr_employee_view.xml",
-            "pos_hr_l10n_be/views/pos_hr_l10n_be_assets.xml"
         ]
 
         for relative_file_path in relative_file_paths_to_show:
@@ -46,9 +39,6 @@ class GovCertificationController(http.Controller):
                     'contents': content,
                     'hash': hashlib.sha1(content).hexdigest()
                 })
-                main_hash += hashlib.sha1(content).hexdigest()
-
-        data['main_hash'] = hashlib.sha1(main_hash.encode('utf-8')).hexdigest()
 
         return request.render('pos_blackbox_be.fdm_source', data, mimetype='text/plain')
 
@@ -73,19 +63,12 @@ class GovCertificationController(http.Controller):
 
 class BlackboxPOSController(PosController):
     @http.route()
-    def pos_web(self, config_id=False, **k):
-        response = super(BlackboxPOSController, self).pos_web(**k)
+    def pos_web(self, debug=False, **k):
+        response = super(BlackboxPOSController, self).pos_web(debug, **k)
 
         if response.status_code == 200:
             pos_session = request.env['pos.session']
-            domain = [
-                    ('state', '=', 'opened'),
-                    ('user_id', '=', request.session.uid),
-                    ('rescue', '=', False)
-                    ]
-            if config_id:
-                domain = AND([domain,[('config_id', '=', int(config_id))]])
-            active_pos_session = pos_session.search(domain, limit=1)
+            active_pos_session = pos_session.search([('state', '=', 'opened'), ('user_id', '=', request.session.uid)], limit=1)
             response.qcontext.update({
                 'blackbox': active_pos_session.config_id.blackbox_pos_production_id
             })

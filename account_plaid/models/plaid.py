@@ -18,6 +18,7 @@ class PlaidProviderAccount(models.Model):
     plaid_error_type = fields.Char(readonly=True, help='Additional information on error')
     plaid_item_id = fields.Char(readonly=True, help='item id in plaid database')
 
+    @api.multi
     def _get_available_providers(self):
         ret = super(PlaidProviderAccount, self)._get_available_providers()
         ret.append('plaid')
@@ -43,13 +44,11 @@ class PlaidProviderAccount(models.Model):
                     resp_json.get('error_code', ''), resp_json.get('error_type', ''), resp_json.get('request_id', ''))
                 if self and self.id:
                     self._update_status('FAILED', resp_json)
-                    self.flush(['status'])
                     self.log_message(message)
                 raise UserError(message)
             elif resp.status_code in (400, 403):
                 if self and self.id:
                     self._update_status('FAILED', {})
-                    self.flush(['status'])
                     self.log_message(resp.text)
                 raise UserError(resp.text)
             resp.raise_for_status()
@@ -59,6 +58,7 @@ class PlaidProviderAccount(models.Model):
                 self.log_message(message)
             raise UserError(message)
 
+    @api.multi
     def plaid_fetch(self, url, data):
         credentials = self._get_plaid_credentials()
         url = credentials['url'] + url
@@ -85,6 +85,7 @@ class PlaidProviderAccount(models.Model):
             return resp_json.get('result')
         return resp.json()
 
+    @api.multi
     def get_login_form(self, site_id, provider, beta=False):
         if provider != 'plaid':
             return super(PlaidProviderAccount, self).get_login_form(site_id, provider, beta)
@@ -108,6 +109,7 @@ class PlaidProviderAccount(models.Model):
             'context': ctx,
         }
 
+    @api.multi
     def link_success(self, public_token, metadata):
         # convert public token to access_token and create a provider with accounts defined in metadata
         data = {'public_token': public_token}
@@ -149,6 +151,7 @@ class PlaidProviderAccount(models.Model):
         return self.show_result(result)
 
 
+    @api.multi
     def _update_status(self, status, resp_json=None):
         if not self.user_has_groups('account.group_account_user'):
             raise AccessError(_('Only an Accountant is allowed to perform this operation.'))
@@ -167,6 +170,7 @@ class PlaidProviderAccount(models.Model):
                 'action_required': True if status == 'FAILED' else False
             })
 
+    @api.multi
     def manual_sync(self):
         if self.provider_type != 'plaid':
             return super(PlaidProviderAccount, self).manual_sync()
@@ -178,6 +182,7 @@ class PlaidProviderAccount(models.Model):
         result = {'status': 'SUCCESS', 'transactions': transactions, 'method': 'refresh', 'added': self.env['account.online.journal']}
         return self.show_result(result)
 
+    @api.multi
     def update_credentials(self):
         if self.provider_type != 'plaid':
             return super(PlaidProviderAccount, self).update_credentials()
@@ -197,6 +202,7 @@ class PlaidProviderAccount(models.Model):
             return super(PlaidProviderAccount, self).cron_fetch_online_transactions()
         self.manual_sync()
 
+    @api.multi
     def unlink(self):
         for provider in self:
             if provider.provider_type == 'plaid':
@@ -213,6 +219,7 @@ class PlaidProviderAccount(models.Model):
 class PlaidAccount(models.Model):
     _inherit = 'account.online.journal'
 
+    @api.multi
     def retrieve_transactions(self):
         if (self.account_online_provider_id.provider_type != 'plaid'):
             return super(PlaidAccount, self).retrieve_transactions()

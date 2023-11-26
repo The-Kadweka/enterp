@@ -7,4 +7,4 @@ from odoo import models, fields
 class ResCountry(models.Model):
     _inherit = "res.country"
 
-    ebay_available = fields.Boolean("Use on eBay", help="If activated, can be used for eBay.")
+    ebay_available = fields.Boolean("Availability To Use For eBay API", readonly=True)

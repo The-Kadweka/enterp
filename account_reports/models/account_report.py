@@ -7,19 +7,23 @@ import logging
 import lxml.html
 import datetime
 import ast
-from collections import defaultdict
-from math import copysign
 
 from dateutil.relativedelta import relativedelta
 
-from odoo.tools.misc import xlsxwriter
+try:
+    from odoo.tools.misc import xlsxwriter
+except ImportError:
+    # TODO saas-17: remove the try/except to directly import from misc
+    import xlsxwriter
+
 from odoo import models, fields, api, _
-from odoo.tools import config, date_utils, get_lang
+from odoo.tools import DEFAULT_SERVER_DATE_FORMAT, pycompat, config, date_utils
 from odoo.osv import expression
 from babel.dates import get_quarter_names
-from odoo.tools.misc import formatLang, format_date
+from odoo.tools.misc import formatLang, format_date, get_user_companies
 from odoo.addons.web.controllers.main import clean_action
 from odoo.tools.safe_eval import safe_eval
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -53,6 +57,7 @@ class AccountReport(models.AbstractModel):
     MAX_LINES = 80
     filter_multi_company = True
     filter_date = None
+    filter_cash_basis = None
     filter_all_entries = None
     filter_comparison = None
     filter_journals = None
@@ -60,765 +65,91 @@ class AccountReport(models.AbstractModel):
     filter_unfold_all = None
     filter_hierarchy = None
     filter_partner = None
-    order_selected_column = None
 
-    ####################################################
-    # OPTIONS: multi_company
-    ####################################################
-
-    @api.model
-    def _init_filter_multi_company(self, options, previous_options=None):
-        if not self.filter_multi_company:
-            return
-
-        companies = self.env.user.company_ids
-        if len(companies) > 1:
-            allowed_company_ids = self._context.get('allowed_company_ids', self.env.company.ids)
-            options['multi_company'] = [
-                {'id': c.id, 'name': c.name, 'selected': c.id in allowed_company_ids} for c in companies
-            ]
-
-    @api.model
-    def _get_options_companies(self, options):
-        if not options.get('multi_company'):
-            company = self.env.company
-            return [{'id': company.id, 'name': company.name, 'selected': True}]
-
-        all_companies = []
-        companies = []
-        for company_option in options['multi_company']:
-            if company_option['selected']:
-                companies.append(company_option)
-            all_companies.append(company_option)
-        return companies or all_companies
-
-    @api.model
-    def _get_options_companies_domain(self, options):
-        if options.get('multi_company'):
-            return [('company_id', 'in', [c['id'] for c in self._get_options_companies(options)])]
-        else:
-            return [('company_id', '=', self.env.company.id)]
-
-    ####################################################
-    # OPTIONS: journals
-    ####################################################
-
-    @api.model
-    def _get_filter_journals(self):
-        return self.env['account.journal'].with_context(active_test=False).search([
-            ('company_id', 'in', self.env.user.company_ids.ids or [self.env.company.id])
-        ], order="company_id, name")
-
-    @api.model
-    def _get_filter_journal_groups(self):
-        journals = self._get_filter_journals()
-        groups = self.env['account.journal.group'].search([], order='sequence')
-        ret = self.env['account.journal.group']
-        for journal_group in groups:
-            # Only display the group if it doesn't exclude every journal
-            if journals - journal_group.excluded_journal_ids:
-                ret += journal_group
-        return ret
-
-    @api.model
-    def _init_filter_journals(self, options, previous_options=None):
-        if self.filter_journals is None:
-            return
-
-        previous_company = False
-        if previous_options and previous_options.get('journals'):
-            journal_map = dict((opt['id'], opt['selected']) for opt in previous_options['journals'] if opt['id'] != 'divider' and 'selected' in opt)
-        else:
-            journal_map = {}
-        options['journals'] = []
-
-        group_header_displayed = False
-        default_group_ids = []
-        for group in self._get_filter_journal_groups():
-            journal_ids = (self._get_filter_journals() - group.excluded_journal_ids).ids
-            if len(journal_ids):
-                if not group_header_displayed:
-                    group_header_displayed = True
-                    options['journals'].append({'id': 'divider', 'name': _('Journal Groups')})
-                    default_group_ids = journal_ids
-                options['journals'].append({'id': 'group', 'name': group.name, 'ids': journal_ids})
-
-        for j in self._get_filter_journals():
-            if j.company_id != previous_company:
-                options['journals'].append({'id': 'divider', 'name': j.company_id.name})
-                previous_company = j.company_id
-            options['journals'].append({
-                'id': j.id,
-                'name': j.name,
-                'code': j.code,
-                'type': j.type,
-                'selected': journal_map.get(j.id, j.id in default_group_ids),
-            })
-
-    @api.model
-    def _get_options_journals(self, options):
-        return [
-            journal for journal in options.get('journals', []) if
-            not journal['id'] in ('divider', 'group') and journal['selected']
-        ]
-
-    @api.model
-    def _get_options_journals_domain(self, options):
-        # Make sure to return an empty array when nothing selected to handle archived journals.
-        selected_journals = self._get_options_journals(options)
-        return selected_journals and [('journal_id', 'in', [j['id'] for j in selected_journals])] or []
-
-    ####################################################
-    # OPTIONS: date + comparison
-    ####################################################
-
-    @api.model
-    def _get_options_periods_list(self, options):
-        ''' Get periods as a list of options, one per impacted period.
-        The first element is the range of dates requested in the report, others are the comparisons.
+    def has_single_date_filter(self, options):
+        '''Determine if we are dealing with options having a single date (options['date']['date']) or
+        a date range options['date']['date_from'] -> options['date']['date_to'].
 
         :param options: The report options.
-        :return:        A list of options having size 1 + len(options['comparison']['periods']).
+        :return:        True if False -> date, False otherwise (date_from -> date_to).
         '''
-        periods_options_list = []
-        if options.get('date'):
-            periods_options_list.append(options)
-        if options.get('comparison') and options['comparison'].get('periods'):
-            for period in options['comparison']['periods']:
-                period_options = options.copy()
-                period_options['date'] = period
-                periods_options_list.append(period_options)
-        return periods_options_list
+        return options['date'].get('date_from') is None
 
-    @api.model
-    def _get_dates_period(self, options, date_from, date_to, mode, period_type=None, strict_range=False):
-        '''Compute some information about the period:
-        * The name to display on the report.
-        * The period type (e.g. quarter) if not specified explicitly.
-        :param date_from:   The starting date of the period.
-        :param date_to:     The ending date of the period.
-        :param period_type: The type of the interval date_from -> date_to.
-        :return:            A dictionary containing:
-            * date_from * date_to * string * period_type * mode *
-        '''
-        def match(dt_from, dt_to):
-            return (dt_from, dt_to) == (date_from, date_to)
+    def _build_options(self, previous_options=None):
+        if not previous_options:
+            previous_options = {}
+        options = {}
+        filter_list = [attr for attr in dir(self) if attr.startswith('filter_') and len(attr) > 7 and not callable(getattr(self, attr))]
+        for element in filter_list:
+            filter_name = element[7:]
+            value = getattr(self, element)
+            # Changing options must not change class-level members, so shallow-copy lists and dicts
+            if isinstance(value, dict):
+                value = dict(value)
+            elif isinstance(value, list):
+                value = list(value)
+            options[filter_name] = value
 
-        string = None
-        # If no date_from or not date_to, we are unable to determine a period
-        if not period_type or period_type == 'custom':
-            date = date_to or date_from
-            company_fiscalyear_dates = self.env.company.compute_fiscalyear_dates(date)
-            if match(company_fiscalyear_dates['date_from'], company_fiscalyear_dates['date_to']):
-                period_type = 'fiscalyear'
-                if company_fiscalyear_dates.get('record'):
-                    string = company_fiscalyear_dates['record'].name
-            elif match(*date_utils.get_month(date)):
-                period_type = 'month'
-            elif match(*date_utils.get_quarter(date)):
-                period_type = 'quarter'
-            elif match(*date_utils.get_fiscal_year(date)):
-                period_type = 'year'
-            elif match(date_utils.get_month(date)[0], fields.Date.today()):
-                period_type = 'today'
+        if options.get('multi_company'):
+            company_ids = get_user_companies(self._cr, self.env.user.id)
+            if len(company_ids) > 1:
+                companies = self.env['res.company'].browse(company_ids)
+                options['multi_company'] = [{'id': c.id, 'name': c.name, 'selected': True if c.id == self.env.user.company_id.id else False} for c in companies]
             else:
-                period_type = 'custom'
-        elif period_type == 'fiscalyear':
-            date = date_to or date_from
-            company_fiscalyear_dates = self.env.company.compute_fiscalyear_dates(date)
-            record = company_fiscalyear_dates.get('record')
-            string = record and record.name
-
-        if not string:
-            fy_day = self.env.company.fiscalyear_last_day
-            fy_month = int(self.env.company.fiscalyear_last_month)
-            if mode == 'single':
-                string = _('As of %s') % (format_date(self.env, fields.Date.to_string(date_to)))
-            elif period_type == 'year' or (
-                    period_type == 'fiscalyear' and (date_from, date_to) == date_utils.get_fiscal_year(date_to)):
-                string = date_to.strftime('%Y')
-            elif period_type == 'fiscalyear' and (date_from, date_to) == date_utils.get_fiscal_year(date_to, day=fy_day, month=fy_month):
-                string = '%s - %s' % (date_to.year - 1, date_to.year)
-            elif period_type == 'month':
-                string = format_date(self.env, fields.Date.to_string(date_to), date_format='MMM yyyy')
-            elif period_type == 'quarter':
-                quarter_names = get_quarter_names('abbreviated', locale=get_lang(self.env).code)
-                string = u'%s\N{NO-BREAK SPACE}%s' % (
-                    quarter_names[date_utils.get_quarter_number(date_to)], date_to.year)
-            else:
-                dt_from_str = format_date(self.env, fields.Date.to_string(date_from))
-                dt_to_str = format_date(self.env, fields.Date.to_string(date_to))
-                string = _('From %s\nto  %s') % (dt_from_str, dt_to_str)
-
-        return {
-            'string': string,
-            'period_type': period_type,
-            'mode': mode,
-            'strict_range': strict_range,
-            'date_from': date_from and fields.Date.to_string(date_from) or False,
-            'date_to': fields.Date.to_string(date_to),
-        }
-
-    @api.model
-    def _get_dates_previous_period(self, options, period_vals):
-        '''Shift the period to the previous one.
-        :param period_vals: A dictionary generated by the _get_dates_period method.
-        :return:            A dictionary containing:
-            * date_from * date_to * string * period_type *
-        '''
-        period_type = period_vals['period_type']
-        mode = period_vals['mode']
-        strict_range = period_vals.get('strict_range', False)
-        date_from = fields.Date.from_string(period_vals['date_from'])
-        date_to = date_from - datetime.timedelta(days=1)
-
-        if period_type == 'fiscalyear':
-            # Don't pass the period_type to _get_dates_period to be able to retrieve the account.fiscal.year record if
-            # necessary.
-            company_fiscalyear_dates = self.env.company.compute_fiscalyear_dates(date_to)
-            return self._get_dates_period(options, company_fiscalyear_dates['date_from'], company_fiscalyear_dates['date_to'], mode, strict_range=strict_range)
-        if period_type in ('month', 'today', 'custom'):
-            return self._get_dates_period(options, *date_utils.get_month(date_to), mode, period_type='month', strict_range=strict_range)
-        if period_type == 'quarter':
-            return self._get_dates_period(options, *date_utils.get_quarter(date_to), mode, period_type='quarter', strict_range=strict_range)
-        if period_type == 'year':
-            return self._get_dates_period(options, *date_utils.get_fiscal_year(date_to), mode, period_type='year', strict_range=strict_range)
-        return None
-
-    @api.model
-    def _get_dates_previous_year(self, options, period_vals):
-        '''Shift the period to the previous year.
-        :param options:     The report options.
-        :param period_vals: A dictionary generated by the _get_dates_period method.
-        :return:            A dictionary containing:
-            * date_from * date_to * string * period_type *
-        '''
-        period_type = period_vals['period_type']
-        mode = period_vals['mode']
-        strict_range = period_vals.get('strict_range', False)
-        date_from = fields.Date.from_string(period_vals['date_from'])
-        date_from = date_from - relativedelta(years=1)
-        date_to = fields.Date.from_string(period_vals['date_to'])
-        date_to = date_to - relativedelta(years=1)
-
-        if period_type == 'month':
-            date_from, date_to = date_utils.get_month(date_to)
-        return self._get_dates_period(options, date_from, date_to, mode, period_type=period_type, strict_range=strict_range)
-
-    @api.model
-    def _init_filter_date(self, options, previous_options=None):
-        if self.filter_date is None:
-            return
-
-        # Default values.
-        mode = self.filter_date.get('mode', 'range')
-        options_filter = self.filter_date.get('filter') or ('today' if mode == 'single' else 'fiscalyear')
-        date_from = self.filter_date.get('date_from') and fields.Date.from_string(self.filter_date['date_from'])
-        date_to = self.filter_date.get('date_to') and fields.Date.from_string(self.filter_date['date_to'])
-        strict_range = (previous_options and previous_options.get('date', {}).get('strict_range')) or False
-        # Handle previous_options.
-        if previous_options and previous_options.get('date') and previous_options['date'].get('filter') \
-                and not (previous_options['date']['filter'] == 'today' and mode == 'range'):
-
-            options_filter = previous_options['date']['filter']
-            if options_filter == 'custom':
-                if previous_options['date']['date_from'] and mode == 'range':
-                    date_from = fields.Date.from_string(previous_options['date']['date_from'])
-                if previous_options['date']['date_to']:
-                    date_to = fields.Date.from_string(previous_options['date']['date_to'])
-
-        # Create date option for each company.
-        period_type = False
-        if 'today' in options_filter:
-            date_to = fields.Date.context_today(self)
-            date_from = date_utils.get_month(date_to)[0]
-        elif 'month' in options_filter:
-            date_from, date_to = date_utils.get_month(fields.Date.context_today(self))
-            period_type = 'month'
-        elif 'quarter' in options_filter:
-            date_from, date_to = date_utils.get_quarter(fields.Date.context_today(self))
-            period_type = 'quarter'
-        elif 'year' in options_filter:
-            company_fiscalyear_dates = self.env.company.compute_fiscalyear_dates(fields.Date.context_today(self))
-            date_from = company_fiscalyear_dates['date_from']
-            date_to = company_fiscalyear_dates['date_to']
-        elif not date_from:
-            # options_filter == 'custom' && mode == 'single'
-            date_from = date_utils.get_month(date_to)[0]
-
-        options['date'] = self._get_dates_period(options, date_from, date_to, mode, period_type=period_type, strict_range=strict_range)
-        if 'last' in options_filter:
-            options['date'] = self._get_dates_previous_period(options, options['date'])
-        options['date']['filter'] = options_filter
-
-    @api.model
-    def _init_filter_comparison(self, options, previous_options=None):
-        if self.filter_comparison is None or not options.get('date'):
-            return
-
-        cmp_filter = self.filter_comparison and self.filter_comparison.get('filter', 'no_comparison')
-        number_period = self.filter_comparison and self.filter_comparison.get('number_period', 1)
-        date_from = self.filter_comparison and self.filter_comparison.get('date_from')
-        date_to = self.filter_comparison and self.filter_comparison.get('date_to')
-
-        # Copy value from previous_options.
-        previous_value = previous_options and previous_options.get('comparison')
-        if previous_value:
-            # Copy the filter.
-            if previous_value.get('filter'):
-                cmp_filter = previous_value['filter']
-
-                # Copy dates if filter is custom.
-                if cmp_filter == 'custom':
-                    if previous_value['date_from'] is not None:
-                        date_from = previous_value['date_from']
-                    if previous_value['date_to'] is not None:
-                        date_to = previous_value['date_to']
-
-            # Copy the number of periods.
-            if previous_value.get('number_period') and previous_value['number_period'] > 1:
-                number_period = previous_value['number_period']
-
-        options['comparison'] = {'filter': cmp_filter, 'number_period': number_period}
-        options['comparison']['date_from'] = date_from
-        options['comparison']['date_to'] = date_to
-        options['comparison']['periods'] = []
-
-        if cmp_filter == 'no_comparison':
-            return
-
-        if cmp_filter == 'custom':
-            number_period = 1
-
-        previous_period = options['date']
-        for index in range(0, number_period):
-            if cmp_filter == 'previous_period':
-                period_vals = self._get_dates_previous_period(options, previous_period)
-            elif cmp_filter == 'same_last_year':
-                period_vals = self._get_dates_previous_year(options, previous_period)
-            else:
-                date_from_obj = fields.Date.from_string(date_from)
-                date_to_obj = fields.Date.from_string(date_to)
-                strict_range = previous_period.get('strict_range', False)
-                period_vals = self._get_dates_period(options, date_from_obj, date_to_obj, previous_period['mode'], strict_range=strict_range)
-            options['comparison']['periods'].append(period_vals)
-            previous_period = period_vals
-
-        if len(options['comparison']['periods']) > 0:
-            options['comparison'].update(options['comparison']['periods'][0])
-
-    @api.model
-    def _get_options_date_domain(self, options):
-        def create_date_domain(options_date):
-            date_field = options_date.get('date_field', 'date')
-            domain = [(date_field, '<=', options_date['date_to'])]
-            if options_date['mode'] == 'range' and options_date['date_from']:
-                strict_range = options_date.get('strict_range')
-                if not strict_range:
-                    domain += [
-                        '|',
-                        (date_field, '>=', options_date['date_from']),
-                        ('account_id.user_type_id.include_initial_balance', '=', True)
-                    ]
-                else:
-                    domain += [(date_field, '>=', options_date['date_from'])]
-            return domain
-
-        if not options.get('date'):
-            return []
-        return create_date_domain(options['date'])
-
-    ####################################################
-    # OPTIONS: analytic
-    ####################################################
-
-    @api.model
-    def _init_filter_analytic(self, options, previous_options=None):
-        if not self.filter_analytic:
-            return
-
-        enable_analytic_accounts = self.user_has_groups('analytic.group_analytic_accounting')
-        enable_analytic_tags = self.user_has_groups('analytic.group_analytic_tags')
-        if not enable_analytic_accounts and not enable_analytic_tags:
-            return
-
-        if enable_analytic_accounts:
-            previous_analytic_accounts = (previous_options or {}).get('analytic_accounts', [])
-            analytic_account_ids = [int(x) for x in previous_analytic_accounts]
-            selected_analytic_accounts = self.env['account.analytic.account'].search([('id', 'in', analytic_account_ids)])
-            options['analytic_accounts'] = selected_analytic_accounts.ids
-            options['selected_analytic_account_names'] = selected_analytic_accounts.mapped('name')
-
-        if enable_analytic_tags:
-            previous_analytic_tags = (previous_options or {}).get('analytic_tags', [])
-            analytic_tag_ids = [int(x) for x in previous_analytic_tags]
-            selected_analytic_tags = self.env['account.analytic.tag'].search([('id', 'in', analytic_tag_ids)])
-            options['analytic_tags'] = selected_analytic_tags.ids
-            options['selected_analytic_tag_names'] = selected_analytic_tags.mapped('name')
-
-    @api.model
-    def _get_options_analytic_domain(self, options):
-        domain = []
-        if options.get('analytic_accounts'):
-            analytic_account_ids = [int(acc) for acc in options['analytic_accounts']]
-            domain.append(('analytic_account_id', 'in', analytic_account_ids))
-        if options.get('analytic_tags'):
-            analytic_tag_ids = [int(tag) for tag in options['analytic_tags']]
-            domain.append(('analytic_tag_ids', 'in', analytic_tag_ids))
-        return domain
-
-    ####################################################
-    # OPTIONS: partners
-    ####################################################
-
-    @api.model
-    def _init_filter_partner(self, options, previous_options=None):
-        if not self.filter_partner:
-            return
-
-        options['partner'] = True
-        options['partner_ids'] = previous_options and previous_options.get('partner_ids') or []
-        options['partner_categories'] = previous_options and previous_options.get('partner_categories') or []
-        selected_partner_ids = [int(partner) for partner in options['partner_ids']]
-        selected_partners = selected_partner_ids and self.env['res.partner'].browse(selected_partner_ids) or self.env['res.partner']
-        options['selected_partner_ids'] = selected_partners.mapped('name')
-        selected_partner_category_ids = [int(category) for category in options['partner_categories']]
-        selected_partner_categories = selected_partner_category_ids and self.env['res.partner.category'].browse(selected_partner_category_ids) or self.env['res.partner.category']
-        options['selected_partner_categories'] = selected_partner_categories.mapped('name')
-
-    @api.model
-    def _get_options_partner_domain(self, options):
-        domain = []
-        if options.get('partner_ids'):
-            partner_ids = [int(partner) for partner in options['partner_ids']]
-            domain.append(('partner_id', 'in', partner_ids))
-        if options.get('partner_categories'):
-            partner_category_ids = [int(category) for category in options['partner_categories']]
-            domain.append(('partner_id.category_id', 'in', partner_category_ids))
-        return domain
-
-    ####################################################
-    # OPTIONS: all_entries
-    ####################################################
-
-    @api.model
-    def _get_options_all_entries_domain(self, options):
-        if options.get('all_entries') is False:
-            return [('move_id.state', '=', 'posted')]
-        else:
-            return [('move_id.state', '!=', 'cancel')]
-
-    ####################################################
-    # OPTIONS: order column
-    ####################################################
-
-    @api.model
-    def _init_order_selected_column(self, options, previous_options=None):
-        if self.order_selected_column is not None:
-            options['selected_column'] = previous_options and previous_options.get('selected_column') or self.order_selected_column['default']
-
-    ####################################################
-    # OPTIONS: hierarchy
-    ####################################################
-    MOST_SORT_PRIO = 0
-    LEAST_SORT_PRIO = 99
-
-    # Create codes path in the hierarchy based on account.
-    def get_account_codes(self, account):
-        # A code is tuple(sort priority, actual code)
-        codes = []
-        if account.group_id:
-            group = account.group_id
-            while group:
-                code = '%s %s' % (group.code_prefix or '', group.name)
-                codes.append((self.MOST_SORT_PRIO, code))
-                group = group.parent_id
-        else:
-            # Limit to 3 levels.
-            code = account.code[:3]
-            while code:
-                codes.append((self.MOST_SORT_PRIO, code))
-                code = code[:-1]
-        return list(reversed(codes))
-
-    @api.model
-    def _sort_lines(self, lines, options):
-        def merge_tree(line):
-            sorted_list.append(line)
-            for l in sorted(tree[line['id']], key=lambda k: selected_sign * k['columns'][selected_column - k.get('colspan', 1)]['no_format']):
-                merge_tree(l)
-
-        sorted_list = []
-        selected_column = abs(options['selected_column']) - 1
-        selected_sign = -copysign(1, options['selected_column'])
-        tree = defaultdict(list)
-        if 'sortable' not in self._get_columns_name(options)[selected_column].get('class', ''):
-            return lines  # Nothing to do here
-        for line in lines:
-            tree[line.get('parent_id')].append(line)
-        for line in sorted(tree[None], key=lambda k: ('total' in k.get('class', ''), selected_sign * k['columns'][selected_column - k.get('colspan', 1)]['no_format'])):
-            merge_tree(line)
-
-        return sorted_list
-
-    @api.model
-    def _create_hierarchy(self, lines, options):
-        """This method is called when the option 'hiearchy' is enabled on a report.
-        It receives the lines (as computed by _get_lines()) in argument, and will add
-        a hiearchy in those lines by using the account.group of accounts. If not set,
-        it will fallback on creating a hierarchy based on the account's code first 3
-        digits.
-        """
-        # Avoid redundant browsing.
-        accounts_cache = {}
-
-        # Retrieve account either from cache, either by browsing.
-        def get_account(id):
-            if id not in accounts_cache:
-                accounts_cache[id] = self.env['account.account'].browse(id)
-            return accounts_cache[id]
-
-        # Add the report line to the hierarchy recursively.
-        def add_line_to_hierarchy(line, codes, level_dict, depth=None):
-            # Recursively build a dict where:
-            # 'children' contains only subcodes
-            # 'lines' contains the lines at this level
-            # This > lines [optional, i.e. not for topmost level]
-            #      > children > [codes] "That" > lines
-            #                                  > metadata
-            #                                  > children
-            #      > metadata(depth, parent ...)
-
-            if not codes:
-                return
-            if not depth:
-                depth = line.get('level', 1)
-            level_dict.setdefault('depth', depth)
-            level_dict.setdefault('parent_id', 'hierarchy_' + codes[0][1] if codes[0][0] != 'root' else codes[0][1])
-            level_dict.setdefault('children', {})
-            code = codes[1]
-            codes = codes[1:]
-            level_dict['children'].setdefault(code, {})
-
-            if len(codes) > 1:
-                add_line_to_hierarchy(line, codes, level_dict['children'][code], depth=depth + 1)
-            else:
-                level_dict['children'][code].setdefault('lines', [])
-                level_dict['children'][code]['lines'].append(line)
-                line['level'] = depth + 1
-                for l in level_dict['children'][code]['lines']:
-                    l['parent_id'] = 'hierarchy_' + code[1]
-
-        # Merge a list of columns together and take care about str values.
-        def merge_columns(columns):
-            return [('n/a' if any(i != '' for i in x) else '') if any(isinstance(i, str) for i in x) else sum(x) for x in zip(*columns)]
-
-        # Get_lines for the newly computed hierarchy.
-        def get_hierarchy_lines(values, depth=1):
-            lines = []
-            sum_sum_columns = []
-            unfold_all = self.env.context.get('print_mode') and len(options.get('unfolded_lines')) == 0 or options.get('unfold_all')
-            for base_line in values.get('lines', []):
-                lines.append(base_line)
-                sum_sum_columns.append([c.get('no_format_name', c['name']) for c in base_line['columns']])
-
-            # For the last iteration, there might not be the children key (see add_line_to_hierarchy)
-            for key in sorted(values.get('children', {}).keys()):
-                sum_columns, sub_lines = get_hierarchy_lines(values['children'][key], depth=values['depth'])
-                id = 'hierarchy_' + key[1]
-                header_line = {
-                    'id': id,
-                    'name': key[1] if len(key[1]) < 60 else key[1][:60] + '...',  # second member of the tuple
-                    'title_hover': key[1],
-                    'unfoldable': True,
-                    'unfolded': id in options.get('unfolded_lines') or unfold_all,
-                    'level': values['depth'],
-                    'parent_id': values['parent_id'],
-                    'columns': [{'name': self.format_value(c) if not isinstance(c, str) else c} for c in sum_columns],
-                }
-                if key[0] == self.LEAST_SORT_PRIO:
-                    header_line['style'] = 'font-style:italic;'
-                lines += [header_line]
-                if header_line.get('unfolded') or not self._context.get('print_mode'):
-                    lines += sub_lines
-                sum_sum_columns.append(sum_columns)
-            return merge_columns(sum_sum_columns), lines
-
-        def deep_merge_dict(source, destination):
-            for key, value in source.items():
-                if isinstance(value, dict):
-                    # get node or create one
-                    node = destination.setdefault(key, {})
-                    deep_merge_dict(value, node)
-                else:
-                    destination[key] = value
-
-            return destination
-
-        # Hierarchy of codes.
-        accounts_hierarchy = {}
-
-        new_lines = []
-        no_group_lines = []
-        # If no account.group at all, we need to pass once again in the loop to dispatch
-        # all the lines across their account prefix, hence the None
-        for line in lines + [None]:
-            # Only deal with lines grouped by accounts.
-            # And discriminating sections defined by account.financial.html.report.line
-            is_grouped_by_account = line and (line.get('caret_options') == 'account.account' or line.get('account_id'))
-            if not is_grouped_by_account or not line:
-
-                # No group code found in any lines, compute it automatically.
-                no_group_hierarchy = {}
-                for no_group_line in no_group_lines:
-                    codes = [('root', str(line.get('parent_id')) or 'root') if line else 'root', (self.LEAST_SORT_PRIO, _('(No Group)'))]
-                    if not accounts_hierarchy:
-                        account = get_account(no_group_line.get('account_id', self._get_caret_option_target_id(no_group_line.get('id'))))
-                        codes = [('root', line and str(line.get('parent_id')) or 'root')] + self.get_account_codes(account)
-                    add_line_to_hierarchy(no_group_line, codes, no_group_hierarchy, line and line.get('level') or 0 + 1)
-                no_group_lines = []
-
-                deep_merge_dict(no_group_hierarchy, accounts_hierarchy)
-
-                # Merge the newly created hierarchy with existing lines.
-                if accounts_hierarchy:
-                    new_lines += get_hierarchy_lines(accounts_hierarchy)[1]
-                    accounts_hierarchy = {}
-
-                if line:
-                    new_lines.append(line)
-                continue
-
-            # Exclude lines having no group.
-            account = get_account(line.get('account_id', self._get_caret_option_target_id(line.get('id'))))
-            if not account.group_id:
-                no_group_lines.append(line)
-                continue
-
-            codes = [('root', str(line.get('parent_id')) or 'root')] + self.get_account_codes(account)
-            add_line_to_hierarchy(line, codes, accounts_hierarchy, line.get('level', 0) + 1)
-
-        return new_lines
-
-    ####################################################
-    # OPTIONS: CORE
-    ####################################################
-
-    @api.model
-    def _get_options(self, previous_options=None):
-        # Create default options.
-        options = {
-            'unfolded_lines': previous_options and previous_options.get('unfolded_lines') or [],
-        }
-
-        # Multi-company is there for security purpose and can't be disabled by a filter.
-        self._init_filter_multi_company(options, previous_options=previous_options)
-
-        # Call _init_filter_date/_init_filter_comparison because the second one must be called after the first one.
-        if self.filter_date:
-            self._init_filter_date(options, previous_options=previous_options)
-        if self.filter_comparison:
-            self._init_filter_comparison(options, previous_options=previous_options)
-        if self.filter_analytic:
-            options['analytic'] = self.filter_analytic
-
-        filter_list = [attr for attr in dir(self)
-                       if (attr.startswith('filter_') or attr.startswith('order_')) and attr not in ('filter_date', 'filter_comparison') and len(attr) > 7 and not callable(getattr(self, attr))]
-        for filter_key in filter_list:
-            options_key = filter_key[7:]
-            init_func = getattr(self, '_init_%s' % filter_key, None)
-            if init_func:
-                init_func(options, previous_options=previous_options)
-            else:
-                filter_opt = getattr(self, filter_key, None)
-                if filter_opt is not None:
-                    if previous_options and options_key in previous_options:
-                        options[options_key] = previous_options[options_key]
+                del options['multi_company']
+
+        if options.get('journals'):
+            options['journals'] = self._get_journals()
+
+        options['unfolded_lines'] = []
+        # Merge old options with default from this report
+        for key, value in options.items():
+            if key in previous_options and value is not None and previous_options[key] is not None:
+                # special case handler for date and comparison as from one report to another, they can have either a date range or single date
+                if key == 'date' or key == 'comparison':
+                    if key == 'comparison':
+                        options[key]['number_period'] = previous_options[key]['number_period']
+                    options[key]['filter'] = 'custom'
+                    if previous_options[key].get('filter', 'custom') != 'custom':
+                        # just copy filter and let the system compute the correct date from it
+                        options[key]['filter'] = previous_options[key]['filter']
+                    elif value.get('date_from') is not None and not previous_options[key].get('date_from'):
+                        date = fields.Date.from_string(previous_options[key]['date'])
+                        company_fiscalyear_dates = self.env.user.company_id.compute_fiscalyear_dates(date)
+                        options[key]['date_from'] = company_fiscalyear_dates['date_from'].strftime(DEFAULT_SERVER_DATE_FORMAT)
+                        options[key]['date_to'] = previous_options[key]['date']
+                    elif value.get('date') is not None and not previous_options[key].get('date'):
+                        options[key]['date'] = previous_options[key]['date_to']
                     else:
-                        options[filter_key[7:]] = filter_opt
+                        options[key] = previous_options[key]
+                else:
+                    options[key] = previous_options[key]
         return options
 
     @api.model
-    def _get_options_domain(self, options):
-        domain = [
-            ('display_type', 'not in', ('line_section', 'line_note')),
-            ('move_id.state', '!=', 'cancel'),
-        ]
-        domain += self._get_options_companies_domain(options)
-        domain += self._get_options_journals_domain(options)
-        domain += self._get_options_date_domain(options)
-        domain += self._get_options_analytic_domain(options)
-        domain += self._get_options_partner_domain(options)
-        domain += self._get_options_all_entries_domain(options)
-        return domain
-
-    ####################################################
-    # QUERIES
-    ####################################################
-
-    @api.model
-    def _get_query_currency_table(self, options):
-        ''' Construct the currency table as a mapping company -> rate to convert the amount to the user's company
-        currency in a multi-company/multi-currency environment.
-        The currency_table is a small postgresql table construct with VALUES.
-        :param options: The report options.
-        :return:        The query representing the currency table.
-        '''
-
-        user_company = self.env.company
-        user_currency = user_company.currency_id
-        if options.get('multi_company'):
-            company_ids = [c['id'] for c in self._get_options_companies(options) if c['id'] != user_company.id and c['selected']]
-            company_ids.append(self.env.company.id)
-            companies = self.env['res.company'].browse(company_ids)
-            conversion_date = options['date']['date_to']
-            currency_rates = companies.mapped('currency_id')._get_rates(user_company, conversion_date)
-        else:
-            companies = user_company
-            currency_rates = {user_currency.id: 1.0}
-
-        conversion_rates = []
-        for company in companies:
-            conversion_rates.append((
-                company.id,
-                currency_rates[user_company.currency_id.id] / currency_rates[company.currency_id.id],
-                user_currency.decimal_places,
-            ))
-
-        currency_table = ','.join('(%s, %s, %s)' % args for args in conversion_rates)
-        return '(VALUES %s) AS currency_table(company_id, rate, precision)' % currency_table
-
-    @api.model
-    def _query_get(self, options, domain=None):
-        domain = self._get_options_domain(options) + (domain or [])
-        self.env['account.move.line'].check_access_rights('read')
-
-        query = self.env['account.move.line']._where_calc(domain)
-
-        # Wrap the query with 'company_id IN (...)' to avoid bypassing company access rights.
-        self.env['account.move.line']._apply_ir_rules(query)
-
-        return query.get_sql()
-
-    ####################################################
-    # MISC
-    ####################################################
+    def _get_options(self, previous_options=None):
+        # Be sure that user has group analytic if a report tries to display analytic
+        if self.filter_analytic:
+            self.filter_analytic_accounts = [] if self.env.user.id in self.env.ref('analytic.group_analytic_accounting').users.ids else None
+            self.filter_analytic_tags = [] if self.env.user.id in self.env.ref('analytic.group_analytic_tags').users.ids else None
+            #don't display the analytic filtering options if no option would be shown
+            if self.filter_analytic_accounts is None and self.filter_analytic_tags is None:
+                self.filter_analytic = None
+        if self.filter_partner:
+            self.filter_partner_ids = []
+            self.filter_partner_categories = []
+        return self._build_options(previous_options)
 
     def get_header(self, options):
         if not options.get('groups', {}).get('ids'):
-            columns = self._get_columns_name(options)
-            if 'selected_column' in options and self.order_selected_column:
-                selected_column = columns[abs(options['selected_column']) - 1]
-                if 'sortable' in selected_column.get('class', ''):
-                    selected_column['class'] = (options['selected_column'] > 0 and 'up ' or 'down ') + selected_column['class']
-            return [columns]
+            return [self._get_columns_name(options)]
         return self._get_columns_name_hierarchy(options)
 
     #TO BE OVERWRITTEN
     def _get_columns_name_hierarchy(self, options):
         return []
 
-    # TO BE OVERWRITTEN
+    #TO BE OVERWRITTEN
     def _get_columns_name(self, options):
         return []
 
@@ -855,6 +186,13 @@ class AccountReport(models.AbstractModel):
             if action.tag == 'account_report':
                 options['unfolded_lines'] = []
                 options['unfold_all'] = False
+                another_report_context = safe_eval(action_read['context'])
+                another_report = self.browse(another_report_context['id'])
+                if not self.date_range and another_report.date_range:
+                    # Don't propagate the filter if current report is date based while the targetted
+                    # report is date_range based, because the semantic is not the same:
+                    # 'End of Following Month' in BS != 'Last Month' in P&L (it has to go from 1st day of fiscalyear)
+                    options['date'].pop('filter')
                 action_read.update({'options': options, 'ignore_session': 'read'})
         if params.get('id'):
             # Add the id of the account.financial.html.report.line in the action's context
@@ -872,15 +210,24 @@ class AccountReport(models.AbstractModel):
         :param document:    The target model of the redirection.
         :return: The target record.
         '''
-        if model == 'account.move':
+        if model == 'account.invoice':
+            if document == 'account.move':
+                return self.env[model].browse(res_id).move_id
             if document == 'res.partner':
                 return self.env[model].browse(res_id).partner_id.commercial_partner_id
+        if model == 'account.invoice.line':
+            if document == 'account.move':
+                return self.env[model].browse(res_id).invoice_id.move_id
+            if document == 'account.invoice':
+                return self.env[model].browse(res_id).invoice_id
         if model == 'account.bank.statement.line' and document == 'account.bank.statement':
             return self.env[model].browse(res_id).statement_id
 
         # model == 'account.move.line' by default.
         if document == 'account.move':
             return self.env[model].browse(res_id).move_id
+        if document == 'account.invoice':
+            return self.env[model].browse(res_id).invoice_id
         if document == 'account.payment':
             return self.env[model].browse(res_id).payment_id
 
@@ -893,6 +240,11 @@ class AccountReport(models.AbstractModel):
         :param target:  The target record of the redirection.
         :return: The target view name as a string.
         '''
+        if target._name == 'account.invoice':
+            if target.type in ('in_refund', 'in_invoice'):
+                return 'account.invoice_supplier_form'
+            if target.type in ('out_refund', 'out_invoice'):
+                return 'account.invoice_form'
         if target._name == 'account.payment':
             return 'account.view_account_payment_form'
         if target._name == 'res.partner':
@@ -903,6 +255,7 @@ class AccountReport(models.AbstractModel):
         # document == 'account.move' by default.
         return 'view_move_form'
 
+    @api.multi
     def open_document(self, options, params=None):
         if not params:
             params = {}
@@ -926,6 +279,7 @@ class AccountReport(models.AbstractModel):
         view_id = self.env['ir.model.data'].get_object_reference(module, view_name)[1]
         return {
             'type': 'ir.actions.act_window',
+            'view_type': 'tree',
             'view_mode': 'form',
             'views': [(view_id, 'form')],
             'res_model': document,
@@ -959,13 +313,6 @@ class AccountReport(models.AbstractModel):
             domain += [('tax_exigible', '=', True)]
         return self.open_action(options, domain)
 
-    def tax_tag_template_open_aml(self, options, params=None):
-        active_id = int(str(params.get('id')).split('_')[0])
-        tag_template = self.env['account.tax.report.line'].browse(active_id)
-        company_ids = [comp_opt['id'] for comp_opt in options.get('multi_company', [])] or self.env.company.ids
-        domain = [('tag_ids', 'in', tag_template.tag_ids.ids), ('tax_exigible', '=', True), ('company_id', 'in', company_ids)]
-        return self.open_action(options, domain)
-
     def open_tax_report_line(self, options, params=None):
         active_id = int(str(params.get('id')).split('_')[0])
         line = self.env['account.financial.html.report.line'].browse(active_id)
@@ -993,31 +340,18 @@ class AccountReport(models.AbstractModel):
         action['context'] = ctx
         return action
 
+    @api.multi
     def open_general_ledger(self, options, params=None):
         if not params:
             params = {}
         ctx = self.env.context.copy()
         ctx.pop('id', '')
         action = self.env.ref('account_reports.action_account_report_general_ledger').read()[0]
-        account_id = self._get_caret_option_target_id(params.get('id'))
-        options['unfolded_lines'] = ['account_%s' % (account_id or '',)]
+        options['unfolded_lines'] = ['account_%s' % (params.get('id', ''),)]
         options['unfold_all'] = False
         ctx.update({'model': 'account.general.ledger'})
         action.update({'options': options, 'context': ctx, 'ignore_session': 'read'})
         return action
-
-    def _get_caret_option_target_id(self, line_id):
-        """ Retrieve the target model's id for lines obtained from a financial
-        report groupby. These lines have a string as id to ensure it is unique,
-        in case some accounts appear multiple times in the same report
-
-        TODO CLEANME: a better id handling in a common caret options function
-        would be nice in master, instead of local hardcoded patches like here.
-        """
-        if type(line_id) == str:
-            return int(line_id.split('_')[-1])
-        else:
-            return line_id
 
     def open_unposted_moves(self, options, params=None):
         ''' Open the list of draft journal entries that might impact the reporting'''
@@ -1033,43 +367,13 @@ class AccountReport(models.AbstractModel):
         action['context'] = {}
         return action
 
-    def periodic_tva_entries(self, options):
-        # Return action to open form view of newly entry created
-        ctx = self._set_context(options)
-        ctx['strict_range'] = True
-        self = self.with_context(ctx)
-        move = self.env['account.generic.tax.report']._generate_tax_closing_entry(options)
-        action = self.env.ref('account.action_move_journal_line').read()[0]
-        action = clean_action(action)
-        action['views'] = [(self.env.ref('account.view_move_form').id, 'form')]
-        action['res_id'] = move.id
-        return action
-
-    def _get_vat_report_attachments(self, options):
-        # Fetch pdf
-        pdf = self.get_pdf(options)
-        return [('vat_report.pdf', pdf)]
-
-    def action_partner_reconcile(self, options, params):
-        form = self.env.ref('account.action_manual_reconciliation', False)
-        ctx = self.env.context.copy()
-        ctx['partner_ids'] = ctx['active_id'] = [params.get('partner_id')]
-        ctx['all_entries'] = True
-        return {
-            'type': 'ir.actions.client',
-            'view_id': form.id,
-            'tag': form.tag,
-            'context': ctx,
-        }
-
     def open_journal_items(self, options, params):
         action = self.env.ref('account.action_move_line_select').read()[0]
         action = clean_action(action)
         ctx = self.env.context.copy()
         if params and 'id' in params:
-            active_id = self._get_caret_option_target_id(params['id'])
+            active_id = params['id']
             ctx.update({
-                    'active_id': active_id,
                     'search_default_account_id': [active_id],
             })
 
@@ -1087,14 +391,16 @@ class AccountReport(models.AbstractModel):
                 domain = expression.AND([domain, [('analytic_account_id', 'in', analytic_ids)]])
             if options.get('date'):
                 opt_date = options['date']
-                domain = expression.AND([domain, self._get_options_date_domain(options)])
+                if opt_date.get('date_from'):
+                    domain = expression.AND([domain, [('date', '>=', opt_date['date_from'])]])
+                if opt_date.get('date_to'):
+                    domain = expression.AND([domain, [('date', '<=', opt_date['date_to'])]])
+                if not opt_date.keys() & {'date_from', 'date_to'} and opt_date.get('date'):
+                    domain = expression.AND([domain, [('date', '<=', opt_date['date'])]])
             # In case the line has been generated for a "group by" financial line, append the parent line's domain to the one we created
             if params.get('financial_group_line_id'):
-                # In case the hierarchy is enabled, 'financial_group_line_id' might be a string such
-                # as 'hierarchy_xxx'. This will obviously cause a crash at domain evaluation.
-                if not (isinstance(params['financial_group_line_id'], str) and 'hierarchy_' in params['financial_group_line_id']):
-                    parent_financial_report_line = self.env['account.financial.html.report.line'].browse(params['financial_group_line_id'])
-                    domain = expression.AND([domain, safe_eval(parent_financial_report_line.domain)])
+                parent_financial_report_line = self.env['account.financial.html.report.line'].browse(params['financial_group_line_id'])
+                domain = expression.AND([domain, safe_eval(parent_financial_report_line.domain)])
 
             if not options.get('all_entries'):
                 ctx['search_default_posted'] = True
@@ -1115,6 +421,8 @@ class AccountReport(models.AbstractModel):
     def _set_context(self, options):
         """This method will set information inside the context based on the options dict as some options need to be in context for the query_get method defined in account_move_line"""
         ctx = self.env.context.copy()
+        if options.get('cash_basis'):
+            ctx['cash_basis'] = True
         if options.get('date') and options['date'].get('date_from'):
             ctx['date_from'] = options['date']['date_from']
         if options.get('date'):
@@ -1127,7 +435,7 @@ class AccountReport(models.AbstractModel):
         if options.get('multi_company'):
             company_ids = [c.get('id') for c in options['multi_company'] if c.get('selected')]
             company_ids = company_ids if len(company_ids) > 0 else [c.get('id') for c in options['multi_company']]
-        ctx['company_ids'] = len(company_ids) > 0 and company_ids or [self.env.company.id]
+        ctx['company_ids'] = len(company_ids) > 0 and company_ids or [self.env.user.company_id.id]
         if options.get('analytic_accounts'):
             ctx['analytic_account_ids'] = self.env['account.analytic.account'].browse([int(acc) for acc in options['analytic_accounts']])
         if options.get('analytic_tags'):
@@ -1143,12 +451,16 @@ class AccountReport(models.AbstractModel):
         return a dictionary of informations that will be needed by the js widget, manager_id, footnotes, html of report and searchview, ...
         '''
         options = self._get_options(options)
+        # apply date and date_comparison filter
+        self._apply_date_filter(options)
 
         searchview_dict = {'options': options, 'context': self.env.context}
         # Check if report needs analytic
         if options.get('analytic_accounts') is not None:
+            searchview_dict['analytic_accounts'] = self.env.user.id in self.env.ref('analytic.group_analytic_accounting').users.ids and [(t.id, t.name) for t in self.env['account.analytic.account'].search([])] or False
             options['selected_analytic_account_names'] = [self.env['account.analytic.account'].browse(int(account)).name for account in options['analytic_accounts']]
         if options.get('analytic_tags') is not None:
+            searchview_dict['analytic_tags'] = self.env.user.id in self.env.ref('analytic.group_analytic_tags').users.ids and [(t.id, t.name) for t in self.env['account.analytic.tag'].search([])] or False
             options['selected_analytic_tag_names'] = [self.env['account.analytic.tag'].browse(int(tag)).name for tag in options['analytic_tags']]
         if options.get('partner'):
             options['selected_partner_ids'] = [self.env['res.partner'].browse(int(partner)).name for partner in options['partner_ids']]
@@ -1160,24 +472,170 @@ class AccountReport(models.AbstractModel):
             period_domain = [('state', '=', 'draft'), ('date', '<=', date_to)]
             options['unposted_in_period'] = bool(self.env['account.move'].search_count(period_domain))
 
-        if options.get('journals'):
-            journals_selected = set(journal['id'] for journal in options['journals'] if journal.get('selected'))
-            for journal_group in self.env['account.journal.group'].search([('company_id', '=', self.env.company.id)]):
-                if journals_selected and journals_selected == set(self._get_filter_journals().ids) - set(journal_group.excluded_journal_ids.ids):
-                    options['name_journal_group'] = journal_group.name
-                    break
-
         report_manager = self._get_report_manager(options)
         info = {'options': options,
                 'context': self.env.context,
                 'report_manager_id': report_manager.id,
                 'footnotes': [{'id': f.id, 'line': f.line, 'text': f.text} for f in report_manager.footnotes_ids],
-                'buttons': self._get_reports_buttons_in_sequence(),
+                'buttons': self._get_reports_buttons(),
                 'main_html': self.get_html(options),
                 'searchview_html': self.env['ir.ui.view'].render_template(self._get_templates().get('search_template', 'account_report.search_template'), values=searchview_dict),
                 }
         return info
 
+    @api.model
+    def _create_hierarchy(self, lines):
+        """This method is called when the option 'hiearchy' is enabled on a report.
+        It receives the lines (as computed by _get_lines()) in argument, and will add
+        a hiearchy in those lines by using the account.group of accounts. If not set,
+        it will fallback on creating a hierarchy based on the account's code first 3
+        digits.
+        """
+        # Avoid redundant browsing.
+        accounts_cache = {}
+
+        MOST_SORT_PRIO = 0
+        LEAST_SORT_PRIO = 99
+
+        # Retrieve account either from cache, either by browsing.
+        def get_account(id):
+            if id not in accounts_cache:
+                accounts_cache[id] = self.env['account.account'].browse(id)
+            return accounts_cache[id]
+
+        # Create codes path in the hierarchy based on account.
+        def get_account_codes(account):
+            # A code is tuple(sort priority, actual code)
+            codes = []
+            if account.group_id:
+                group = account.group_id
+                while group:
+                    code = '%s %s' % (group.code_prefix or '', group.name)
+                    codes.append((MOST_SORT_PRIO, code))
+                    group = group.parent_id
+            else:
+                # Limit to 3 levels.
+                code = account.code[:3]
+                while code:
+                    codes.append((MOST_SORT_PRIO, code))
+                    code = code[:-1]
+            return list(reversed(codes))
+
+        # Add the report line to the hierarchy recursively.
+        def add_line_to_hierarchy(line, codes, level_dict, depth=None):
+            # Recursively build a dict where:
+            # 'children' contains only subcodes
+            # 'lines' contains the lines at this level
+            # This > lines [optional, i.e. not for topmost level]
+            #      > children > [codes] "That" > lines
+            #                                  > metadata
+            #                                  > children
+            #      > metadata(depth, parent ...)
+
+            if not codes:
+                return
+            if not depth:
+                depth = line.get('level', 1)
+            level_dict.setdefault('depth', depth)
+            level_dict.setdefault('parent_id', line.get('parent_id'))
+            level_dict.setdefault('children', {})
+            code = codes[0]
+            codes = codes[1:]
+            level_dict['children'].setdefault(code, {})
+
+            if codes:
+                add_line_to_hierarchy(line, codes, level_dict['children'][code], depth=depth + 1)
+            else:
+                level_dict['children'][code].setdefault('lines', [])
+                level_dict['children'][code]['lines'].append(line)
+
+        # Merge a list of columns together and take care about str values.
+        def merge_columns(columns):
+            return ['n/a' if any(isinstance(i, str) for i in x) else sum(x) for x in pycompat.izip(*columns)]
+
+        # Get_lines for the newly computed hierarchy.
+        def get_hierarchy_lines(values, depth=1):
+            lines = []
+            sum_sum_columns = []
+            for base_line in values.get('lines', []):
+                lines.append(base_line)
+                sum_sum_columns.append([c.get('no_format_name', c['name']) for c in base_line['columns']])
+
+            # For the last iteration, there might not be the children key (see add_line_to_hierarchy)
+            for key in sorted(values.get('children', {}).keys()):
+                sum_columns, sub_lines = get_hierarchy_lines(values['children'][key], depth=values['depth'])
+                header_line = {
+                    'id': 'hierarchy',
+                    'name': key[1],  # second member of the tuple
+                    'unfoldable': False,
+                    'unfolded': True,
+                    'level': values['depth'],
+                    'parent_id': values['parent_id'],
+                    'columns': [{'name': self.format_value(c) if not isinstance(c, str) else c} for c in sum_columns],
+                }
+                if key[0] == LEAST_SORT_PRIO:
+                    header_line['style'] = 'font-style:italic;'
+                lines += [header_line] + sub_lines
+                sum_sum_columns.append(sum_columns)
+            return merge_columns(sum_sum_columns), lines
+
+        def deep_merge_dict(source, destination):
+            for key, value in source.items():
+                if isinstance(value, dict):
+                    # get node or create one
+                    node = destination.setdefault(key, {})
+                    deep_merge_dict(value, node)
+                else:
+                    destination[key] = value
+
+            return destination
+
+        # Hierarchy of codes.
+        accounts_hierarchy = {}
+
+        new_lines = []
+        no_group_lines = []
+        # If no account.group at all, we need to pass once again in the loop to dispatch
+        # all the lines across their account prefix, hence the None
+        for line in lines + [None]:
+            # Only deal with lines grouped by accounts.
+            # And discriminating sections defined by account.financial.html.report.line
+            is_grouped_by_account = line and line.get('caret_options') == 'account.account'
+            if not is_grouped_by_account or not line:
+
+                # No group code found in any lines, compute it automatically.
+                no_group_hierarchy = {}
+                for no_group_line in no_group_lines:
+                    codes = [(LEAST_SORT_PRIO, _('(No Group)'))]
+                    if not accounts_hierarchy:
+                        account = get_account(no_group_line.get('id'))
+                        codes = get_account_codes(account)
+                    add_line_to_hierarchy(no_group_line, codes, no_group_hierarchy)
+                no_group_lines = []
+
+                deep_merge_dict(no_group_hierarchy, accounts_hierarchy)
+
+                # Merge the newly created hierarchy with existing lines.
+                if accounts_hierarchy:
+                    new_lines += get_hierarchy_lines(accounts_hierarchy)[1]
+                    accounts_hierarchy = {}
+
+                if line:
+                    new_lines.append(line)
+                continue
+
+            # Exclude lines having no group.
+            account = get_account(line.get('id'))
+            if not account.group_id:
+                no_group_lines.append(line)
+                continue
+
+            codes = get_account_codes(account)
+            add_line_to_hierarchy(line, codes, accounts_hierarchy)
+
+        return new_lines
+
+    @api.multi
     def _check_report_security(self, options):
         '''The security check must be done in this method. It ensures no-one can by-passing some access rules
         (e.g. falsifying the options).
@@ -1191,8 +649,11 @@ class AccountReport(models.AbstractModel):
             if self.env.user.id not in group_multi_company.users.ids:
                 options.pop('multi_company')
             else:
-                options['multi_company'] = [opt for opt in options['multi_company'] if opt['id'] in user_company_ids]
+                for c in options['multi_company']:
+                    if c['selected'] and c['id'] not in user_company_ids:
+                        c['selected'] = False
 
+    @api.multi
     def get_html(self, options, line_id=None, additional_context=None):
         '''
         return the html value of report, or html value of unfolded line
@@ -1210,13 +671,11 @@ class AccountReport(models.AbstractModel):
         report_manager = self._get_report_manager(options)
         report = {'name': self._get_report_name(),
                 'summary': report_manager.summary,
-                'company_name': self.env.company.name,}
+                'company_name': self.env.user.company_id.name,}
         lines = self._get_lines(options, line_id=line_id)
 
         if options.get('hierarchy'):
-            lines = self._create_hierarchy(lines, options)
-        if options.get('selected_column'):
-            lines = self._sort_lines(lines, options)
+            lines = self._create_hierarchy(lines)
 
         footnotes_to_render = []
         if self.env.context.get('print_mode', False):
@@ -1258,59 +717,15 @@ class AccountReport(models.AbstractModel):
             html = html.replace(b'<div class="js_account_report_footnotes"></div>', self.get_html_footnotes(footnotes_to_render))
         return html
 
+    @api.multi
     def get_html_footnotes(self, footnotes):
         template = self._get_templates().get('footnotes_template', 'account_reports.footnotes_template')
         rcontext = {'footnotes': footnotes, 'context': self.env.context}
         html = self.env['ir.ui.view'].render_template(template, values=dict(rcontext))
         return html
 
-    def _get_reports_buttons_in_sequence(self):
-        return sorted(self._get_reports_buttons(), key=lambda x: x.get('sequence', 9))
-
     def _get_reports_buttons(self):
-        return [
-            {'name': _('Print Preview'), 'sequence': 1, 'action': 'print_pdf', 'file_export_type': _('PDF')},
-            {'name': _('Export (XLSX)'), 'sequence': 2, 'action': 'print_xlsx', 'file_export_type': _('XLSX')},
-            {'name':_('Save'), 'sequence': 10, 'action': 'open_report_export_wizard'},
-        ]
-
-    def open_report_export_wizard(self, options):
-        """ Creates a new export wizard for this report and returns an act_window
-        opening it. A new account_report_generation_options key is also added to
-        the context, containing the current options selected on this report
-        (which must hence be taken into account when exporting it to a file).
-        """
-        new_wizard = self.env['account_reports.export.wizard'].create({'report_model': self._name,'report_id': self.id})
-        view_id = self.env.ref('account_reports.view_report_export_wizard').id
-        new_context = self.env.context.copy()
-        new_context['account_report_generation_options'] = options
-        return {
-            'type': 'ir.actions.act_window',
-            'name': _('Export'),
-            'view_mode': 'form',
-            'res_model': 'account_reports.export.wizard',
-            'target': 'new',
-            'res_id': new_wizard.id,
-            'views': [[view_id, 'form']],
-            'context': new_context,
-        }
-
-
-    @api.model
-    def get_export_mime_type(self, file_type):
-        """ Returns the MIME type associated with a report export file type,
-        for attachment generation.
-        """
-        type_mapping = {
-            'xlsx': 'application/vnd.ms-excel',
-            'pdf': 'application/pdf',
-            'xml': 'application/xml',
-            'xaf': 'application/vnd.sun.xml.writer',
-            'txt': 'text/plain',
-            'csv': 'text/csv',
-            'zip': 'application/zip',
-        }
-        return type_mapping.get(file_type, False)
+        return [{'name': _('Print Preview'), 'action': 'print_pdf'}, {'name': _('Export (XLSX)'), 'action': 'print_xlsx'}]
 
     def _get_report_manager(self, options):
         domain = [('report_name', '=', self._name)]
@@ -1325,55 +740,262 @@ class AccountReport(models.AbstractModel):
             existing_manager = self.env['account.report.manager'].create({'report_name': self._name, 'company_id': selected_companies and selected_companies[0] or False, 'financial_report_id': self.id if 'id' in dir(self) else False})
         return existing_manager
 
-    @api.model
-    def format_value(self, amount, currency=False, blank_if_zero=False):
-        ''' Format amount to have a monetary display (with a currency symbol).
-        E.g: 1000 => 1000.0 $
+    def _get_filter_journals(self):
+        return self.env['account.journal'].search([('company_id', 'in', self.env.user.company_ids.ids or [self.env.user.company_id.id])], order="company_id, name")
 
-        :param amount:          A number.
-        :param currency:        An optional res.currency record.
-        :param blank_if_zero:   An optional flag forcing the string to be empty if amount is zero.
-        :return:                The formatted amount as a string.
+    def _get_journals(self):
+        journals_read = self._get_filter_journals()
+        journals = []
+        previous_company = False
+        for c in journals_read:
+            if c.company_id != previous_company:
+                journals.append({'id': 'divider', 'name': c.company_id.name})
+                previous_company = c.company_id
+            journals.append({'id': c.id, 'name': c.name, 'code': c.code, 'type': c.type, 'selected': False})
+        return journals
+
+    def _get_dates_period(self, options, date_from, date_to, period_type=None):
+        '''Compute some information about the period:
+        * The name to display on the report.
+        * The period type (e.g. quarter) if not specified explicitly.
+
+        :param options:     The report options.
+        :param date_from:   The starting date of the period.
+        :param date_to:     The ending date of the period.
+        :param period_type: The type of the interval date_from -> date_to.
+        :return:            A dictionary containing:
+            * date_from * date_to * string * period_type *
         '''
-        currency_id = currency or self.env.company.currency_id
-        if currency_id.is_zero(amount):
-            if blank_if_zero:
-                return ''
-            # don't print -0.0 in reports
-            amount = abs(amount)
+        def match(dt_from, dt_to):
+            if self.has_single_date_filter(options):
+                return (date_to or date_from) == dt_to
+            else:
+                return (dt_from, dt_to) == (date_from, date_to)
 
+        string = None
+        # If no date_from or not date_to, we are unable to determine a period
+        if not period_type:
+            date = date_to or date_from
+            company_fiscalyear_dates = self.env.user.company_id.compute_fiscalyear_dates(date)
+            if match(company_fiscalyear_dates['date_from'], company_fiscalyear_dates['date_to']):
+                period_type = 'fiscalyear'
+                if company_fiscalyear_dates.get('record'):
+                    string = company_fiscalyear_dates['record'].name
+            elif match(*date_utils.get_month(date)):
+                period_type = 'month'
+            elif match(*date_utils.get_quarter(date)):
+                period_type = 'quarter'
+            elif match(*date_utils.get_fiscal_year(date)):
+                period_type = 'year'
+            else:
+                period_type = 'custom'
+
+        if not string:
+            fy_day = self.env.user.company_id.fiscalyear_last_day
+            fy_month = self.env.user.company_id.fiscalyear_last_month
+            if self.has_single_date_filter(options):
+                string = _('As of %s') % (format_date(self.env, date_to.strftime(DEFAULT_SERVER_DATE_FORMAT)))
+            elif period_type == 'year' or (period_type == 'fiscalyear' and (date_from, date_to) == date_utils.get_fiscal_year(date_to)):
+                string = date_to.strftime('%Y')
+            elif period_type == 'fiscalyear' and (date_from, date_to) == date_utils.get_fiscal_year(date_to, day=fy_day, month=fy_month):
+                string = '%s - %s' % (date_to.year - 1, date_to.year)
+            elif period_type == 'month':
+                string = format_date(self.env, date_to.strftime(DEFAULT_SERVER_DATE_FORMAT), date_format='MMM YYYY')
+            elif period_type == 'quarter':
+                quarter_names = get_quarter_names('abbreviated', locale=self.env.context.get('lang') or 'en_US')
+                string = u'%s\N{NO-BREAK SPACE}%s' % (quarter_names[date_utils.get_quarter_number(date_to)], date_to.year)
+            else:
+                dt_from_str = format_date(self.env, date_from.strftime(DEFAULT_SERVER_DATE_FORMAT))
+                dt_to_str = format_date(self.env, date_to.strftime(DEFAULT_SERVER_DATE_FORMAT))
+                string = _('From %s \n to  %s') % (dt_from_str, dt_to_str)
+
+        return {
+            'string': string,
+            'period_type': period_type,
+            'date_from': date_from,
+            'date_to': date_to,
+        }
+
+    def _get_dates_previous_period(self, options, period_vals):
+        '''Shift the period to the previous one.
+
+        :param options:     The report options.
+        :param period_vals: A dictionary generated by the _get_dates_period method.
+        :return:            A dictionary containing:
+            * date_from * date_to * string * period_type *
+        '''
+        period_type = period_vals['period_type']
+        date_from = period_vals['date_from']
+        date_to = period_vals['date_to']
+
+        if not date_from or not date_to:
+            date = (date_from or date_to).replace(day=1) - datetime.timedelta(days=1)
+            # Propagate the period_type to avoid bad behavior.
+            # E.g. custom single date 2018-01-30 with previous period will produce 2017-12-31 that
+            # must not be interpreted as a fiscal year.
+            return self._get_dates_period(options, None, date, period_type=period_type)
+
+        date_to = date_from - datetime.timedelta(days=1)
+        if period_type == 'fiscalyear':
+            # Don't pass the period_type to _get_dates_period to be able to retrieve the account.fiscal.year record if
+            # necessary.
+            company_fiscalyear_dates = self.env.user.company_id.compute_fiscalyear_dates(date_to)
+            return self._get_dates_period(options, company_fiscalyear_dates['date_from'], company_fiscalyear_dates['date_to'])
+        if period_type == 'month':
+            return self._get_dates_period(options, *date_utils.get_month(date_to), period_type='month')
+        if period_type == 'quarter':
+            return self._get_dates_period(options, *date_utils.get_quarter(date_to), period_type='quarter')
+        if period_type == 'year':
+            return self._get_dates_period(options, *date_utils.get_fiscal_year(date_to), period_type='year')
+        date_from = date_to - datetime.timedelta(days=(period_vals['date_to'] - date_from).days)
+        return self._get_dates_period(options, date_from, date_to)
+
+    def _get_dates_previous_year(self, options, period_vals):
+        '''Shift the period to the previous year.
+
+        :param options:     The report options.
+        :param period_vals: A dictionary generated by the _get_dates_period method.
+        :return:            A dictionary containing:
+            * date_from * date_to * string * period_type *
+        '''
+        period_type = period_vals['period_type']
+        date_from = period_vals['date_from']
+        date_to = period_vals['date_to']
+
+        # Note: Use relativedelta to avoid moving from 2016-02-29 -> 2015-02-29 and then, have a day out of range.
+        if not date_from or not date_to:
+            date_to = date_from or date_to
+            date_from = None
+
+        date_to = date_to - relativedelta(years=1)
+        # Take care about the 29th february.
+        # Moving from 2017-02-28 -> 2016-02-28 is wrong! It must be 2016-02-29.
+        if period_type == 'month':
+            date_from, date_to = date_utils.get_month(date_to)
+        elif date_from:
+            date_from = date_from - relativedelta(years=1)
+        return self._get_dates_period(options, date_from, date_to, period_type=period_type)
+
+    def format_value(self, value, currency=False):
+        currency_id = currency or self.env.user.company_id.currency_id
         if self.env.context.get('no_format'):
-            return amount
-        return formatLang(self.env, amount, currency_obj=currency_id)
+            return currency_id.round(value)
+        if currency_id.is_zero(value):
+            # don't print -0.0 in reports
+            value = abs(value)
+        res = formatLang(self.env, value, currency_obj=currency_id)
+        return res
 
-    @api.model
-    def _format_aml_name(self, line_name, move_ref, move_name):
-        ''' Format the display of an account.move.line record. As its very costly to fetch the account.move.line
-        records, only line_name, move_ref, move_name are passed as parameters to deal with sql-queries more easily.
-
-        :param line_name:   The name of the account.move.line record.
-        :param move_ref:    The reference of the account.move record.
-        :param move_name:   The name of the account.move record.
-        :return:            The formatted name of the account.move.line record.
-        '''
-        names = []
-        if move_name != '/':
-            names.append(move_name)
-        if move_ref and move_ref != '/':
-            names.append(move_ref)
-        if line_name and line_name != move_name and line_name != '/':
-            names.append(line_name)
-        name = '-'.join(names)
-        # TODO: check if no_format is still needed
+    def _format_aml_name(self, aml):
+        name = '-'.join(
+            (aml.move_id.name not in ['', '/'] and [aml.move_id.name] or []) +
+            (aml.ref not in ['', '/', False] and [aml.ref] or []) +
+            ([aml.name] if aml.name and aml.name not in ['', '/'] else [])
+        )
         if len(name) > 35 and not self.env.context.get('no_format'):
             name = name[:32] + "..."
         return name
 
     def format_date(self, options, dt_filter='date'):
-        date_from = fields.Date.from_string(options[dt_filter]['date_from'])
-        date_to = fields.Date.from_string(options[dt_filter]['date_to'])
-        strict_range = options['date'].get('strict_range', False)
-        return self._get_dates_period(options, date_from, date_to, options['date']['mode'], strict_range=strict_range)['string']
+        # previously get_full_date_names
+        if self.has_single_date_filter(options):
+            dt_from = None
+            dt_to = fields.Date.from_string(options[dt_filter]['date'])
+            if not dt_to:
+                raise UserError(_('Please specify an end date.'))
+        else:
+            dt_from = fields.Date.from_string(options[dt_filter]['date_from'])
+            dt_to = fields.Date.from_string(options[dt_filter]['date_to'])
+            if not dt_from or not dt_to:
+                raise UserError(_('Please specify a start and end date.'))
+
+        return self._get_dates_period(options, dt_from, dt_to)['string']
+
+    def _apply_date_filter(self, options):
+        def create_vals(period_vals):
+            vals = {'string': period_vals['string']}
+            if self.has_single_date_filter(options):
+                vals['date'] = (period_vals['date_to'] or period_vals['date_from']).strftime(DEFAULT_SERVER_DATE_FORMAT)
+            else:
+                vals['date_from'] = period_vals['date_from'].strftime(DEFAULT_SERVER_DATE_FORMAT)
+                vals['date_to'] = period_vals['date_to'].strftime(DEFAULT_SERVER_DATE_FORMAT)
+            return vals
+
+        # ===== Date Filter =====
+        if not options.get('date') or not options['date'].get('filter'):
+            return
+        options_filter = options['date']['filter']
+
+        date_from = None
+        date_to = fields.Date.context_today(self)
+        period_type = None
+        if options_filter == 'custom':
+            if self.has_single_date_filter(options):
+                date_from = None
+                date_to = fields.Date.from_string(options['date']['date'])
+            else:
+                date_from = fields.Date.from_string(options['date']['date_from'])
+                date_to = fields.Date.from_string(options['date']['date_to'])
+        elif 'today' in options_filter:
+            if not self.has_single_date_filter(options):
+                date_from = self.env.user.company_id.compute_fiscalyear_dates(date_to)['date_from']
+        elif 'month' in options_filter:
+            period_type = 'month'
+            date_from, date_to = date_utils.get_month(date_to)
+        elif 'quarter' in options_filter:
+            period_type = 'quarter'
+            date_from, date_to = date_utils.get_quarter(date_to)
+        elif 'year' in options_filter:
+            company_fiscalyear_dates = self.env.user.company_id.compute_fiscalyear_dates(date_to)
+            date_from = company_fiscalyear_dates['date_from']
+            date_to = company_fiscalyear_dates['date_to']
+        else:
+            raise UserError('Programmation Error: Unrecognized parameter %s in date filter!' % str(options_filter))
+
+        period_vals = self._get_dates_period(options, date_from, date_to, period_type)
+        if 'last' in options_filter:
+            period_vals = self._get_dates_previous_period(options, period_vals)
+
+        options['date'].update(create_vals(period_vals))
+
+        # ===== Comparison Filter =====
+        if not options.get('comparison') or not options['comparison'].get('filter'):
+            return
+        cmp_filter = options['comparison']['filter']
+
+        if cmp_filter == 'no_comparison':
+            options['comparison']['string'] = _('No comparison')
+            options['comparison']['periods'] = []
+            if self.has_single_date_filter(options):
+                options['comparison']['date'] = ""
+            else:
+                options['comparison']['date_from'] = ""
+                options['comparison']['date_to'] = ""
+            return
+
+        if cmp_filter == 'custom':
+            if self.has_single_date_filter(options):
+                date_from = None
+                date_to = fields.Date.from_string(options['comparison']['date'])
+            else:
+                date_from = fields.Date.from_string(options['comparison']['date_from'])
+                date_to = fields.Date.from_string(options['comparison']['date_to'])
+            vals = create_vals(self._get_dates_period(options, date_from, date_to))
+            options['comparison']['periods'] = [vals]
+            return
+
+        periods = []
+        number_period = options['comparison'].get('number_period', 1) or 0
+        for index in range(0, number_period):
+            if cmp_filter == 'previous_period':
+                period_vals = self._get_dates_previous_period(options, period_vals)
+            else:
+                period_vals = self._get_dates_previous_year(options, period_vals)
+            periods.append(create_vals(period_vals))
+
+        if len(periods) > 0:
+            options['comparison'].update(periods[0])
+        options['comparison']['periods'] = periods
 
     def print_pdf(self, options):
         return {
@@ -1407,7 +1029,7 @@ class AccountReport(models.AbstractModel):
         rcontext = {
             'mode': 'print',
             'base_url': base_url,
-            'company': self.env.company,
+            'company': self.env.user.company_id,
         }
 
         body = self.env['ir.ui.view'].render_template(
@@ -1426,7 +1048,7 @@ class AccountReport(models.AbstractModel):
             rcontext.update({
                     'css': '',
                     'o': self.env.user,
-                    'res_company': self.env.company,
+                    'res_company': self.env.user.company_id,
                 })
             header = self.env['ir.actions.report'].render_template("web.external_layout", values=rcontext)
             header = header.decode('utf-8') # Ensure that headers and footer are correctly encoded
@@ -1495,7 +1117,7 @@ class AccountReport(models.AbstractModel):
         """
         return {}
 
-    def get_xlsx(self, options, response=None):
+    def get_xlsx(self, options, response):
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output, {
             'in_memory': True,
@@ -1554,9 +1176,7 @@ class AccountReport(models.AbstractModel):
         lines = self.with_context(ctx)._get_lines(options)
 
         if options.get('hierarchy'):
-            lines = self.with_context(no_format=True)._create_hierarchy(lines, options)
-        if options.get('selected_column'):
-            lines = self._sort_lines(lines, options)
+            lines = self._create_hierarchy(lines)
 
         #write all data rows
         for y in range(0, len(lines)):
@@ -1598,10 +1218,8 @@ class AccountReport(models.AbstractModel):
 
         workbook.close()
         output.seek(0)
-        generated_file = output.read()
+        response.stream.write(output.read())
         output.close()
-
-        return generated_file
 
     def _get_cell_type_value(self, cell):
         if 'date' not in cell.get('class', '') or not cell.get('name'):
@@ -1612,8 +1230,8 @@ class AccountReport(models.AbstractModel):
             return ('date', cell['name'])
         try:
             # the date is parsable to a xlsx compatible date
-            lg = self.env['res.lang']._lang_get(self.env.user.lang) or get_lang(self.env)
-            return ('date', datetime.datetime.strptime(cell['name'], lg.date_format))
+            lg = self._context.get('lang') or self.env.lang or 'en_US'
+            return ('date', datetime.strptime(cell['name'], self.env['res.lang']._lang_get(lg).date_format))
         except:
             # the date is not parsable thus is returned as text
             return ('text', cell['name'])
@@ -1643,17 +1261,3 @@ class AccountReport(models.AbstractModel):
 
     def get_txt(self, options):
         return False
-
-    ####################################################
-    # HOOKS
-    ####################################################
-
-    def _get_account_groups_for_asset_report(self):
-        """ Get the groups of account code
-        return: dict whose keys are the 2 first digits of an account (xx) or a
-                range of 2 first digits (xx-yy). If it is not a range, the value
-                for that key shouldbe a dict containeing the key 'name'. If it
-                is a range, it should also contain a dict for the key 'children'
-                that is defined the same way as this return value.
-        """
-        return {}

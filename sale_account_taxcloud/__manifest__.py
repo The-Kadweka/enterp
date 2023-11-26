@@ -4,7 +4,7 @@
     'summary': """""",
     'description': """
     """,
-    'category': 'Accounting/Accounting',
+    'category': 'Accounting',
     'depends': ['account_taxcloud', 'sale'],
     'data': [
         'views/sale_order_views.xml',

@@ -90,7 +90,7 @@
                                 <a class="check_enterprise_status" href="#" title="Refresh subscription status" aria-label="Refresh subscription status"><i class="fa fa-refresh"></i></a>
                             </t>
                             <t t-if="dbexpiration_reason == 'upsell'">
-                                You have more users or more apps installed than your subscription allows.<br/>
+                                You have more users than your subscription allows.<br/>
                                 <a class="oe_instance_upsell" href="#">Upgrade your subscription</a>
                                 <a class="check_enterprise_status" href="#" title="Refresh subscription status" aria-label="Refresh subscription status"><i class="fa fa-refresh"></i></a>
                             </t>
@@ -110,22 +110,6 @@
             <span class="oe_instance_register oe_instance_error">
               Something went wrong while registering your database. You can try again or contact <a href="https://www.odoo.com/help" target="_blank">Odoo Help</a>.
             </span>
-            <span class="oe_instance_register oe_database_already_linked">
-              Your subscription is already linked to a database.<br/>
-              To unlink it you can either:<br/>
-              - Login to your Odoo.com dashboard then unlink your previous database: <a class="oe_contract_link"/><br/>
-            <span class="oe_contract_email_block">
-              - <a href="#" class="oe_contract_send_mail">Click here to send an email</a> to the subscription owner (email: <strong class="oe_contract_email" />) with the instructions to follow
-              <p class="oe_contract_sending_mail">Sending the instructions by email ...</p>
-              <p class="oe_contract_sending_mail_success">The instructions to unlink your subscription from the previous database(s) have been sent</p>
-              <p class="oe_contract_sending_mail_fail">Unable to send the instructions by email, please contact the <a href="www.odoo.com/help">Odoo Support</a><br/>
-                Error reason: <span class="oe_contract_sending_mail_fail_reason"/>
-              </p>
-            </span>
-            <span class="oe_contract_no_email_block">
-              - Contact your sales representative to help you to unlink your previous database
-            </span>
-            </span>
             <div class="oe_instance_register oe_instance_register_form">
                 <form class="form-inline justify-content-center mt-4">
                     <div class="form-group">
@@ -143,7 +127,7 @@
 
 <header t-name="Menu">
     <nav class="o_main_navbar">
-        <a href="#" class="fa fa-th o_menu_toggle" title="Applications" aria-label="Applications" accesskey="h"/>
+        <a href="#" class="fa o_menu_toggle" title="Applications" aria-label="Applications"/>
         <button type="button" class="fa fa-bars float-right d-block d-md-none o_mobile_menu_toggle" title="Toggle menu" aria-label="Toggle menu"/>
 
         <a href="#" class="o_menu_brand" role="button" />
@@ -230,14 +214,14 @@
     </t>
 </t>
 
-<t t-extend="res_config_edition">
+<t t-extend="DashboardShare">
     <t t-jquery=".user-heading h3" t-operation="replace">
         <h3>
-            Odoo <t t-esc="widget.server_version"/> (Enterprise Edition)
+            Odoo <t t-esc="server_version"/> (Enterprise Edition)
         </h3>
     </t>
     <t t-jquery=".user-heading h3" t-operation="after">
-        <t t-set="expiration_date" t-value="widget.expiration_date ? moment(widget.expiration_date).format('LL') : null"/>
+        <t t-set="expiration_date" t-value="widget.data.expiration_date ? new moment(widget.data.expiration_date).format('LL') : null"/>
         <t t-if="expiration_date">
             <h5>Database expiration: <t t-esc="expiration_date"/></h5>
         </t>

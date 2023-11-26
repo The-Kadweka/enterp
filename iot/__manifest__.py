@@ -14,10 +14,6 @@ This module provides management of your IoT Boxes inside Odoo.
         'wizard/iot_wizard.xml',
         'views/iot_views.xml',
         'security/ir.model.access.csv',
-        'security/iot_security.xml',
-    ],
-    'qweb': [
-        'static/src/xml/iot_scan_progress_template.xml',
     ],
     'installable': True,
     'application': True,

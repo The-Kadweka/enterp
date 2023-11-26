@@ -4,7 +4,7 @@
 {
     'name': 'Documents - Signatures',
     'version': '1.0',
-    'category': 'Operations/Documents',
+    'category': 'Uncategorized',
     'summary': 'Signature templates from Documents',
     'description': """
 Add the ability to create signatures from the document module.
@@ -16,10 +16,6 @@ The first element of the selection (in DRM) will be used as the signature attach
     'data': [
         'data/data.xml',
         'views/sign_templates.xml',
-    ],
-
-    'demo': [
-        'demo/demo.xml',
     ],
 
     'installable': True,

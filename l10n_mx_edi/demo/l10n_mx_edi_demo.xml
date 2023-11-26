@@ -9,6 +9,7 @@
 
         <record id="base.main_partner" model="res.partner">
             <field name="vat">EKU9003173C9</field>
+            <field name="property_account_position_id" search="[('name', '=', '601 - General de Ley Personas Morales')]"/>
             <field name="street_name">Campobasso Norte</field>
             <field name="street2">Fraccionamiento Montecarlo</field>
             <field name="street_number">3206</field>
@@ -22,8 +23,8 @@
         <record id="base.main_company" model="res.company">
             <field name="l10n_mx_edi_pac">finkok</field>
             <field name="l10n_mx_edi_pac_test_env">True</field>
-            <field name="l10n_mx_edi_fiscal_regime">601</field>
             <field name="l10n_mx_edi_certificate_ids" eval="[(6, 0, [ref('demo_certificate')])]"/>
+            <field name="country_id" ref="base.mx"/>
         </record>
     </data>
 </odoo>

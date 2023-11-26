@@ -41,7 +41,7 @@ class MxReportAccountTrial(models.AbstractModel):
     def _get_reports_buttons(self):
         """Create the buttons to be used to download the required files"""
         buttons = super(MxReportAccountTrial, self)._get_reports_buttons()
-        buttons += [{'name': _('Export For SAT (XML)'), 'sequence': 3, 'action': 'print_xml', 'file_export_type': _('SAT XML')}]
+        buttons += [{'name': _('Export For SAT (XML)'), 'action': 'print_xml'}]
         return buttons
 
     def _get_templates(self):
@@ -114,6 +114,22 @@ class MxReportAccountTrial(models.AbstractModel):
                 'columns': [{'name': self.format_value(v)} for v in total],
             })
         return lines
+
+    def _do_query_group_by_account_selected_range(self, options, line_id):
+        """This is a wrapper to allow l10n_mx to leverage on `account.report.coa`
+        without resorting to lengthy modification.
+
+        This will allow to ask all the accounts from:
+            - The beginning of the fy, excluding all the Journal Items with a
+            Journal Entry set as `Closing Move` within the range selected by
+            the user. Closing Move should not be displayed in the `l10n_mx
+            Trial Balance`. Only in `13th Month Trial Balance`.
+            - The beginning of times up to the last_date of previous
+            fiscal-year selected by the user. Including the Closing Move as
+            them will avoid `Unaffected Earnings` from building up if Closing
+            Moves are present, and will build up if not present.
+        """
+        return self.with_context(exclude_closing_move=True)._do_query_group_by_account(options, line_id)
 
     @api.model
     def _get_lines_second_level(self, lines_child, grouped_accounts,
@@ -194,7 +210,7 @@ class MxReportAccountTrial(models.AbstractModel):
 
     def _get_lines_fourth_level(self, accounts, grouped_accounts, initial_balances, options, comparison_table):
         lines = []
-        company_id = self.env.context.get('company_id') or self.env.company
+        company_id = self.env.context.get('company_id') or self.env.user.company_id
         is_zero = company_id.currency_id.is_zero
         for account in accounts:
             # skip accounts with all periods = 0 (debit and credit) and no initial balance
@@ -244,7 +260,7 @@ class MxReportAccountTrial(models.AbstractModel):
 
     def _l10n_mx_edi_add_digital_stamp(self, path_xslt, cfdi):
         """Add digital stamp certificate attributes in XML report"""
-        company_id = self.env.company
+        company_id = self.env.user.company_id
         certificate_ids = company_id.l10n_mx_edi_certificate_ids
         certificate_id = certificate_ids.sudo().get_valid_certificate()
         if not certificate_id:
@@ -260,7 +276,7 @@ class MxReportAccountTrial(models.AbstractModel):
                               xml_declaration=True, encoding='UTF-8')
 
     def get_bce_dict(self, options):
-        company = self.env.company
+        company = self.env.user.company_id
         xml_data = self._get_lines(options)
         accounts = []
         account_lines = [l for l in xml_data
@@ -288,38 +304,6 @@ class MxReportAccountTrial(models.AbstractModel):
             'type': 'N',
         }
         return chart
-
-    @api.model
-    def _get_lines(self, options, line_id=None):
-        # Create new options with 'unfold_all' to compute the initial balances.
-        # Then, the '_do_query' will compute all sums/unaffected earnings/initial balances for all comparisons.
-        new_options = options.copy()
-        new_options['unfold_all'] = True
-        options_list = self._get_options_periods_list(new_options)
-        accounts_results, taxes_results = self.env['account.general.ledger']._do_query(options_list, fetch_lines=False)
-
-        grouped_accounts = {}
-        initial_balances = {}
-        comparison_table = [options.get('date')]
-        comparison_table += options.get('comparison') and options['comparison'].get('periods') or []
-        for account, periods_results in accounts_results:
-            grouped_accounts.setdefault(account, [])
-            periods_results.reverse()
-            for i, res in enumerate(periods_results):
-                account_init_bal = res.get('initial_balance', {})
-                if i == 0:
-                    initial_balances[account] = res.get('initial_balance', {}).get('balance', 0.0) + res.get('unaffected_earnings', {}).get('balance', 0.0)
-                sums = [
-                    res.get('sum', {}).get('debit', 0.0) - account_init_bal.get('debit', 0.0),
-                    res.get('sum', {}).get('credit', 0.0) - account_init_bal.get('credit', 0.0),
-                ]
-                grouped_accounts[account].append({
-                    'balance': sums[0] - sums[1],
-                    'debit': sums[0],
-                    'credit': sums[1],
-                })
-
-        return self._post_process(grouped_accounts, initial_balances, options, comparison_table)
 
     @api.model
     def get_xml(self, options):
@@ -361,7 +345,7 @@ class MxReportAccountTrial(models.AbstractModel):
         date_report = fields.Date.from_string(context['date_from']) if context.get(
                 'date_from') else fields.Date.today()
         return '%s%s%sBN' % (
-            self.env.company.vat or '',
+            self.env.user.company_id.vat or '',
             date_report.year,
             str(date_report.month).zfill(2))
 

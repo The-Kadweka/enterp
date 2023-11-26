@@ -4,7 +4,7 @@
 {
     'name': 'Helpdesk',
     'version': '1.2',
-    'category': 'Operations/Helpdesk',
+    'category': 'Helpdesk',
     'sequence': 57,
     'summary': 'Track help tickets',
     'website': 'https://www.odoo.com/page/helpdesk',
@@ -42,6 +42,7 @@ Features:
         'data/digest_data.xml',
         'data/mail_data.xml',
         'data/helpdesk_data.xml',
+        'data/helpdesk_cron.xml',
         'views/helpdesk_views.xml',
         'views/helpdesk_team_views.xml',
         'views/assets.xml',
@@ -49,7 +50,6 @@ Features:
         'views/helpdesk_portal_templates.xml',
         'views/res_partner_views.xml',
         'views/mail_activity_views.xml',
-        'report/helpdesk_sla_report_analysis_views.xml',
     ],
     'qweb': [
         "static/src/xml/helpdesk_team_templates.xml",

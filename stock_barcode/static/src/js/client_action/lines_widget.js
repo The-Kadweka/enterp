@@ -24,7 +24,6 @@ var LinesWidget = Widget.extend({
         this.groups = parent.groups;
         this.model = parent.actionParams.model;
         this.show_entire_packs = parent.show_entire_packs;
-        this.requireLotNumber = parent.requireLotNumber;
     },
 
     start: function () {
@@ -82,7 +81,6 @@ var LinesWidget = Widget.extend({
             lines: [lineDescription],
             groups: this.groups,
             model: model,
-            requireLotNumber: this.requireLotNumber,
         }));
         $body.prepend($line);
         $line.on('click', '.o_edit', this._onClickEditLine.bind(this));
@@ -107,7 +105,7 @@ var LinesWidget = Widget.extend({
 
     highlightPackage: function (barcode) {
         var $line = this.$('.o_barcode_line:contains(' + barcode + ')');
-        $line.length && this._highlightLine($line);
+        this._highlightLine($line);
     },
 
     /**
@@ -264,7 +262,6 @@ var LinesWidget = Widget.extend({
                 packageLines: this.getPackageLines(this.page.lines),
                 model: this.model,
                 groups: this.groups,
-                requireLotNumber: this.requireLotNumber,
             }));
             $body.prepend($lines);
             $lines.on('click', '.o_edit', this._onClickEditLine.bind(this));
@@ -285,7 +282,7 @@ var LinesWidget = Widget.extend({
             $validate.toggleClass('o_hidden');
         }
 
-        if (! this.page.lines.length && this.model !== 'stock.inventory') {
+        if (! this.page.lines.length) {
             $validate.prop('disabled', true);
         }
 
@@ -341,10 +338,6 @@ var LinesWidget = Widget.extend({
     _toggleScanMessage: function (message) {
         this.$('.o_scan_message').toggleClass('o_hidden', true);
         this.$('.o_scan_message_' + message).toggleClass('o_hidden', false);
-        this.$('.o_barcode_pic').toggleClass(
-            'o_js_has_warning_msg',
-            _.indexOf([ "picking_already_done", "picking_already_cancelled", "inv_already_done"], message) > -1
-        );
     },
 
     _isReservationProcessedLine: function ($line) {
@@ -437,19 +430,6 @@ var LinesWidget = Widget.extend({
     },
 
     /**
-     * Scroll to `$line`.
-     *
-     * @private
-     * @param {jQueryElement} $body
-     * @param {jQueryElement} $line
-     */
-    _scrollToLine: function ($body, $line) {
-        $body.animate({
-            scrollTop: $body.scrollTop() + $line.position().top - $body.height() / 2 + $line.height() / 2
-        }, 500);
-    },
-
-    /**
      * Highlight and scroll to a specific line in the current page after removing the highlight on
      * the other lines.
      *
@@ -480,7 +460,9 @@ var LinesWidget = Widget.extend({
         }
 
         // Scroll to `$line`.
-        this._scrollToLine($body, $line);
+        $body.animate({
+            scrollTop: $body.scrollTop() + $line.position().top - $body.height()/2 + $line.height()/2
+        }, 500);
     },
 
     //--------------------------------------------------------------------------

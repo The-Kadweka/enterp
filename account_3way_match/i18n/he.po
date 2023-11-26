@@ -1,19 +1,20 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_3way_match
+# * account_3way_match
 # 
 # Translators:
-# Martin Trigaux, 2019
-# ExcaliberX <excaliberx@gmail.com>, 2019
-# hed shefetr <hed@laylinetech.com>, 2019
+# Martin Trigaux, 2018
+# ExcaliberX <excaliberx@gmail.com>, 2018
+# Yihya Hugirat <hugirat@gmail.com>, 2018
+# hed shefetr <hed@laylinetech.com>, 2018
 # ZVI BLONDER <ZVIBLONDER@gmail.com>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~12.5+e\n"
+"Project-Id-Version: Odoo Server saas~11.5+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-09 11:58+0000\n"
-"PO-Revision-Date: 2019-08-26 09:34+0000\n"
+"POT-Creation-Date: 2018-09-18 10:05+0000\n"
+"PO-Revision-Date: 2018-08-24 11:36+0000\n"
 "Last-Translator: ZVI BLONDER <ZVIBLONDER@gmail.com>, 2019\n"
 "Language-Team: Hebrew (https://www.transifex.com/odoo/teams/41243/he/)\n"
 "MIME-Version: 1.0\n"
@@ -23,18 +24,15 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % 1 == 0) ? 1: (n % 10 == 0 && n % 1 == 0 && n > 10) ? 2 : 3;\n"
 
 #. module: account_3way_match
-#: model:ir.model.fields,help:account_3way_match.field_account_move__release_to_pay_manual
+#: model:ir.model.fields,help:account_3way_match.field_account_invoice__release_to_pay_manual
 msgid ""
 "  * Yes: you should pay the bill, you have received the products\n"
 "  * No, you should not pay the bill, you have not received the products\n"
-"  * Exception, there is a difference between received and billed quantities\n"
-"This status is defined automatically, but you can force it by ticking the 'Force Status' checkbox."
+"  * Exception, there is a difference between received and billed quantities."
 msgstr ""
-"שדה זה יכול להכיל את הערכים הבאים:\n"
-"* כן: אתה צריך לשלם את החשבונית, קיבלת את המוצרים\n"
-"* לא, אתה לא צריך לשלם את החשבונית, לא קיבלת את המוצרים\n"
-"* חריג, יש הבדל בין הכמויות שהתקבלו לכמויות שחיובו\n"
-"סטטוס זה מוגדר אוטומטית, אך ניתן לכפות אותו על ידי סימון 'כפה סטטוס'."
+"  * כן: אתה צריך לשלם את החשבונית, קיבלת את המוצרים\n"
+"  * לא, אתה לא צריך לשלם את החשבונית, לא קיבלת את המוצרים\n"
+"  * חריג, יש הבדל בין הכמויות שהתקבלו לכמויות שחיובו.."
 
 #. module: account_3way_match
 #: model_terms:ir.ui.view,arch_db:account_3way_match.account_invoice_filter_inherit_account_3way_match
@@ -47,23 +45,33 @@ msgid "Bills to Pay"
 msgstr "חשבונות לתשלום"
 
 #. module: account_3way_match
-#: model:ir.model.fields.selection,name:account_3way_match.selection__account_move__release_to_pay__exception
-#: model:ir.model.fields.selection,name:account_3way_match.selection__account_move__release_to_pay_manual__exception
-#: model:ir.model.fields.selection,name:account_3way_match.selection__account_move_line__can_be_paid__exception
+#: selection:account.invoice,release_to_pay:0
+#: selection:account.invoice,release_to_pay_manual:0
+#: selection:account.invoice.line,can_be_paid:0
 msgid "Exception"
 msgstr "חריגה"
 
 #. module: account_3way_match
-#: model:ir.model.fields,field_description:account_3way_match.field_account_move__force_release_to_pay
-msgid "Force Status"
-msgstr "כפה סטטוס"
+#: model:ir.model.fields,field_description:account_3way_match.field_account_invoice__force_release_to_pay
+msgid "Force status"
+msgstr "אלץ סטטוס"
 
 #. module: account_3way_match
-#: model:ir.model.fields,help:account_3way_match.field_account_move__force_release_to_pay
+#: model:ir.model.fields,help:account_3way_match.field_account_invoice__force_release_to_pay
 msgid ""
-"Indicates whether the 'Should Be Paid' status is defined automatically or "
+"Indicates whether the 'Can be paid' status is defined automatically or "
 "manually."
-msgstr "מציין אם הסטטוס 'מחייב תשלום' מוגדר אוטומטית או ידנית."
+msgstr "מציין אם סטטוס 'ניתן לתשלום' מוגדר אוטומטית או ידנית."
+
+#. module: account_3way_match
+#: model:ir.model,name:account_3way_match.model_account_invoice
+msgid "Invoice"
+msgstr "חשבונית"
+
+#. module: account_3way_match
+#: model:ir.model,name:account_3way_match.model_account_invoice_line
+msgid "Invoice Line"
+msgstr "שורת חשבונית"
 
 #. module: account_3way_match
 #: model:ir.model,name:account_3way_match.model_account_journal
@@ -71,39 +79,29 @@ msgid "Journal"
 msgstr "יומן"
 
 #. module: account_3way_match
-#: model:ir.model,name:account_3way_match.model_account_move
-msgid "Journal Entries"
-msgstr "פקודות יומן"
-
-#. module: account_3way_match
-#: model:ir.model,name:account_3way_match.model_account_move_line
-msgid "Journal Item"
-msgstr "פקודת יומן"
-
-#. module: account_3way_match
-#: model:ir.model.fields.selection,name:account_3way_match.selection__account_move__release_to_pay__no
-#: model:ir.model.fields.selection,name:account_3way_match.selection__account_move__release_to_pay_manual__no
-#: model:ir.model.fields.selection,name:account_3way_match.selection__account_move_line__can_be_paid__no
+#: selection:account.invoice,release_to_pay:0
+#: selection:account.invoice,release_to_pay_manual:0
+#: selection:account.invoice.line,can_be_paid:0
 msgid "No"
 msgstr "לא"
 
 #. module: account_3way_match
-#: model:ir.model.fields,field_description:account_3way_match.field_account_move__release_to_pay
-msgid "Release To Pay"
-msgstr "שחרר לתשלום"
-
-#. module: account_3way_match
-#: model:ir.model.fields,field_description:account_3way_match.field_account_move_line__can_be_paid
+#: model:ir.model.fields,field_description:account_3way_match.field_account_invoice_line__can_be_paid
 msgid "Release to Pay"
 msgstr "שחרר לתשלום"
 
 #. module: account_3way_match
-#: model:ir.model.fields,field_description:account_3way_match.field_account_move__release_to_pay_manual
-msgid "Should Be Paid"
-msgstr "מחייב תשלום"
+#: model:ir.model.fields,field_description:account_3way_match.field_account_invoice__release_to_pay
+msgid "Should be paid"
+msgstr "יש לשלם"
 
 #. module: account_3way_match
-#: model:ir.model.fields,help:account_3way_match.field_account_move__release_to_pay
+#: model:ir.model.fields,field_description:account_3way_match.field_account_invoice__release_to_pay_manual
+msgid "Should be paid Manual"
+msgstr "יש לשלם ידנית"
+
+#. module: account_3way_match
+#: model:ir.model.fields,help:account_3way_match.field_account_invoice__release_to_pay
 msgid ""
 "This field can take the following values :\n"
 "  * Yes: you should pay the bill, you have received the products\n"
@@ -115,11 +113,11 @@ msgstr ""
 "  * כן: אתה צריך לשלם את החשבונית, קיבלת את המוצרים\n"
 "  * לא, אתה לא צריך לשלם את החשבונית, לא קיבלת את המוצרים\n"
 "  * חריג, יש הבדל בין הכמויות שהתקבלו לכמויות שחיובו\n"
-"סטטוס זה מוגדר אוטומטית, אך ניתן לכפות אותו על ידי סימון  'כפה סטטוס'."
+"סטטוס זה מוגדר באופן אוטומטי, אך אתה יכול לאלץ אותו על ידי סימון תיבת הסימון 'אלץ סטטוס'."
 
 #. module: account_3way_match
-#: model:ir.model.fields.selection,name:account_3way_match.selection__account_move__release_to_pay__yes
-#: model:ir.model.fields.selection,name:account_3way_match.selection__account_move__release_to_pay_manual__yes
-#: model:ir.model.fields.selection,name:account_3way_match.selection__account_move_line__can_be_paid__yes
+#: selection:account.invoice,release_to_pay:0
+#: selection:account.invoice,release_to_pay_manual:0
+#: selection:account.invoice.line,can_be_paid:0
 msgid "Yes"
 msgstr "כן"

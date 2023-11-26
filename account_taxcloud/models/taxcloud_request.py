@@ -3,13 +3,13 @@
 
 import hashlib
 import logging
+import suds
 import re
 import requests
 
-from zeep import Client
-from zeep.exceptions import Fault
+from suds.client import Client
 
-from odoo import modules, fields, _
+from odoo import modules, fields
 
 _logger = logging.getLogger(__name__)
 
@@ -21,7 +21,6 @@ class TaxCloudRequest(object):
     def __init__(self, api_id, api_key):
         wsdl_path = modules.get_module_path('account_taxcloud') + '/api/taxcloud.wsdl'
         self.client = Client('file:///%s' % wsdl_path)
-        self.factory = self.client.type_factory('ns0')
         self.api_login_id = api_id
         self.api_key = api_key
 
@@ -47,7 +46,7 @@ class TaxCloudRequest(object):
 
     def set_location_origin_detail(self, shipper):
         address = self.verify_address(shipper)
-        self.origin = self.factory.Address()
+        self.origin = self.client.factory.create('Address')
         self.origin.Address1 = address['Address1'] or ''
         self.origin.Address2 = address['Address2'] or ''
         self.origin.City = address['City']
@@ -57,7 +56,7 @@ class TaxCloudRequest(object):
 
     def set_location_destination_detail(self, recipient_partner):
         address = self.verify_address(recipient_partner)
-        self.destination = self.factory.Address()
+        self.destination = self.client.factory.create('Address')
         self.destination.Address1 = address['Address1'] or ''
         self.destination.Address2 = address['Address2'] or ''
         self.destination.City = address['City']
@@ -66,8 +65,8 @@ class TaxCloudRequest(object):
         self.destination.Zip4 = address['Zip4']
 
     def set_items_detail(self, product_id, tic_code):
-        self.cart_items = self.factory.ArrayOfCartItem()
-        self.cart_item = self.factory.CartItem()
+        self.cart_items = self.client.factory.create('ArrayOfCartItem')
+        self.cart_item = self.client.factory.create('CartItem')
         self.cart_item.Index = 1
         self.cart_item.ItemID = product_id
         if tic_code:
@@ -79,9 +78,8 @@ class TaxCloudRequest(object):
 
     def set_invoice_items_detail(self, invoice):
         self.customer_id = invoice.partner_id.id
-        self.taxcloud_date = invoice.get_taxcloud_reporting_date()
         self.cart_id = invoice.id
-        self.cart_items = self.factory.ArrayOfCartItem()
+        self.cart_items = self.client.factory.create('ArrayOfCartItem')
         self.cart_items.CartItem = self._process_lines(invoice.invoice_line_ids)
 
     def _process_lines(self, lines):
@@ -93,10 +91,10 @@ class TaxCloudRequest(object):
                 tic_code = line.product_id.tic_category_id.code or \
                     line.product_id.categ_id.tic_category_id.code or \
                     line.company_id.tic_category_id.code or \
-                    line.env.company.tic_category_id.code
+                    line.env.user.company_id.tic_category_id.code
                 price_unit = line._get_taxcloud_price() * (1 - (line.discount or 0.0) / 100.0)
 
-                cart_item = self.factory.CartItem()
+                cart_item = self.client.factory.create('CartItem')
                 cart_item.Index = index
                 cart_item.ItemID = product_id
                 if tic_code:
@@ -108,13 +106,8 @@ class TaxCloudRequest(object):
 
     def get_all_taxes_values(self):
         formatted_response = {}
-        if not self.api_login_id or not self.api_key:
-            formatted_response['error_message'] = _("Please configure taxcloud credential on the current company"
-                                                    "or use a different fiscal position")
-            return formatted_response
-
         try:
-            response = self.client.service.LookupForDate(
+            response = self.client.service.Lookup(
                 self.api_login_id,
                 self.api_key,
                 hasattr(self, 'customer_id') and self.customer_id or 'NoCustomerID',
@@ -122,9 +115,7 @@ class TaxCloudRequest(object):
                 self.cart_items,
                 self.origin,
                 self.destination,
-                False, # deliveredBySeller
-                None, # exemptCert
-                self.taxcloud_date, # useDate
+                False
             )
             formatted_response['response'] = response
             if response.ResponseType == 'OK':
@@ -134,9 +125,9 @@ class TaxCloudRequest(object):
                     tax_amount = item.TaxAmount
                     formatted_response['values'][index] = tax_amount
             elif response.ResponseType == 'Error':
-                formatted_response['error_message'] = response.Messages.ResponseMessage[0].Message
-        except Fault as fault:
-            formatted_response['error_message'] = fault.message
+                formatted_response['error_message'] = response.Messages[0][0].Message
+        except suds.WebFault as fault:
+            formatted_response['error_message'] = fault
         except IOError:
             formatted_response['error_message'] = "TaxCloud Server Not Found"
         return formatted_response
@@ -147,11 +138,11 @@ class TaxCloudRequest(object):
         try:
             self.response = self.client.service.GetTICs(self.api_login_id, self.api_key)
             if self.response.ResponseType == 'OK':
-                formatted_response['data'] = self.response.TICs.TIC
+                formatted_response['data'] = self.response.TICs[0]
             elif self.response.ResponseType == 'Error':
-                formatted_response['error_message'] = self.response.Messages.ResponseMessage[0].Message
-        except Fault as fault:
-            formatted_response['error_message'] = fault.message
+                formatted_response['error_message'] = self.response.Messages[0][0].Message
+        except suds.WebFault as fault:
+            formatted_response['error_message'] = fault
         except IOError:
             formatted_response['error_message'] = "TaxCloud Server Not Found"
 
@@ -164,8 +155,8 @@ class TaxCloudRequest(object):
         # The current date is appended to refresh the value every day.
         return hashlib.sha1(
             (
-                (self.api_login_id or '')
-                + (self.api_key or '')
+                self.api_login_id
+                + self.api_key
                 + str(hasattr(self, "customer_id") and self.customer_id or "NoCustomerID")
                 + str(hasattr(self, "cart_id") and self.cart_id or "NoCartID")
                 + str(self.cart_items)

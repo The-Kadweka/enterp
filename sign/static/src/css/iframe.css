@@ -19,12 +19,12 @@
     -moz-box-sizing: border-box;
     box-sizing: border-box;
 
-    border: 1px dashed #875A7B;
+    border: 1px dashed #A4498C;
     vertical-align: middle;
     display: inline-block;
     margin: 0;
     padding: 0;
-    box-shadow: 0px 0px 3px 1px #875A7B;
+    box-shadow: 0px 0px 3px 1px #A4498C;
     resize: none;
 
     background-color: rgba(255, 255, 255, 0.9);
@@ -38,17 +38,8 @@
     cursor: pointer;
 }
 
-.o_sign_sign_item .o_placeholder {
-    vertical-align: middle;
-}
-
-textarea.o_sign_sign_item {
-    font-size: 12pt !important;
-}
-
 .o_sign_sign_item_required {
     background-color: rgba(255, 235, 235, 0.9);
-    font-size: 10pt;
 }
 
 .o_sign_item_custom_popover .form-group {
@@ -222,20 +213,20 @@ textarea.o_sign_sign_item {
     border-left-color: #fff;
 } 
 
-.popover .o_sign_delete_field_button {
+.o_sign_sign_item + .popover .o_sign_delete_field_button {
     float: right;
     margin-top: 8px;
     margin-bottom: 8px;
 }
 
-.popover .o_sign_delete_field_button.fa-trash {
+.o_sign_sign_item + .popover .o_sign_delete_field_button.fa-trash {
     cursor: pointer;
     opacity: 0.5;
     transition: opacity ease 250ms;
     margin-top: 8px;
 }
 
-.popover .o_sign_delete_field_button.fa-trash:hover {
+.o_sign_sign_item + .popover .o_sign_delete_field_button.fa-trash:hover {
     opacity: 1.0; 
 }
 
@@ -245,11 +236,6 @@ textarea.o_sign_sign_item {
     cursor: pointer;
 }
 
-.o_sign_sign_textarea {
-    white-space: pre-wrap !important;
-    font-size: 12pt !important;
-}
-
 .o_sign_sign_item_pdfview {
     border: 1px dashed silver;
     box-shadow: 0px 0px 0px 0px white;
@@ -257,15 +243,12 @@ textarea.o_sign_sign_item {
     background: transparent;
     color: black;
     cursor: auto;
-    white-space: pre;
-    text-align: left;
-    display: flex;
+    white-space: pre-wrap;
 }
 
 .o_sign_sign_item .o_sign_helper {
     vertical-align: middle;
     height: 100%;
-    color: #757575;
     display: inline-block;
 }
 
@@ -285,11 +268,8 @@ textarea.o_sign_sign_item {
     right: 0;
     overflow: hidden;
     white-space: nowrap;
-    font-size: 0.5em;
-    text-align: right;
-    padding: 2px 16px 2px 2px; /* 16px right to prevent overflow with resizing handler */
-    margin: 2px;
-
+    font-size: 10pt;
+    text-align: left;
 }
 
 .o_sign_sign_item .o_sign_config_area .fa-arrows {
@@ -298,53 +278,26 @@ textarea.o_sign_sign_item {
     margin-right: 5px;
 }
 
-.o_sign_sign_item .o_sign_config_area .o_sign_item_display {
+.o_sign_sign_item .o_sign_config_area .o_sign_responsible_display {
     display: block;
     width: 100%;
     height: 100%;
 }
 
-.o_sign_select_options_display {
-    height: 100%;
-    width: 100%;
-    display: flex;
-    margin-top: -22px;
-    align-items: center;
-    justify-content: left;
-}
-
-.o_sign_item_option {
-    padding: 5px;
-    /* font-size: 12pt; */
-}
-
-.o_sign_option_separator {
-    padding: 5px;
-    /* font-size: 12pt; */
-}
-
-.o_sign_selected_option {
-    text-decoration-line: none;
-}
-
-.o_sign_not_selected_option  {
-    text-decoration-line: line-through;
-}
-
 .ui-selected, .ui-selecting { /* jQuery UI */
     box-shadow: 0px 0px 5px 1px orange;
 }
-.ui-resizable {
-    text-align: center;
-}
 
 .ui-draggable .ui-draggable-handle, .o_sign_field_type_button.ui-draggable { /* jQuery UI */
-    /* See o-grab-cursor mixin */
-    cursor: url(/web/static/src/img/openhand.cur), grab;
+    cursor: grab;
+    cursor: -moz-grab;
+    cursor: -webkit-grab;
 }
 
 .ui-draggable-dragging .ui-draggable-handle, .o_sign_sign_item_to_add.ui-draggable-dragging { /* jQuery UI */
     cursor: grabbing;
+    cursor: -moz-grabbing;
+    cursor: -webkit-grabbing;
 }
 
 .o_sign_sign_item_navigator {
@@ -370,19 +323,9 @@ textarea.o_sign_sign_item {
 
 @media (max-width: 767px) { /* @screen-xs-max */
     .o_sign_sign_item_navigator {
-        width: 100%;
-        top: 32px !important;
-        z-index: 9999;
         line-height: 25px;
-        height: 35px;
-        padding: 5px 0 0;
+        height: 25px;
         font-size: 0.8em;
-        background-image: none;
-        background-color: #875A7B;
-        text-align: center;
-    }
-    .o_sign_sign_item_navline {
-        display: none !important;
     }
 }
 
@@ -432,19 +375,9 @@ textarea.o_sign_sign_item {
     border: none;
     border-right: 1px solid #E7E7E7;
 
-    background-color: #875A7B;
+    background-color: #875a7b;
     color: white;
 
     height: 30px;
     padding: 0px 20px 0px 20px;
 }
-
-.o_sign_close_button {
-    padding: 0;
-    background-color: transparent;
-    border: 0;
-    float: right;
-    line-height: 1;
-    text-shadow: 0 1px 0 #FFFFFF;
-    opacity: .5;
-  }

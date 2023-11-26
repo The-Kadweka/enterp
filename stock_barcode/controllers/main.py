@@ -44,7 +44,6 @@ class StockBarcodeController(http.Controller):
 
             # Create and confirm the picking
             picking = request.env['stock.picking'].create({
-                'user_id': False,
                 'picking_type_id': picking_type.id,
                 'location_id': location_id.id,
                 'location_dest_id': location_dest_id.id,
@@ -83,7 +82,6 @@ class StockBarcodeController(http.Controller):
                 # Create and confirm an internal picking
                 picking = request.env['stock.picking'].create({
                     'picking_type_id': internal_picking_type[0].id,
-                    'user_id': False,
                     'location_id': corresponding_location.id,
                     'location_dest_id': dest_loc.id,
                     'immediate_transfer': True,
@@ -107,6 +105,7 @@ class StockBarcodeController(http.Controller):
                 'action': {
                     'name': _('Open picking form'),
                     'res_model': 'stock.picking',
+                    'view_type': 'form',
                     'view_mode': 'form',
                     'view_id': view_id,
                     'views': [(view_id, 'form')],

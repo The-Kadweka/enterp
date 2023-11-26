@@ -11,6 +11,7 @@ class Partner(models.Model):
         help="Every mandate belonging to this partner.")
     sdd_count = fields.Integer(compute='_compute_sdd_count', string="SDD count")
 
+    @api.multi
     def _compute_sdd_count(self):
         sdd_data = self.env['sdd.mandate'].read_group(
             domain=[('partner_id', 'in', self.ids)],

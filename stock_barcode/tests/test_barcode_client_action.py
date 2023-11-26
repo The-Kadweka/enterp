@@ -5,7 +5,6 @@ try:
 except ImportError:
     from mock import patch
 
-import odoo
 from odoo.tests import HttpCase, tagged
 
 
@@ -28,19 +27,10 @@ class TestBarcodeClientAction(HttpCase):
         CALL_COUNT = 0
         self.supplier_location = self.env.ref('stock.stock_location_suppliers')
         self.stock_location = self.env.ref('stock.stock_location_stock')
-        self.stock_location.write({
-            'barcode': 'LOC-01-00-00',
-            })
         self.customer_location = self.env.ref('stock.stock_location_customers')
         self.pack_location = self.env.ref('stock.location_pack_zone')
         self.shelf1 = self.env.ref('stock.stock_location_components')
-        self.shelf1.write({
-            'barcode': 'LOC-01-01-00',
-            })
         self.shelf2 = self.env.ref('stock.stock_location_14')
-        self.shelf2.write({
-            'barcode': 'LOC-01-02-00',
-            })
         self.shelf3 = self.env['stock.location'].create({
             'name': 'Shelf 3',
             'location_id': self.stock_location.id,
@@ -112,7 +102,7 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
             'location_dest_id': self.stock_location.id,
             'picking_type_id': self.picking_type_internal.id,
         })
-        picking_write_orig = odoo.addons.stock.models.stock_picking.Picking.write
+        picking_write_orig = internal_picking.write
         url = self._get_client_action_url(internal_picking.id)
 
         # Mock the calls to write and run the phantomjs script.
@@ -151,10 +141,16 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
                 assertEqual(write_vals['location_id'], shelf1.id)
                 assertEqual(write_vals['location_dest_id'], shelf2.id)
                 assertEqual(write_vals['qty_done'], 1)
-            return picking_write_orig(self, vals)
+            return picking_write_orig(vals)
 
         with patch('odoo.addons.stock.models.stock_picking.Picking.write', new=picking_write_mock):
-            self.start_tour(url, 'test_internal_picking_from_scratch_1', login='admin', timeout=180)
+            self.phantom_js(
+                url,
+                "odoo.__DEBUG__.services['web_tour.tour'].run('test_internal_picking_from_scratch_1')",
+                "odoo.__DEBUG__.services['web_tour.tour'].tours.test_internal_picking_from_scratch_1.ready",
+                login='admin',
+                timeout=180,
+            )
             self.assertEqual(CALL_COUNT, 3)
 
         self.assertEqual(len(internal_picking.move_line_ids), 3)
@@ -174,10 +170,16 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
             'location_dest_id': self.stock_location.id,
             'picking_type_id': self.picking_type_internal.id,
         })
-        picking_write_orig = odoo.addons.stock.models.stock_picking.Picking.write
+        picking_write_orig = internal_picking.write
         url = self._get_client_action_url(internal_picking.id)
 
-        self.start_tour(url, 'test_internal_picking_from_scratch_2', login='admin', timeout=180)
+        self.phantom_js(
+            url,
+            "odoo.__DEBUG__.services['web_tour.tour'].run('test_internal_picking_from_scratch_2')",
+            "odoo.__DEBUG__.services['web_tour.tour'].tours.test_internal_picking_from_scratch_2.ready",
+            login='admin',
+            timeout=180,
+        )
 
         self.assertEqual(len(internal_picking.move_line_ids), 4)
         prod1_ml = internal_picking.move_line_ids.filtered(lambda ml: ml.product_id.id == self.product1.id)
@@ -198,7 +200,7 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
             'location_dest_id': self.stock_location.id,
             'picking_type_id': self.picking_type_internal.id,
         })
-        picking_write_orig = odoo.addons.stock.models.stock_picking.Picking.write
+        picking_write_orig = internal_picking.write
         url = self._get_client_action_url(internal_picking.id)
 
         # prepare the picking
@@ -252,10 +254,16 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
                 assertEqual(write_vals['location_id'], shelf3.id)
                 assertEqual(write_vals['location_dest_id'], shelf2.id)
                 assertEqual(write_vals['qty_done'], 1)
-            return picking_write_orig(self, vals)
+            return picking_write_orig(vals)
 
         with patch('odoo.addons.stock.models.stock_picking.Picking.write', new=picking_write_mock):
-            self.start_tour(url, 'test_internal_picking_reserved_1', login='admin', timeout=180)
+            self.phantom_js(
+                url,
+                "odoo.__DEBUG__.services['web_tour.tour'].run('test_internal_picking_reserved_1')",
+                "odoo.__DEBUG__.services['web_tour.tour'].tours.test_internal_picking_reserved_1.ready",
+                login='admin',
+                timeout=180,
+            )
             self.assertEqual(CALL_COUNT, 2)
 
     def test_receipt_from_scratch_with_lots_1(self):
@@ -271,7 +279,13 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
             'picking_type_id': self.picking_type_in.id,
         })
         url = self._get_client_action_url(receipt_picking.id)
-        self.start_tour(url, 'test_receipt_from_scratch_with_lots_1', login='admin', timeout=180)
+        self.phantom_js(
+            url,
+            "odoo.__DEBUG__.services['web_tour.tour'].run('test_receipt_from_scratch_with_lots_1')",
+            "odoo.__DEBUG__.services['web_tour.tour'].tours.test_receipt_from_scratch_with_lots_1.ready",
+            login='admin',
+            timeout=180,
+        )
         self.assertEqual(receipt_picking.move_line_ids.mapped('lot_name'), ['lot1', 'lot2'])
 
     def test_receipt_from_scratch_with_lots_2(self):
@@ -287,57 +301,15 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
             'picking_type_id': self.picking_type_in.id,
         })
         url = self._get_client_action_url(receipt_picking.id)
-        self.start_tour(url, 'test_receipt_from_scratch_with_lots_2', login='admin', timeout=180)
+        self.phantom_js(
+            url,
+            "odoo.__DEBUG__.services['web_tour.tour'].run('test_receipt_from_scratch_with_lots_2')",
+            "odoo.__DEBUG__.services['web_tour.tour'].tours.test_receipt_from_scratch_with_lots_2.ready",
+            login='admin',
+            timeout=180,
+        )
         self.assertEqual(receipt_picking.move_line_ids.mapped('lot_name'), ['lot1', 'lot2'])
         self.assertEqual(receipt_picking.move_line_ids.mapped('qty_done'), [2, 2])
-
-    def test_receipt_from_scratch_with_lots_3(self):
-        """ Scans a non tracked product, then scans a tracked by lots product, then scans a
-        production lot twice and checks the tracked product quantity was rightly increased.
-        """
-        clean_access_rights(self.env)
-        grp_multi_loc = self.env.ref('stock.group_stock_multi_locations')
-        grp_lot = self.env.ref('stock.group_production_lot')
-        self.env.user.write({'groups_id': [(4, grp_multi_loc.id, 0)]})
-        self.env.user.write({'groups_id': [(4, grp_lot.id, 0)]})
-
-        receipt_picking = self.env['stock.picking'].create({
-            'location_id': self.supplier_location.id,
-            'location_dest_id': self.stock_location.id,
-            'picking_type_id': self.picking_type_in.id,
-        })
-        url = self._get_client_action_url(receipt_picking.id)
-        self.start_tour(url, 'test_receipt_from_scratch_with_lots_3', login='admin', timeout=180)
-        move_lines = receipt_picking.move_line_ids
-        self.assertEqual(move_lines[0].product_id.id, self.product1.id)
-        self.assertEqual(move_lines[0].qty_done, 1.0)
-        self.assertEqual(move_lines[1].product_id.id, self.productlot1.id)
-        self.assertEqual(move_lines[1].qty_done, 2.0)
-        self.assertEqual(move_lines[1].lot_name, 'lot1')
-
-    def test_receipt_from_scratch_with_lots_4(self):
-        """ With picking type options "use_create_lots" and "use existing lots" disabled, scan a tracked product 3 times and checks the tracked product quantity was rightly increased without the need to enter serial/lot number.
-        """
-        clean_access_rights(self.env)
-        grp_multi_loc = self.env.ref('stock.group_stock_multi_locations')
-        grp_lot = self.env.ref('stock.group_production_lot')
-        self.env.user.write({'groups_id': [(4, grp_multi_loc.id, 0)]})
-        self.env.user.write({'groups_id': [(4, grp_lot.id, 0)]})
-
-        self.picking_type_in.use_create_lots = False
-        self.picking_type_in.use_existing_lots = False
-
-        receipt_picking = self.env['stock.picking'].create({
-            'location_id': self.supplier_location.id,
-            'location_dest_id': self.stock_location.id,
-            'picking_type_id': self.picking_type_in.id,
-        })
-        url = self._get_client_action_url(receipt_picking.id)
-        self.start_tour(url, 'test_receipt_from_scratch_with_lots_4', login='admin', timeout=180)
-        move_lines = receipt_picking.move_line_ids
-        self.assertEqual(move_lines[0].product_id.id, self.productserial1.id)
-        self.assertEqual(move_lines[0].qty_done, 3.0)
-
 
     def test_receipt_reserved_1(self):
         """ Open a receipt. Move a unit of `self.product1` into shelf1, shelf2, shelf3 and shelf 4.
@@ -351,7 +323,7 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
             'location_dest_id': self.stock_location.id,
             'picking_type_id': self.picking_type_in.id,
         })
-        picking_write_orig = odoo.addons.stock.models.stock_picking.Picking.write
+        picking_write_orig = receipt_picking.write
         url = self._get_client_action_url(receipt_picking.id)
 
         move1 = self.env['stock.move'].create({
@@ -392,86 +364,17 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
                 assertEqual(len(vals['move_line_ids']), 2)
                 assertEqual(vals['move_line_ids'][0][:2], [1, ml1.id])
                 assertEqual(vals['move_line_ids'][1][:2], [1, ml2.id])
-            return picking_write_orig(self, vals)
+            return picking_write_orig(vals)
 
         with patch('odoo.addons.stock.models.stock_picking.Picking.write', new=picking_write_mock):
-            self.start_tour(url, 'test_receipt_reserved_1', login='admin', timeout=180)
+            self.phantom_js(
+                url,
+                "odoo.__DEBUG__.services['web_tour.tour'].run('test_receipt_reserved_1')",
+                "odoo.__DEBUG__.services['web_tour.tour'].tours.test_receipt_reserved_1.ready",
+                login='admin',
+                timeout=180,
+            )
             self.assertEqual(CALL_COUNT, 1)
-
-    def test_delivery_lot_with_package(self):
-        """ Have a delivery for on product tracked by SN, scan a non-reserved SN
-        and check the new created line has the right SN's package & owner.
-        """
-        clean_access_rights(self.env)
-        grp_lot = self.env.ref('stock.group_production_lot')
-        grp_owner = self.env.ref('stock.group_tracking_owner')
-        grp_pack = self.env.ref('stock.group_tracking_lot')
-        self.env.user.write({'groups_id': [(4, grp_lot.id, 0)]})
-        self.env.user.write({'groups_id': [(4, grp_owner.id, 0)]})
-        self.env.user.write({'groups_id': [(4, grp_pack.id, 0)]})
-
-        # Creates 4 serial numbers and adds 2 qty. for the reservation.
-        snObj = self.env['stock.production.lot']
-        sn1 = snObj.create({'name': 'sn1', 'product_id': self.productserial1.id, 'company_id': self.env.company.id})
-        sn2 = snObj.create({'name': 'sn2', 'product_id': self.productserial1.id, 'company_id': self.env.company.id})
-        sn3 = snObj.create({'name': 'sn3', 'product_id': self.productserial1.id, 'company_id': self.env.company.id})
-        sn4 = snObj.create({'name': 'sn4', 'product_id': self.productserial1.id, 'company_id': self.env.company.id})
-        package1 = self.env['stock.quant.package'].create({'name': 'pack_sn_1'})
-        package2 = self.env['stock.quant.package'].create({'name': 'pack_sn_2'})
-        partner = self.env['res.partner'].create({'name': 'Particulier'})
-        inv_line_data = {
-            'product_id': self.productserial1.id,
-            'product_uom_id': self.uom_unit.id,
-            'product_qty': 1,
-            'location_id': self.stock_location.id,
-        }
-        inventory = self.env['stock.inventory'].create({
-            'name': 'Inv. productserial1',
-            'line_ids': [
-                (0, 0, dict(inv_line_data, prod_lot_id=sn1.id, package_id=package1.id)),
-                (0, 0, dict(inv_line_data, prod_lot_id=sn2.id, package_id=package1.id)),
-            ],
-        })
-        inventory.action_start()
-        inventory.action_validate()
-
-        # Creates and confirms the delivery.
-        delivery_picking = self.env['stock.picking'].create({
-            'location_id': self.stock_location.id,
-            'location_dest_id': self.customer_location.id,
-            'picking_type_id': self.picking_type_out.id,
-        })
-        self.env['stock.move'].create({
-            'name': self.productserial1.name,
-            'product_id': self.productserial1.id,
-            'product_uom_qty': 2,
-            'product_uom': self.productserial1.uom_id.id,
-            'picking_id': delivery_picking.id,
-            'location_id': self.stock_location.id,
-            'location_dest_id': self.customer_location.id,
-        })
-        delivery_picking.action_confirm()
-        delivery_picking.action_assign()
-        # Add 2 more qty. after the reservation.
-        inventory = self.env['stock.inventory'].create({
-            'name': 'Inv. productserial1',
-            'line_ids': [
-                (0, 0, dict(inv_line_data, prod_lot_id=sn3.id, package_id=package2.id)),
-                (0, 0, dict(inv_line_data, prod_lot_id=sn4.id, package_id=package2.id, partner_id=partner.id)),
-            ],
-        })
-        inventory.action_start()
-        inventory.action_validate()
-
-        # Runs the tour.
-        url = self._get_client_action_url(delivery_picking.id)
-        self.phantom_js(
-            url,
-            "odoo.__DEBUG__.services['web_tour.tour'].run('test_delivery_lot_with_package')",
-            "odoo.__DEBUG__.services['web_tour.tour'].tours.test_delivery_lot_with_package.ready",
-            login='admin',
-            timeout=180,
-        )
 
     def test_delivery_reserved_1(self):
         clean_access_rights(self.env)
@@ -482,7 +385,7 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
             'location_dest_id': self.customer_location.id,
             'picking_type_id': self.picking_type_out.id,
         })
-        picking_write_orig = odoo.addons.stock.models.stock_picking.Picking.write
+        picking_write_orig = delivery_picking.write
         url = self._get_client_action_url(delivery_picking.id)
 
         move1 = self.env['stock.move'].create({
@@ -518,9 +421,15 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         def picking_write_mock (self, vals):
             global CALL_COUNT
             CALL_COUNT += 1
-            return picking_write_orig(self, vals)
+            return picking_write_orig(vals)
         with patch('odoo.addons.stock.models.stock_picking.Picking.write', new=picking_write_mock):
-            self.start_tour(url, 'test_delivery_reserved_1', login='admin', timeout=180)
+            self.phantom_js(
+                url,
+                "odoo.__DEBUG__.services['web_tour.tour'].run('test_delivery_reserved_1')",
+                "odoo.__DEBUG__.services['web_tour.tour'].tours.test_delivery_reserved_1.ready",
+                login='admin',
+                timeout=180,
+            )
             self.assertEqual(CALL_COUNT, 1)
 
     def test_delivery_reserved_2(self):
@@ -530,7 +439,7 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
             'location_dest_id': self.customer_location.id,
             'picking_type_id': self.picking_type_out.id,
         })
-        picking_write_orig = odoo.addons.stock.models.stock_picking.Picking.write
+        picking_write_orig = delivery_picking.write
         url = self._get_client_action_url(delivery_picking.id)
 
         pg_1 = self.env['procurement.group'].create({'name': 'ProcurementGroup1'})
@@ -570,10 +479,16 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         def picking_write_mock(self, vals):
             global CALL_COUNT
             CALL_COUNT += 1
-            return picking_write_orig(self, vals)
+            return picking_write_orig(vals)
 
         with patch('odoo.addons.stock.models.stock_picking.Picking.write', new=picking_write_mock):
-            self.start_tour(url, 'test_delivery_reserved_2', login='admin', timeout=180)
+            self.phantom_js(
+                url,
+                "odoo.__DEBUG__.services['web_tour.tour'].run('test_delivery_reserved_2')",
+                "odoo.__DEBUG__.services['web_tour.tour'].tours.test_delivery_reserved_2.ready",
+                login='admin',
+                timeout=180,
+            )
             self.assertEqual(CALL_COUNT, 0)
 
     def test_delivery_reserved_3(self):
@@ -583,7 +498,7 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
             'location_dest_id': self.customer_location.id,
             'picking_type_id': self.picking_type_out.id,
         })
-        picking_write_orig = odoo.addons.stock.models.stock_picking.Picking.write
+        picking_write_orig = delivery_picking.write
         url = self._get_client_action_url(delivery_picking.id)
 
         self.env['stock.move'].create({
@@ -604,10 +519,16 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         def picking_write_mock(self, vals):
             global CALL_COUNT
             CALL_COUNT += 1
-            return picking_write_orig(self, vals)
+            return picking_write_orig(vals)
 
         with patch('odoo.addons.stock.models.stock_picking.Picking.write', new=picking_write_mock):
-            self.start_tour(url, 'test_delivery_reserved_3', login='admin', timeout=180)
+            self.phantom_js(
+                url,
+                "odoo.__DEBUG__.services['web_tour.tour'].run('test_delivery_reserved_3')",
+                "odoo.__DEBUG__.services['web_tour.tour'].tours.test_delivery_reserved_3.ready",
+                login='admin',
+                timeout=180,
+            )
             self.assertEqual(CALL_COUNT, 0)
 
     def test_delivery_from_scratch_1(self):
@@ -619,8 +540,8 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
 
         # Add lot1 et lot2 sur productlot1
         lotObj = self.env['stock.production.lot']
-        lot1 = lotObj.create({'name': 'lot1', 'product_id': self.productlot1.id, 'company_id': self.env.company.id})
-        lot2 = lotObj.create({'name': 'lot2', 'product_id': self.productlot1.id, 'company_id': self.env.company.id})
+        lot1 = lotObj.create({'name': 'lot1', 'product_id': self.productlot1.id})
+        lot2 = lotObj.create({'name': 'lot2', 'product_id': self.productlot1.id})
 
         # empty picking
         delivery_picking = self.env['stock.picking'].create({
@@ -630,7 +551,13 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         })
         url = self._get_client_action_url(delivery_picking.id)
 
-        self.start_tour(url, 'test_delivery_from_scratch_with_lots_1', login='admin', timeout=180)
+        self.phantom_js(
+            url,
+            "odoo.__DEBUG__.services['web_tour.tour'].run('test_delivery_from_scratch_with_lots_1')",
+            "odoo.__DEBUG__.services['web_tour.tour'].tours.test_delivery_from_scratch_with_lots_1.ready",
+            login='admin',
+            timeout=180,
+        )
 
         lines = delivery_picking.move_line_ids
         self.assertEqual(lines[0].lot_id.name, 'lot1')
@@ -648,10 +575,10 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
 
         # Add 4 serial numbers productserial1
         snObj = self.env['stock.production.lot']
-        sn1 = snObj.create({'name': 'sn1', 'product_id': self.productserial1.id, 'company_id': self.env.company.id})
-        sn2 = snObj.create({'name': 'sn2', 'product_id': self.productserial1.id, 'company_id': self.env.company.id})
-        sn3 = snObj.create({'name': 'sn3', 'product_id': self.productserial1.id, 'company_id': self.env.company.id})
-        sn4 = snObj.create({'name': 'sn4', 'product_id': self.productserial1.id, 'company_id': self.env.company.id})
+        sn1 = snObj.create({'name': 'sn1', 'product_id': self.productserial1.id})
+        sn2 = snObj.create({'name': 'sn2', 'product_id': self.productserial1.id})
+        sn3 = snObj.create({'name': 'sn3', 'product_id': self.productserial1.id})
+        sn4 = snObj.create({'name': 'sn4', 'product_id': self.productserial1.id})
 
         # empty picking
         delivery_picking = self.env['stock.picking'].create({
@@ -661,7 +588,13 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         })
         url = self._get_client_action_url(delivery_picking.id)
 
-        self.start_tour(url, 'test_delivery_from_scratch_with_sn_1', login='admin', timeout=180)
+        self.phantom_js(
+            url,
+            "odoo.__DEBUG__.services['web_tour.tour'].run('test_delivery_from_scratch_with_sn_1')",
+            "odoo.__DEBUG__.services['web_tour.tour'].tours.test_delivery_from_scratch_with_sn_1.ready",
+            login='admin',
+            timeout=180,
+        )
 
         lines = delivery_picking.move_line_ids
         self.assertEqual(lines.mapped('lot_id.name'), ['sn1', 'sn2', 'sn3', 'sn4'])
@@ -691,8 +624,8 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
 
         # Add lot1 et lot2 sur productlot1
         lotObj = self.env['stock.production.lot']
-        lot1 = lotObj.create({'name': 'lot1', 'product_id': self.productlot1.id, 'company_id': self.env.company.id})
-        lot2 = lotObj.create({'name': 'lot2', 'product_id': self.productlot1.id, 'company_id': self.env.company.id})
+        lot1 = lotObj.create({'name': 'lot1', 'product_id': self.productlot1.id})
+        lot2 = lotObj.create({'name': 'lot2', 'product_id': self.productlot1.id})
 
         self.env['stock.quant']._update_available_quantity(self.productlot1, self.stock_location, 1, lot_id=lot1)
         self.env['stock.quant']._update_available_quantity(self.productlot1, self.stock_location, 2, lot_id=lot2)
@@ -702,7 +635,13 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         self.assertEqual(delivery_picking.move_lines.state, 'assigned')
         self.assertEqual(len(delivery_picking.move_lines.move_line_ids), 2)
 
-        self.start_tour(url, 'test_delivery_reserved_lots_1', login='admin', timeout=180)
+        self.phantom_js(
+            url,
+            "odoo.__DEBUG__.services['web_tour.tour'].run('test_delivery_reserved_lots_1')",
+            "odoo.__DEBUG__.services['web_tour.tour'].tours.test_delivery_reserved_lots_1.ready",
+            login='admin',
+            timeout=180,
+        )
 
         delivery_picking.invalidate_cache()
         lines = delivery_picking.move_line_ids
@@ -751,8 +690,8 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         })
 
         # Create 2 lots with the same name for productlot1 and productlot2
-        lot1 = self.env['stock.production.lot'].create({'name': 'lot1', 'product_id': self.productlot1.id, 'company_id': self.env.company.id})
-        lot2 = self.env['stock.production.lot'].create({'name': 'lot1', 'product_id': self.productlot2.id, 'company_id': self.env.company.id})
+        lot1 = self.env['stock.production.lot'].create({'name': 'lot1', 'product_id': self.productlot1.id})
+        lot2 = self.env['stock.production.lot'].create({'name': 'lot1', 'product_id': self.productlot2.id})
 
         self.env['stock.quant']._update_available_quantity(self.productlot1, self.stock_location, 2, lot_id=lot1)
         self.env['stock.quant']._update_available_quantity(self.productlot2, self.stock_location, 2, lot_id=lot2)
@@ -790,10 +729,10 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
 
         # Add 4 serial numbers productserial1
         snObj = self.env['stock.production.lot']
-        sn1 = snObj.create({'name': 'sn1', 'product_id': self.productserial1.id, 'company_id': self.env.company.id})
-        sn2 = snObj.create({'name': 'sn2', 'product_id': self.productserial1.id, 'company_id': self.env.company.id})
-        sn3 = snObj.create({'name': 'sn3', 'product_id': self.productserial1.id, 'company_id': self.env.company.id})
-        sn4 = snObj.create({'name': 'sn4', 'product_id': self.productserial1.id, 'company_id': self.env.company.id})
+        sn1 = snObj.create({'name': 'sn1', 'product_id': self.productserial1.id})
+        sn2 = snObj.create({'name': 'sn2', 'product_id': self.productserial1.id})
+        sn3 = snObj.create({'name': 'sn3', 'product_id': self.productserial1.id})
+        sn4 = snObj.create({'name': 'sn4', 'product_id': self.productserial1.id})
 
         self.env['stock.quant']._update_available_quantity(self.productserial1, self.stock_location, 1, lot_id=sn1)
         self.env['stock.quant']._update_available_quantity(self.productserial1, self.stock_location, 1, lot_id=sn2)
@@ -822,7 +761,13 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
 
         url = self._get_client_action_url(delivery_picking.id)
 
-        self.start_tour(url, 'test_delivery_reserved_with_sn_1', login='admin', timeout=180)
+        self.phantom_js(
+            url,
+            "odoo.__DEBUG__.services['web_tour.tour'].run('test_delivery_reserved_with_sn_1')",
+            "odoo.__DEBUG__.services['web_tour.tour'].tours.test_delivery_reserved_with_sn_1.ready",
+            login='admin',
+            timeout=180,
+        )
 
         # TODO: the framework should call invalidate_cache every time a test cursor is asked or
         #       given back
@@ -858,13 +803,19 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
 
         # Add lot1 et lot2 sur productlot1
         lotObj = self.env['stock.production.lot']
-        lot1 = lotObj.create({'name': 'lot1', 'product_id': self.productlot1.id, 'company_id': self.env.company.id})
-        lot2 = lotObj.create({'name': 'lot2', 'product_id': self.productlot1.id, 'company_id': self.env.company.id})
+        lot1 = lotObj.create({'name': 'lot1', 'product_id': self.productlot1.id})
+        lot2 = lotObj.create({'name': 'lot2', 'product_id': self.productlot1.id})
 
         receipts_picking.action_confirm()
         receipts_picking.action_assign()
 
-        self.start_tour(url, 'test_receipt_reserved_lots_multiloc_1', login='admin', timeout=180)
+        self.phantom_js(
+            url,
+            "odoo.__DEBUG__.services['web_tour.tour'].run('test_receipt_reserved_lots_multiloc_1')",
+            "odoo.__DEBUG__.services['web_tour.tour'].tours.test_receipt_reserved_lots_multiloc_1.ready",
+            login='admin',
+            timeout=180,
+        )
         receipts_picking.invalidate_cache()
         lines = receipts_picking.move_line_ids
         self.assertEqual(lines[0].qty_done, 0.0)
@@ -901,7 +852,13 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         )], limit=1)
         sequence.write({'number_next_actual': 1000})
 
-        self.start_tour(url, 'test_pack_multiple_scan', login='admin', timeout=180)
+        self.phantom_js(
+            url,
+            "odoo.__DEBUG__.services['web_tour.tour'].run('test_pack_multiple_scan')",
+            "odoo.__DEBUG__.services['web_tour.tour'].tours.test_pack_multiple_scan.ready",
+            login='admin',
+            timeout=180,
+        )
 
         # Check the new package is well delivered
         package = self.env['stock.quant.package'].search([
@@ -955,7 +912,13 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
             package_id=pack2,
         )
 
-        self.start_tour(url, 'test_pack_common_content_scan', login='admin', timeout=180)
+        self.phantom_js(
+            url,
+            "odoo.__DEBUG__.services['web_tour.tour'].run('test_pack_common_content_scan')",
+            "odoo.__DEBUG__.services['web_tour.tour'].tours.test_pack_common_content_scan.ready",
+            login='admin',
+            timeout=180,
+        )
 
     def test_pack_multiple_location(self):
         """ Simulate a picking where a package is scanned two times.
@@ -992,55 +955,15 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         )
 
         self.picking_type_internal.show_entire_packs = True
-        self.start_tour(url, 'test_pack_multiple_location', login='admin', timeout=180)
-
-        # Check the new package is well transfered
-        self.assertEqual(pack1.location_id, self.shelf2)
-
-    def test_pack_multiple_location_02(self):
-        """ Creates an internal transfer and reserves a package. Then this test will scan the
-        location source, the package (already in the barcode view) and the location destination.
-        """
-        clean_access_rights(self.env)
-        grp_pack = self.env.ref('stock.group_tracking_lot')
-        grp_multi_loc = self.env.ref('stock.group_stock_multi_locations')
-        self.env.user.write({'groups_id': [(4, grp_pack.id, 0)]})
-        self.env.user.write({'groups_id': [(4, grp_multi_loc.id, 0)]})
-
-        # Creates a package with 1 quant in it.
-        pack1 = self.env['stock.quant.package'].create({
-            'name': 'PACK0002020',
-        })
-        self.env['stock.quant']._update_available_quantity(
-            product_id=self.product1,
-            location_id=self.shelf1,
-            quantity=5,
-            package_id=pack1,
+        self.phantom_js(
+            url,
+            "odoo.__DEBUG__.services['web_tour.tour'].run('test_pack_multiple_location')",
+            "odoo.__DEBUG__.services['web_tour.tour'].tours.test_pack_multiple_location.ready",
+            login='admin',
+            timeout=180,
         )
 
-        # Creates an internal transfer for this package.
-        internal_picking = self.env['stock.picking'].create({
-            'location_id': self.shelf1.id,
-            'location_dest_id': self.shelf2.id,
-            'picking_type_id': self.picking_type_internal.id,
-        })
-        url = self._get_client_action_url(internal_picking.id)
-
-        self.env['stock.move'].create({
-            'name': 'test_delivery_reserved_2_1',
-            'location_id': self.shelf1.id,
-            'location_dest_id': self.shelf2.id,
-            'product_id': self.product1.id,
-            'product_uom': self.uom_unit.id,
-            'product_uom_qty': 5,
-            'picking_id': internal_picking.id,
-        })
-        internal_picking.action_confirm()
-        internal_picking.action_assign()
-
-        self.start_tour(url, 'test_pack_multiple_location_02', login='admin', timeout=180)
-
-        # Checks the new package is well transfered.
+        # Check the new package is well transfered
         self.assertEqual(pack1.location_id, self.shelf2)
 
     def test_put_in_pack_from_multiple_pages(self):
@@ -1089,7 +1012,13 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         internal_picking.action_confirm()
         internal_picking.action_assign()
 
-        self.start_tour(url, 'test_put_in_pack_from_multiple_pages', login='admin', timeout=180)
+        self.phantom_js(
+            url,
+            "odoo.__DEBUG__.services['web_tour.tour'].run('test_put_in_pack_from_multiple_pages')",
+            "odoo.__DEBUG__.services['web_tour.tour'].tours.test_put_in_pack_from_multiple_pages.ready",
+            login='admin',
+            timeout=180,
+        )
 
         pack = self.env['stock.quant.package'].search([])[-1]
         self.assertEqual(len(pack.quant_ids), 2)
@@ -1103,7 +1032,13 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         action_id = self.env.ref('stock_barcode.stock_barcode_action_main_menu')
         url = "/web#action=" + str(action_id.id)
 
-        self.start_tour(url, 'test_reload_flow', login='admin', timeout=180)
+        self.phantom_js(
+            url,
+            "odoo.__DEBUG__.services['web_tour.tour'].run('test_reload_flow')",
+            "odoo.__DEBUG__.services['web_tour.tour'].tours.test_reload_flow.ready",
+            login='admin',
+            timeout=180,
+        )
 
         move_line1 = self.env['stock.move.line'].search_count([
             ('product_id', '=', self.product1.id),
@@ -1134,9 +1069,21 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         action_id = self.env.ref('stock_barcode.stock_barcode_action_main_menu')
         url = "/web#action=" + str(action_id.id)
 
-        self.start_tour(url, 'test_receipt_duplicate_serial_number', login='admin', timeout=180)
+        self.phantom_js(
+            url,
+            "odoo.__DEBUG__.services['web_tour.tour'].run('test_receipt_duplicate_serial_number')",
+            "odoo.__DEBUG__.services['web_tour.tour'].tours.test_receipt_duplicate_serial_number.ready",
+            login='admin',
+            timeout=180,
+        )
 
-        self.start_tour(url, 'test_delivery_duplicate_serial_number', login='admin', timeout=180)
+        self.phantom_js(
+            url,
+            "odoo.__DEBUG__.services['web_tour.tour'].run('test_delivery_duplicate_serial_number')",
+            "odoo.__DEBUG__.services['web_tour.tour'].tours.test_delivery_duplicate_serial_number.ready",
+            login='admin',
+            timeout=180,
+        )
 
     def test_bypass_source_scan(self):
         """ Scan a lot, package, product without source location scan. """
@@ -1148,8 +1095,8 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         self.env.user.write({'groups_id': [(4, grp_pack.id, 0)]})
         self.env.user.write({'groups_id': [(4, grp_multi_loc.id, 0)]})
 
-        lot1 = self.env['stock.production.lot'].create({'name': 'lot1', 'product_id': self.productlot1.id, 'company_id': self.env.company.id})
-        lot2 = self.env['stock.production.lot'].create({'name': 'serial1', 'product_id': self.productserial1.id, 'company_id': self.env.company.id})
+        lot1 = self.env['stock.production.lot'].create({'name': 'lot1', 'product_id': self.productlot1.id})
+        lot2 = self.env['stock.production.lot'].create({'name': 'serial1', 'product_id': self.productserial1.id})
 
         pack1 = self.env['stock.quant.package'].create({
             'name': 'THEPACK',
@@ -1196,7 +1143,13 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         delivery_picking.action_confirm()
         delivery_picking.action_assign()
 
-        self.start_tour(url, 'test_bypass_source_scan', login='admin', timeout=180)
+        self.phantom_js(
+            url,
+            "odoo.__DEBUG__.services['web_tour.tour'].run('test_bypass_source_scan')",
+            "odoo.__DEBUG__.services['web_tour.tour'].tours.test_bypass_source_scan.ready",
+            login='admin',
+            timeout=180,
+        )
 
     def test_put_in_pack_from_different_location(self):
         clean_access_rights(self.env)
@@ -1236,7 +1189,13 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         internal_picking.action_confirm()
         internal_picking.action_assign()
 
-        self.start_tour(url, 'test_put_in_pack_from_different_location', login='admin', timeout=180)
+        self.phantom_js(
+            url,
+            "odoo.__DEBUG__.services['web_tour.tour'].run('test_put_in_pack_from_different_location')",
+            "odoo.__DEBUG__.services['web_tour.tour'].tours.test_put_in_pack_from_different_location.ready",
+            login='admin',
+            timeout=180,
+        )
         pack = self.env['stock.quant.package'].search([])[-1]
         self.assertEqual(len(pack.quant_ids), 2)
         self.assertEqual(pack.location_id, self.shelf2)
@@ -1280,7 +1239,13 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         internal_picking.action_confirm()
         internal_picking.action_assign()
 
-        self.start_tour(url, 'test_put_in_pack_before_dest', login='admin', timeout=180)
+        self.phantom_js(
+            url,
+            "odoo.__DEBUG__.services['web_tour.tour'].run('test_put_in_pack_before_dest')",
+            "odoo.__DEBUG__.services['web_tour.tour'].tours.test_put_in_pack_before_dest.ready",
+            login='admin',
+            timeout=180,
+        )
         pack = self.env['stock.quant.package'].search([])[-1]
         self.assertEqual(len(pack.quant_ids), 2)
         self.assertEqual(pack.location_id, self.shelf2)
@@ -1316,14 +1281,19 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
             'package_id': pack1.id,
             'is_done': False,
             'picking_id': out_picking.id,
-            'company_id': self.env.company.id,
         })
 
         url = self._get_client_action_url(out_picking.id)
         out_picking.action_confirm()
         out_picking.action_assign()
 
-        self.start_tour(url, 'test_highlight_packs', login='admin', timeout=180)
+        self.phantom_js(
+            url,
+            "odoo.__DEBUG__.services['web_tour.tour'].run('test_highlight_packs')",
+            "odoo.__DEBUG__.services['web_tour.tour'].tours.test_highlight_packs.ready",
+            login='admin',
+            timeout=180,
+        )
 
 
 @tagged('post_install', '-at_install')
@@ -1340,7 +1310,13 @@ class TestInventoryAdjustmentBarcodeClientAction(TestBarcodeClientAction):
         action_id = self.env.ref('stock_barcode.stock_barcode_action_main_menu')
         url = "/web#action=" + str(action_id.id)
 
-        self.start_tour(url, 'test_inventory_adjustment', login='admin', timeout=180)
+        self.phantom_js(
+            url,
+            "odoo.__DEBUG__.services['web_tour.tour'].run('test_inventory_adjustment')",
+            "odoo.__DEBUG__.services['web_tour.tour'].tours.test_inventory_adjustment.ready",
+            login='admin',
+            timeout=180,
+        )
 
         inventory = self.env['stock.inventory.line'].search([('product_id', '=', self.product1.id)]).inventory_id
         self.assertTrue(inventory)
@@ -1364,7 +1340,13 @@ class TestInventoryAdjustmentBarcodeClientAction(TestBarcodeClientAction):
         action_id = self.env.ref('stock_barcode.stock_barcode_action_main_menu')
         url = "/web#action=" + str(action_id.id)
 
-        self.start_tour(url, 'test_inventory_adjustment_mutli_location', login='admin', timeout=180)
+        self.phantom_js(
+            url,
+            "odoo.__DEBUG__.services['web_tour.tour'].run('test_inventory_adjustment_mutli_location')",
+            "odoo.__DEBUG__.services['web_tour.tour'].tours.test_inventory_adjustment_mutli_location.ready",
+            login='admin',
+            timeout=180,
+        )
 
         inventory = self.env['stock.inventory.line'].search([('product_id', '=', self.product1.id)], limit=1).inventory_id
         self.assertTrue(inventory)
@@ -1400,7 +1382,13 @@ class TestInventoryAdjustmentBarcodeClientAction(TestBarcodeClientAction):
         action_id = self.env.ref('stock_barcode.stock_barcode_action_main_menu')
         url = "/web#action=" + str(action_id.id)
 
-        self.start_tour(url, 'test_inventory_adjustment_tracked_product', login='admin', timeout=180)
+        self.phantom_js(
+            url,
+            "odoo.__DEBUG__.services['web_tour.tour'].run('test_inventory_adjustment_tracked_product')",
+            "odoo.__DEBUG__.services['web_tour.tour'].tours.test_inventory_adjustment_tracked_product.ready",
+            login='admin',
+            timeout=180,
+        )
 
         inventory = self.env['stock.inventory.line'].search([('product_id', '=', self.productlot1.id)], limit=1).inventory_id
         self.assertTrue(inventory)
@@ -1419,7 +1407,7 @@ class TestInventoryAdjustmentBarcodeClientAction(TestBarcodeClientAction):
         """ Simulate scanning a product and its weight
         thanks to the barcode nomenclature """
         clean_access_rights(self.env)
-        self.env.company.nomenclature_id = self.env.ref('barcodes.default_barcode_nomenclature')
+        self.env.user.company_id.nomenclature_id = self.env.ref('barcodes.default_barcode_nomenclature')
 
         product_weight = self.env['product.product'].create({
             'name': 'product_weight',
@@ -1431,11 +1419,17 @@ class TestInventoryAdjustmentBarcodeClientAction(TestBarcodeClientAction):
         action_id = self.env.ref('stock_barcode.stock_barcode_action_main_menu')
         url = "/web#action=" + str(action_id.id)
 
-        self.start_tour(url, 'test_inventory_nomenclature', login='admin', timeout=180)
+        self.phantom_js(
+            url,
+            "odoo.__DEBUG__.services['web_tour.tour'].run('test_inventory_nomenclature')",
+            "odoo.__DEBUG__.services['web_tour.tour'].tours.test_inventory_nomenclature.ready",
+            login='admin',
+            timeout=180,
+        )
         quantity = self.env['stock.move.line'].search([
             ('product_id', '=', product_weight.id),
             ('state', '=', 'done'),
-            ('location_id', '=', product_weight.property_stock_inventory.id),
+            ('location_id', '=', self.env.ref('stock.location_inventory').id),
         ])
 
         self.assertEqual(quantity.qty_done, 12.345)
@@ -1456,7 +1450,13 @@ class TestInventoryAdjustmentBarcodeClientAction(TestBarcodeClientAction):
         action_id = self.env.ref('stock_barcode.stock_barcode_action_main_menu')
         url = "/web#action=" + str(action_id.id)
 
-        self.start_tour(url, "test_inventory_package", login="admin", timeout=180)
+        self.phantom_js(
+            url,
+            "odoo.__DEBUG__.services['web_tour.tour'].run('test_inventory_package')",
+            "odoo.__DEBUG__.services['web_tour.tour'].tours.test_inventory_package.ready",
+            login='admin',
+            timeout=180,
+        )
 
         # Check the package is updated after adjustment
         self.assertDictEqual(

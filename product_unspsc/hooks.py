@@ -14,7 +14,7 @@ def post_init_hook(cr, registry):
 
 def uninstall_hook(cr, registry):
     cr.execute("DELETE FROM product_unspsc_code;")
-    cr.execute("DELETE FROM ir_model_data WHERE model='product_unspsc_code';")
+    cr.execute("DELETE FROM ir_model_data WHERE model='product.unspsc.code';")
 
 def _load_unspsc_codes(cr, registry):
     """Import CSV data as it is faster than xml and because we can't use

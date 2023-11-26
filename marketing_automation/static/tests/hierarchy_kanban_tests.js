@@ -54,10 +54,10 @@ QUnit.module('Marketing Automation', {
     }
 }, function () {
 
-    QUnit.test('render basic hirarchy kanban', async function (assert) {
+    QUnit.test('render basic hirarchy kanban', function (assert) {
         assert.expect(10);
 
-        var form = await createView({
+        var form = createView({
             View: FormView,
             model: 'campaign',
             data: this.data,
@@ -90,9 +90,9 @@ QUnit.module('Marketing Automation', {
         // Checking number of child and their positions
         var $parentRecords = form.$('.o_ma_hierarchy_container .o_kanban_view > .o_kanban_record');
         assert.strictEqual($parentRecords.length, 2, "There should be 2 parent");
-        assert.containsOnce($($parentRecords[0]), '> .o_hierarchy_children > .o_kanban_record', "First parent should have 1 child");
-        assert.containsN($($parentRecords[1]), '> .o_hierarchy_children > .o_kanban_record', 2, "Second parent should have 2 child");
-        assert.containsOnce($($parentRecords[1]), '.o_hierarchy_children .o_hierarchy_children > .o_kanban_record', "2nd parent's 2nd Child should have 1 child");
+        assert.strictEqual($($parentRecords[0]).find('> .o_hierarchy_children > .o_kanban_record').length, 1, "First parent should have 1 child");
+        assert.strictEqual($($parentRecords[1]).find('> .o_hierarchy_children > .o_kanban_record').length, 2, "Second parent should have 2 child");
+        assert.strictEqual($($parentRecords[1]).find('.o_hierarchy_children .o_hierarchy_children > .o_kanban_record').length, 1, "2nd parent's 2nd Child should have 1 child");
 
         // Checking titles of kanban to verify proper values
         assert.strictEqual($($parentRecords[0]).find('> .o_title').text(), 'Parent 1', "Title of 1st parent");

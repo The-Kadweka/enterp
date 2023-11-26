@@ -5,13 +5,13 @@
 {
     'name': 'Loyalty Program',
     'version': '1.0',
-    'category': 'Sales/Point Of Sale',
+    'category': 'Point of Sale',
     'sequence': 6,
     'summary': 'Loyalty Program for the Point of Sale ',
     'description': """
 
 This module allows you to define a loyalty program in
-the point of sale, where customers earn loyalty points
+the point of sale, where the customers earn loyalty points
 and get rewards.
 
 """,

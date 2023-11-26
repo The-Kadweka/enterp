@@ -25,7 +25,7 @@ var Menu = Widget.extend({
     init: function (parent, menu_data) {
         var self = this;
         this._super.apply(this, arguments);
-        this.home_menu_displayed = false;
+        this.home_menu_displayed = true;
         this.backbutton_displayed = false;
 
         this.$menu_sections = {};
@@ -67,15 +67,15 @@ var Menu = Widget.extend({
 
         // Systray Menu
         this.systray_menu = new SystrayMenu(this);
-        var autoMoreMenu = this.systray_menu.attachTo(this.$('.o_menu_systray')).then(function () {
-            dom.initAutoMoreMenu(self.$section_placeholder, {
-                maxWidth: function () {
-                    return self.$el.width() - (self.$menu_toggle.outerWidth(true) + self.$menu_brand_placeholder.outerWidth(true) + self.systray_menu.$el.outerWidth(true));
-                },
-            });
+        this.systray_menu.attachTo(this.$('.o_menu_systray'));
+
+        dom.initAutoMoreMenu(this.$section_placeholder, {
+            maxWidth: function () {
+                return self.$el.width() - (self.$menu_toggle.outerWidth(true) + self.$menu_brand_placeholder.outerWidth(true) + self.systray_menu.$el.outerWidth(true));
+            },
         });
 
-        return Promise.all([this._super.apply(this, arguments), autoMoreMenu]);
+        return this._super.apply(this, arguments);
     },
     toggle_mode: function (home_menu, overapp) {
         this.home_menu_displayed = !!home_menu;
@@ -83,6 +83,11 @@ var Menu = Widget.extend({
 
         this.$menu_toggle.toggleClass('fa-chevron-left', this.home_menu_displayed)
                          .toggleClass('fa-th', !this.home_menu_displayed);
+        if (this.home_menu_displayed && !this.backbutton_displayed) {
+            this.$menu_toggle.removeAttr('accesskey');
+        } else {
+            this.$menu_toggle.attr('accesskey', 'h');
+        }
         this.$menu_toggle.toggleClass('d-none', this.home_menu_displayed && !this.backbutton_displayed);
         this.$menu_brand_placeholder.toggleClass('d-none', this.home_menu_displayed);
         this.$section_placeholder.toggleClass('d-none', this.home_menu_displayed);
@@ -234,10 +239,7 @@ var Menu = Widget.extend({
         var $target = $(ev.currentTarget);
         var $opened = $target.siblings('.show');
         if ($opened.length) {
-            $opened.find('[data-toggle="dropdown"]:first').dropdown('toggle');
-            $opened.removeClass('show');
             $target.find('[data-toggle="dropdown"]:first').dropdown('toggle');
-            $target.addClass('show');
         }
     },
     /**

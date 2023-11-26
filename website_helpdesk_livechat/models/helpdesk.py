@@ -16,7 +16,7 @@ class HelpdeskTeam(models.Model):
     def _get_livechat_channel(self):
         LiveChat = self.env['im_livechat.channel']
         for team in self:
-            if team.name and team.use_website_helpdesk_livechat:
+            if not team.feature_livechat_channel_id and team.name and team.use_website_helpdesk_livechat:
                 channel = LiveChat.search([('name', '=', team.name)])
                 if not channel:
                     if team.member_ids:
@@ -24,8 +24,6 @@ class HelpdeskTeam(models.Model):
                     else:
                         channel = LiveChat.create({'name': team.name})
                 team.feature_livechat_channel_id = channel
-            else:
-                team.feature_livechat_channel_id = False
 
 
 class MailChannel(models.Model):

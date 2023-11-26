@@ -1,23 +1,20 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* delivery_usps
+# * delivery_usps
 # 
 # Translators:
-# Martin Trigaux, 2020
-# Marc Tormo i Bochaca <mtbochaca@gmail.com>, 2020
-# RGB Consulting <odoo@rgbconsulting.com>, 2020
-# Quim - eccit <quim@eccit.com>, 2020
-# José Cabrera Lozano <jose.cabrera@edukative.es>, 2021
-# Harcogourmet, 2022
-# marcescu, 2022
+# Martin Trigaux, 2018
+# Marc Tormo i Bochaca <mtbochaca@gmail.com>, 2018
+# RGB Consulting <odoo@rgbconsulting.com>, 2018
+# Quim - eccit <quim@eccit.com>, 2018
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~12.5+e\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-13 11:38+0000\n"
-"PO-Revision-Date: 2019-08-26 09:35+0000\n"
-"Last-Translator: marcescu, 2022\n"
+"POT-Creation-Date: 2019-01-15 15:18+0000\n"
+"PO-Revision-Date: 2018-08-24 11:37+0000\n"
+"Last-Translator: Quim - eccit <quim@eccit.com>, 2018\n"
 "Language-Team: Catalan (https://www.transifex.com/odoo/teams/41243/ca/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -26,27 +23,30 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_intl_non_delivery_option__abandon
+#: selection:delivery.carrier,usps_intl_non_delivery_option:0
 msgid "Abandon"
-msgstr "Abandona"
+msgstr ""
 
 #. module: delivery_usps
 #: model:ir.model.fields,field_description:delivery_usps.field_delivery_carrier__usps_account_validated
 msgid "Account Validated"
-msgstr "Compte validat"
+msgstr ""
+
+#. module: delivery_usps
+#: selection:delivery.carrier,delivery_type:0
+msgid "Based on Rules"
+msgstr "En base a regles"
 
 #. module: delivery_usps
 #: model:ir.model.fields,help:delivery_usps.field_delivery_carrier__usps_account_validated
 msgid "Check this box if your account is validated by USPS"
-msgstr "Marqueu aquesta casella si el vostre compte està validat per USPS"
+msgstr ""
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:64
 #, python-format
 msgid "Company phone number is invalid. Please insert a US phone number."
 msgstr ""
-"El número de telèfon de l'empresa no és vàlid. Introduïu un número de "
-"telèfon americà."
 
 #. module: delivery_usps
 #: model:ir.model.fields,field_description:delivery_usps.field_delivery_carrier__usps_content_type
@@ -54,139 +54,162 @@ msgid "Content Type"
 msgstr "Tipus de contingut"
 
 #. module: delivery_usps
-#: model:ir.model.fields,field_description:delivery_usps.field_delivery_carrier__usps_delivery_nature
-msgid "Delivery Nature"
-msgstr "Naturalesa del lliurament"
+#: selection:delivery.carrier,delivery_type:0
+msgid "DHL"
+msgstr ""
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_content_type__documents
+#: model:ir.model,name:delivery_usps.model_delivery_carrier
+msgid "Delivery Methods"
+msgstr "Mètodes lliurament"
+
+#. module: delivery_usps
+#: model:ir.model.fields,field_description:delivery_usps.field_delivery_carrier__usps_delivery_nature
+msgid "Delivery Nature"
+msgstr ""
+
+#. module: delivery_usps
+#: selection:delivery.carrier,usps_content_type:0
 msgid "Documents"
 msgstr "Documents"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_delivery_nature__domestic
+#: selection:delivery.carrier,usps_delivery_nature:0
 msgid "Domestic"
-msgstr "Domèstic"
+msgstr ""
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/delivery_usps.py:0
+#: selection:delivery.carrier,delivery_type:0
+msgid "Easypost"
+msgstr ""
+
+#. module: delivery_usps
+#: code:addons/delivery_usps/models/delivery_usps.py:104
 #, python-format
 msgid ""
 "Error:\n"
 "%s"
 msgstr ""
-"Error:\n"
-"%s"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_service__express
+#: selection:delivery.carrier,usps_service:0
 msgid "Express"
-msgstr "Express"
+msgstr ""
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_service__first_class
+#: selection:delivery.carrier,delivery_type:0
+msgid "FedEx"
+msgstr ""
+
+#. module: delivery_usps
+#: selection:delivery.carrier,usps_service:0
 msgid "First Class"
-msgstr "Primera classe"
+msgstr ""
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_first_class_mail_type__flat
+#: selection:delivery.carrier,delivery_type:0
+msgid "Fixed Price"
+msgstr "Preu fix"
+
+#. module: delivery_usps
+#: selection:delivery.carrier,usps_first_class_mail_type:0
 msgid "Flat"
-msgstr "Pla"
+msgstr ""
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_mail_type__flatrate
+#: selection:delivery.carrier,usps_mail_type:0
 msgid "Flat Rate"
-msgstr "Tarifa plana"
+msgstr ""
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_domestic_regular_container__flat_rate_box
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_international_regular_container__flatratebox
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_mail_type__flatratebox
+#: selection:delivery.carrier,usps_domestic_regular_container:0
+#: selection:delivery.carrier,usps_international_regular_container:0
+#: selection:delivery.carrier,usps_mail_type:0
 msgid "Flat Rate Box"
-msgstr "Caixa de tarifa plana"
+msgstr ""
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_domestic_regular_container__flat_rate_envelope
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_international_regular_container__flatrateenv
+#: selection:delivery.carrier,usps_domestic_regular_container:0
+#: selection:delivery.carrier,usps_international_regular_container:0
 msgid "Flat Rate Envelope"
-msgstr "Sobre amb tarifa plana"
+msgstr ""
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_content_type__gift
+#: selection:delivery.carrier,usps_content_type:0
 msgid "Gift"
 msgstr "Regal "
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_delivery_nature__international
+#: selection:delivery.carrier,usps_delivery_nature:0
 msgid "International"
-msgstr "International"
+msgstr ""
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_size_container__large
+#: selection:delivery.carrier,usps_size_container:0
 msgid "Large"
 msgstr "Gran"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_mail_type__largeenvelope
+#: selection:delivery.carrier,usps_mail_type:0
 msgid "Large Envelope"
-msgstr "Sobre gran"
+msgstr ""
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_domestic_regular_container__lg_flat_rate_box
+#: selection:delivery.carrier,usps_domestic_regular_container:0
 msgid "Large Flat Rate Box"
-msgstr "Caixa gran de tarifa plana"
+msgstr ""
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_domestic_regular_container__legal_flat_rate_envelope
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_international_regular_container__legalflatrateenv
+#: selection:delivery.carrier,usps_domestic_regular_container:0
+#: selection:delivery.carrier,usps_international_regular_container:0
 msgid "Legal Flat Rate Envelope"
-msgstr "Sobre legal de tarifa plana"
+msgstr ""
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_first_class_mail_type__letter
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_mail_type__letter
+#: selection:delivery.carrier,usps_first_class_mail_type:0
+#: selection:delivery.carrier,usps_mail_type:0
 msgid "Letter"
-msgstr "Carta"
+msgstr ""
 
 #. module: delivery_usps
 #: model:ir.model.fields,field_description:delivery_usps.field_delivery_carrier__usps_machinable
 msgid "Machinable"
-msgstr "Mecanitzable"
+msgstr ""
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_domestic_regular_container__md_flat_rate_box
+#: selection:delivery.carrier,usps_domestic_regular_container:0
 msgid "Medium Flat Rate Box"
-msgstr "Caixa plana mitjana"
+msgstr ""
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_content_type__merchandise
+#: selection:delivery.carrier,usps_content_type:0
 msgid "Merchandise"
-msgstr "Merchandise"
+msgstr ""
 
 #. module: delivery_usps
 #: model:ir.model.fields,field_description:delivery_usps.field_delivery_carrier__usps_intl_non_delivery_option
 msgid "Non delivery option"
-msgstr "Opció de no entrega"
+msgstr ""
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_container__nonrectangular
+#: selection:delivery.carrier,usps_container:0
 msgid "Non-rectangular"
-msgstr "No rectangular"
+msgstr ""
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_label_file_type__pdf
+#: selection:delivery.carrier,usps_label_file_type:0
 msgid "PDF"
 msgstr "PDF"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_mail_type__package
+#: selection:delivery.carrier,usps_mail_type:0
 msgid "Package"
 msgstr "Paquet"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_first_class_mail_type__package_service
+#: selection:delivery.carrier,usps_first_class_mail_type:0
 msgid "Package Service"
-msgstr "Servei de paquets"
+msgstr ""
 
 #. module: delivery_usps
 #: model:ir.model.fields,field_description:delivery_usps.field_delivery_carrier__usps_custom_container_girth
@@ -209,66 +232,62 @@ msgid "Package width (in inches)"
 msgstr ""
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_domestic_regular_container__padded_flat_rate_envelope
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_international_regular_container__paddedflatrateenv
+#: selection:delivery.carrier,usps_domestic_regular_container:0
+#: selection:delivery.carrier,usps_international_regular_container:0
 msgid "Padded Flat Rate Envelope"
-msgstr "Sobre de velocitat plana inclinada"
+msgstr ""
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_first_class_mail_type__parcel
+#: selection:delivery.carrier,usps_first_class_mail_type:0
 msgid "Parcel"
-msgstr "Paquet"
+msgstr ""
 
 #. module: delivery_usps
 #: model:ir.model.fields,help:delivery_usps.field_delivery_carrier__usps_machinable
 msgid ""
 "Please check on USPS website to ensure that your package is machinable."
 msgstr ""
-"Si us plau, comprovi en la pàgina web de USPS que el seu paquet és "
-"mecanitzable."
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:83
 #, python-format
 msgid ""
 "Please choose another service (maximum weight of this service is 4 pounds)"
-msgstr "Trieu un altre servei (el pes màxim d'aquest servei és de 4 lliures)"
+msgstr ""
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:69
 #, python-format
 msgid "Please enter a valid ZIP code in recipient address"
-msgstr "Introduïu un codi postal vàlid a l'adreça del destinatari"
+msgstr ""
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:62
 #, python-format
 msgid "Please enter a valid ZIP code in your Company address"
-msgstr "Introduïu un codi postal vàlid a l'adreça de l'empresa"
+msgstr ""
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:76
 #, python-format
 msgid "Please provide at least one item to ship."
-msgstr "Proporcioneu almenys un element per enviar."
+msgstr ""
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:60
 #, python-format
 msgid ""
 "Please set country U.S.A in your company address, Service is only available "
 "for U.S.A"
 msgstr ""
-"Si us plau, estableixi el país de Estats Units en la direcció de la seva "
-"empresa, el servei només està disponible per a Estats Units "
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_first_class_mail_type__postcard
+#: selection:delivery.carrier,usps_first_class_mail_type:0
 msgid "Postcard"
-msgstr "Targeta postal"
+msgstr ""
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_service__priority
+#: selection:delivery.carrier,usps_service:0
 msgid "Priority"
 msgstr "Prioritat"
 
@@ -278,228 +297,223 @@ msgid "Provider"
 msgstr "Proveïdor"
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
-#, python-format
-msgid "Quantity for each move line should be less than 1000."
-msgstr "La quantitat per a cada línia de moviment ha de ser inferior a 1000."
-
-#. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:372
 #, python-format
 msgid "Recipient address cannot be found. Please check the address exists."
 msgstr ""
-"No s'ha trobat l'adreça del destinatari. Comproveu que l'adreça existeix."
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_container__rectangular
+#: selection:delivery.carrier,usps_container:0
 msgid "Rectangular"
-msgstr "Rectangular"
+msgstr ""
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_intl_non_delivery_option__redirect
+#: selection:delivery.carrier,usps_intl_non_delivery_option:0
 msgid "Redirect"
-msgstr "Redirigir"
+msgstr ""
 
 #. module: delivery_usps
 #: model:ir.model.fields,field_description:delivery_usps.field_delivery_carrier__usps_redirect_partner_id
 msgid "Redirect Partner"
-msgstr "Redirigeix l'empresa"
+msgstr ""
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_size_container__regular
+#: selection:delivery.carrier,usps_size_container:0
 msgid "Regular"
 msgstr "Regular"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_container__variable
+#: selection:delivery.carrier,usps_container:0
 msgid "Regular < 12 inch"
-msgstr "Regular < 12 polzades"
+msgstr ""
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_content_type__return
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_intl_non_delivery_option__return
+#: selection:delivery.carrier,usps_content_type:0
+#: selection:delivery.carrier,usps_intl_non_delivery_option:0
 msgid "Return"
 msgstr "Retorna"
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_content_type__sample
+#: selection:delivery.carrier,usps_content_type:0
 msgid "Sample"
-msgstr "Mostra"
+msgstr ""
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/delivery_usps.py:0
+#: code:addons/delivery_usps/models/delivery_usps.py:169
 #, python-format
 msgid "Shipment N° %s has been cancelled"
 msgstr ""
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/delivery_usps.py:0
-#: code:addons/delivery_usps/models/delivery_usps.py:0
+#: code:addons/delivery_usps/models/delivery_usps.py:149
 #, python-format
 msgid "Shipment created into USPS <br/> <b>Tracking Number : </b>%s"
-msgstr "Enviament creat a l'USPS <br/> <b>Número de seguiment : </b>%s"
+msgstr ""
 
 #. module: delivery_usps
-#: model:ir.model,name:delivery_usps.model_delivery_carrier
-msgid "Shipping Methods"
-msgstr "Mètodes d'enviament"
-
-#. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_domestic_regular_container__sm_flat_rate_box
+#: selection:delivery.carrier,usps_domestic_regular_container:0
 msgid "Small Flat Rate Box"
-msgstr "Caixa petita de tarifa plana"
+msgstr ""
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_domestic_regular_container__sm_flat_rate_envelope
+#: selection:delivery.carrier,usps_domestic_regular_container:0
 msgid "Small Flat Rate Envelope"
-msgstr "Sobre petit amb tarifa plana"
+msgstr ""
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__usps_label_file_type__tif
+#: selection:delivery.carrier,usps_label_file_type:0
 msgid "TIF"
-msgstr "TIF"
+msgstr ""
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:46
 #, python-format
 msgid ""
 "The address of your company is missing or wrong (Missing field(s) :  \n"
 " %s)"
 msgstr ""
-"La direcció de la seva empresa falta o és incorrecta (camp(s) que falte(n) :\n"
-" %s)"
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:66
 #, python-format
 msgid ""
-"The estimated price cannot be computed because the weight of your product %s"
-" is missing."
+"The estimated price cannot be computed because the weight of your product is"
+" missing."
 msgstr ""
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:55
 #, python-format
 msgid ""
 "The recipient address is missing or wrong (Missing field(s) :  \n"
 " %s)"
 msgstr ""
-"L'adreça del destinatari falta o és incorrecta (camps que falte(n) :  \n"
-" %s)"
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:155
 #, python-format
 msgid "The selected USPS service (%s) cannot be used to deliver this package."
 msgstr ""
-"El servei USPS seleccionat (%s) no es pot utilitzar per a lliurar aquest "
-"paquet."
 
 #. module: delivery_usps
 #: model:ir.model.fields,field_description:delivery_usps.field_delivery_carrier__usps_international_regular_container
 msgid "Type of USPS International regular container"
-msgstr "Tipus de contenidor regular USPS International"
+msgstr ""
 
 #. module: delivery_usps
 #: model:ir.model.fields,field_description:delivery_usps.field_delivery_carrier__usps_domestic_regular_container
 msgid "Type of USPS domestic regular container"
-msgstr "Tipus de contenidor regular intern USPS"
+msgstr ""
 
 #. module: delivery_usps
 #: model:ir.model.fields,field_description:delivery_usps.field_delivery_carrier__usps_container
 msgid "Type of container"
-msgstr "Tipus de contenidor"
+msgstr ""
 
 #. module: delivery_usps
-#: model:ir.model.fields.selection,name:delivery_usps.selection__delivery_carrier__delivery_type__usps
+#: selection:delivery.carrier,delivery_type:0
+msgid "UPS"
+msgstr "UPS"
+
+#. module: delivery_usps
+#: selection:delivery.carrier,delivery_type:0
 msgid "USPS"
 msgstr "USPS"
 
 #. module: delivery_usps
 #: model_terms:ir.ui.view,arch_db:delivery_usps.view_delivery_carrier_form_with_provider_usps
 msgid "USPS Configuration"
-msgstr "Configuració USPS"
+msgstr ""
+
+#. module: delivery_usps
+#: model_terms:ir.ui.view,arch_db:delivery_usps.res_config_settings_view_form_sale
+#: model_terms:ir.ui.view,arch_db:delivery_usps.res_config_settings_view_form_stock
+msgid "USPS Delivery Methods"
+msgstr ""
 
 #. module: delivery_usps
 #: model:delivery.carrier,name:delivery_usps.delivery_carrier_usps_domestic
 #: model:product.product,name:delivery_usps.product_product_delivery_usps_domestic
 #: model:product.template,name:delivery_usps.product_product_delivery_usps_domestic_product_template
 msgid "USPS Domestic Flat Rate Envelope"
-msgstr "Sobre nacional de tarifa plana de USPS"
+msgstr ""
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:73
 #, python-format
 msgid ""
 "USPS Domestic is used only to ship inside of the U.S.A. Please change the "
 "delivery method into USPS International."
 msgstr ""
-"L'USPS Domestic només s'utilitza per enviar dins dels EUA Si us plau canvieu"
-" el mètode de lliurament a l'USPS International."
 
 #. module: delivery_usps
 #: model:ir.model.fields,field_description:delivery_usps.field_delivery_carrier__usps_first_class_mail_type
 msgid "USPS First Class Mail Type"
-msgstr "Tipus de correu de primera classe USPS"
+msgstr ""
 
 #. module: delivery_usps
 #: model:delivery.carrier,name:delivery_usps.delivery_carrier_usps_international
 #: model:product.product,name:delivery_usps.product_product_delivery_usps_international
 #: model:product.template,name:delivery_usps.product_product_delivery_usps_international_product_template
 msgid "USPS International Flat Rate Box"
-msgstr "Caixa de tarifa plana internacional de USPS"
+msgstr ""
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:71
 #, python-format
 msgid ""
 "USPS International is used only to ship outside of the U.S.A. Please change "
 "the delivery method into USPS Domestic."
 msgstr ""
-"L'USPS International només s'utilitza per enviar fora dels EUA Si us plau "
-"canvieu el mètode d'entrega a USPS Domestic."
 
 #. module: delivery_usps
 #: model:ir.model.fields,field_description:delivery_usps.field_delivery_carrier__usps_label_file_type
 msgid "USPS Label File Type"
-msgstr "Tipus de fitxer de l'etiqueta USPS"
+msgstr ""
 
 #. module: delivery_usps
 #: model:ir.model.fields,field_description:delivery_usps.field_delivery_carrier__usps_mail_type
 msgid "USPS Mail Type"
-msgstr "Tipus de correu USPS"
+msgstr ""
 
 #. module: delivery_usps
 #: model:ir.model.fields,field_description:delivery_usps.field_delivery_carrier__usps_service
 msgid "USPS Service"
-msgstr "Servei USPS"
-
-#. module: delivery_usps
-#: model_terms:ir.ui.view,arch_db:delivery_usps.res_config_settings_view_form_sale
-#: model_terms:ir.ui.view,arch_db:delivery_usps.res_config_settings_view_form_stock
-msgid "USPS Shipping Methods"
-msgstr "Mètodes d'enviament USPS"
+msgstr ""
 
 #. module: delivery_usps
 #: model:ir.model.fields,field_description:delivery_usps.field_delivery_carrier__usps_username
 msgid "USPS User ID"
-msgstr "ID d'usuari USPS"
+msgstr ""
 
 #. module: delivery_usps
 #: model:product.product,uom_name:delivery_usps.product_product_delivery_usps_domestic
 #: model:product.product,uom_name:delivery_usps.product_product_delivery_usps_international
 #: model:product.template,uom_name:delivery_usps.product_product_delivery_usps_domestic_product_template
 #: model:product.template,uom_name:delivery_usps.product_product_delivery_usps_international_product_template
-msgid "Units"
-msgstr "Unitats"
+msgid "Unit(s)"
+msgstr "Unitat(s)"
 
 #. module: delivery_usps
 #: model:ir.model.fields,field_description:delivery_usps.field_delivery_carrier__usps_size_container
 msgid "Usps Size Container"
-msgstr "Contenidor de la mida de Usps"
+msgstr ""
 
 #. module: delivery_usps
-#: code:addons/delivery_usps/models/usps_request.py:0
+#: code:addons/delivery_usps/models/usps_request.py:374
 #, python-format
 msgid "Your company or recipient ZIP code is incorrect."
-msgstr "El codi postal de l'empresa o del destinatari és incorrecte."
+msgstr ""
+
+#. module: delivery_usps
+#: selection:delivery.carrier,delivery_type:0
+msgid "bpost"
+msgstr "bpost"
+
+#. module: delivery_usps
+#: model:product.product,weight_uom_name:delivery_usps.product_product_delivery_usps_domestic
+#: model:product.product,weight_uom_name:delivery_usps.product_product_delivery_usps_international
+#: model:product.template,weight_uom_name:delivery_usps.product_product_delivery_usps_domestic_product_template
+#: model:product.template,weight_uom_name:delivery_usps.product_product_delivery_usps_international_product_template
+msgid "kg"
+msgstr "kg"

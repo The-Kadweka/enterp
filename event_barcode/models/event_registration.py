@@ -3,6 +3,7 @@ import logging
 import random
 
 from odoo import api, fields, models
+from odoo.tools import pycompat
 
 _logger = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ class EventRegistration(models.Model):
         Generate 8 bytes (64 bits) barcodes as 16 bytes barcodes are not
         compatible with all scanners.
          """
-        return str(random.getrandbits(64))
+        return pycompat.text_type(random.getrandbits(64))
 
     barcode = fields.Char(default=_get_random_token, readonly=True, copy=False)
 
@@ -29,6 +30,7 @@ class EventRegistration(models.Model):
         ('barcode_event_uniq', 'unique(barcode, event_id)', "Barcode should be unique per event")
     ]
 
+    @api.model_cr_context
     def _init_column(self, column_name):
         """ to avoid generating a single default barcide when installing the module,
             we need to set the default row by row for this column """
@@ -40,6 +42,7 @@ class EventRegistration(models.Model):
             query_list = [{'id': reg['id'], 'barcode': self._get_random_token()} for reg in registration_ids]
             query = 'UPDATE ' + self._table + ' SET barcode = %(barcode)s WHERE id = %(id)s;'
             self.env.cr._obj.executemany(query, query_list)
+            self.env.cr.commit()
 
         else:
             super(EventRegistration, self)._init_column(column_name)

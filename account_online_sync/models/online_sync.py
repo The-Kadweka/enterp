@@ -32,12 +32,13 @@ class ProviderAccount(models.Model):
     last_refresh = fields.Datetime(readonly=True, default=fields.Datetime.now())
     next_refresh = fields.Datetime("Next synchronization", compute='_compute_next_synchronization')
     account_online_journal_ids = fields.One2many('account.online.journal', 'account_online_provider_id')
-    company_id = fields.Many2one('res.company', required=True, readonly=True, default=lambda self: self.env.company)
+    company_id = fields.Many2one('res.company', required=True, readonly=True, default=lambda self: self.env.user.company_id)
 
+    @api.one
     def _compute_next_synchronization(self):
-        for rec in self:
-            rec.next_refresh = self.env['ir.cron'].sudo().search([('id', '=', self.env.ref('account_online_sync.online_sync_cron').id)], limit=1).nextcall
+        self.next_refresh = self.env['ir.cron'].sudo().search([('id', '=', self.env.ref('account_online_sync.online_sync_cron').id)], limit=1).nextcall
 
+    @api.multi
     def open_action(self, action_name, number_added):
         action = self.env.ref(action_name).read()[0]
         ctx = self.env.context.copy()
@@ -45,6 +46,7 @@ class ProviderAccount(models.Model):
         action.update({'context': ctx})
         return action
 
+    @api.multi
     def log_message(self, message):
         # Usually when we are performing a call to the third party provider to either refresh/fetch transaction/add user, etc,
         # the call can fail and we raise an error. We also want the error message to be logged in the object in the case the call
@@ -62,6 +64,7 @@ class ProviderAccount(models.Model):
             with self.pool.cursor() as cr:
                 self.with_env(self.env(cr=cr)).message_post(body=message, subject=subject)
 
+    @api.multi
     def _get_favorite_institutions(self, country):
         resp_json = {}
         try:
@@ -74,6 +77,7 @@ class ProviderAccount(models.Model):
             raise UserError(_('Server not reachable, please try again later'))
         return resp_json
 
+    @api.multi
     def get_institutions(self, searchString, country):
         if len(searchString) == 0:
             raise UserError(_('Please enter at least a character for the search'))
@@ -112,7 +116,7 @@ class ProviderAccount(models.Model):
         else:
             transactions = '<br/><br/><p>%s</p>' % (_('No new transactions have been loaded in the system.'),)
         hide_table = False
-        if number_added == 0:
+        if ((values.get('method') == 'add' and number_added == 1) or number_added == 0):
             hide_table = True
         transient = self.env['account.online.wizard'].create({
             'number_added': number_added,
@@ -135,9 +139,11 @@ class ProviderAccount(models.Model):
 
     """ Methods that need to be override by sub-module"""
 
+    @api.multi
     def _get_available_providers(self):
         return []
 
+    @api.multi
     def get_login_form(self, site_id, provider, beta=False):
         """ This method is used to fetch and display the login form of the institution choosen in
             get_institutions method. Usually this method should return a client action that will
@@ -145,6 +151,7 @@ class ProviderAccount(models.Model):
         """
         return []
 
+    @api.multi
     def manual_sync(self):
         """ This method is used to ask the third party provider to refresh the account and
             fetch the latest transactions.
@@ -158,18 +165,12 @@ class ProviderAccount(models.Model):
     @api.model
     def get_manual_configuration_form(self):
         view_id = self.env.ref('account.setup_bank_account_wizard').id
-        ctx = self.env.context.copy()
-        # if this was called from kanban box, active_model is in context
-        if self.env.context.get('active_model') == 'account.journal':
-            ctx.update({
-                'default_linked_journal_id': ctx.get('journal_id', False)
-            })
         return {'type': 'ir.actions.act_window',
                 'name': _('Create a Bank Account'),
                 'res_model': 'account.setup.bank.manual.config',
                 'target': 'new',
                 'view_mode': 'form',
-                'context': ctx,
+                'view_type': 'form',
                 'views': [[view_id, 'form']],
         }
 
@@ -191,6 +192,7 @@ class OnlineAccount(models.Model):
     provider_name = fields.Char(related='account_online_provider_id.name', string="Provider", readonly=True)
     balance = fields.Float(readonly=True, help='balance of the account sent by the third party provider')
 
+    @api.multi
     @api.depends('name', 'account_online_provider_id.name')
     def name_get(self):
         res = []
@@ -201,6 +203,7 @@ class OnlineAccount(models.Model):
             res += [(account_online.id, name)]
         return res
 
+    @api.multi
     def retrieve_transactions(self):
         # This method must be implemented by plaid and yodlee services
         raise UserError(_("Unimplemented"))
@@ -254,16 +257,7 @@ class OnlineAccountLinkWizard(models.TransientModel):
     balance = fields.Float(related='online_account_id.balance', readonly=True)
     account_online_wizard_id = fields.Many2one('account.online.wizard')
     account_number = fields.Char(related='online_account_id.account_number', readonly=True)
-    journal_statements_creation = fields.Selection(selection=lambda x: x.env['account.journal'].get_statement_creation_possible_values(), default='none', string="Synchronization frequency")
-
-    @api.onchange('journal_id')
-    def _onchange_account_ids(self):
-        if self.journal_id:
-            self.journal_statements_creation = self.journal_id.bank_statement_creation
-
-        if self.action == 'drop':
-            self.journal_id = None
-            self.journal_statements_creation = None
+    journal_statements_creation = fields.Selection(selection=lambda x: x.env['account.journal'].get_statement_creation_possible_values())
 
 
 class OnlineAccountWizard(models.TransientModel):
@@ -275,20 +269,19 @@ class OnlineAccountWizard(models.TransientModel):
     status = fields.Selection([('success', 'Success'), ('failed', 'Failed'), ('cancelled', 'Cancelled')], readonly=True)
     method = fields.Selection([('add', 'add'), ('edit', 'edit'), ('refresh', 'refresh')], readonly=True)
     message = fields.Char(readonly=True)
-    sync_date = fields.Date('Fetch transactions from', default=lambda a: fields.Date.context_today(a) - relativedelta(days=15))
+    sync_date = fields.Date('Fetch transaction from', default=lambda a: fields.Date.context_today(a) - relativedelta(days=15))
     account_ids = fields.One2many('account.online.link.wizard', 'account_online_wizard_id', 'Synchronized accounts')
     hide_table = fields.Boolean(help='Technical field to hide table in view')
 
-    def _get_journal_values(self, account, create=False):
-        vals = {
-            'account_online_journal_id': account.online_account_id.id,
-            'bank_statements_source': 'online_sync',
-            'bank_statement_creation': account.journal_statements_creation,
-        }
-        if create:
-            vals['name'] = account.name
-            vals['type'] = 'bank'
-        return vals
+    @api.onchange('account_ids')
+    def _onchange_account_ids(self):
+        for account in self.account_ids:
+            if account.journal_id:
+                account.journal_statements_creation = account.journal_id.bank_statement_creation
+
+            if account.action == 'drop':
+                account.journal_id = None
+                account.journal_statements_creation = None
 
     def sync_now(self):
         # Link account to journal
@@ -301,9 +294,19 @@ class OnlineAccountWizard(models.TransientModel):
                 if account.journal_id.id in journal_already_linked:
                     raise UserError(_('You can not link two accounts to the same journal'))
                 journal_already_linked.append(account.journal_id.id)
-                account.journal_id.write(self._get_journal_values(account))
+                account.journal_id.write({
+                    'account_online_journal_id': account.online_account_id.id,
+                    'bank_statements_source': 'online_sync',
+                    'bank_statement_creation': account.journal_statements_creation,
+                })
             elif account.action == 'create':
-                vals = self._get_journal_values(account, create=True)
+                vals = {
+                    'name': account.name,
+                    'type': 'bank',
+                    'account_online_journal_id': account.online_account_id.id,
+                    'bank_statements_source': 'online_sync',
+                    'bank_statement_creation': account.journal_statements_creation,
+                }
                 self.env['account.journal'].create(vals)
         # call to synchronize
         self.env['account.journal'].cron_fetch_online_transactions()
@@ -331,7 +334,7 @@ class AccountJournal(models.Model):
                 ('month', 'Create monthly statements')]
 
     next_synchronization = fields.Datetime("Next synchronization", compute='_compute_next_synchronization')
-    account_online_journal_id = fields.Many2one('account.online.journal')
+    account_online_journal_id = fields.Many2one('account.online.journal', string='Online Account')
     account_online_provider_id = fields.Many2one('account.online.provider', related='account_online_journal_id.account_online_provider_id', readonly=False)
     synchronization_status = fields.Char(related='account_online_provider_id.status', readonly=False)
     bank_statement_creation = fields.Selection(selection=get_statement_creation_possible_values,
@@ -341,14 +344,11 @@ class AccountJournal(models.Model):
                                                default='none',
                                                string='Creation of Bank Statements')
 
+    @api.one
     def _compute_next_synchronization(self):
-        next_sync = self.env['ir.cron'].sudo().search([
-            ('id', '=', self.env.ref('account_online_sync.online_sync_cron').id)
-        ], limit=1).nextcall
+        self.next_synchronization = self.env['ir.cron'].sudo().search([('id', '=', self.env.ref('account_online_sync.online_sync_cron').id)], limit=1).nextcall
 
-        for rec in self:
-            rec.next_synchronization = next_sync
-
+    @api.multi
     def action_choose_institution(self):
         sync_error_message = ''
         ctx = self.env.context.copy()
@@ -372,6 +372,7 @@ class AccountJournal(models.Model):
             'context': ctx,
             }
 
+    @api.multi
     def manual_sync(self):
         if self.account_online_journal_id:
             return self.account_online_journal_id.account_online_provider_id.manual_sync()
@@ -381,6 +382,7 @@ class AccountJournal(models.Model):
                 'type': 'ir.actions.act_window',
                 'name': _('Online Synchronization'),
                 'res_model': 'account.online.wizard',
+                'view_type': 'form',
                 'view_mode': 'form',
                 'view_id': self.env.ref("view_account_online_wizard_form").id,
                 'target': 'new',
@@ -397,19 +399,11 @@ class AccountJournal(models.Model):
                 except UserError:
                     continue
 
-    def unlink(self):
-        acc_online_provider = False
-        if self.account_online_journal_id:
-            acc_online_provider = self.account_online_journal_id.account_online_provider_id
-        super(AccountJournal, self).unlink()
-        if acc_online_provider and len(acc_online_provider.account_online_journal_ids.filtered(lambda j: len(j.journal_ids) > 0)) == 0:
-            # If we have no more linked journal to the account provider, delete it.
-            acc_online_provider.unlink()
-
 
 class AccountBankStatement(models.Model):
     _inherit = "account.bank.statement"
 
+    @api.multi
     def button_confirm_bank(self):
         super(AccountBankStatement, self).button_confirm_bank()
         for statement in self:
@@ -471,7 +465,7 @@ class AccountBankStatement(models.Model):
         previous_statement = self.search([('journal_id', '=', journal.id)], order="date desc, id desc", limit=1)
         # For first synchronization, an opening bank statement line is created to fill the missing bank statements
         all_statement = self.search_count([('journal_id', '=', journal.id)])
-        digits_rounding_precision = journal.currency_id.rounding if journal.currency_id else journal.company_id.currency_id.rounding
+        digits_rounding_precision = journal.currency_id.rounding
         if all_statement == 0 and not float_is_zero(end_amount - total, precision_rounding=digits_rounding_precision):
             lines.append((0, 0, {
                 'date': transactions and (transactions[0]['date']) or datetime.now(),
@@ -510,14 +504,10 @@ class AccountBankStatement(models.Model):
                     to_create.append(line)
                 else:
                     previous_amount_to_report += line[2]['amount']
-                    line[2].update({
-                        'journal_id': previous_statement.journal_id.id or journal.id,
-                        'statement_id': previous_statement.id,
-                        'company_id': previous_statement.company_id.id or self.env.company.id,
-                    })
+                    line[2].update({'statement_id': previous_statement.id})
                     self.env['account.bank.statement.line'].create(line[2])
 
-            if not float_is_zero(previous_amount_to_report, precision_rounding=digits_rounding_precision):
+            if not float_is_zero(previous_amount_to_report, precision_rounding=journal.currency_id.rounding):
                 previous_statement.write({'balance_end_real': previous_statement.balance_end_real + previous_amount_to_report})
 
             if to_create:
@@ -525,12 +515,8 @@ class AccountBankStatement(models.Model):
                 if previous_statement:
                     balance_start = previous_statement.balance_end_real
                 sum_lines = sum([l[2]['amount'] for l in to_create])
-                for l in to_create:
-                    l[2]['journal_id'] = journal.id
-                    l[2]['company_id'] = journal.company_id.id
                 self.create({'name': _('online sync'),
                             'journal_id': journal.id,
-                            'company_id': journal.company_id.id,
                             'line_ids': to_create,
                             'balance_end_real': end_amount if balance_start is None else balance_start + sum_lines,
                             'balance_start': (end_amount - total) if balance_start is None else balance_start

@@ -17,8 +17,8 @@ class Company(models.Model):
         help="If checked, send an email to all users who have not recorded their timesheet")
     timesheet_mail_employee_delay = fields.Integer("Employee Reminder Days", default=1)
     timesheet_mail_employee_interval = fields.Selection([
-        ('weeks', 'after the end of the week'),
-        ('months', 'after the end of the month')
+        ('weeks', 'after end of week'),
+        ('months', 'after end of month')
     ], string='Employee Frequency', required=True, default="weeks")
     timesheet_mail_employee_nextdate = fields.Datetime('Next scheduled date for employee reminder', readonly=True)
 
@@ -27,8 +27,8 @@ class Company(models.Model):
         help="If checked, send an email to all managers who have not validated their timesheet")
     timesheet_mail_manager_delay = fields.Integer("Manager Reminder Days", default=3)
     timesheet_mail_manager_interval = fields.Selection([
-        ('weeks', 'after the end of the week'),
-        ('months', 'after the end of the month')
+        ('weeks', 'after end of week'),
+        ('months', 'after end of month')
     ], string='Manager Reminder Frequency', required=True, default="weeks")
     timesheet_mail_manager_nextdate = fields.Datetime('Next scheduled date for manager reminder', readonly=True)
 
@@ -185,4 +185,4 @@ class Company(models.Model):
             template_ctx.update(additionnal_values)
 
         for employee in employees.filtered('user_id'):
-            template.with_context(**template_ctx).send_mail(employee.id)
+            template.with_context(lang=employee.user_id.lang, **template_ctx).send_mail(employee.id)

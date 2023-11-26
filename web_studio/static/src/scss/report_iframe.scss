@@ -131,7 +131,7 @@ tbody .o_web_studio_hook.o_web_studio_nearest_hook.o_web_studio_hook_table_colum
             margin: 0;
             margin-top: -0.5rem;
 
-            background: none !important;
+            background: !important none;
 
             &.col-3 {
                 width: 0;
@@ -234,11 +234,14 @@ tbody .o_web_studio_hook.o_web_studio_nearest_hook.o_web_studio_hook_table_colum
             }
         }
     }
+
 }
 div.row.o_web_studio_structure_hook {
     &:not(.o_web_studio_nearest) {
         position: absolute;
         width: 100%;
+        // compensate for bootstrap negative margins on rows
+        padding-right: ($grid-gutter-width / 2);
     }
     &.o_web_studio_nearest {
         position: relative;
@@ -251,15 +254,6 @@ div.row.o_web_studio_structure_hook {
         }
         .o_web_studio_hook.o_web_studio_hook_information {
             height: 3rem;
-        }
-    }
-}
-
-div.row:not(.o_web_studio_structure_hook) {
-    .o_web_studio_hook:not(.o_web_studio_nearest_hook) {
-        &.o_web_studio_hook_information, &.o_web_studio_hook_address {
-            position: relative;
-            margin-top: 0.5rem;
         }
     }
 }

@@ -31,11 +31,9 @@
                     </group>
                     <field name="city"/>
                     <field name="lost_reason"/>
-                    <separator/>
-                    <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
                     <group expand="1" string="Group By">
                         <filter string="Salesperson" name="salesperson" context="{'group_by':'user_id'}"/>
-                        <filter string="Sales Team" name="saleschannel" context="{'group_by':'team_id'}"/>
+                        <filter string="Sales Channel" name="saleschannel" context="{'group_by':'team_id'}"/>
                         <filter name="stage" string="Stage" context="{'group_by':'stage_id'}"/>
                         <filter name="city" string="City" context="{'group_by': 'city'}"/>
                         <filter string="Country" name="country" context="{'group_by':'country_id'}" />
@@ -88,19 +86,6 @@
             </field>
         </record>
 
-        <record id="crm_lead_view_map" model="ir.ui.view">
-            <field name="name">crm.lead.view.map</field>
-            <field name="model">crm.lead</field>
-            <field name="arch" type="xml">
-                <map res_partner="partner_id">
-                    <marker-popup>
-                        <field name="name" string="Title "/>
-                        <field name="partner_id" string="Customer "/>
-                    </marker-popup>
-                </map>
-            </field>
-        </record>
-
         <record id="crm_opportunity_view_dashboard" model="ir.ui.view">
             <field name="name">crm.lead.view.dashboard</field>
             <field name="model">crm.lead</field>
@@ -115,8 +100,8 @@
                             <aggregate name="prorated_revenue_aggregate" field="expected_revenue" invisible="1"/>
                             <formula name="prorated_revenue" string="Prorated Revenue" value="record.prorated_revenue_aggregate" widget="monetary"/>
                             <formula name="deal_size" string="Average Deal Size" value="record.expected_revenue_aggregate / record.opportunities" widget="monetary"/>
-                            <aggregate name="days_to_assign" string="Days to Assign" field="day_open" group_operator="avg" value_label="days"/>
-                            <aggregate name="days_to_close" string="Days to Close" field="day_close" group_operator="avg" value_label="days"/>
+                            <aggregate name="days_to_assign" string="Days to Assign" field="day_open" group_operator="avg" value_label="day(s)"/>
+                            <aggregate name="days_to_close" string="Days to Close" field="day_close" group_operator="avg" value_label="day(s)"/>
                             <aggregate name="days_exceeding_closing" string="Exceeding Close Days" field="days_exceeding_closing" group_operator="avg"/>
                         </group>
                         <group col="1">
@@ -141,12 +126,12 @@
                         <group>
                                 <aggregate name="leads" string="Leads" group_operator="count_distinct" field="id" measure="__count__"/>
                                 <aggregate name="days_to_convert" string="Days To Opportunity" group_operator="avg" field="days_to_convert"/>
-                                <aggregate name="days_to_assign" string="Days to Assign" field="day_open" group_operator="avg" value_label="days"/>
+                                <aggregate name="days_to_assign" string="Days to Assign" field="day_open" group_operator="avg" value_label="day(s)"/>
                                 <formula name="opportunity_percent" string="% Opportunities" value="record.opportunities / record.leads" widget="percentage"/>
                                 <aggregate name="planned_revenue" string="Expected Revenue" field="planned_revenue"
                                 group_operator="sum" widget="monetary"/>
                                 <aggregate name="expected_revenue" string="Prorated Revenue" field="expected_revenue" group_operator="sum" widget="monetary"/>
-                                <aggregate name="day_close" string="Days to Close" field="day_close" group_operator="avg" value_label="days"/>
+                                <aggregate name="day_close" string="Days to Close" field="day_close" group_operator="avg" value_label="day(s)"/>
                                 <aggregate name="opportunities" string="Opportunities" field="id" domain="[('type','=','opportunity')]" group_operator="count" invisible="1"/>
                         </group>
                         <group>
@@ -167,25 +152,13 @@
             </field>
         </record>
 
-        <record id="crm.action_report_crm_lead_salesteam" model="ir.actions.act_window">
-            <field name="view_mode">dashboard,pivot,graph,tree,form,cohort</field>
-            <field name="view_id" ref="crm_lead_dashboard_view"/>
-            <field name="search_view_id" ref="crm.view_crm_case_leads_filter"/>
-        </record>
-
-        <record id="crm.action_report_crm_opportunity_salesteam" model="ir.actions.act_window">
-            <field name="view_mode">dashboard,pivot,graph,tree,form,cohort</field>
-            <field name="view_id" ref="crm_opportunity_view_dashboard"/>
-            <field name="search_view_id" ref="crm_enterprise.crm_opportunity_view_search"/>
-        </record>
-
         <!-- dashboard action -->
         <record id="crm_opportunity_action_dashboard" model="ir.actions.act_window">
             <field name="name">Pipeline Analysis</field>
             <field name="res_model">crm.lead</field>
-            <field name="view_mode">dashboard,pivot,graph,tree,form,cohort</field>
-            <field name="context" eval="{'tree_view_ref': 'crm.crm_case_tree_view_oppor','default_type': 'opportunity', 'search_default_opportunity': True, 'time_ranges': {'field':'create_date', 'range':'last_365_days'}}"/>
+            <field name="view_mode">dashboard,pivot,graph,cohort</field>
             <field name="search_view_id" ref="crm_enterprise.crm_opportunity_view_search"/>
+            <field name="context" eval="{'search_default_opportunity': True, 'time_ranges': {'field':'create_date', 'range':'last_365_days'}, 'list_view_id': ref('crm.crm_case_tree_view_oppor'), 'form_view_id': ref('crm.crm_case_form_view_oppor')}"/>
         </record>
 
         <record id="crm_opportunity_action_dashboard_dashboard" model="ir.actions.act_window.view">
@@ -216,18 +189,10 @@
             <field name="act_window_id" ref="crm_enterprise.crm_opportunity_action_dashboard"/>
         </record>
 
-        <record id="crm_opportunity_action_dashboard_tree" model="ir.actions.act_window.view">
-            <field name="sequence" eval="5"/>
-            <field name="view_mode">tree</field>
-            <field name="view_id" ref="crm.crm_case_tree_view_oppor"/>
-
-            <field name="act_window_id" ref="crm_enterprise.crm_opportunity_action_dashboard"/>
-        </record>
-
         <record id="crm_lead_action_dashboard" model="ir.actions.act_window">
             <field name="name">Leads Analysis</field>
             <field name="res_model">crm.lead</field>
-            <field name="view_mode">dashboard,pivot,graph,tree</field>
+            <field name="view_mode">dashboard,pivot,graph</field>
             <field name="domain">['|', ('active','=',True), ('active','=',False)]</field>
             <field name="search_view_id" ref="crm.view_crm_case_leads_filter"/>
             <field name="context" eval="{'time_ranges': {'field':'create_date', 'range':'last_30_days'}}"/>
@@ -259,23 +224,15 @@
             <field name="sequence" eval="7"/>
             <field name="view_mode">dashboard</field>
             <field name="view_id" ref="crm_enterprise.crm_opportunity_view_dashboard"/>
-            <field name="act_window_id" ref="crm.crm_lead_action_pipeline"/>
+            <field name="act_window_id" ref="crm.crm_lead_opportunities_tree_view"/>
         </record>
 
         <!-- add cohort to pipeline action -->
-        <record id="crm_lead_action_pipeline_view_cohort" model="ir.actions.act_window.view">
+        <record id="crm_lead_act_window_view_cohort" model="ir.actions.act_window.view">
             <field name="sequence" eval="6"/>
             <field name="view_mode">cohort</field>
             <field name="view_id" ref="crm_enterprise.crm_lead_view_cohort"/>
-            <field name="act_window_id" ref="crm.crm_lead_action_pipeline"/>
-        </record>
-
-        <!-- add map to pipeline action -->
-        <record id="crm_lead_action_pipeline_view_map" model="ir.actions.act_window.view">
-            <field name="sequence" eval="7"/>
-            <field name="view_mode">map</field>
-            <field name="view_id" ref="crm_enterprise.crm_lead_view_map"/>
-            <field name="act_window_id" ref="crm.crm_lead_action_pipeline"/>
+            <field name="act_window_id" ref="crm.crm_lead_opportunities_tree_view"/>
         </record>
 
         <!-- add dashboard to res partner action -->

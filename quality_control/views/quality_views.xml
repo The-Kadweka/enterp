@@ -1,15 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- QUALITY.ALERT -->
-    <record id="quality_alert_view_search_inherit_quality_control" model="ir.ui.view">
-        <field name="name">quality.alert.view.search.inherit.quality.control</field>
+    <record id="quality_alert_view_search" model="ir.ui.view">
+        <field name="name">quality.alert.view.search</field>
         <field name="model">quality.alert</field>
-        <field name="inherit_id" ref="quality.quality_alert_view_search"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='name']" position="replace">
-                <field name="title" string="Quality Alert" filter_domain="[
-                    '|', '|', '|', ('title', 'ilike', self), ('product_id', 'ilike', self), ('product_tmpl_id', 'ilike', self), ('lot_id', 'ilike', self)]"/>
-            </xpath>
+            <search>
+                <field name="tag_ids"/>
+                <field name="product_id"/>
+                <field name="user_id"/>
+                <filter string="My Alerts" name="myalerts" domain="[('user_id', '=', uid)]"/>
+                <separator/>
+                <filter string="In Progress" name="inprogress" domain="[('stage_id.done', '=', False)]"/>
+                <filter string="Done" name="done" domain="[('stage_id.done','=',True)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Stage" name="groupby_stage" domain="[]" context="{'group_by':'stage_id'}"/>
+                    <filter string="Responsible" name="groupby_user" domain="[]" context="{'group_by':'user_id'}"/>
+                    <filter string="Root Cause" name="groupby_reason" domain="[]" context="{'group_by':'reason_id'}"/>
+                    <filter string="Creation Date" name="groupby_createmonth" domain="[]" context="{'group_by':'create_date'}"/>
+                    <filter string="Quality Team" name="groupby_team_id" domain="[]" context="{'group_by': 'team_id'}"/>
+                </group>
+            </search>
         </field>
     </record>
 
@@ -23,8 +34,6 @@
                 <field name="stage_id"/>
                 <field name="tag_ids"/>
                 <field name="priority"/>
-                <field name="activity_ids"/>
-                <field name="activity_state"/>
                 <templates>
                     <t t-name="kanban-box">
                         <div t-attf-class="oe_kanban_card oe_kanban_global_click">
@@ -38,11 +47,10 @@
                                 <field name="display_name"/>
                             </div>
                             <div class="oe_kanban_bottom_right">
-                                <img t-att-src="kanban_image('res.users', 'image_128', record.user_id.raw_value)" t-att-title="record.user_id.value" t-att-alt="record.user_id.value" class="oe_kanban_avatar o_image_24_cover float-right"/>
+                                <img t-att-src="kanban_image('res.users', 'image_small', record.user_id.raw_value)" t-att-title="record.user_id.value" t-att-alt="record.user_id.value" width="24" height="24" class="oe_kanban_avatar float-right"/>
                             </div>
                             <div class="oe_kanban_bottom_left">
-                                <field name="priority" widget="priority"/>
-                                <field name="activity_ids" widget="kanban_activity"/>
+                                 <field name="priority" widget="priority"/>
                             </div>
                         </div>
                     </t>
@@ -98,8 +106,6 @@
                             <group>
                                 <group>
                                     <field name="partner_id"/>
-                                    <field name="company_id" groups="base.group_multi_company"/>
-                                    <field name="email_cc" groups="base.group_no_one"/>
                                 </group>
                                 <group>
                                     <field name="date_assign"/>
@@ -111,7 +117,6 @@
                 </sheet>
                 <div class="oe_chatter">
                     <field name="message_follower_ids" widget="mail_followers"/>
-                    <field name="activity_ids" widget="mail_activity"/>
                     <field name="message_ids" widget="mail_thread"/>
                 </div>
             </form>
@@ -119,22 +124,15 @@
     </record>
 
     <record id="quality_alert_view_tree" model="ir.ui.view">
-        <field name="name">quality.alert.view.tree.inherit.quality.control</field>
+        <field name="name">quality.alert.view.tree</field>
         <field name="model">quality.alert</field>
-        <field name="inherit_id" ref="quality.quality_alert_view_tree"/>
         <field name="arch" type="xml">
-            <field name="user_id" position="after">
-                <field name="check_id" optional="show"/>
-            </field>
-            <field name="priority" position="after">
-                <field name="description" optional="hide"/>
-            </field>
-            <field name="partner_id" position="after">
-                <field name="activity_exception_decoration" widget="activity_exception"/>
-            </field>
-            <field name="date_assign" position="after">
-                <field name="company_id" groups="base.main_company"/>
-            </field>
+            <tree>
+                <field name="display_name" string="Name"/>
+                <field name="check_id"/>
+                <field name="stage_id"/>
+                <field name="description"/>
+            </tree>
         </field>
     </record>
 
@@ -165,11 +163,8 @@
         <field name="model">quality.alert</field>
         <field name="priority" eval="2"/>
         <field name="arch" type="xml">
-            <calendar string="Quality Alert" date_start="date_assign" color="user_id" quick_add="false" event_limit="5">
+            <calendar string="Quality Alert" date_start="date_assign" color="user_id" quick_add="false">
                 <field name="user_id"/>
-                <field name="product_id"/>
-                <field name="team_id"/>
-                <field name="partner_id" avatar_field="image_128"/>
                 <field name="reason_id"/>
             </calendar>
         </field>
@@ -178,6 +173,7 @@
     <record id="quality_alert_action_team" model="ir.actions.act_window">
         <field name="name">Quality Alerts</field>
         <field name="res_model">quality.alert</field>
+        <field name="view_type">form</field>
         <field name="view_mode">kanban,tree,form,pivot,graph,calendar</field>
         <field name="domain">[('team_id', '=', active_id)]</field>
         <field name="context">{'default_team_id': active_id,
@@ -187,6 +183,7 @@
     <record id="quality_alert_action_check" model="ir.actions.act_window">
         <field name="name">Quality Alerts</field>
         <field name="res_model">quality.alert</field>
+        <field name="view_type">form</field>
         <field name="view_mode">kanban,tree,form,pivot,graph,calendar</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
@@ -198,6 +195,7 @@
     <record id="quality_alert_action_report" model="ir.actions.act_window">
         <field name="name">Quality Alerts</field>
         <field name="res_model">quality.alert</field>
+        <field name="view_type">form</field>
         <field name="view_mode">graph,pivot,kanban,tree,form,calendar</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_empty_folder">
@@ -218,7 +216,7 @@
                 </footer>
             </form>
         </field>
-   </record>
+  </record>
 
     <!-- QUALITY.CHECK -->
    <record id="quality_check_view_form" model="ir.ui.view">
@@ -239,7 +237,7 @@
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_see_alerts" icon="fa-bell" type="object" class="oe_stat_button" attrs="{'invisible': [('alert_count', '=', 0)]}">
-                            <field name="alert_count" string="Alerts" widget="statinfo"/>
+                            <field name="alert_count" string="Alert(s)" widget="statinfo"/>
                         </button>
                     </div>
                     <group>
@@ -255,7 +253,6 @@
                             <field name="point_id"/>
                             <field name="control_date" invisible="1"/>
                             <field name="team_id"/>
-                            <field name="company_id" groups="base.group_multi_company"/>
                             <field name="user_id" string="Control Person" invisible="1"/>
                         </group>
                     </group>
@@ -290,7 +287,6 @@
                 <field name="point_id" invisible="1"/>
                 <field name="test_type" invisible="1"/>
                 <field name="measure_success" invisible="1"/>
-                <field name="company_id" invisible="1"/>
                 <group>
                     <group>
                         <label for="measure" attrs="{'invisible': [('test_type', '!=', 'measure')]}"/>
@@ -300,19 +296,13 @@
                         </div>
                     </group>
                 </group>
-                <label for="picture" invisible="1"/>
-                <div attrs="{'invisible': [('test_type', '!=', 'picture')]}">
-                    <field name="picture" widget="image" attrs="{'required': [('test_type', '=', 'picture')]}"/>
-                </div>
                 <footer>
                     <button name="do_measure" type="object" class="btn-primary" string="Validate"
                         attrs="{'invisible': [('test_type', '!=', 'measure')]}"/>
-                    <button name="do_pass" type="object" class="btn-primary" string="Validate"
-                        attrs="{'invisible': [ '|' , ('test_type', '=', 'passfail'), ('test_type', '=', 'measure')]}"/>
                     <button name="do_pass" type="object" class="btn-primary" string="Pass"
-                        attrs="{'invisible': [('test_type', '!=', 'passfail')]}"/>
+                        attrs="{'invisible': [('test_type', '=', 'measure')]}"/>
                     <button name="do_fail" type="object" class="btn-primary" string="Fail"
-                        attrs="{'invisible': [('test_type', '!=', 'passfail')]}"/>
+                        attrs="{'invisible': [('test_type', '=', 'measure')]}"/>
                     <button string="Cancel" class="btn btn-secondary" special="cancel" />
                 </footer>
             </form>
@@ -325,20 +315,15 @@
         <field name="model">quality.check</field>
         <field name="arch" type="xml">
             <form string="Quality Check Failed">
-                <field name="test_type" invisible="1"/>
-                <div class="alert alert-warning" role="alert" attrs="{'invisible': [('test_type', '!=', 'measure')]}" >
+                <div class="alert alert-warning" role="alert">
                     <field name="warning_message"/>
                 </div>
                 <div>
                     <field name="failure_message"/>
                 </div>
                 <footer>
-                    <button name="correct_measure" type="object" class="btn-primary" string="Correct Measure"
-                        attrs="{'invisible': [('test_type', '!=', 'measure')]}"/>
-                    <button name="redirect_after_failure" type="object" string="Confirm Measure"
-                        attrs="{'invisible': [('test_type', '!=', 'measure')]}"/>
-                    <button name="redirect_after_failure" type="object" class="btn-primary" string="OK"
-                        attrs="{'invisible': [('test_type', '!=', 'passfail')]}"/>
+                    <button name="correct_measure" type="object" class="btn-primary" string="Correct Measure"/>
+                    <button name="do_fail" type="object" string="Confirm Measure"/>
                 </footer>
             </form>
         </field>
@@ -375,7 +360,7 @@
                                 </div>
                             </div>
                             <div class="oe_kanban_bottom_right">
-                                <img t-att-src="kanban_image('res.users', 'image_128', record.user_id.raw_value)" t-att-title="record.user_id.value" t-att-alt="record.user_id.value" class="oe_kanban_avatar o_image_24_cover float-right"/>
+                                <img t-att-src="kanban_image('res.users', 'image_small', record.user_id.raw_value)" t-att-title="record.user_id.value" t-att-alt="record.user_id.value" width="24" height="24" class="oe_kanban_avatar float-right"/>
                             </div>
                         </div>
                     </t>
@@ -389,15 +374,11 @@
         <field name="model">quality.check</field>
         <field name="arch" type="xml">
             <tree>
-                <field name='product_id' optional="show"/>
-                <field name="lot_id" optional="show"/>
-                <field name="picking_id" optional="hide" string="Transfer"/>
-                <field name="control_date" string="Checked Date" optional="show"/>
-                <field name="user_id" string="Checked By" optional="show"/>
-                <field name="point_id" optional="hide"/>
-                <field name="team_id" optional="show"/>
-                <field name="quality_state" optional="show"/>
-                <field name="company_id" groups="base.main_company"/>
+                <field name='product_id'/>
+                <field name="lot_id"/>
+                <field name="control_date" string="Checked Date"/>
+                <field name="user_id" string="Checked By"/>
+                <field name="quality_state"/>
             </tree>
         </field>
     </record>
@@ -429,19 +410,16 @@
         <field name="model">quality.check</field>
         <field name="arch" type="xml">
             <search>
-                <field name="product_id" string="Product" filter_domain="['|', ('product_id', 'ilike', self), ('lot_id', 'ilike', self)]"/>
-                <field name="picking_id"/>
                 <field name="team_id"/>
-                <filter string="In Progress" name="progress" domain="[('quality_state', '=', 'none')]"/>
-                <filter string="Passed" name="passed" domain="[('quality_state', '=', 'pass')]"/>
-                <filter string="Failed" name="failed" domain="[('quality_state', '=', 'fail')]"/>
-                <separator/>
-                <filter string="Checked Date" name="control_date" date="control_date"/>
+                <field name="picking_id"/>
+                <field name="quality_state"/>
+                <filter string="In Progress" domain="[('quality_state', '=', 'none')]" name="progress"/>
+                <filter string="Passed" domain="[('quality_state', '=', 'pass')]" name="passed"/>
+                <filter string="Failed" domain="[('quality_state', '=', 'fail')]" name="failed"/>
                 <group expand="0" string="Group By">
-                    <filter string="Status" name="state" context="{'group_by': 'quality_state'}"/>
-                    <filter string="Product" name="by_product" context="{'group_by': 'product_id'}"/>
-                    <filter string="Control Point" name="groupby_point_id" context="{'group_by': 'point_id'}"/>
-                    <filter string="Team" name="groupby_team_id" context="{'group_by': 'team_id'}"/>
+                    <filter string="State" name="state" context="{'group_by': 'quality_state'}"/>
+                    <filter string="Control Points" name="groupby_point_id" context="{'group_by': 'point_id'}"/>
+                    <filter string="Quality Team" name="groupby_team_id" context="{'group_by': 'team_id'}"/>
                 </group>
             </search>
         </field>
@@ -450,6 +428,7 @@
     <record id="quality_check_action_spc" model="ir.actions.act_window">
         <field name="name">Quality Checks SPC</field>
         <field name="res_model">quality.check</field>
+        <field name="view_type">form</field>
         <field name="view_mode">graph</field>
         <field name="view_id" ref="quality_check_view_graph"/>
     </record>
@@ -457,6 +436,7 @@
     <record id="quality_check_action_team" model="ir.actions.act_window">
         <field name="name">Quality Checks</field>
         <field name="res_model">quality.check</field>
+        <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('team_id', '=', active_id)]</field>
         <field name="context">{
@@ -477,6 +457,7 @@
     <record id="quality_check_action_picking" model="ir.actions.act_window">
         <field name="name">Quality Checks</field>
         <field name="res_model">quality.check</field>
+        <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
         <field name="context">{
             'search_default_picking_id': [active_id],
@@ -487,6 +468,7 @@
     <record id="quality_check_action_main" model="ir.actions.act_window">
         <field name="name">Quality Checks</field>
         <field name="res_model">quality.check</field>
+        <field name="view_type">form</field>
         <field name="view_mode">tree,kanban,form,pivot,graph</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
@@ -501,6 +483,7 @@
     <record id="quality_check_action_small" model="ir.actions.act_window">
         <field name="name">Quality Checks</field>
         <field name="res_model">quality.check</field>
+        <field name="view_type">form</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
         <field name="view_id" ref="quality_check_view_form_small"/>
@@ -509,60 +492,13 @@
     <record model="ir.actions.act_window" id="quality_check_action_report">
         <field name="name">Quality Checks</field>
         <field name="res_model">quality.check</field>
+        <field name="view_type">form</field>
         <field name="view_mode">graph,pivot,kanban,tree,form</field>
         <field name="context">{'search_default_state': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_empty_folder">
                 No quality checks found
             </p>
-        </field>
-    </record>
-
-    <!-- view used for product.template only -->
-    <record id="product_template_form_view_quality_control" model="ir.ui.view">
-        <field name="name">product.template.quality</field>
-        <field name="model">product.template</field>
-        <field name="inherit_id" ref="stock.product_template_form_view_procurement_button"/>
-        <field name="arch" type="xml">
-            <xpath expr="//button[@name='action_view_related_putaway_rules']" position="after">
-                <button name="action_see_quality_control_points" type="object" class="oe_stat_button" icon="fa-check" attrs="{'invisible':[('type', 'not in', ['product', 'consu'])]}" groups="quality.group_quality_user">
-                    <field string="Quality Points" name="quality_control_point_qty" widget="statinfo"/>
-                </button>
-                <button name="action_see_quality_checks" type="object" class="oe_stat_button" icon="fa-check" attrs="{'invisible':['|', ('type', 'not in', ['product', 'consu']), ('quality_pass_qty', '=', 0),('quality_fail_qty', '=', 0)]}" groups="quality.group_quality_user">
-                    <div class="o_field_widget o_stat_info mr4">
-                        <span class="o_stat_text">Pass:</span>
-                        <span class="o_stat_text">Fail:</span>
-                    </div>
-                    <div class="o_field_widget o_stat_info">
-                        <span class="o_stat_value"><field name="quality_pass_qty"/></span>
-                        <span class="o_stat_value"><field name="quality_fail_qty"/></span>
-                    </div>
-                </button>
-            </xpath>
-        </field>
-    </record>
-
-    <!-- view used for product.product only -->
-    <record id="product_product_form_view_quality_control" model="ir.ui.view">
-        <field name="name">product.product.quality</field>
-        <field name="model">product.product</field>
-        <field name="inherit_id" ref="stock.product_form_view_procurement_button"/>
-        <field name="arch" type="xml">
-            <xpath expr="//button[@name='action_view_related_putaway_rules']" position="after">
-                <button name="action_see_quality_control_points" type="object" icon="fa-list" class="oe_stat_button" attrs="{'invisible':[('type', 'not in', ['product', 'consu'])]}" groups="quality.group_quality_user">
-                    <field string="Quality Points" name="quality_control_point_qty" widget="statinfo"/>
-                </button>
-                <button name="action_see_quality_checks" type="object" class="oe_stat_button" icon="fa-check" groups="quality.group_quality_user" attrs="{'invisible':[ ('quality_pass_qty', '=', 0),('quality_fail_qty', '=', 0)]}" >
-                    <div class="o_field_widget o_stat_info mr4">
-                        <span class="o_stat_text">Pass:</span>
-                        <span class="o_stat_text">Fail:</span>
-                    </div>
-                    <div class="o_field_widget o_stat_info">
-                        <span class="o_stat_value"><field name="quality_pass_qty"/></span>
-                        <span class="o_stat_value"><field name="quality_fail_qty"/></span>
-                    </div>
-                </button>
-            </xpath>
         </field>
     </record>
 
@@ -661,9 +597,6 @@
                             <field name="alias_contact" class="oe_inline" groups="base.group_no_one"
                                     string="Accept Emails From"/>
                         </group>
-                        <group>
-                            <field name="company_id" groups="base.group_multi_company"/>
-                        </group>
                     </group>
                 </sheet>
                 <div class="oe_chatter">
@@ -678,11 +611,10 @@
         <field name="name">quality.alert.team.view.tree</field>
         <field name="model">quality.alert.team</field>
         <field name="arch" type="xml">
-            <tree string="Teams">
-                <field name="sequence" widget="handle"/>
-                <field name="name"/>
-                <field name="company_id" groups="base.group_multi_company"/>
-            </tree>
+                 <tree string="Teams">
+                    <field name="sequence" widget="handle"/>
+                    <field name="name"/>
+                </tree>
         </field>
     </record>
 
@@ -709,6 +641,7 @@
     <record id="quality_alert_team_action" model="ir.actions.act_window">
         <field name="name">Quality Overview</field>
         <field name="res_model">quality.alert.team</field>
+        <field name="view_type">form</field>
         <field name="view_mode">kanban,form</field>
         <field name="view_id" ref="quality_alert_team_dashboard_view_kanban" />
         <field name="help" type="html">
@@ -752,6 +685,7 @@
     <record id="quality_tag_action" model="ir.actions.act_window">
         <field name="name">Quality Tags</field>
         <field name="res_model">quality.tag</field>
+        <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
         <field name="help" type="html">
           <p class="o_view_nocontent_smiling_face">
@@ -765,11 +699,9 @@
         <field name="name">quality.alert.stage.tree</field>
         <field name="model">quality.alert.stage</field>
         <field name="arch" type="xml">
-            <tree editable="bottom">
+            <tree>
                 <field name="sequence" widget="handle"/>
-                <field name="name" string="Stage Name"/>
-                <field name="folded"/>
-                <field name="done"/>
+                <field name="name"/>
             </tree>
         </field>
     </record>
@@ -796,6 +728,7 @@
     <record id="quality_alert_stage_action" model="ir.actions.act_window">
         <field name="name">Quality Alert Stages</field>
         <field name="res_model">quality.alert.stage</field>
+        <field name="view_type">form</field>
         <field name="view_mode">tree,kanban,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
@@ -807,37 +740,39 @@
     </record>
 
     <!-- QUALITY.POINT -->
-    <record id="quality_point_view_tree" model="ir.ui.view">
-        <field name="name">quality.point.view.tree.inherit.quality.control</field>
-        <field name="model">quality.point</field>
-        <field name="inherit_id" ref="quality.quality_point_view_tree"/>
-        <field name="priority">10</field>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='test_type_id']" position="before">
-                <field name="measure_frequency_type" optional="hide" string="Control Type"/>
-            </xpath>
-        </field>
-    </record>
-
     <record id="quality_point_view_search" model="ir.ui.view">
         <field name="name">quality.point.view.search</field>
         <field name="model">quality.point</field>
         <field name="arch" type="xml">
             <search>
-                <field name="name" string="Control Point" filter_domain="[
-                    '|', '|', ('name', 'ilike', self), ('title', 'ilike', self), ('product_tmpl_id', 'ilike', self)]"/>
+                <field name="name"/>
+                <field name="title"/>
                 <field name="product_tmpl_id"/>
                 <field name="picking_type_id"/>
                 <field name="test_type_id"/>
-                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <filter string="Archived" name="inactive" domain="[('active','=',False)]"/>
                 <group expand="1" string="Group By">
-                    <filter string="Product" name="groupby_product_template" context="{'group_by': 'product_tmpl_id'}"/>
-                    <filter string="Operation Type" name="groupby_operation" context="{'group_by': 'picking_type_id'}"/>
-                    <filter string="Test Type" name="groupby_test_type" context="{'group_by': 'test_type_id'}"/>
+                    <filter string="Product" name="groupby_product_template" context="{'group_by':'product_tmpl_id'}"/>
+                    <filter string="Operation Type" name="groupby_operation" context="{'group_by':'picking_type_id'}"/>
+                    <filter string="Test Type" name="groupby_test_type" context="{'group_by':'test_type_id'}"/>
                     <filter string="Team" name="groupby_team_id" context="{'group_by': 'team_id'}"/>
                     <filter string="Responsible" name="groupby_user_id" context="{'group_by': 'user_id'}"/>
                 </group>
             </search>
+        </field>
+    </record>
+
+    <record id="quality_point_view_tree" model="ir.ui.view">
+        <field name="name">quality.point.view.tree</field>
+        <field name="model">quality.point</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="title"/>
+                <field name="product_tmpl_id"/>
+                <field name="picking_type_id"/>
+            </tree>
         </field>
     </record>
 
@@ -884,7 +819,7 @@
                     </div>
                 </button>
             </xpath>
-            <xpath expr="//page[@name='instructions']" position="after">
+            <xpath expr="//page[@name='Notes']" position="after">
                 <page string="Message If Failure" attrs="{'invisible': [('test_type', 'in', ['picture', 'text', 'register_consumed_materials', 'print_label'])]}">
                     <field name="failure_message"/>
                 </page>
@@ -918,6 +853,7 @@
     <record model="ir.actions.act_window" id="quality_point_action">
         <field name="name">Quality Control Points</field>
         <field name="res_model">quality.point</field>
+        <field name="view_type">form</field>
         <field name="view_mode">tree,kanban,form</field>
         <field name="search_view_id" ref="quality_point_view_search"/>
         <field name="context">{'search_default_groupby_product_template': 1}</field>

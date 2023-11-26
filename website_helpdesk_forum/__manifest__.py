@@ -3,7 +3,7 @@
 
 {
     'name': 'Helpdesk: Knowledge Base',
-    'category': 'Operations/Helpdesk',
+    'category': 'Helpdesk',
     'sequence': 58,
     'summary': 'Knowledge base for helpdesk based on Odoo Forum',
     'depends': [

@@ -1,23 +1,22 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_sepa
+# * account_sepa
 # 
 # Translators:
-# Jeanphy <hzh0292@qq.com>, 2019
-# Martin Trigaux, 2019
-# keecome <7017511@qq.com>, 2019
-# inspur qiuguodong <qiuguodong@inspur.com>, 2019
-# 敬雲 林 <chingyun@yuanchih-consult.com>, 2019
-# Jeffery CHEN Fan <jeffery9@gmail.com>, 2020
-# guohuadeng <guohuadeng@hotmail.com>, 2020
+# Martin Trigaux, 2018
+# Jeffery CHEN Fan <jeffery9@gmail.com>, 2018
+# waveyeung <waveyeung@qq.com>, 2018
+# liAnGjiA <liangjia@qq.com>, 2018
+# keecome <7017511@qq.com>, 2018
+# inspur qiuguodong <qiuguodong@inspur.com>, 2018
 # Felix Yang - Elico Corp <felixyangsh@aliyun.com>, 2020
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0+e\n"
+"Project-Id-Version: Odoo Server saas~11.5+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-27 09:32+0000\n"
-"PO-Revision-Date: 2019-08-26 09:34+0000\n"
+"POT-Creation-Date: 2018-09-21 14:06+0000\n"
+"PO-Revision-Date: 2018-08-24 11:36+0000\n"
 "Last-Translator: Felix Yang - Elico Corp <felixyangsh@aliyun.com>, 2020\n"
 "Language-Team: Chinese (China) (https://www.transifex.com/odoo/teams/41243/zh_CN/)\n"
 "MIME-Version: 1.0\n"
@@ -25,12 +24,6 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Language: zh_CN\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-
-#. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
-#, python-format
-msgid "A bank account is not defined."
-msgstr "银行账户未定义"
 
 #. module: account_sepa
 #: code:addons/account_sepa/models/account_payment.py:0
@@ -51,12 +44,13 @@ msgstr "公司"
 #. module: account_sepa
 #: model:ir.model,name:account_sepa.model_res_config_settings
 msgid "Config Settings"
-msgstr "配置设置"
+msgstr "配置设定"
 
 #. module: account_sepa
-#: model:ir.model.fields,field_description:account_sepa.field_account_payment__display_qr_code
-msgid "Display Qr Code"
-msgstr "显示二维码"
+#: model:ir.model,name:account_sepa.model_account_abstract_payment
+msgid ""
+"Contains the logic shared between models which allows to register payments"
+msgstr "包含在允许登记付款的模块之间共享的逻辑"
 
 #. module: account_sepa
 #: model:ir.model.fields,help:account_sepa.field_res_company__sepa_orgid_issr
@@ -66,12 +60,12 @@ msgid ""
 msgstr "全部分配认证 (eg. KBE-BCO or Finanzamt Muenchen IV)"
 
 #. module: account_sepa
-#: model:ir.model.fields.selection,name:account_sepa.selection__res_company__sepa_pain_version__pain_001_001_03
+#: selection:res.company,sepa_pain_version:0
 msgid "Generic"
 msgstr "通用的"
 
 #. module: account_sepa
-#: model:ir.model.fields.selection,name:account_sepa.selection__res_company__sepa_pain_version__pain_001_003_03
+#: selection:res.company,sepa_pain_version:0
 msgid "German Version"
 msgstr "德国版本"
 
@@ -88,8 +82,8 @@ msgid "Identification assigned by an institution (eg. VAT number)."
 msgstr "被一家机构分配的标识例(如.增值税 号码)"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:44
+#: code:addons/account_sepa/models/account_batch_payment.py:51
 #, python-format
 msgid ""
 "In result, the file might not be accepted by all bank as a valid SEPA Credit"
@@ -115,12 +109,6 @@ msgid ""
 msgstr "债权人参考方姓名。使用规则：长度限制在70字符以内。"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_journal.py:0
-#, python-format
-msgid "Partner %s has not bank account defined."
-msgstr "或者伙伴 %s银行账户未被定义 "
-
-#. module: account_sepa
 #: model_terms:ir.ui.view,arch_db:account_sepa.account_journal_dashboard_kanban_view_inherited
 msgid "Payment to send via SEPA"
 msgstr "通过SEPA发送付款"
@@ -136,31 +124,27 @@ msgid "Payments to send via SEPA"
 msgstr "通过SEPA发送付款"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:42
 #, python-format
 msgid "Please note that the following warning has been raised:"
 msgstr "请注意，已提出以下警告："
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:46
 #, python-format
 msgid "Please note that the following warnings have been raised:"
 msgstr "请注意，已提出以下警告："
 
 #. module: account_sepa
-#: model:ir.model.fields,field_description:account_sepa.field_account_payment__qr_code_url
-msgid "Qr Code Url"
-msgstr "二维码地址"
+#: model:ir.model.fields,field_description:account_sepa.field_account_payment__partner_bank_account_id
+#: model:ir.model.fields,field_description:account_sepa.field_account_register_payments__partner_bank_account_id
+msgid "Recipient Bank Account"
+msgstr "收款银行账号"
 
 #. module: account_sepa
-#: model:ir.model,name:account_sepa.model_account_payment_register
-msgid "Register Payment"
+#: model:ir.model,name:account_sepa.model_account_register_payments
+msgid "Register Payments"
 msgstr "登记付款"
-
-#. module: account_sepa
-#: model_terms:ir.ui.view,arch_db:account_sepa.view_sepa_credit_transfer_search
-msgid "SCT Payments To Send"
-msgstr "要发送的SCT付款"
 
 #. module: account_sepa
 #: model:account.payment.method,name:account_sepa.account_payment_method_sepa_ct
@@ -168,7 +152,12 @@ msgid "SEPA Credit Transfer"
 msgstr "SEPA 信用转账"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_journal_dashboard.py:0
+#: model_terms:ir.ui.view,arch_db:account_sepa.view_sepa_credit_transfer_search
+msgid "SEPA Credit Transfer Payments To Send"
+msgstr "SEPA 信用转账付款发送"
+
+#. module: account_sepa
+#: code:addons/account_sepa/models/account_journal_dashboard.py:23
 #, python-format
 msgid "SEPA Credit Transfers to Send"
 msgstr "SEPA 信用转账发送"
@@ -189,12 +178,6 @@ msgid ""
 msgstr "SEPA可以是通用格式，一些国家与EPC（欧洲支付系统）做出的SEPA建议不同，因此创建的XML需要一些改动。"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_payment.py:0
-#, python-format
-msgid "Scan me with your banking app."
-msgstr "使用你的银行APP扫描"
-
-#. module: account_sepa
 #: model:ir.model.fields,field_description:account_sepa.field_account_batch_payment__sct_generic
 msgid "Sct Generic"
 msgstr "通用的"
@@ -205,7 +188,7 @@ msgid "Sct Warning"
 msgstr "警告"
 
 #. module: account_sepa
-#: model:ir.model.fields.selection,name:account_sepa.selection__res_company__sepa_pain_version__pain_001_001_03_ch_02
+#: selection:res.company,sepa_pain_version:0
 msgid "Swiss Version"
 msgstr "瑞士版本"
 
@@ -221,13 +204,7 @@ msgstr ""
 "当银行日记账不是以欧元为单位，交易不是以欧元为单位或者没有IBAN认证和银行认证码."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_payment.py:0
-#, python-format
-msgid "The SEPA QR Code information is not set correctly."
-msgstr "SEPA二维码信息未被正确定义"
-
-#. module: account_sepa
-#: code:addons/account_sepa/models/account_journal.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:353
 #, python-format
 msgid ""
 "The account %s, linked to partner '%s', is not of type IBAN.\n"
@@ -238,7 +215,7 @@ msgstr ""
 "."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:103
 #, python-format
 msgid ""
 "The account %s, of journal '%s', is not of type IBAN.\n"
@@ -248,7 +225,7 @@ msgstr ""
 "一个有效的IBAN账户需要使用SEPA功能."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_payment.py:0
+#: code:addons/account_sepa/models/account_payment.py:47
 #, python-format
 msgid ""
 "The account '%s' (journal %s) requires a Bank Identification Code (BIC) to "
@@ -256,38 +233,38 @@ msgid ""
 msgstr "账户 '%s' (日记账 %s)需要一个银行认证码 (BIC)来通过SEPA付费. 请先配置它."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_journal.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:317
 #, python-format
 msgid ""
 "The amount of the payment '%s' is too high. The maximum permitted is %s."
 msgstr "付款金额 '%s' 太高了. 最大限制是 %s."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:90
 #, python-format
 msgid ""
 "The creditor bank account %s used in payment %s is not identified by a BIC"
-msgstr "用于付款 %s 的债权人银行账户 %s 未经BIC鉴定"
+msgstr "用于付款 %s 的债权人银行帐户 %s 未经BIC鉴定"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:92
 #, python-format
 msgid ""
 "The creditor bank account %s used in payment %s is not identified by an IBAN"
-msgstr "用于付款 %s 的债权人银行账户 %s 未经IBAN鉴定"
+msgstr "用于付款 %s 的债权人银行帐户 %s 未经IBAN鉴定"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:111
 #, python-format
 msgid ""
 "The following payments have no recipient bank account set: %s. \n"
 "\n"
 msgstr ""
-"以下付款没有设置收款人银行账户： %s. \n"
+"以下付款没有设置收款人银行帐户： %s. \n"
 "\n"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_payment.py:0
+#: code:addons/account_sepa/models/account_payment.py:45
 #, python-format
 msgid ""
 "The journal '%s' requires a proper IBAN account to pay via SEPA. Please "
@@ -295,7 +272,7 @@ msgid ""
 msgstr "日记账 '%s' 需要一个正确的IBAN 账号来通过SEPA付费。请先配置它。"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_payment.py:0
+#: code:addons/account_sepa/models/account_payment.py:56
 #, python-format
 msgid ""
 "The partner account '%s' requires a Bank Identification Code (BIC) to pay "
@@ -303,7 +280,7 @@ msgid ""
 msgstr "伙伴的账户 '%s'需要一个银行认证码 (BIC)来通过SEPA付费. 请先配置它."
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:18
 #, python-format
 msgid ""
 "The text used in SEPA files can only contain the following characters :\n"
@@ -321,27 +298,27 @@ msgstr ""
 "/ - ? : ( ) . , ' + (space)"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:88
 #, python-format
 msgid "The transaction %s is instructed in another currency than EUR"
 msgstr "本次交易%s被指示其他货币不是欧元"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_journal.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:347
 #, python-format
 msgid "There is no Bank Identifier Code recorded for bank account '%s'"
 msgstr "这个银行账号没有银行认证码 '%s'"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_journal.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:191
 #, python-format
 msgid ""
 "There is no Bank Identifier Code recorded for bank account '%s' of journal "
 "'%s'"
-msgstr "银行账号没有银行认证码记录 '%s' 日记账的 '%s'"
+msgstr "银行帐号没有银行认证码记录 '%s' 日记账的 '%s'"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_journal.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:189
 #, python-format
 msgid "Too many transactions for a single file."
 msgstr "在单个文件里太多的交易了。"
@@ -361,7 +338,7 @@ msgid "Your Company Name"
 msgstr "公司名称"
 
 #. module: account_sepa
-#: code:addons/account_sepa/models/account_batch_payment.py:0
+#: code:addons/account_sepa/models/account_batch_payment.py:84
 #, python-format
 msgid "Your bank account is not labelled in EUR"
-msgstr "您的银行账户中未标示欧元"
+msgstr "您的银行帐户中未标示欧元"

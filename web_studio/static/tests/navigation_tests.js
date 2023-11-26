@@ -12,7 +12,6 @@ QUnit.module('Studio Navigation', {
             partner: {
                 fields: {
                     foo: {string: "Foo", type: "char"},
-                    date: {string: "Date", type: "date"},
                     bar: {string: "Bar", type: "many2one", relation: 'partner'},
                     type: {
                         string: "Type",
@@ -102,57 +101,50 @@ QUnit.module('Studio Navigation', {
 }, function () {
     QUnit.module('Misc');
 
-    QUnit.test('open Studio with act_window', async function (assert) {
-        assert.expect(17);
+    QUnit.test('open Studio with act_window', function (assert) {
+        assert.expect(16);
 
-        var actionManager = await createActionManager({
+        var actionManager = createActionManager({
             actions: this.actions,
             archs: this.archs,
             data: this.data,
             mockRPC: function (route) {
                 assert.step(route);
                 if (route === '/web_studio/get_studio_view_arch') {
-                    return Promise.resolve();
+                    return $.when();
                 }
                 return this._super.apply(this, arguments);
             },
         });
 
-        await actionManager.doAction(1);  // open a act_window_action
+        actionManager.doAction(1);  // open a act_window_action
 
         var rpcs = ['/web/action/load', '/web/dataset/call_kw/partner', '/web/dataset/search_read'];
         assert.verifySteps(rpcs, "should have loaded the action");
 
-        await actionManager.doAction('action_web_studio_action_editor', {
+        actionManager.doAction('action_web_studio_action_editor', {
             action: actionManager.getCurrentAction(),
-            controllerState: actionManager.getCurrentController().widget.exportState(),
         });
         bus.trigger('studio_toggled', 'main');
-        await testUtils.nextTick();
 
-        rpcs = [
-            '/web_studio/activity_allowed',
-            '/web_studio/get_studio_view_arch',
-            '/web/dataset/call_kw/partner',  // load_views with studio in context
-            '/web/dataset/search_read',
-        ];
+        rpcs.push('/web_studio/get_studio_view_arch');
+        rpcs.push('/web/dataset/call_kw/partner');  // load_views with studio in context
+        rpcs.push('/web/dataset/search_read');
         assert.verifySteps(rpcs, "should have opened the action in Studio");
 
-        assert.containsOnce(actionManager, '.o_web_studio_client_action .o_web_studio_kanban_view_editor',
+        assert.strictEqual(actionManager.$('.o_web_studio_client_action .o_web_studio_kanban_view_editor').length, 1,
             "the kanban view should be opened");
         assert.strictEqual(actionManager.$('.o_kanban_record:contains(yop)').length, 1,
             "the first partner should be displayed");
 
-        await actionManager.restoreStudioAction();  // simulate leaving Studio
+        actionManager.restoreStudioAction();  // simulate leaving Studio
 
-        rpcs = [
-            '/web/action/load',
-            '/web/dataset/call_kw/partner',  // load_views
-            '/web/dataset/search_read',
-        ];
+        rpcs.push('/web/action/load');
+        rpcs.push('/web/dataset/call_kw/partner');  // load_views
+        rpcs.push('/web/dataset/search_read');
         assert.verifySteps(rpcs, "should have reloaded the previous action edited by Studio");
 
-        assert.containsNone(actionManager, '.o_web_studio_client_action',
+        assert.strictEqual(actionManager.$('.o_web_studio_client_action').length, 0,
             "Studio should be closed");
         assert.strictEqual(actionManager.$('.o_kanban_view .o_kanban_record:contains(yop)').length, 1,
             "the first partner should be displayed in kanban");
@@ -160,34 +152,32 @@ QUnit.module('Studio Navigation', {
         actionManager.destroy();
     });
 
-    QUnit.test('open Studio with act_window and viewType', async function (assert) {
+    QUnit.test('open Studio with act_window and viewType', function (assert) {
         assert.expect(2);
 
-        var actionManager = await createActionManager({
+        var actionManager = createActionManager({
             actions: this.actions,
             archs: this.archs,
             data: this.data,
             mockRPC: function (route) {
                 if (route === '/web_studio/chatter_allowed') {
-                    return Promise.resolve(true);
+                    return $.when(true);
                 }
                 if (route === '/web_studio/get_studio_view_arch') {
-                    return Promise.resolve();
+                    return $.when();
                 }
                 return this._super.apply(this, arguments);
             },
         });
 
-        await actionManager.doAction(1);  // open a act_window_action
-        await actionManager.doAction('action_web_studio_action_editor', {
+        actionManager.doAction(1);  // open a act_window_action
+        actionManager.doAction('action_web_studio_action_editor', {
             action: actionManager.getCurrentAction(),
-            controllerState: actionManager.getCurrentController().widget.exportState(),
             viewType: 'form',
         });
         bus.trigger('studio_toggled', 'main');
-        await testUtils.nextTick();
 
-        assert.containsOnce(actionManager, '.o_web_studio_client_action .o_web_studio_form_view_editor',
+        assert.strictEqual(actionManager.$('.o_web_studio_client_action .o_web_studio_form_view_editor').length, 1,
             "the form view should be opened");
         assert.strictEqual(actionManager.$('.o_field_widget[name="foo"]').text(), "yop",
             "the first partner should be displayed");
@@ -195,126 +185,115 @@ QUnit.module('Studio Navigation', {
         actionManager.destroy();
     });
 
-    QUnit.test('switch view and close Studio', async function (assert) {
+    QUnit.test('switch view and close Studio', function (assert) {
         assert.expect(3);
 
-        var actionManager = await createActionManager({
+        var actionManager = createActionManager({
             actions: this.actions,
             archs: this.archs,
             data: this.data,
             mockRPC: function (route) {
                 if (route === '/web_studio/get_studio_view_arch') {
-                    return Promise.resolve();
+                    return $.when();
                 }
                 return this._super.apply(this, arguments);
             },
         });
 
-        await actionManager.doAction(1);  // open a act_window_action
+        actionManager.doAction(1);  // open a act_window_action
 
         var action = actionManager.getCurrentAction();
-        await actionManager.doAction('action_web_studio_action_editor', {
+        actionManager.doAction('action_web_studio_action_editor', {
             action: action,
-            controllerState: actionManager.getCurrentController().widget.exportState(),
         });
         bus.trigger('studio_toggled', 'main');
-        await testUtils.nextTick();
 
-        assert.containsOnce(actionManager, '.o_web_studio_client_action .o_web_studio_kanban_view_editor',
+        assert.strictEqual(actionManager.$('.o_web_studio_client_action .o_web_studio_kanban_view_editor').length, 1,
             "the kanban view should be opened");
-        await actionManager.doAction('action_web_studio_action_editor', {
+        actionManager.doAction('action_web_studio_action_editor', {
             action: action,
-            controllerState: actionManager.getCurrentStudioController().widget.exportState(),
             pushState: false,
             replace_last_action: true,
             viewType: 'list',
         });
-        await actionManager.restoreStudioAction();  // simulate leaving Studio
+        actionManager.restoreStudioAction();  // simulate leaving Studio
 
-        assert.containsNone(actionManager, '.o_web_studio_client_action',
+        assert.strictEqual(actionManager.$('.o_web_studio_client_action').length, 0,
             "Studio should be closed");
-        assert.containsOnce(actionManager, '.o_list_view',
+        assert.strictEqual(actionManager.$('.o_list_view').length, 1,
             "the list view should be opened");
 
         actionManager.destroy();
     });
 
-    QUnit.test('navigation in Studio with act_window', async function (assert) {
-        assert.expect(27);
+    QUnit.test('navigation in Studio with act_window', function (assert) {
+        assert.expect(25);
 
-        var actionManager = await createActionManager({
+        var actionManager = createActionManager({
             actions: this.actions,
             archs: this.archs,
             data: this.data,
             mockRPC: function (route) {
                 assert.step(route);
                 if (route === '/web_studio/get_studio_view_arch') {
-                    return Promise.resolve();
+                    return $.when();
                 }
                 return this._super.apply(this, arguments);
             },
         });
 
-        await actionManager.doAction(1);  // open a act_window_action
+        actionManager.doAction(1);  // open a act_window_action
 
         var rpcs = ['/web/action/load', '/web/dataset/call_kw/partner', '/web/dataset/search_read'];
         assert.verifySteps(rpcs, "should have loaded the action");
 
-        await actionManager.doAction('action_web_studio_action_editor', {
+        actionManager.doAction('action_web_studio_action_editor', {
             action: actionManager.getCurrentAction(),
-            controllerState: actionManager.getCurrentController().widget.exportState(),
         });
         bus.trigger('studio_toggled', 'main');
 
-        rpcs = [
-            '/web_studio/activity_allowed',
-            '/web_studio/get_studio_view_arch',
-            '/web/dataset/call_kw/partner',  // load_views with studio in context
-            '/web/dataset/search_read',
-        ];
+        rpcs.push('/web_studio/get_studio_view_arch');
+        rpcs.push('/web/dataset/call_kw/partner');  // load_views with studio in context
+        rpcs.push('/web/dataset/search_read');
         assert.verifySteps(rpcs, "should have opened the action in Studio");
 
-        assert.containsOnce(actionManager, '.o_web_studio_client_action .o_web_studio_kanban_view_editor',
+        assert.strictEqual(actionManager.$('.o_web_studio_client_action .o_web_studio_kanban_view_editor').length, 1,
             "the kanban view should be opened");
         assert.strictEqual(actionManager.$('.o_kanban_record:contains(yop)').length, 1,
             "the first partner should be displayed");
 
         this.actions[1].studioNavigation = true;  // is normally set by the webclient
-        await actionManager.doAction(2);  // favourite ponies
+        actionManager.doAction(2);  // favourite ponies
 
-        rpcs = ['/web/action/load'];
+        rpcs.push('/web/action/load');
         assert.verifySteps(rpcs, "should not have done any extra rpc for the new action");
 
-        await actionManager.doAction('action_web_studio_action_editor', {
-            action: actionManager.getLastAction(),
+        actionManager.doAction('action_web_studio_action_editor', {
+            action: actionManager.getCurrentAction(),
+            studio_clear_breadcrumbs: true,  // is normally set by the webclient
         });
 
-        rpcs = [
-            '/web_studio/activity_allowed',
-            '/web_studio/get_studio_view_arch',
-            '/web/dataset/call_kw/pony',  // load_views with studio in context
-            '/web/dataset/search_read',
-        ];
+        rpcs.push('/web_studio/get_studio_view_arch');
+        rpcs.push('/web/dataset/call_kw/pony');  // load_views with studio in context
+        rpcs.push('/web/dataset/search_read');
         assert.verifySteps(rpcs, "should have opened the navigated action in Studio");
 
-        assert.containsOnce(actionManager, '.o_web_studio_client_action .o_web_studio_list_view_editor',
+        assert.strictEqual(actionManager.$('.o_web_studio_client_action .o_web_studio_list_view_editor').length, 1,
             "the list view should be opened");
         assert.strictEqual(actionManager.$('.o_list_view .o_data_cell').text(), "Twilight SparkleApplejackFluttershy",
             "the list of ponies should be correctly displayed");
 
         this.actions[1].studioNavigation = false;
-        await actionManager.restoreStudioAction();  // simulate leaving Studio
+        actionManager.restoreStudioAction();  // simulate leaving Studio
 
-        rpcs = [
-            '/web/action/load',
-            '/web/dataset/call_kw/pony',  // load_views
-            '/web/dataset/search_read',
-        ];
+        rpcs.push('/web/action/load');
+        rpcs.push('/web/dataset/call_kw/pony');  // load_views
+        rpcs.push('/web/dataset/search_read');
         assert.verifySteps(rpcs, "should have reloaded the previous action edited by Studio");
 
-        assert.containsNone(actionManager, '.o_web_studio_client_action',
+        assert.strictEqual(actionManager.$('.o_web_studio_client_action').length, 0,
             "Studio should be closed");
-        assert.containsOnce(actionManager, '.o_list_view',
+        assert.strictEqual(actionManager.$('.o_list_view').length, 1,
             "the list view should be opened");
         assert.strictEqual(actionManager.$('.o_list_view .o_data_cell').text(), "Twilight SparkleApplejackFluttershy",
             "the list of ponies should be correctly displayed");
@@ -322,19 +301,19 @@ QUnit.module('Studio Navigation', {
         actionManager.destroy();
     });
 
-    QUnit.test('keep action context when leaving Studio', async function (assert) {
+    QUnit.test('keep action context when leaving Studio', function (assert) {
         assert.expect(2);
 
         this.actions[0].context = "{'active_id': 1}";
         var nbLoadAction = 0;
 
-        var actionManager = await createActionManager({
+        var actionManager = createActionManager({
             actions: this.actions,
             archs: this.archs,
             data: this.data,
             mockRPC: function (route, args) {
                 if (route === '/web_studio/get_studio_view_arch') {
-                    return Promise.resolve();
+                    return $.when();
                 } else if (route === '/web/action/load') {
                     nbLoadAction++;
                     if (nbLoadAction === 2) {
@@ -347,90 +326,51 @@ QUnit.module('Studio Navigation', {
             },
         });
 
-        await actionManager.doAction(1);  // open a act_window_action
-        await actionManager.doAction('action_web_studio_action_editor', {
+        actionManager.doAction(1);  // open a act_window_action
+        actionManager.doAction('action_web_studio_action_editor', {
             action: actionManager.getCurrentAction(),
-            controllerState: actionManager.getCurrentController().widget.exportState(),
         });
         bus.trigger('studio_toggled', 'main');
-        await actionManager.restoreStudioAction();  // simulate leaving Studio
+        actionManager.restoreStudioAction();  // simulate leaving Studio
         assert.strictEqual(nbLoadAction, 2, "the action should have been loaded twice");
         actionManager.destroy();
     });
 
-    QUnit.test('open same record when leaving form', async function (assert) {
+    QUnit.test('open same record when leaving form', function (assert) {
         assert.expect(3);
 
-        var actionManager = await createActionManager({
+        var actionManager = createActionManager({
             actions: this.actions,
             archs: this.archs,
             data: this.data,
             mockRPC: function (route) {
                 if (route === '/web_studio/chatter_allowed') {
-                    return Promise.resolve(true);
+                    return $.when(true);
                 }
                 if (route === '/web_studio/get_studio_view_arch') {
-                    return Promise.resolve();
+                    return $.when();
                 }
                 return this._super.apply(this, arguments);
             },
         });
 
-        await actionManager.doAction(2);  // open a act_window_action
-        await testUtils.dom.click(actionManager.$('.o_list_view tbody tr:first td:contains(Twilight Sparkle)'));
+        actionManager.doAction(2);  // open a act_window_action
+        actionManager.$('.o_list_view tbody tr:first td:contains(Twilight Sparkle)').click();
 
         var action = actionManager.getCurrentAction();
-        await actionManager.doAction('action_web_studio_action_editor', {
+        actionManager.doAction('action_web_studio_action_editor', {
             action: action,
-            controllerState: actionManager.getCurrentController().widget.exportState(),
             viewType: 'form',  // is normally set by the webclient
         });
         bus.trigger('studio_toggled', 'main');
-        await testUtils.nextTick();
 
-        assert.containsOnce(actionManager, '.o_web_studio_client_action .o_web_studio_form_view_editor',
+        assert.strictEqual(actionManager.$('.o_web_studio_client_action .o_web_studio_form_view_editor').length, 1,
             "the form view should be opened");
-        await actionManager.restoreStudioAction();  // simulate leaving Studio
-        assert.containsOnce(actionManager, '.o_form_view',
+        actionManager.restoreStudioAction();  // simulate leaving Studio
+        assert.strictEqual(actionManager.$('.o_form_view').length, 1,
             "the form view should be opened");
         assert.strictEqual(actionManager.$('.o_form_view span:contains(Twilight Sparkle)').length, 1,
             "should have open the same record");
-
-        actionManager.destroy();
-    });
-
-    QUnit.test('open Studio with non editable view', async function (assert) {
-        assert.expect(1);
-
-        this.actions.push({
-            id: 42,
-            name: 'Partners Action 42',
-            res_model: 'partner',
-            type: 'ir.actions.act_window',
-            views: [[42, 'grid'], [2, 'list'], [false, 'form']],
-        });
-        this.archs['partner,42,grid'] = '<grid>' +
-                '<field name="foo" type="row"/>' +
-                '<field name="id" type="measure"/>' +
-                '<field name="date" type="col">' +
-                    '<range name="week" string="Week" span="week" step="day"/>' +
-                '</field>' +
-            '</grid>';
-
-        var actionManager = await createActionManager({
-            actions: this.actions,
-            archs: this.archs,
-            data: this.data,
-        });
-
-        await actionManager.doAction(42);
-        await actionManager.doAction('action_web_studio_action_editor', {
-            action: actionManager.getCurrentAction(),
-            controllerState: actionManager.getCurrentController().widget.exportState(),
-        });
-
-        assert.containsOnce(actionManager, '.o_web_studio_action_editor',
-            "action editor should be opened (grid is not editable)");
 
         actionManager.destroy();
     });
@@ -471,19 +411,19 @@ QUnit.module('Studio Navigation', {
             },
         });
 
-        await actionManager.doAction(43);
-        await actionManager.doAction('action_web_studio_action_editor', {
+        actionManager.doAction(43);
+        actionManager.doAction('action_web_studio_action_editor', {
             action: actionManager.getCurrentAction(),
             viewType: 'form',
         });
 
-        assert.containsOnce(actionManager, '.o_web_studio_client_action .o_web_studio_form_view_editor',
+        assert.strictEqual(actionManager.$('.o_web_studio_client_action .o_web_studio_form_view_editor').length, 1,
             "the form view should be opened");
 
-        await testUtils.dom.click(actionManager.$('.o_web_studio_form_view_editor .o_field_one2many'));
-        await testUtils.dom.click(actionManager.$('.o_web_studio_form_view_editor .o_field_one2many .o_web_studio_editX2Many[data-type="form"]'));
+        actionManager.$('.o_web_studio_form_view_editor .o_field_one2many').click();
+        actionManager.$('.o_web_studio_form_view_editor .o_field_one2many .o_web_studio_editX2Many')[1].click();
 
-        assert.containsOnce(actionManager, '.o_web_studio_client_action .o_web_studio_form_view_editor',
+        assert.strictEqual(actionManager.$('.o_web_studio_client_action .o_web_studio_form_view_editor').length, 1,
             "the form view should be opened");
 
         actionManager.destroy();

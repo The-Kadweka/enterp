@@ -57,16 +57,10 @@ var InventoryClientAction = ClientAction.extend({
     /**
      * @override
      */
-     _getPageFields: function (options) {
-         if (options && options.line) {
-            return [
-                ['location_id', 'location_id.id'],
-                ['location_name', 'location_id.display_name'],
-            ];
-         }
+     _getPageFields: function () {
          return [
-             ['location_id', 'location_ids.0.id'],
-             ['location_name', 'location_ids.0.display_name'],
+             ['location_id', 'location_id.id'],
+             ['location_name', 'location_id.display_name'],
          ];
      },
 
@@ -168,7 +162,7 @@ var InventoryClientAction = ClientAction.extend({
                 'params': params,
             });
         } else {
-            return Promise.reject();
+            return $.Deferred().reject();
         }
     },
 
@@ -190,7 +184,7 @@ var InventoryClientAction = ClientAction.extend({
                 {currentId :self.currentState.id},
                 'readonly'
             );
-            self.ViewsWidget.appendTo(self.$('.o_content'));
+            self.ViewsWidget.appendTo(self.$el);
         });
     },
 
@@ -200,7 +194,7 @@ var InventoryClientAction = ClientAction.extend({
      * event listener.
      *
      * @private
-     * @returns {Promise}
+     * @returns {Deferred}
      */
      _validate: function (ev) {
         var self = this;

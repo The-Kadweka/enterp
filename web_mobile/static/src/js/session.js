@@ -1,7 +1,6 @@
 odoo.define('web_mobile.session', function (require) {
 "use strict";
 
-var core = require('web.core');
 var session = require('web.Session');
 
 var mobile = require('web_mobile.rpc');
@@ -23,9 +22,6 @@ session.include({
      */
     get_file: function (options) {
         if (mobile.methods.downloadFile) {
-            if (core.csrf_token) {
-                options.csrf_token = core.csrf_token;
-            }
             mobile.methods.downloadFile(options);
             // There is no need to wait downloadFile because we delegate this to
             // Download Manager Service where error handling will be handled correclty.

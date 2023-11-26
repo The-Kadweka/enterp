@@ -4,33 +4,34 @@
 
     <t t-name="event_barcode_template">
         <div class="o_event_barcode_bg o_home_menu_background">
-            <div class="o_event_barcode_main">
-                <div class="text-center">
-                    <h1 t-esc="widget.data.name"/>
-                    <p>
-                        <t t-if="widget.data.city and widget.data.country">
-                            <t t-esc="widget.data.city"/> - <t t-esc="widget.data.country"/>
-                        </t>
-                        <t t-if="widget.data.city and !widget.data.country" t-esc="widget.data.city"/>
-                        <t t-if="widget.data.country and !widget.data.city" t-esc="widget.data.country"/>
-                    </p>
+            <div class="o_event_barcode_detail text-center mt32 row">
+                <div class="col-lg-3 col-12 o_event_date">
+                    <span class="o_event_day mt24"><t t-esc="widget.data.date"/></span>
+                    <span class="o_event_month"><t t-esc="widget.data.month"/></span>
                 </div>
-                <h2><small>Welcome to</small> <t t-esc="widget.data.company_name"/></h2>
-                <img src="/web/binary/company_logo" alt="Company Logo" class="o_event_barcode_company_image"/>
-                <div class="row">
-                    <div class="col-sm-5">
-                        <img class="mt16 o_event_barcode_image" src="/event_barcode/static/img/barcode.png" alt="Barcode"/>
-                        <h5 class="mt8 mb0 text-muted">Scan your badge</h5>
-                    </div>
-                    <div class="col-sm-2 mt32">
-                        <h4 class="mt0 mb8"><i>or</i></h4>
-                    </div>
-                    <div class="col-sm-5 mt16">
-                        <button class="o_event_select_attendee btn btn-primary mb16">
-                            <div class="mb16 mt16">Select Attendee</div>
-                        </button>
+                <div class="col-lg-6 col-9 o_event_info text-center">
+                    <div class="o_event_info_name text-center">
+                        <h2 class="o_event_title"><t t-esc="widget.data.name"/></h2>
+                        <p class="o_event_desc">
+                            <t t-if="widget.data.city and widget.data.country">
+                                <t t-esc="widget.data.city"/> - <t t-esc="widget.data.country"/>
+                            </t>
+                            <t t-if="widget.data.city and !widget.data.country" t-esc="widget.data.city"/>
+                            <t t-if="widget.data.country and !widget.data.city" t-esc="widget.data.country"/>
+                        </p>
                     </div>
                 </div>
+                <div class="col-lg-3 col-3 o_event_social">
+                    <div class="o_event_reg_attendee">0</div>
+                    <div class="o_event_total_attendee">
+                        <t t-esc="widget.data.total_attendee"/>
+                    </div>
+                </div>
+            </div>
+            <div class="o_event_barcode_main mt16 mb16">
+                <h1 class="mt0">Barcode Scanning</h1>
+                <img class="mt16" src="/event_barcode/static/img/barcode.png" alt="Barcode"/>
+                <input class="mt32" type="text" id="event_barcode" placeholder="Waiting for barcode scan..." size="40"/>
             </div>
         </div>
     </t>
@@ -38,10 +39,7 @@
     <t t-name="event_registration_summary">
         <div class="row">
           <div class="col-lg-8 offset-lg-2">
-            <div class="text-center" style="margin-bottom: 18px;">
-                <img t-if="registration.partner_id" t-attf-src="/web/image/res.partner/{{registration.partner_id}}/image_128" alt="Registration" class="o_image_64_cover"/>
-                <img t-else="" src="/web/static/src/img/placeholder.png" alt="Registration" class="o_image_64_cover"/>
-            </div>
+            <div class="text-center" style="margin-bottom: 18px;"><img t-att-src="registration.image" alt="Registration"/></div>
             <div t-if="success" class="alert alert-success text-center" role="status"><t t-esc="success"/></div>
             <div t-if="warning" class="alert alert-warning text-center" role="alert"><t t-esc="warning"/></div>
             <div t-if="registration.alert" class="alert alert-danger text-center" role="alert"><t t-esc="registration.alert"/></div>

@@ -57,16 +57,8 @@ var FloatToggleWidgetTimesheet = gridWidgets.FloatToggleWidget.extend({
 var FieldTimesheetUom = FloatFactorWidgetTimesheet;
 var widgetName = 'timesheet_uom' in session ?
          session.timesheet_uom.timesheet_widget : 'float_factor';
-if (widgetName === "float_toggle") {
-	var FieldTimesheetUom = FloatToggleWidgetTimesheet;
-} else if (widgetName === "float_factor") {
-    var FieldTimesheetUom = FloatFactorWidgetTimesheet;
-} else {
-    var FieldTimesheetUom = (
-        gridRegistry.get(widgetName) &&
-        gridRegistry.get(widgetName).extend({})
-    ) || FloatFactorWidgetTimesheet;
-}
+var FieldTimesheetUom = widgetName === 'float_toggle' ?
+         FloatToggleWidgetTimesheet : (gridRegistry.get(widgetName) || FloatFactorWidgetTimesheet);
 
 gridRegistry.add('timesheet_uom', FieldTimesheetUom);
 

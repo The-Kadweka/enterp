@@ -1,14 +1,12 @@
 from odoo.addons.web_studio.controllers.main import WebStudioController
 from odoo.http import _request_stack
 from odoo.tests.common import TransactionCase
-from odoo.tools import DotDict
 
 
 class TestReportEditor(TransactionCase):
 
     def setUp(self):
         super(TestReportEditor, self).setUp()
-        self.session = DotDict({'debug': False})
         _request_stack.push(self)
         self.WebStudioController = WebStudioController()
 
@@ -131,62 +129,6 @@ class TestReportEditor(TransactionCase):
         copy = self.env['ir.actions.report'].search([('report_name', '=', 'base.report_irmodulereference_copy_1')])
         report_model = copy._get_rendering_context_model()
         self.assertIsNotNone(report_model)
-
-    def test_duplicate_keep_translations(self):
-        def create_view(name, **kwargs):
-            arch = '<div>{}</div>'.format(name)
-            if kwargs.get('inherit_id'):
-                arch = '<xpath expr="." path="inside">{}</xpath>'.format(arch)
-            name = 'web_studio.test_keep_translations_{}'.format(name)
-            return self.env['ir.ui.view'].create(dict({
-                'type': 'qweb',
-                'name': name,
-                'key': name,
-                'arch': arch,
-            }, **kwargs))
-
-        report = self.env['ir.actions.report'].create({
-            'name': 'test inherit report user',
-            'report_name': 'web_studio.test_keep_translations_ab',
-            'model': 'res.users',
-        }).with_context(load_all_views=True)
-
-        self.env.ref('base.lang_fr').active = True
-        views = report.env['ir.ui.view']
-        views += create_view("a_")
-        root = views[-1]
-        views += create_view("b_")
-        views += create_view("aa", inherit_id=root.id, mode="primary")
-        views += create_view("ab", inherit_id=root.id)
-        target = views[-1]
-        views += create_view("aba", inherit_id=target.id)
-        views[-1].arch = views[-1].arch.replace('aba', 'a_</div>aba<div>ab')
-        views += create_view("abb", inherit_id=target.id, mode="primary")
-
-        self.env['ir.translation'].insert_missing(views._fields['arch_db'], views)
-        fr_translations = self.env['ir.translation'].search([
-            ('name', '=', 'ir.ui.view,arch_db'), ('res_id', 'in', views.ids), ('lang', '=', 'fr_FR')
-        ])
-        self.assertEqual(len(fr_translations), len(views) + 2)  # +2 for aba
-        for trans in fr_translations:
-            trans.value = "%s in fr" % trans.src
-
-        combined_arch = '<div>a_<div>ab</div><div>a_</div>aba<div>ab</div></div>'
-        self.assertEqual(target._read_template(target.id), combined_arch)
-
-        # duplicate original report, views will be combined into one
-        report.copy_report_and_template()
-        copy_view = self.env['ir.ui.view'].search([
-            ('key', '=', 'web_studio.test_keep_translations_ab_copy_1'),
-        ])
-        self.assertEqual(copy_view.arch, combined_arch)
-
-        # translations of combined views have been copied to the new view
-        translations = self.env['ir.translation'].search([
-            ('name', '=', 'ir.ui.view,arch_db'), ('res_id', '=', copy_view.id), ('lang', '=', 'fr_FR')
-        ])
-        self.assertEqual(len(translations), 3)
-        self.assertEqual(set(translations.mapped('src')), set(['a_', 'ab', 'aba']))
 
     def test_report_action_translations(self):
         self.env['ir.actions.report'].create({

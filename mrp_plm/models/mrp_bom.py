@@ -10,13 +10,14 @@ class MrpBom(models.Model):
     version = fields.Integer('Version', default=1)
     previous_bom_id = fields.Many2one('mrp.bom', 'Previous BoM')
     active = fields.Boolean('Production Ready')
-    image_128 = fields.Image(related='product_tmpl_id.image_128', readonly=False)
+    image_small = fields.Binary(related='product_tmpl_id.image_small', readonly=False)
     eco_ids = fields.One2many(
         'mrp.eco', 'new_bom_id', 'ECO to be applied')
     eco_count = fields.Integer('# ECOs', compute='_compute_eco_data')
     eco_inprogress_count = fields.Integer("# ECOs in progress", compute='_compute_eco_data')
     revision_ids = fields.Many2many('mrp.bom', compute='_compute_revision_ids')
 
+    @api.multi
     def _compute_eco_data(self):
         eco_inprogress_data = self.env['mrp.eco'].read_group([
             ('product_tmpl_id', 'in', self.mapped('product_tmpl_id').ids),
@@ -32,15 +33,16 @@ class MrpBom(models.Model):
             bom.eco_count = result.get(bom.id, 0)
             bom.eco_inprogress_count = result_inprogress.get(bom.product_tmpl_id.id, 0)
 
+    @api.one
     def _compute_revision_ids(self):
-        for rec in self:
-            previous_boms = self.env['mrp.bom']
-            current = self
-            while current.previous_bom_id:
-                previous_boms |= current
-                current = current.previous_bom_id
-            rec.revision_ids = previous_boms.ids
+        previous_boms = self.env['mrp.bom']
+        current = self
+        while current.previous_bom_id:
+            previous_boms |= current
+            current = current.previous_bom_id
+        self.revision_ids = previous_boms.ids
 
+    @api.multi
     def apply_new_version(self):
         """ Put old BoM as deprecated - TODO: Set to stage that is production_ready """
         MrpEco = self.env['mrp.eco']
@@ -64,6 +66,7 @@ class MrpBom(models.Model):
             new_bom.previous_bom_id.write({'active': False})
         return True
 
+    @api.multi
     def button_mrp_eco(self):
         self.ensure_one()
         action = self.env.ref('mrp_plm.mrp_eco_action_main').read()[0]
@@ -139,6 +142,7 @@ class MrpBomLine(models.Model):
         res.bom_line_change(vals, operation='add')
         return res
 
+    @api.multi
     def write(self, vals):
         operation = 'update'
         if vals.get('product_id'):
@@ -148,6 +152,7 @@ class MrpBomLine(models.Model):
         self.bom_line_change(vals, operation)
         return super(MrpBomLine, self).write(vals)
 
+    @api.multi
     def unlink(self):
         # It will create update rebase line.
         self.bom_line_change({'product_qty': 0.0})

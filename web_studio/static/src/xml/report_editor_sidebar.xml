@@ -46,14 +46,17 @@
                     <label for="attachment_use" class="custom-control-label">Reload from attachment</label>
                 </div>
             </div>
-            <t t-call="web_studio.Sidebar.Groups"/>
+            <div class="o_web_studio_sidebar_tags">
+                <label for="groups">Limit visibility to groups</label>
+                <div class="o_groups"/>
+            </div>
             <t t-call="web_studio.Sidebar.Toolbox">
                 <t t-call="web_studio.Sidebar.Parameters" t-if="widget.debug"/>
                 <t t-call="web_studio.Sidebar.XMLEditor" t-if="widget.debug"/>
             </t>
         </t>
         <t t-if="widget.state.mode === 'properties'">
-            <div id="accordion" class="o_web_studio_accordion mt16" role="tablist" aria-multiselectable="true">
+            <div id="accordion" class="o_web_studio_accordion" role="tablist" aria-multiselectable="true">
                 <!-- the rest will be dynamically added -->
             </div>
         </t>
@@ -81,18 +84,18 @@
             </button>
         </h5>
     </div>
-    <div t-att-id="id" class="collapse card-body" t-att-aria-labelledby="header" data-parent="#accordion">
+    <div t-att-id="id" class="collapse" t-att-aria-labelledby="header" data-parent="#accordion">
     <!-- dynamically inserted here -->
     </div>
 </div>
 
 <!-- edit components templates -->
-<div t-name="web_studio.ReportDirectiveTField" class="o_web_studio_sidebar_text">
+<div t-name="web_studio.ReportDirectiveTField" class="o_web_studio_sidebar_text card-body">
     <label>Field expression</label>
     <div class="o_web_studio_tfield_fieldexpression" />
 </div>
 
-<div t-name="web_studio.ReportDirectiveTIf">
+<div t-name="web_studio.ReportDirectiveTIf" class="card-body">
     <div class="o_web_studio_sidebar_text">
         <label for="if_expression">Visible if</label>
         <div class="o_web_studio_tif_ifexpression">
@@ -107,19 +110,19 @@
     <label for="o_web_studio_telse_elseexpression">Else <span class="float-left o_web_studio_telse_elseexpression"/> (t-if="<t t-esc="widget.tIf"/>")</label>
 </div>
 
-<div t-name="web_studio.ReportDirectiveTEsc" class="o_web_studio_sidebar_text">
+<div t-name="web_studio.ReportDirectiveTEsc" class="o_web_studio_sidebar_text card-body">
     <label for="if_expression">Esc expression</label>
     <div class="o_web_studio_tesc_escexpression" />
 </div>
 
-<div t-name="web_studio.ReportDirectiveTSet" class="o_web_studio_sidebar_text">
+<div t-name="web_studio.ReportDirectiveTSet" class="o_web_studio_sidebar_text card-body">
     <label for="set_expression">Set expression</label>
     <div class="o_web_studio_tset_setexpression" />
     <label for="value_expression">Related expression</label>
     <div class="o_web_studio_tset_valueexpression" />
 </div>
 
-<div t-name="web_studio.ReportDirectiveTForeach" class="o_web_studio_sidebar_text">
+<div t-name="web_studio.ReportDirectiveTForeach" class="o_web_studio_sidebar_text card-body">
     <label for="foreach_expression">Foreach expression</label>
     <div class="o_web_studio_tforeach_foreachexpression" />
     <label for="as_expression">As expression</label>
@@ -152,24 +155,22 @@
     </div>
 </div>
 
-<div t-name="web_studio.ReportColumn">
-    <div class="row no-gutters">
-        <div class="o_web_studio_sidebar_text col-6">
-            <label for="o_web_studio_size">Size</label>
-            <div class="input-group o_web_studio_size">
-                <span class="text-muted">/ 12</span>
-            </div>
+<div t-name="web_studio.ReportColumn" class="card-body row">
+    <div class="o_web_studio_sidebar_text col-6">
+        <label for="o_web_studio_size">Size</label>
+        <div class="input-group o_web_studio_size">
+            <span class="text-muted">/ 12</span>
         </div>
-        <div class="o_web_studio_sidebar_text col-6">
-            <label for="o_web_studio_offset">Offset</label>
-            <div class="input-group o_web_studio_offset">
-                <span class="text-muted">/ 12</span>
-            </div>
+    </div>
+    <div class="o_web_studio_sidebar_text col-6">
+        <label for="o_web_studio_offset">Offset</label>
+        <div class="input-group o_web_studio_offset">
+            <span class="text-muted">/ 12</span>
         </div>
     </div>
 </div>
 
-<div t-name="web_studio.ReportImage">
+<div t-name="web_studio.ReportImage" class="card-body">
     <div class="o_web_studio_sidebar_text">
         <label for="o_web_studio_source">Source</label>
         <div class="o_web_studio_source"/>
@@ -183,13 +184,13 @@
     </div>
 </div>
 
-<div t-name="web_studio.ReportText">
+<div t-name="web_studio.ReportText" class="card-body">
     <div class="o_web_studio_sidebar_text">
         <div class="o_web_studio_text"/>
     </div>
 </div>
 
-<div t-name="web_studio.ReportLayoutEditable" class="o_web_studio_layout">
+<div t-name="web_studio.ReportLayoutEditable" class="o_web_studio_layout card-body">
     <div class="row no-gutters">
         <div class="col-9 o_web_studio_sidebar_text o_web_studio_margin">
             <label>Margins</label>
@@ -203,83 +204,54 @@
                     data-margin="margin-left" placeholder="left" />
             <span class="text-muted"> px</span>
         </div>
-        <div t-if="widget.displayWidth" class="col-3 o_web_studio_sidebar_text o_web_studio_width">
+        <div class="col-3 o_web_studio_sidebar_text o_web_studio_width">
             <label>Width</label>
             <input type="text" t-att-value="widget.width" />
             <span class="text-muted"> px</span>
         </div>
     </div>
     <div class="row no-gutters">
-        <div t-if="!widget.isNodeText" class="col-4 o_web_studio_sidebar_text o_web_studio_text_decoration">
+        <div class="col-4 o_web_studio_sidebar_text o_web_studio_text_decoration">
             <label>Text decoration</label>
             <button type="button" title="Bold" data-property="bold" t-att-class="widget.bold ? 'btn btn-secondary o_bold active' : 'btn btn-secondary o_bold'"><i class="fa fa-bold"/></button>
             <button type="button" title="Italic" data-property="italic" t-att-class="widget.italic ? 'btn btn-secondary o_italic active' : 'btn btn-secondary o_italic'"><i class="fa fa-italic"/></button>
             <button type="button" title="Underline" data-property="underline" t-att-class="widget.underline ? 'btn btn-secondary o_underline active' : 'btn btn-secondary o_underline'"><i class="fa fa-underline"/></button>
         </div>
-        <div t-if="widget.displayAlignment" class="col-4 o_web_studio_sidebar_text o_web_studio_text_alignment">
-            <label>Alignment</label>
-            <t t-foreach="['left', 'center', 'right']" t-as="alignment">
-                <button type="button" t-att-title="alignment" t-attf-data-property="text-#{alignment}" t-attf-class="btn btn-secondary #{widget.alignment === 'text-' + alignment ? 'active' : ''}">
-                    <i t-attf-class="fa fa-align-#{alignment}"/>
-                </button>
-            </t>
-        </div>
-        <div t-if="!widget.isNodeText" class="col-4 o_web_studio_font_size">
-            <label>Font style</label>
+        <div class="col-8 o_web_studio_sidebar_text o_web_studio_colors">
+            <label>Colors</label>
             <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"><i class="fa fa-magic"/></button>
+                <button class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">Font <span class="caret"/></button>
                 <div class="dropdown-menu" role="menu">
-                    <div t-attf-class="dropdown-item-text #{!widget.fontSize ? 'active' : null}">Normal</div>
-                    <div t-attf-class="dropdown-item-text #{widget.fontSize == 'small' ? 'active' : null}" data-value="small">
-                        <div class="small">Small</div>
+                    <div role="menuitem" class="dropdown-item o_web_studio_font_colorpicker note-color">
+                        <button data-target="font" class="btn btn-block o_web_studio_reset_color">reset color</button>
+                        <div class="note-color-palette"/>
                     </div>
-                    <div t-attf-class="dropdown-item-text #{widget.fontSize == 'h1' ? 'active' : null}" data-value="h1">
-                        <h1>Heading1</h1>
-                    </div>
-                    <div t-attf-class="dropdown-item-text #{widget.fontSize == 'h2' ? 'active' : null}" data-value="h2">
-                        <h2>Heading2</h2>
-                    </div>
-                    <div t-attf-class="dropdown-item-text #{widget.fontSize == 'h3' ? 'active' : null}" data-value="h3">
-                        <h3>Heading3</h3>
-                    </div>
-                    <div t-attf-class="dropdown-item-text #{widget.fontSize == 'h4' ? 'active' : null}" data-value="h4">
-                        <h4>Heading4</h4>
-                    </div>
-                    <div t-attf-class="dropdown-item-text #{widget.fontSize == 'h5' ? 'active' : null}" data-value="h5">
-                        <h5>Heading5</h5>
-                    </div>
-                    <div t-attf-class="dropdown-item-text #{widget.fontSize == 'h6' ? 'active' : null}" data-value="h6">
-                        <h6>Heading6</h6>
+                </div>
+            </div>
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">Background <span class="caret"/></button>
+                <div class="dropdown-menu" role="menu">
+                    <div role="menuitem" class="dropdown-item o_web_studio_background_colorpicker note-color">
+                        <button data-target="background" class="btn btn-block o_web_studio_reset_color">reset color</button>
+                        <div class="note-color-palette"/>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <div class="row no-gutters">
-        <div t-if="!widget.isNodeText" class="col-6 o_web_studio_sidebar_text o_web_studio_colors">
-            <label>Colors</label>
-            <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"><i class="fa fa-font"/></button>
-                <div class="dropdown-menu" role="menu">
-                    <div role="menuitem" class="dropdown-item o_web_studio_font_colorpicker">
-                        <button data-target="font" class="btn btn-block o_web_studio_reset_color">reset color</button>
-                        <div class="o_web_studio_color_palette"/>
-                        <button data-target="font" class="btn btn-block o_web_studio_custom_color">Custom color</button>
-                        <div class="o_web_studio_custom_colors"/>
-                    </div>
-                </div>
-            </div>
-            <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"><i class="fa fa-paint-brush"/></button>
-                <div class="dropdown-menu" role="menu">
-                    <div role="menuitem" class="dropdown-item o_web_studio_background_colorpicker">
-                        <button data-target="background" class="btn btn-block o_web_studio_reset_color">reset color</button>
-                        <div class="o_web_studio_color_palette"/>
-                        <button data-target="background" class="btn btn-block o_web_studio_custom_color">Custom color</button>
-                        <div class="o_web_studio_custom_colors"/>
-                    </div>
-                </div>
-            </div>
+        <div class="col-6 o_web_studio_sidebar_select o_web_studio_font_size">
+            <label>Font style</label>
+            <select>
+                <option></option>
+                <option t-att-selected="widget.fontSize == 'h1' or null" value="h1">Heading 1</option>
+                <option t-att-selected="widget.fontSize == 'h2' or null" value="h2">Heading 2</option>
+                <option t-att-selected="widget.fontSize == 'h3' or null" value="h3">Heading 3</option>
+                <option t-att-selected="widget.fontSize == 'h4' or null" value="h4">Heading 4</option>
+                <option t-att-selected="widget.fontSize == 'h5' or null" value="h5">Heading 5</option>
+                <option t-att-selected="widget.fontSize == 'h6' or null" value="h6">Heading 6</option>
+                <option t-att-selected="widget.fontSize == 'small' or null" value="small">Small</option>
+            </select>
         </div>
         <div t-if="widget.isTable" class="col-6 o_web_studio_sidebar_select o_web_studio_table_style">
             <label>Table style</label>

@@ -14,12 +14,7 @@ Session.include({
     session_reload: function () {
         var self = this;
         return this.rpc("/web/session/get_session_info", {}).then(function (result) {
-
-            // This is only useful before 12.2 (`session_id` has been removed
-            // since then) but the timesheet app code is the same for all
-            // versions.
             delete result.session_id;
-
             _.extend(self, result);
         });
     },

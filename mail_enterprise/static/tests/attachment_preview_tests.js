@@ -44,7 +44,7 @@ QUnit.module('MailAttachmentOnSide', {
 
 }, function () {
 
-    QUnit.test('Attachment on side', async function (assert) {
+    QUnit.test('Attachment on side', function (assert) {
         assert.expect(11);
 
         var count = 0;
@@ -69,7 +69,7 @@ QUnit.module('MailAttachmentOnSide', {
             res_id: 2,
         }];
 
-        var form = await createView({
+        var form = createView({
             View: FormView,
             model: 'partner',
             data: this.data,
@@ -91,25 +91,25 @@ QUnit.module('MailAttachmentOnSide', {
             mockRPC: function (route, args) {
                 if (args.method === 'search_read') {
                     if (count === 0) {
-                        return Promise.resolve([messages[0].attachment_ids[0]]);
+                        return $.when([messages[0].attachment_ids[0]]);
                     }
                     else {
-                        return Promise.resolve([messages[0].attachment_ids[0],
-                                                messages[1].attachment_ids[0]]);
+                        return $.when([messages[0].attachment_ids[0],
+                                       messages[1].attachment_ids[0]]);
                     }
                 }
                 if (args.method === 'message_format') {
                     var requestedMessages = _.filter(messages, function (message) {
                         return _.contains(args.args[0], message.id);
                     });
-                    return Promise.resolve(requestedMessages);
+                    return $.when(requestedMessages);
                 }
-                if (route === '/mail/get_suggested_recipients') {
-                    return Promise.resolve({2: []});
+                if (args.method === 'message_get_suggested_recipients') {
+                    return $.when({2: []});
                 }
                 if (_.str.contains(route, '/web/static/lib/pdfjs/web/viewer.html')){
                     var canvas = document.createElement('canvas');
-                    return Promise.resolve(canvas.toDataURL());
+                    return $.when(canvas.toDataURL());
                 }
                 if (args.method === 'message_post') {
                     messages.push({
@@ -131,10 +131,10 @@ QUnit.module('MailAttachmentOnSide', {
                         model: 'partner',
                         res_id: 2,
                     });
-                    return Promise.resolve(5);
+                    return $.when(5);
                 }
                 if (args.method === 'register_as_main_attachment') {
-                    return Promise.resolve(true);
+                    return $.when(true);
                 }
                 return this._super.apply(this, arguments);
             },
@@ -153,44 +153,44 @@ QUnit.module('MailAttachmentOnSide', {
             services: this.services,
         });
 
-        assert.containsOnce(form, '.o_attachment_preview_img > img',
+        assert.strictEqual(form.$('.o_attachment_preview_img > img').length, 1,
             "There should be an image for attachment preview");
-        assert.containsOnce(form, '.o_form_sheet_bg > .o_chatter',
+        assert.strictEqual(form.$('.o_form_sheet_bg > .o_chatter').length, 1,
             "Chatter should moved inside sheet");
-        assert.containsOnce(form, '.o_form_sheet_bg + .o_attachment_preview',
+        assert.strictEqual(form.$('.o_form_sheet_bg + .o_attachment_preview').length, 1,
             "Attachment preview should be next sibling to .o_form_sheet_bg");
 
         // Don't display arrow if there is no previous/next element
-        assert.containsNone(form, '.arrow',
+        assert.strictEqual(form.$('.arrow').length, 0,
             "Don't display arrow if there is no previous/next attachment");
 
         // normally, send_message should trigger a reload_attachment_box...
         // since all of this is fake, we force it here.
         form.renderer.chatter._areAttachmentsLoaded = false;
         // send a message with attached PDF file
-        await testUtils.dom.click(form.$('.o_chatter_button_new_message'));
+        form.$('.o_chatter_button_new_message').click();
         form.$('.oe_chatter .o_composer_text_field:first()').val("Attached the pdf file");
-        await testUtils.dom.click(form.$('.oe_chatter .o_composer_button_send'));
+        form.$('.oe_chatter .o_composer_button_send').click();
 
-        assert.containsN(form, '.arrow', 2,
+        assert.strictEqual(form.$('.arrow').length, 2,
             "Display arrows if there multiple attachments");
-        assert.containsNone(form, '.o_attachment_preview_img > img',
+        assert.strictEqual(form.$('.o_attachment_preview_img > img').length, 0,
             "Preview image should be removed");
-        assert.containsOnce(form, '.o_attachment_preview_container > iframe',
+        assert.strictEqual(form.$('.o_attachment_preview_container > iframe').length, 1,
             "There should be iframe for pdf viewer");
-        await testUtils.dom.click(form.$('.o_move_next'), {allowInvisible:true});
-        assert.containsOnce(form, '.o_attachment_preview_img > img',
+        form.$('.o_move_next').click();
+        assert.strictEqual(form.$('.o_attachment_preview_img > img').length, 1,
             "Display next attachment");
-        await testUtils.dom.click(form.$('.o_move_previous'), {allowInvisible:true});
-        assert.containsOnce(form, '.o_attachment_preview_container > iframe',
+        form.$('.o_move_previous').click();
+        assert.strictEqual(form.$('.o_attachment_preview_container > iframe').length, 1,
             "Display preview attachment");
         form.destroy();
     });
 
-    QUnit.test('Attachment on side on new record', async function (assert) {
+    QUnit.test('Attachment on side on new record', function (assert) {
         assert.expect(3);
 
-        var form = await createView({
+        var form = createView({
             View: FormView,
             model: 'partner',
             data: this.data,
@@ -211,17 +211,17 @@ QUnit.module('MailAttachmentOnSide', {
             services: this.services,
         });
 
-        assert.containsOnce(form, '.o_form_sheet_bg .o_attachment_preview',
+        assert.strictEqual(form.$('.o_form_sheet_bg .o_attachment_preview').length, 1,
             "the preview should not be displayed");
         assert.strictEqual(form.$('.o_form_sheet_bg .o_attachment_preview').children().length, 0,
             "the preview should be empty");
-        assert.containsOnce(form, '.o_form_sheet_bg + .o_chatter',
+        assert.strictEqual(form.$('.o_form_sheet_bg + .o_chatter').length, 1,
             "chatter should not have been moved");
 
         form.destroy();
     });
 
-    QUnit.test('Attachment on side not displayed on smaller screens', async function (assert) {
+    QUnit.test('Attachment on side not displayed on smaller screens', function (assert) {
         assert.expect(2);
 
         this.data.partner.records[0].message_ids = [1];
@@ -245,7 +245,7 @@ QUnit.module('MailAttachmentOnSide', {
             res_id: 2,
         }];
 
-        var form = await createView({
+        var form = createView({
             View: FormView,
             model: 'partner',
             data: this.data,
@@ -269,7 +269,7 @@ QUnit.module('MailAttachmentOnSide', {
                     var requestedMessages = _.filter(messages, function (message) {
                         return _.contains(args.args[0], message.id);
                     });
-                    return Promise.resolve(requestedMessages);
+                    return $.when(requestedMessages);
                 }
                 return this._super.apply(this, arguments);
             },
@@ -277,85 +277,13 @@ QUnit.module('MailAttachmentOnSide', {
         });
         assert.strictEqual(form.$('.o_attachment_preview').children().length, 0,
             "there should be nothing previewed");
-        assert.containsOnce(form, '.o_form_sheet_bg + .o_chatter',
+        assert.strictEqual(form.$('.o_form_sheet_bg + .o_chatter').length, 1,
             "chatter should not have been moved");
 
         form.destroy();
     });
 
-    QUnit.test('Attachment triggers list resize', async function (assert) {
-        assert.expect(3);
 
-        this.data.partner.fields.yeses = { relation: 'yes', string: "Yeses", type: 'many2many' };
-        this.data.partner.records[0].yeses = [-1720932];
-        this.data.yes = {
-            fields: { the_char: { string: "The Char", type: 'char' } },
-            records: [{ id: -1720932, the_char: new Array(100).fill().map(_ => "yes").join() }],
-        };
-
-        const attachmentLoaded = testUtils.makeTestPromise();
-        const form = await createView({
-            arch: `
-                <form string="Whatever">
-                    <sheet>
-                        <field name="yeses"/>
-                    </sheet>
-                    <div class="o_attachment_preview" options="{ 'order': 'desc' }"/>
-                    <div class="oe_chatter">
-                        <field name="message_ids" widget="mail_thread"/>
-                    </div>
-                </form>`,
-            archs: {
-                'yes,false,list': `
-                    <tree>
-                        <field name="the_char"/>
-                    </tree>`,
-            },
-            // Simulates a server delay before each action
-            async mockRPC(route, { method }) {
-                if (route === '/web/image/1?unique=1') {
-                    await testUtils.nextTick();
-                    attachmentLoaded.resolve();
-                }
-                switch (method) {
-                    case 'register_as_main_attachment':
-                        await testUtils.nextTick();
-                        return true;
-                    case 'search_read':
-                        await testUtils.nextTick();
-                        return [{
-                            filename: 'image1.jpg',
-                            id:1,
-                            mimetype: 'image/jpeg',
-                            name: 'Test Image 1',
-                            url: '/web/content/1?download=true',
-                        }];
-                }
-                return this._super(...arguments);
-            },
-            config: {
-                device: { size_class: config.device.SIZES.XXL },
-            },
-            data: this.data,
-            model: 'partner',
-            res_id: 2,
-            services: this.services,
-            View: FormView,
-        });
-
-        // Sets an arbitrary width to check if it is correctly overriden.
-        form.el.querySelector('table th').style.width = '0px';
-
-        assert.containsNone(form, 'img#attachment_img');
-
-        await attachmentLoaded;
-
-        assert.containsOnce(form, 'img#attachment_img');
-        assert.notEqual(form.el.querySelector('table th').style.width, '0px',
-            "List should have been resized after the attachment has been appended.");
-
-        form.destroy();
-    });
 });
 
 

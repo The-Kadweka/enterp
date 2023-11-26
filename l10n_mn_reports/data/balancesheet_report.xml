@@ -3,6 +3,7 @@
     <record id="account_report_balancesheet" model="account.financial.html.report">
         <field name="name">Balance Sheet</field>
         <field name='parent_id' ref='l10n_mn.account_reports_mn_statements_menu'/>
+        <field name="cash_basis" eval="1"/>
     </record>
     <record id="report_line_balanceta" model="account.financial.html.report.line">
         <field name="code">MN_TA</field>
@@ -674,16 +675,5 @@
         <field name="parent_id" ref="report_line_balanceequity"/>
         <field name="show_domain">foldable</field>
         <field name="special_date_changer">normal</field>
-    </record>
-    <record id="account_financial_report_mn_off_sheet" model="account.financial.html.report.line">
-        <field name="name">OFF BALANCE SHEET ACCOUNTS</field>
-        <field name="code">MN_OS</field>
-        <field name="financial_report_id" ref="account_report_balancesheet"/>
-        <field name="domain" eval="[('account_id.user_type_id', '=', ref('account.data_account_off_sheet'))]"/>
-        <field name="groupby">account_id</field>
-        <field name="formulas">balance = -sum.balance</field>
-        <field name="sequence" eval="3"/>
-        <field name="level" eval="0"/>
-        <field name="hide_if_empty" eval="1"/>
     </record>
 </odoo>

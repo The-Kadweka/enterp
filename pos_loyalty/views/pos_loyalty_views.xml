@@ -80,7 +80,7 @@
                         <label class="oe_edit_only" for="name" string="Rule Name"/>
                         <h1><field name="name"/></h1>
                     </div>
-                    <group col="2">
+                    <group col="4">
                         <group col='2'>
                             <field name="rule_type" />
                         </group>
@@ -111,17 +111,17 @@
                         <field name="reward_type" />
                     </group>
                     <group >
-                        <field name="gift_product_id"       attrs="{ 'invisible':[('reward_type','!=','gift')], 'required':[('reward_type','==','gift')] }" domain="[('available_in_pos', '=', True)]" context="{'default_available_in_pos': '1'}"/>
+                        <field name="gift_product_id"       attrs="{ 'invisible':[('reward_type','!=','gift')], 'required':[('reward_type','==','gift')] }" />
                         <label for="discount" attrs="{ 'invisible':[('reward_type','!=','discount')] }"/>
                         <div class="o_row" attrs="{ 'invisible':[('reward_type','!=','discount')] }">
                             <field name="discount" />
                             <span class="o_form_label">%</span>
                         </div>
-                        <field name="discount_product_id" string="Discount Product" attrs="{ 'invisible':[('reward_type','!=','discount')], 'required':[('reward_type','==','discount')] }" domain="[('available_in_pos', '=', True)]" context="{'default_available_in_pos': '1'}"/>
-                        <field name="point_product_id" string="Discount Product" attrs="{ 'invisible':[('reward_type','!=','resale')],   'required':[('reward_type','==','resale')] }" domain="[('available_in_pos', '=', True)]" context="{'default_available_in_pos': '1'}" />
+                        <field name="discount_product_id"   attrs="{ 'invisible':[('reward_type','!=','discount')], 'required':[('reward_type','==','discount')] }"/>
+                        <field name="point_product_id"      attrs="{ 'invisible':[('reward_type','!=','resale')],   'required':[('reward_type','==','resale')] }"/>
                     </group>
                     <group>
-                        <field name="point_cost" attrs="{ 'invisible':[('reward_type','=','resale')] }"/>
+                        <field name="point_cost"           attrs="{ 'invisible':[('reward_type','=','resale')] }" />
                         <field name="minimum_points" />
                     </group>
                 </form>
@@ -176,6 +176,7 @@
             <field name="name">Loyalty Programs</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">loyalty.program</field>
+            <field name="view_type">form</field>
             <field name="view_mode">tree,kanban,form</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
