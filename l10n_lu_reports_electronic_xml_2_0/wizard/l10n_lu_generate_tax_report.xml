@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_l10n_lu_generate_tax_report" model="ir.ui.view">
+            <field name="name">l10n_lu.generate.tax.report.2.0.view</field>
+            <field name="model">l10n_lu.generate.tax.report</field>
+            <field name="arch" type="xml">
+                <form>
+                    <field name="l10n_lu_annex_warning_visible" invisible="1"/>
+                    <p attrs="{'invisible': [('l10n_lu_annex_warning_visible', '!=', True)]}">
+                        <strong>
+                        Attention: note that the report sections "Appendix to the VAT return" and "Appendix to Operational expenditures"
+                                    are not filled in, and the report will thus be incomplete.
+                                    To have them automatically filled in, please migrate your database to v14.0. (strongly recommended).
+                        </strong>
+                    </p>
+                    <group>
+                        <field name="period" invisible="1"/>
+                        <field name="simplified_declaration" invisible="1"/>
+                        <field name="by_fidu"/>
+                    </group>
+                    <footer>
+                        <button name="get_xml" string="EXPORT XML" type="object" class="oe_highlight" attrs="{'invisible': ['&amp;', ('simplified_declaration', '=', False), ('period', '=', 'A')]}"/>
+                    </footer>
+               </form>
+            </field>
+        </record>
+    </data>
+</odoo>

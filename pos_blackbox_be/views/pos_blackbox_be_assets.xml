@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="assets" inherit_id="point_of_sale.index">
+            <xpath expr="//head" position="inside">
+                <t t-if="blackbox">
+                    <link rel="stylesheet" href="/pos_blackbox_be/static/src/css/pos_blackbox_be.css"/>
+                    <script type="text/javascript" src="/pos_blackbox_be/static/lib/sha1.js"></script>
+                    <script type="text/javascript" src="/pos_blackbox_be/static/src/js/pos_blackbox_be.js"></script>
+                </t>
+            </xpath>
+            <xpath expr="//t[contains(@t-call-assets, 'point_of_sale.pos_assets_backend')]" position="before">
+                <t t-if="not blackbox">
+                    <script type="text/javascript" id="no_qweb" t-raw="init">
+                        odoo.define('pos_blackbox_be.no_qweb', function (require) {
+                            require('web.Session').include({
+                                load_qweb: function(mods) {
+                                  mods = mods.replace("pos_blackbox_be", "");
+                                  return this._super.apply(this, arguments);
+                                }
+                            });
+                        });
+                    </script>
+                </t>
+            </xpath>
+        </template>
+    </data>
+</odoo>
